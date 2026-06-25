@@ -1,0 +1,36 @@
+excluded: # swiftlint를 적용하지 않게 설정할 파일 경로, `included`보다 우선순위 높음
+  - Pods
+  - Routee-iOS/Application/AppDelegate.swift
+  - Routee-iOS/Application/SceneDelegate.swift
+
+opt_in_rules: # 기본(default) 룰이 아닌 룰들을 활성화
+  - sorted_imports                         # import 시 알파벳 순 정렬
+  - closure_end_indentation                # 클로저의 끝 괄호를 시작한 행과의 들여쓰기 맞춤
+  - closure_spacing                        # 클로저 중괄호 주변 공백을 일관성 있게 강제
+  - explicit_init                          # 불필요한 .init() 호출 제거
+  - redundant_self                         # 불필요한 self 사용 제거
+  - vertical_whitespace                    # 함수, 프로퍼티 사이의 과도한 빈 줄 방지
+  - multiline_arguments                    # 여러 줄 인자의 들여쓰기 일관성 강제
+  - multiline_parameters                   # 여러 줄 파라미터의 들여쓰기 일관성 강제
+  - operator_usage_whitespace              # 연산자 앞뒤 공백 강제
+  - trailing_closure                       # 가능한 경우 후행 클로저 문법 사용 권장
+  - implicit_return                        # 한 줄 클로저에서 return 생략 권장
+  - prefer_self_in_static_references       # static 멤버 접근 시 Self 사용 권장
+  - shorthand_optional_binding             # if let user = user 대신 if let user 문법 사용 권장
+  - attributes                             # @objc, @MainActor 같은 Attribute 줄바꿈 및 위치 일관성 강제
+  - mark                                   # // MARK: - 형식의 주석 사용 강제
+  - class_delegate_protocol                # Delegate 프로토콜 이름에 Class명 + Delegate 패턴 사용 권장
+  - collection_alignment                   # 배열, 딕셔너리, Set 등의 요소 들여쓰기 및 정렬 일관성 강제
+  - overridden_super_call                  # viewDidLoad(), viewWillAppear() 등 override 메서드에서 super 호출 강제
+  - redundant_nil_coalescing               # 불필요한 nil 병합 연산자(??) 사용 방지
+  - lower_acl_than_parent                  # 부모 타입보다 넓은 접근 제어 수준의 멤버 선언 방지
+  - force_unwrapping                        # 강제 언래핑(!) 사용 방지
+  - empty_count                             # count == 0 대신 isEmpty 사용 권장
+
+disabled_rules: # 기본 활성화된 룰 중에 비활성화할 룰을 지정
+  - trailing_whitespace                    # 후행 공백 (선행 공백과 더불어 필요없다고 미적용이 불필요하다고 생각됨) - 선택 필요
+  - todo                                   # // TODO: 사용 허용
+  
+line_length:
+  warning: 90                              # 90자 초과 시 경고
+  error: 120                               # 120자 초과 시 에러
