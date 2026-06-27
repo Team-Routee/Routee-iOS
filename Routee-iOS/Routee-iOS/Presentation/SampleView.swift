@@ -14,11 +14,11 @@ final class SampleView: BaseUIView {
     private let nameLabel = UILabel()
     
     override func setStyle() {
-        backgroundColor = .white
+        backgroundColor = .brown
         
         nameLabel.do {
             $0.text = "SampleView"
-            $0.textColor = .black
+            $0.textColor = .white
         }
     }
     
