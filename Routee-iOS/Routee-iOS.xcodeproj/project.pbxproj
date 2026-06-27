@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		4F324C3C2FEE587000B7B9F9 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 4F324C3B2FEE587000B7B9F9 /* NMapsMap */; };
-		4F324C3E2FEE5D9800B7B9F9 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 4F324C3D2FEE5D9800B7B9F9 /* Config.xcconfig */; };
 		4F324C412FEE6F1000B7B9F9 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4F324C402FEE6F1000B7B9F9 /* SnapKit */; };
 		4F324C442FEF454C00B7B9F9 /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = 4F324C432FEF454C00B7B9F9 /* Then */; };
 /* End PBXBuildFile section */
@@ -145,7 +144,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4F324C3E2FEE5D9800B7B9F9 /* Config.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
