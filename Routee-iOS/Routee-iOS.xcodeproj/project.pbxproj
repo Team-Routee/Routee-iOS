@@ -10,6 +10,7 @@
 		4F324C3C2FEE587000B7B9F9 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 4F324C3B2FEE587000B7B9F9 /* NMapsMap */; };
 		4F324C3E2FEE5D9800B7B9F9 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 4F324C3D2FEE5D9800B7B9F9 /* Config.xcconfig */; };
 		4F324C412FEE6F1000B7B9F9 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4F324C402FEE6F1000B7B9F9 /* SnapKit */; };
+		4F324C442FEF454C00B7B9F9 /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = 4F324C432FEF454C00B7B9F9 /* Then */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,6 +46,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4F324C3C2FEE587000B7B9F9 /* NMapsMap in Frameworks */,
+				4F324C442FEF454C00B7B9F9 /* Then in Frameworks */,
 				4F324C412FEE6F1000B7B9F9 /* SnapKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -93,6 +95,7 @@
 			packageProductDependencies = (
 				4F324C3B2FEE587000B7B9F9 /* NMapsMap */,
 				4F324C402FEE6F1000B7B9F9 /* SnapKit */,
+				4F324C432FEF454C00B7B9F9 /* Then */,
 			);
 			productName = "Routee-iOS";
 			productReference = 4F324B982FE931BB00B7B9F9 /* Routee-iOS.app */;
@@ -125,6 +128,7 @@
 			packageReferences = (
 				4F324C3A2FEE587000B7B9F9 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */,
 				4F324C3F2FEE6F1000B7B9F9 /* XCRemoteSwiftPackageReference "SnapKit" */,
+				4F324C422FEF454C00B7B9F9 /* XCRemoteSwiftPackageReference "Then" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4F324B992FE931BB00B7B9F9 /* Products */;
@@ -417,6 +421,14 @@
 				minimumVersion = 6.0.0;
 			};
 		};
+		4F324C422FEF454C00B7B9F9 /* XCRemoteSwiftPackageReference "Then" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/devxoul/Then.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -429,6 +441,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4F324C3F2FEE6F1000B7B9F9 /* XCRemoteSwiftPackageReference "SnapKit" */;
 			productName = SnapKit;
+		};
+		4F324C432FEF454C00B7B9F9 /* Then */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4F324C422FEF454C00B7B9F9 /* XCRemoteSwiftPackageReference "Then" */;
+			productName = Then;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

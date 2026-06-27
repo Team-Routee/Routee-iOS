@@ -1,5 +1,5 @@
 {
-  "originHash" : "a432743b467476365f691945226b4978c4b5584d94270525334a5ff20283157c",
+  "originHash" : "c8529d6da16b2912615c50e983b6c3b050c20728510f1e5b0ed8316ddfaa9aab",
   "pins" : [
     {
       "identity" : "snapkit",
@@ -26,6 +26,15 @@
       "state" : {
         "revision" : "d527147b0bf31260166a7063e3ed854a03f8239c",
         "version" : "3.23.2"
+      }
+    },
+    {
+      "identity" : "then",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/devxoul/Then.git",
+      "state" : {
+        "revision" : "d41ef523faef0f911369f79c0b96815d9dbb6d7a",
+        "version" : "3.0.0"
       }
     }
   ],
