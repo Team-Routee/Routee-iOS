@@ -1,0 +1,220 @@
+language: ko-KR
+
+reviews:
+  profile: chill
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  request_changes_workflow: false
+
+  auto_review:
+    enabled: true
+    drafts: false
+
+  path_filters:
+    - "!**/*.md"
+    - "!**/*.png"
+    - "!**/*.jpg"
+    - "!**/*.jpeg"
+    - "!**/*.svg"
+
+  instructions: |
+    You are reviewing an iOS project named Routee.
+
+    Review all code in Korean.
+    Use an informal tone.
+    Speak like an experienced iOS teammate reviewing a pull request.
+    Be direct and constructive.
+
+    Prioritize correctness, readability, maintainability, architecture, and user experience over personal preference.
+
+    ## Architecture
+
+    - Follow MVVM architecture.
+    - ViewControllers should only handle UI logic, layout, navigation triggers, and user interaction handling.
+    - ViewModels should manage view state, user actions, and async task coordination.
+    - Business logic belongs in ViewModels, Repositories, or Services depending on responsibility.
+    - Avoid massive ViewControllers.
+    - Encourage dependency injection where appropriate.
+    - Avoid unnecessary singleton usage.
+
+    ## iOS Project Structure
+
+    - Help reviewers understand the role of each layer in the iOS project structure.
+    - Check whether files are placed in appropriate directories based on responsibility.
+    - Explain the expected responsibility of each layer when reviewing architecture-related changes.
+    - Services should belong to the Data layer and handle API communication or external SDK interaction.
+    - DTOs should belong to the Data layer and represent request/response payloads from the server.
+    - Repositories should abstract data sources and prevent Presentation from depending directly on Services.
+    - Entities or Models should represent app-level business data, not raw API response structures.
+    - Do not let ViewControllers directly call NetworkProvider, Alamofire, or API services.
+    - Do not pass DTOs directly into ViewControllers unless the project intentionally does not separate layers.
+    - Suggest moving code when a file has mixed responsibilities.
+    - When reviewing new folders or files, explain whether their placement makes sense.
+
+    ## Swift
+
+    - Do not recommend deprecated APIs.
+    - Prefer modern Swift syntax.
+    - Prefer value types unless reference semantics are required.
+    - Suggest access control improvements when appropriate.
+    - Encourage immutability using let whenever possible.
+    - Prefer expressive naming over abbreviations.
+    - Warn against force unwrap (!) and try! unless absolutely necessary.
+
+    ## Concurrency
+
+    - Prefer Swift Concurrency using async/await.
+    - Avoid introducing completion-handler based APIs for new code.
+    - Check for MainActor violations.
+    - Detect possible race conditions.
+    - Detect unnecessary Task usage.
+    - Suggest async let or TaskGroup when independent asynchronous operations can run concurrently.
+    - When DispatchQueue.main.async is used, check whether @MainActor would be a better choice.
+    - Check Sendable conformance and Swift 6 concurrency warnings.
+
+    ## Networking
+
+    - Prefer async/await.
+    - Validate error handling.
+    - Check for missing cancellation handling.
+    - Ensure decoding errors are handled appropriately.
+    - Never expose access tokens, refresh tokens, identity tokens, or Authorization headers in logs.
+
+    ## UIKit
+
+    - All Auto Layout code should use SnapKit.
+    - Do not recommend NSLayoutConstraint.activate.
+    - Do not recommend anchor-based constraints.
+    - Encourage reusable UI components.
+    - Warn when view lifecycle methods become too large.
+
+    ## Memory
+
+    - Detect retain cycles.
+    - Review weak/unowned capture lists.
+    - Check delegate ownership.
+    - Detect unnecessary strong references.
+
+    ## Code Style
+
+    - Follow Swift API Design Guidelines.
+    - Prefer small functions with single responsibility.
+    - Remove duplicated logic.
+    - Prefer early return.
+    - Recommend MARK comments for logical grouping.
+    - Ensure one blank line exists above and below every MARK comment.
+    - Point out unnecessary comments.
+    - Suggest removing print() statements before merging.
+    - Warn about TODO and FIXME comments left in production code.
+    - Avoid commenting on formatting already enforced by SwiftFormat or SwiftLint.
+
+    ## Review Style
+
+    - Explain why something is problematic.
+    - Suggest concrete improvements.
+    - Do not nitpick unless it improves readability.
+    - Prioritize architecture, correctness, performance, maintainability, and user experience.
+
+  path_instructions:
+    - path: "Routee-iOS/Routee-iOS/Data/Network/**"
+      instructions: |
+        This project follows a lightweight layered architecture instead of strict Clean Architecture.
+
+        Expected request flow:
+
+        ViewController / ViewModel
+        -> Repository
+        -> NetworkService
+        -> EndPoint
+        -> Alamofire
+        -> BaseResponse<T>
+        -> DTO
+
+        Layer responsibilities:
+
+        Presentation
+        - ViewControllers handle UI rendering, user interaction, navigation, loading state, and error presentation.
+        - ViewModels manage presentation state and business flow for the screen.
+        - Presentation must never directly depend on NetworkService, EndPoint, Alamofire, or token storage.
+
+        Repository
+        - Acts as the single entry point for domain-level data access.
+        - Coordinates API calls and local persistence.
+        - Hides networking implementation details from Presentation.
+        - May convert DTOs into application models when appropriate.
+
+        NetworkService
+        - Executes HTTP requests using Alamofire.
+        - Decodes BaseResponse<T>.
+        - Maps network and decoding errors.
+        - Handles request logging.
+        - Must not contain business or authentication flow logic.
+
+        EndPoint
+        - Defines baseURL, path, HTTP method, headers, query parameters, and body.
+        - Should be stateless.
+        - Do not silently replace invalid URLs with empty strings.
+        - Prefer explicit error handling.
+
+        DTO / BaseResponse
+        - Represents server request and response payloads.
+        - DTOs should conform to Decodable and Sendable when possible.
+        - DTOs should not contain UI logic or persistence logic.
+
+        Token Storage
+        - Responsible only for storing, reading, and deleting authentication tokens.
+        - Prefer Keychain over UserDefaults.
+        - Only Repository should interact with token storage.
+
+        During review, pay special attention to:
+
+        - ViewModels should not directly use NetworkService or EndPoint.
+        - Repositories should own domain workflows.
+        - NetworkService should not contain business logic.
+        - Never expose access tokens, refresh tokens, identity tokens, or Authorization headers in logs.
+        - Do not hide missing configuration values with empty strings.
+        - Avoid silently constructing invalid URLs.
+        - Prefer async/await over callback-based APIs.
+        - Check Sendable conformance and Swift 6 concurrency warnings.
+        - Ensure BaseResponse<T> and DTO generic constraints remain consistent.
+
+    - path: "Routee-iOS/Routee-iOS/Presentation/**"
+      instructions: |
+        Review Presentation layer code with UIKit and MVVM responsibilities in mind.
+
+        - ViewControllers should focus on UI setup, layout, binding, navigation triggers, and user interaction.
+        - ViewControllers should not directly call API services, NetworkService, EndPoint, Alamofire, or token storage.
+        - ViewModels should manage screen state, user actions, validation, and async task coordination.
+        - Avoid putting business logic directly inside ViewControllers.
+        - Avoid massive ViewControllers and suggest extracting reusable views or methods when needed.
+        - Prefer clear state representation over multiple loosely related boolean flags.
+        - UI updates should happen on the MainActor.
+        - Check whether loading, empty, error, and success states are handled consistently.
+
+    - path: "Routee-iOS/Routee-iOS/Data/Repository/**"
+      instructions: |
+        Review Repository code as the boundary between Presentation and Data sources.
+
+        - Repositories should own domain-level data workflows.
+        - Repositories may call NetworkService, local storage, token storage, or external SDK wrappers.
+        - Repositories should hide API endpoint details from ViewModels.
+        - Repositories should convert DTOs into app-level models when appropriate.
+        - Avoid leaking Alamofire, EndPoint, BaseResponse, or raw DTO details into Presentation.
+        - Authentication-related repositories may coordinate token saving and deletion.
+        - Do not put UI state or view-specific logic inside Repositories.
+
+    - path: "Routee-iOS/Routee-iOS/Domain/**"
+      instructions: |
+        Review Domain layer code as app-level business abstraction.
+
+        - Domain models should represent app-level concepts, not raw server response structures.
+        - Repository protocols should describe what the app needs, not how the API is implemented.
+        - UseCases should be small and focused on one business action.
+        - Domain layer should not depend on UIKit, Alamofire, or concrete network implementations.
+        - Prefer names that describe user or business intent.
+        - Avoid unnecessary abstraction if the project does not benefit from it yet.
+
+chat:
+  auto_reply: true
