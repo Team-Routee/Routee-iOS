@@ -32,5 +32,5 @@ disabled_rules: # 기본 활성화된 룰 중에 비활성화할 룰을 지정
   - todo                                   # // TODO: 사용 허용
   
 line_length:
-  warning: 100                              # 90자 초과 시 경고
+  warning: 110                              # 110자 초과 시 경고
   error: 120                               # 120자 초과 시 에러
