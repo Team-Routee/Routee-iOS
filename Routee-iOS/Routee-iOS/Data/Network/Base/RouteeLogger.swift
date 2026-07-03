@@ -83,16 +83,16 @@ enum LogLevel {
 
 struct RouteeLogger {
     private static var isDebugMode: Bool {
-        #if DEBUG
+#if DEBUG
         return true
-        #else
+#else
         return false
-        #endif
+#endif
     }
     
     private static func shouldShowLog(level: LogLevel) -> Bool {
         if isDebugMode { return true }
-      
+        
         return level.shouldShowLogInRelease
     }
     
@@ -118,7 +118,7 @@ struct RouteeLogger {
         let logger = Logger(subsystem: OSLog.subsystem, category: level.category)
         let logMessage = "\(message)"
         let fileName = (file as NSString).lastPathComponent
-    
+        
         switch level {
         case .network:
             logger.log(

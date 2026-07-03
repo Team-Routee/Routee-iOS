@@ -10,16 +10,6 @@ import Foundation
 import Alamofire
 
 protocol EndPoint {
-    /// ex ) /api/v1/quests/journey?journey={journey}
-    ///
-    /// basePath - /api/v1/quests
-    /// path - /journey
-    /// method - get
-    /// headers - .withAuth(userID: Int)
-    /// parameterEncoding - URLEncoding / JSONEncoding
-    /// queryParameters - [journey: journey]
-    /// bodyParameters - nil
-    ///
     var basePath: String { get }
     var path: String { get }
     var method: HTTPMethod { get }
@@ -27,7 +17,6 @@ protocol EndPoint {
     var parameterEncoding: ParameterEncoding { get }
     var queryParameters: [String: String]? { get }
     var bodyParameters: Parameters? { get }
-    
     var requestURL: URL { get }
 }
 

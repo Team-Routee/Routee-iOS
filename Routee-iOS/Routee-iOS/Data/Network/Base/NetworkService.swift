@@ -15,7 +15,6 @@ protocol NetworkService {
         _ endPoint: EndPoint,
         decodingType: T.Type
     ) async throws -> T
-    
 }
 
 final class DefaultNetworkService: NetworkService {
