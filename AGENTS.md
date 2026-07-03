@@ -192,7 +192,7 @@ Current expectations include:
 - Sorted imports
 - No force unwraps
 - No excessive whitespace
-- 100-character line warning
+- 110-character line warning
 - 120-character line error
 
 Prefer fixing warnings rather than disabling rules locally.
