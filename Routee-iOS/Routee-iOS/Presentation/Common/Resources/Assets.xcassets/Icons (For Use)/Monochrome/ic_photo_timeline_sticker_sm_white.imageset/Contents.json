@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "ic_photo_timeline_sticker_sm_white.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

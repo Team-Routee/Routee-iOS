@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "routee_symbol_grey_sm.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

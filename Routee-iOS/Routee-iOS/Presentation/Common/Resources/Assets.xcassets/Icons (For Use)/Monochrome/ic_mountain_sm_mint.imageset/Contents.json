@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "ic_mountain_sm_mint.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

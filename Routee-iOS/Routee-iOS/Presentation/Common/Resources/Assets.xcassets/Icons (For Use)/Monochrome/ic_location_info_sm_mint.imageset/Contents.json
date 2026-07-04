@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "ic_location_info_sm_mint.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
