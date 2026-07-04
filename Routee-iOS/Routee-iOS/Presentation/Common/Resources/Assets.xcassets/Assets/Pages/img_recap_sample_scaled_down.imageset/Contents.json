@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "img_recap_sample_scaled_down.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

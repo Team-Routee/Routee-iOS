@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "tokens:build": "style-dictionary build --config DesignTokens/style-dictionary.config.mjs && node DesignTokens/scripts/build-ios-colors.mjs",
+    "tokens:build:ios": "node DesignTokens/scripts/build-ios-colors.mjs"
+  },
+  "devDependencies": {
+    "style-dictionary": "^5.0.0"
+  }
+}

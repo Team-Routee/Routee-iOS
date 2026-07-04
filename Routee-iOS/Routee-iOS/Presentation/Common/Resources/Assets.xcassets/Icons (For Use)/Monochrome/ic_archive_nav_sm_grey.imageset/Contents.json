@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "ic_archive_nav_sm_grey.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

@@ -134,3 +134,7 @@ iOSInjectionProject/
 ### Env
 *.xcconfig
 .env
+
+### Node / Design Tokens ###
+node_modules/
+DesignTokens/build/
