@@ -18,7 +18,11 @@ final class RecordEditViewController: BaseUIViewController, UICollectionViewDele
         "숭실대 동기모임 2탄",
         "북한산 백운대 코스",
         "아차산 야경 산책",
-        "인왕산 둘레길"
+        "인왕산 둘레길",
+        "남산 순환로 러닝",
+        "한강공원 조깅",
+        "청계산 등산",
+        "석촌호수 산책"
     ]
     
     override func loadView() {
@@ -61,6 +65,8 @@ extension RecordEditViewController: UICollectionViewDataSource {
         ) as? WorkoutRecordCell else {
             return UICollectionViewCell()
         }
+        
+        cell.configure(title: records[indexPath.item])
         
         return cell
     }
