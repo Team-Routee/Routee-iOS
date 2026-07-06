@@ -14,9 +14,9 @@ final class MonthSelector: BaseUIView {
     
     // MARK: - Properties
 
-    private var currentDate = Date() {
+    private var currentDate = Date().startOfMonth {
         didSet {
-            updateMonthLabel()
+            updateMonthState()
         }
     }
     
@@ -29,11 +29,15 @@ final class MonthSelector: BaseUIView {
     
     // MARK: - init
     
-    override init(frame: CGRect) {
+    override init(frame: CGRect = .zero) {
         super.init(frame: frame)
 
-        configureUI()
-        updateMonthLabel()
+        setAddTarget()
+        updateMonthState()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     // MARK: - UI Settings
@@ -56,6 +60,7 @@ final class MonthSelector: BaseUIView {
         
         rightButton.do {
             $0.setImage(UIImage(named: "ic_chevron_right_sm_white"), for: .normal)
+            $0.setImage(UIImage(named: "ic_chevron_right_sm_grey"), for: .disabled)
         }
     }
     
@@ -85,10 +90,18 @@ final class MonthSelector: BaseUIView {
     
     private func updateMonthLabel() {
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy년 M월"   // 2026년 7월
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.dateFormat = "yyyy년 M월"
 
         monthLabel.text = formatter.string(from: currentDate)
     }
+    
+    private func updateMonthState() {
+        updateMonthLabel()
+        rightButton.isEnabled = !currentDate.isSameMonth(as: Date())
+    }
+    
+    // MARK: - Actions
     
     @objc
     private func didTapPrevious() {
@@ -98,32 +111,33 @@ final class MonthSelector: BaseUIView {
             to: currentDate
         ) else { return }
 
-        currentDate = date
+        currentDate = date.startOfMonth
     }
     
     @objc
     private func didTapNext() {
+        guard !currentDate.isSameMonth(as: Date()) else { return }
+        
         guard let date = Calendar.current.date(
             byAdding: .month,
             value: 1,
             to: currentDate
         ) else { return }
 
-        currentDate = date
+        currentDate = date.startOfMonth
     }
     
-    private func AddTarget(_ button: UIButton, _ selector: Selector) {
+    private func setAddTarget() {
         leftButton.addTarget(
             self,
             action: #selector(didTapPrevious),
             for: .touchUpInside
         )
-
+        
         rightButton.addTarget(
             self,
             action: #selector(didTapNext),
             for: .touchUpInside
         )
     }
-
 }
