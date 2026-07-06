@@ -1,5 +1,5 @@
 //
-//  MonthSelectorView.swift
+//  MonthSelector.swift
 //  Routee-iOS
 //
 //  Created by 김세령 on 7/6/26.
@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class MonthSelectorView: BaseUIView {
+final class MonthSelector: BaseUIView {
     
     // MARK: - UI Properties
     
@@ -19,7 +19,7 @@ final class MonthSelectorView: BaseUIView {
     private let monthLabel = UILabel()
     private let rightButton = UIButton()
     
-    // MARK: - Private Methods
+    // MARK: - UI Settings
     
     override func setStyle() {
         stackView.do {
@@ -33,7 +33,7 @@ final class MonthSelectorView: BaseUIView {
         
         monthLabel.do {
             $0.text = "2026년 3월"
-            $0.textColor = .white
+            $0.textColor = .staticWhite
             $0.font = .title_sb_18
         }
         
