@@ -53,16 +53,24 @@ final class LoginView: BaseUIView {
             let text = "계속 진행하면 Routee의 서비스 이용약관에 동의하게 됩니다."
             let font = UIFont.pretendard(.regular, size: 10)
             
-            $0.attributedText = NSAttributedString(
+            let attributedString = NSMutableAttributedString(
                 string: text,
                 attributes: [
                     .font: font,
                     .foregroundColor: UIColor.white60
                 ]
             )
-            $0.font = font
-            $0.textColor = .white60
-            $0.numberOfLines = 2
+            
+            let range = (text as NSString).range(of: "이용약관에 동의")
+
+            attributedString.addAttribute(
+                .underlineStyle,
+                value: NSUnderlineStyle.single.rawValue,
+                range: range
+            )
+
+            $0.attributedText = attributedString
+            
             $0.textAlignment = .center
         }
         
@@ -70,16 +78,24 @@ final class LoginView: BaseUIView {
             let text = "개인정보 처리 방식은 개인정보 처리방침에서 확인할 수 있습니다."
             let font = UIFont.pretendard(.regular, size: 10)
             
-            $0.attributedText = NSAttributedString(
+            let attributedString = NSMutableAttributedString(
                 string: text,
                 attributes: [
                     .font: font,
                     .foregroundColor: UIColor.white60
                 ]
             )
-            $0.font = font
-            $0.textColor = .white60
-            $0.numberOfLines = 2
+            
+            let range = (text as NSString).range(of: "개인정보 처리방침")
+
+            attributedString.addAttribute(
+                .underlineStyle,
+                value: NSUnderlineStyle.single.rawValue,
+                range: range
+            )
+
+            $0.attributedText = attributedString
+            
             $0.textAlignment = .center
         }
     }
