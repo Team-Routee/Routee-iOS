@@ -82,4 +82,22 @@ final class TabBarItem: UIControl {
             $0.height.equalTo(17)
         }
     }
+    
+    // MARK: - Public Methods
+
+    func configure( normalImage: UIImage, selectedImage: UIImage, title: String ) {
+        self.normalImage = normalImage
+        self.selectedImage = selectedImage
+
+        titleLabel.text = title
+
+        updateAppearance()
+    }
+
+    // MARK: - Private Methods
+
+    private func updateAppearance() {
+        imageView.image = isSelected ? selectedImage : normalImage
+        titleLabel.textColor = isSelected ? .staticWhite : .grey400
+    }
 }
