@@ -70,7 +70,7 @@ final class RecordEditView: BaseUIView {
             $0.top.equalTo(monthSelector.snp.bottom).offset(20)
             $0.centerX.equalToSuperview()
             $0.width.equalTo(327)
-            $0.bottom.equalTo(safeAreaLayoutGuide).inset(20)
+            $0.bottom.equalTo(safeAreaLayoutGuide).inset(TabBarViewController.customTabBarHeight)
         }
     }
 }
