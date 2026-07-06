@@ -645,6 +645,16 @@
         ]
       }
     },
+    "radius-22": {
+      "$type": "number",
+      "$value": 22,
+      "$extensions": {
+        "com.figma.variableId": "VariableID:2924:25470",
+        "com.figma.scopes": [
+          "ALL_SCOPES"
+        ]
+      }
+    },
     "radius-24": {
       "$type": "number",
       "$value": 24,
@@ -655,13 +665,13 @@
         ]
       }
     },
-    "radius-999": {
+    "radius-32": {
       "$type": "number",
-      "$value": 999,
+      "$value": 32,
       "$extensions": {
-        "com.figma.variableId": "VariableID:900:14203",
+        "com.figma.variableId": "VariableID:2916:26178",
         "com.figma.scopes": [
-          "CORNER_RADIUS"
+          "ALL_SCOPES"
         ]
       }
     }
