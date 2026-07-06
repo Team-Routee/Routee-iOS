@@ -29,7 +29,7 @@ final class TabBarItem: UIControl {
 
     private lazy var contentStackView = UIStackView()
 
-    // MARK: - Initialize
+    // MARK: - Initializer
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -43,7 +43,7 @@ final class TabBarItem: UIControl {
         fatalError("init(coder:) has not been implemented")
     }
 
-    // MARK: - Private
+    // MARK: - UI Setting
 
     private func setStyle() {
         imageView.do {
@@ -85,7 +85,7 @@ final class TabBarItem: UIControl {
     
     // MARK: - Public Methods
 
-    func configure( normalImage: UIImage, selectedImage: UIImage, title: String ) {
+    func configure(normalImage: UIImage, selectedImage: UIImage, title: String) {
         self.normalImage = normalImage
         self.selectedImage = selectedImage
 
