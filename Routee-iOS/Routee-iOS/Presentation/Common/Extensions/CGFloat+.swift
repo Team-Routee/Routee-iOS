@@ -27,7 +27,8 @@ extension CGFloat {
     static let r12: CGFloat = 12
     static let r16: CGFloat = 16
     static let r20: CGFloat = 20
+    static let r22: CGFloat = 22
     static let r24: CGFloat = 24
-    static let r999: CGFloat = 999
+    static let r32: CGFloat = 32
 }
 // swiftlint:enable identifier_name
