@@ -40,18 +40,17 @@ enum RouteeButtonType {
             false
         }
     }
-    
-    var font: UIFont {
-        switch self {
-        default:
-            .label_sb_16
-        }
-    }
 }
 
 final class RouteeButton: UIButton {
     private let titleText: String
     private var type: RouteeButtonType
+    
+    override var isHighlighted: Bool {
+        didSet {
+            updateBackgroundColor()
+        }
+    }
     
     init(
         titleText: String,
@@ -64,10 +63,10 @@ final class RouteeButton: UIButton {
         
         self.setTitle(titleText, for: .normal)
         self.setTitleColor(type.textColor, for: .normal)
-        self.titleLabel?.font = type.font
-        self.backgroundColor = type.backgroundColor
+        self.titleLabel?.font = .label_sb_16
         self.layer.cornerRadius = 27
         self.isEnabled = type.isEnabled
+        updateBackgroundColor()
         
         self.snp.makeConstraints {
             $0.height.equalTo(54)
@@ -82,12 +81,17 @@ final class RouteeButton: UIButton {
         self.do {
             $0.type = type
             $0.setTitleColor(type.textColor, for: .normal)
-            $0.backgroundColor = type.backgroundColor
             $0.isEnabled = type.isEnabled
+            $0.updateBackgroundColor()
         }
     }
     
-    func updateTitle(_ title: String) {
-        self.setTitle(title, for: .normal)
+    private func updateBackgroundColor() {
+        guard type.isEnabled else {
+            backgroundColor = type.backgroundColor
+            return
+        }
+        
+        backgroundColor = isHighlighted ? .mint_200 : type.backgroundColor
     }
 }
