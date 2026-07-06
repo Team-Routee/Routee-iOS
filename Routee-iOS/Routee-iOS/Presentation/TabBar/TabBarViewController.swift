@@ -63,10 +63,10 @@ final class TabBarViewController: UITabBarController {
 private extension TabBarViewController {
 
     func configureViewControllers() {
-        let exercise = UINavigationController(rootViewController: TestExerciseViewController())
-        let recap = UINavigationController(rootViewController: TestRecapViewController())
-        let archive = UINavigationController(rootViewController: TestArchiveViewController())
-        let setting = UINavigationController(rootViewController: TestSettingViewController())
+        let exercise = UINavigationController(rootViewController: SampleViewController())
+        let recap = UINavigationController(rootViewController: SampleViewController())
+        let archive = UINavigationController(rootViewController: SampleViewController())
+        let setting = UINavigationController(rootViewController: SampleViewController())
 
         exercise.navigationBar.isHidden = true
         recap.navigationBar.isHidden = true
@@ -142,8 +142,9 @@ private extension TabBarViewController {
 
     func setLayout() {
         customTabBar.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.centerX.equalToSuperview()
             $0.bottom.equalTo(view.safeAreaLayoutGuide)
+            $0.width.equalTo(343)
             $0.height.equalTo(62)
         }
 
