@@ -192,7 +192,7 @@ final class TabBarViewController: UITabBarController {
         }
     }
     
-    private func moveSelectionView(to index: Int,animated: Bool) {
+    private func moveSelectionView(to index: Int, animated: Bool) {
         let targetItem = tabBarItems[index]
         
         selectionView.snp.remakeConstraints {
