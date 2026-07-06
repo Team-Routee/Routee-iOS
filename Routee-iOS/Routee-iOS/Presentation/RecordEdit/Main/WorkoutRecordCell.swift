@@ -54,28 +54,33 @@ final class WorkoutRecordCell: UICollectionViewCell {
     }
     
     private func setUI() {
-        addSubviews(workoutRecordThumbnail,
-                    titleLabel,
-                    dateLabel
+        contentView.addSubviews(
+            workoutRecordThumbnail,
+            titleLabel,
+            dateLabel
         )
     }
     
     private func setLayout() {
         workoutRecordThumbnail.snp.makeConstraints {
-            $0.top.leading.trailing.equalToSuperview()
+            $0.top.leading.trailing.equalTo(contentView)
             $0.height.equalTo(192)
         }
         
         titleLabel.snp.makeConstraints {
             $0.top.equalTo(workoutRecordThumbnail.snp.bottom).offset(12)
-            $0.leading.trailing.equalToSuperview()
+            $0.leading.trailing.equalTo(contentView)
         }
         
         dateLabel.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(2)
-            $0.leading.trailing.equalToSuperview()
-            $0.bottom.lessThanOrEqualToSuperview()
+            $0.leading.trailing.equalTo(contentView)
+            $0.bottom.lessThanOrEqualTo(contentView)
         }
         
+    }
+    
+    func configure(title: String) {
+        titleLabel.text = title
     }
 }

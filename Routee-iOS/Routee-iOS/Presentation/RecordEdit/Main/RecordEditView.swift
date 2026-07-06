@@ -37,14 +37,9 @@ final class RecordEditView: BaseUIView {
         flowLayout.do {
             $0.scrollDirection = .vertical
             $0.itemSize = CGSize(width: 152, height: 243)
-            $0.minimumInteritemSpacing = 20
+            $0.minimumInteritemSpacing = 23
             $0.minimumLineSpacing = 20
-            $0.sectionInset = UIEdgeInsets(
-                top: 0,
-                left: 24,
-                bottom: 0,
-                right: 24
-            )
+            $0.sectionInset = .zero
         }
         
         workoutRecordCollectionView.do {
@@ -66,12 +61,15 @@ final class RecordEditView: BaseUIView {
         
         monthSelector.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(28)
-            $0.leading.equalToSuperview().inset(106)
+            $0.centerX.equalToSuperview()
+            $0.height.equalTo(28)
+            $0.width.equalTo(160)
         }
         
         workoutRecordCollectionView.snp.makeConstraints {
             $0.top.equalTo(monthSelector.snp.bottom).offset(20)
             $0.centerX.equalToSuperview()
+            $0.width.equalTo(327)
             $0.bottom.equalTo(safeAreaLayoutGuide).inset(20)
         }
     }

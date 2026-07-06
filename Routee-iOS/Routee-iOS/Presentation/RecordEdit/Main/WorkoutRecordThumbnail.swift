@@ -26,8 +26,10 @@ final class WorkoutRecordThumbnail: BaseUIView {
     
     override func setStyle() {
         backgroundContainerView.do {
-            $0.backgroundColor = .dimSecondary
-            $0.layer.cornerRadius = 20
+            $0.backgroundColor = .grey_500
+            $0.layer.cornerRadius = 22
+            $0.layer.borderWidth = 6
+            $0.layer.borderColor = UIColor.grey_500.cgColor
             $0.clipsToBounds = true
         }
         
@@ -40,7 +42,7 @@ final class WorkoutRecordThumbnail: BaseUIView {
         
         borderOverlayView.do {
             $0.backgroundColor = .clear
-            $0.layer.borderWidth = 1
+            $0.layer.borderWidth = 4
             $0.layer.borderColor = UIColor.white10.cgColor
             $0.layer.cornerRadius = 16
             $0.isUserInteractionEnabled = false
@@ -51,7 +53,7 @@ final class WorkoutRecordThumbnail: BaseUIView {
             $0.clipsToBounds = true
             $0.layer.cornerRadius = 8
             $0.backgroundColor = .clear
-            $0.layer.borderWidth = 1
+            $0.layer.borderWidth = 2
             $0.layer.borderColor = UIColor.staticWhite.cgColor
         }
         
@@ -131,7 +133,7 @@ final class WorkoutRecordThumbnail: BaseUIView {
         }
         
         editButton.snp.makeConstraints {
-            $0.size.equalTo(24)
+            $0.size.equalTo(36)
             $0.top.equalToSuperview().inset(16)
             $0.trailing.equalToSuperview().inset(16)
         }
