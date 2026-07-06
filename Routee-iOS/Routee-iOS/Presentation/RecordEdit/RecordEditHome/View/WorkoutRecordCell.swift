@@ -31,6 +31,7 @@ final class WorkoutRecordCell: UICollectionViewCell {
         setUI()
         setLayout()
     }
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -77,7 +78,6 @@ final class WorkoutRecordCell: UICollectionViewCell {
             $0.leading.trailing.equalTo(contentView)
             $0.bottom.lessThanOrEqualTo(contentView)
         }
-        
     }
     
     func configure(title: String) {

@@ -114,22 +114,22 @@ final class WorkoutRecordThumbnail: BaseUIView {
         }
         
         firstPhotoView.snp.makeConstraints {
-            $0.top.equalTo(backgroundContainerView.snp.top).offset(96)
-            $0.leading.equalTo(backgroundContainerView.snp.leading).offset(13)
+            $0.bottom.equalTo(backgroundContainerView.snp.bottom).offset(-20)
+            $0.leading.equalTo(backgroundContainerView.snp.leading).offset(18)
             $0.height.equalTo(72)
             $0.width.equalTo(56)
         }
         
         secondPhotoView.snp.makeConstraints {
-            $0.top.equalTo(backgroundContainerView.snp.top).offset(83)
-            $0.leading.equalTo(backgroundContainerView.snp.leading).offset(39)
+            $0.bottom.equalTo(backgroundContainerView.snp.bottom).offset(-28)
+            $0.leading.equalTo(backgroundContainerView.snp.leading).offset(63)
             $0.height.equalTo(72)
             $0.width.equalTo(56)
         }
         
         thirdPhotoView.snp.makeConstraints {
-            $0.top.equalTo(backgroundContainerView.snp.top).offset(96)
-            $0.trailing.equalTo(backgroundContainerView.snp.trailing).offset(-12)
+            $0.bottom.equalTo(backgroundContainerView.snp.bottom).offset(-18)
+            $0.trailing.equalTo(backgroundContainerView.snp.trailing).offset(-15)
             $0.height.equalTo(72)
             $0.width.equalTo(56)
         }

@@ -12,6 +12,8 @@ import Then
 
 final class TabBarViewController: UITabBarController {
     
+    static let customTabBarHeight: CGFloat = 62
+    
     // MARK: - Properties
     
     private let workoutItem = TabBarItem()
@@ -144,7 +146,7 @@ final class TabBarViewController: UITabBarController {
             $0.centerX.equalToSuperview()
             $0.bottom.equalTo(view.safeAreaLayoutGuide)
             $0.width.equalTo(343)
-            $0.height.equalTo(62)
+            $0.height.equalTo(Self.customTabBarHeight)
         }
         
         selectionView.snp.makeConstraints {
