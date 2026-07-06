@@ -15,7 +15,7 @@ final class RecordEditView: BaseUIView {
     // MARK: - UI Properties
     
     private let titleLabel = UILabel()
-    private let monthSelectorView = MonthSelectorView()
+    private let monthSelector = MonthSelector()
     
     private let flowLayout = UICollectionViewFlowLayout()
     private lazy var workoutRecordCollectionView = UICollectionView(
@@ -23,19 +23,22 @@ final class RecordEditView: BaseUIView {
         collectionViewLayout: flowLayout
     )
     
-    // MARK: - Private Methods
+    // MARK: - UI Settings
     
     override func setStyle() {
+        backgroundColor = .bgPrimary
+        
         titleLabel.do {
             $0.text = "운동 기록 편집"
             $0.font = .title_sb_20
-            $0.textColor = .white
+            $0.textColor = .staticWhite
         }
         
         flowLayout.do {
             $0.scrollDirection = .vertical
-            $0.minimumInteritemSpacing = 16   // 셀 사이 가로 간격
-            $0.minimumLineSpacing = 32        // 셀 사이 세로 간격
+            $0.itemSize = CGSize(width: 152, height: 243)
+            $0.minimumInteritemSpacing = 20
+            $0.minimumLineSpacing = 20
             $0.sectionInset = UIEdgeInsets(
                 top: 0,
                 left: 24,
@@ -43,6 +46,33 @@ final class RecordEditView: BaseUIView {
                 right: 24
             )
         }
+        
+        workoutRecordCollectionView.do {
+            $0.backgroundColor = .clear
+            $0.showsVerticalScrollIndicator = false
+            $0.contentInsetAdjustmentBehavior = .never
+        }
     }
-
+    
+    override func setUI() {
+        addSubviews(titleLabel, monthSelector, workoutRecordCollectionView)
+    }
+    
+    override func setLayout() {
+        titleLabel.snp.makeConstraints {
+            $0.top.equalTo(safeAreaLayoutGuide).inset(16)
+            $0.leading.equalToSuperview().inset(16)
+        }
+        
+        monthSelector.snp.makeConstraints {
+            $0.top.equalTo(titleLabel.snp.bottom).offset(28)
+            $0.leading.equalToSuperview().inset(106)
+        }
+        
+        workoutRecordCollectionView.snp.makeConstraints {
+            $0.top.equalTo(monthSelector.snp.bottom).offset(20)
+            $0.centerX.equalToSuperview()
+            $0.bottom.equalTo(safeAreaLayoutGuide).inset(20)
+        }
+    }
 }
