@@ -12,12 +12,29 @@ import Then
 
 final class MonthSelector: BaseUIView {
     
+    // MARK: - Properties
+
+    private var currentDate = Date() {
+        didSet {
+            updateMonthLabel()
+        }
+    }
+    
     // MARK: - UI Properties
     
     private let stackView = UIStackView()
     private let leftButton = UIButton()
     private let monthLabel = UILabel()
     private let rightButton = UIButton()
+    
+    // MARK: - init
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+
+        configureUI()
+        updateMonthLabel()
+    }
     
     // MARK: - UI Settings
     
@@ -63,4 +80,50 @@ final class MonthSelector: BaseUIView {
             $0.size.equalTo(28)
         }
     }
+    
+    // MARK: - Private Methods
+    
+    private func updateMonthLabel() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy년 M월"   // 2026년 7월
+
+        monthLabel.text = formatter.string(from: currentDate)
+    }
+    
+    @objc
+    private func didTapPrevious() {
+        guard let date = Calendar.current.date(
+            byAdding: .month,
+            value: -1,
+            to: currentDate
+        ) else { return }
+
+        currentDate = date
+    }
+    
+    @objc
+    private func didTapNext() {
+        guard let date = Calendar.current.date(
+            byAdding: .month,
+            value: 1,
+            to: currentDate
+        ) else { return }
+
+        currentDate = date
+    }
+    
+    private func AddTarget(_ button: UIButton, _ selector: Selector) {
+        leftButton.addTarget(
+            self,
+            action: #selector(didTapPrevious),
+            for: .touchUpInside
+        )
+
+        rightButton.addTarget(
+            self,
+            action: #selector(didTapNext),
+            for: .touchUpInside
+        )
+    }
+
 }

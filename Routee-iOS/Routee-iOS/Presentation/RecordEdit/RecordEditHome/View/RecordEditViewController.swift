@@ -12,6 +12,9 @@ import Then
 
 final class RecordEditViewController: BaseUIViewController, UICollectionViewDelegate {
     
+    // MARK: - Properties
+    
+    var onMonthChanged: ((Date) -> Void)?
     private let rootView = RecordEditView()
     
     private let records = [
@@ -24,6 +27,8 @@ final class RecordEditViewController: BaseUIViewController, UICollectionViewDele
         "청계산 등산",
         "석촌호수 산책"
     ]
+    
+    // MARK: - Private Methods
     
     override func loadView() {
         view = rootView

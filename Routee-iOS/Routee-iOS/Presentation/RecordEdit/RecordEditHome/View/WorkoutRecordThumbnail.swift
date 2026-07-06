@@ -26,8 +26,8 @@ final class WorkoutRecordThumbnail: BaseUIView {
     
     override func setStyle() {
         backgroundContainerView.do {
-            $0.backgroundColor = .grey_500
-            $0.layer.cornerRadius = 22
+            $0.backgroundColor = .white_30
+            $0.layer.cornerRadius = 20
             $0.layer.borderWidth = 6
             $0.layer.borderColor = UIColor.grey_500.cgColor
             $0.clipsToBounds = true
@@ -39,11 +39,11 @@ final class WorkoutRecordThumbnail: BaseUIView {
             $0.layer.cornerRadius = 16
             $0.clipsToBounds = true
         }
-        
+    
         borderOverlayView.do {
             $0.backgroundColor = .clear
             $0.layer.borderWidth = 4
-            $0.layer.borderColor = UIColor.white10.cgColor
+            $0.layer.borderColor = UIColor.white30.cgColor
             $0.layer.cornerRadius = 16
             $0.isUserInteractionEnabled = false
         }
@@ -59,17 +59,19 @@ final class WorkoutRecordThumbnail: BaseUIView {
         
         firstPhotoView.do {
             $0.image = UIImage(named: "img_selfcamera2")
-            $0.transform = CGAffineTransform(rotationAngle: -0.12)
+            $0.transform = CGAffineTransform(rotationAngle: -8 * .pi / 180)
+
         }
         
         secondPhotoView.do {
             $0.image = UIImage(named: "img_location6")
-            $0.transform = CGAffineTransform(rotationAngle: 0.05)
+            $0.transform = CGAffineTransform(rotationAngle: 2 * .pi / 180)
+
         }
         
         thirdPhotoView.do {
             $0.image = UIImage(named: "img_location1")
-            $0.transform = CGAffineTransform(rotationAngle: 0.14)
+            $0.transform = CGAffineTransform(rotationAngle: 4 * .pi / 180)
         }
         
         editButton.do {
