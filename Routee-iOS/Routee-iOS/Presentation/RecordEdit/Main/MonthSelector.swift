@@ -43,6 +43,8 @@ final class MonthSelector: BaseUIView {
     }
     
     override func setUI() {
+        addSubview(stackView)
+        
         stackView.addArrangedSubviews(
             leftButton, monthLabel, rightButton
         )

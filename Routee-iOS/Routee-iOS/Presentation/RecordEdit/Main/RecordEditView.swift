@@ -18,7 +18,7 @@ final class RecordEditView: BaseUIView {
     private let monthSelector = MonthSelector()
     
     private let flowLayout = UICollectionViewFlowLayout()
-    private lazy var workoutRecordCollectionView = UICollectionView(
+    private(set) lazy var workoutRecordCollectionView = UICollectionView(
         frame: .zero,
         collectionViewLayout: flowLayout
     )
