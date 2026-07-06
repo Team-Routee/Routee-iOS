@@ -66,7 +66,7 @@ final class TabBarItem: UIControl {
 
     private func setUI() {
         addSubview(contentStackView)
-        contentStackView.addArrangedSubviews(imageView,titleLabel)
+        contentStackView.addArrangedSubviews(imageView, titleLabel)
     }
 
     private func setLayout() {
