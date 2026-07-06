@@ -80,7 +80,14 @@ final class WorkoutRecordThumbnail: BaseUIView {
     override func setUI() {
         addSubview(backgroundContainerView)
         
-        backgroundContainerView.addSubviews(backgroundPhotoView, borderOverlayView, firstPhotoView, secondPhotoView, thirdPhotoView, editButton)
+        backgroundContainerView.addSubviews(
+            backgroundPhotoView,
+            borderOverlayView,
+            firstPhotoView,
+            secondPhotoView,
+            thirdPhotoView,
+            editButton
+        )
     }
     
     override func setLayout() {
