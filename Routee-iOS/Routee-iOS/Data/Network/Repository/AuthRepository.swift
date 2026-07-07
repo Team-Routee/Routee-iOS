@@ -13,6 +13,7 @@ protocol AuthRepository {
 
 struct DefaultAuthRepository: AuthRepository {
     private let service: NetworkService
+    private let keychainService = DefaultKeychainService()
     
     init(service: NetworkService = DefaultNetworkService()) {
         self.service = service
@@ -30,9 +31,12 @@ struct DefaultAuthRepository: AuthRepository {
             requestDTO: dto
         )
         
-        let _: LoginResponseDTO = try await service.request(
+        let response: LoginResponseDTO = try await service.request(
             endpoint,
             decodingType: LoginResponseDTO.self
         )
+        
+        keychainService.create(.accessToken, token: response.accessToken)
+        keychainService.create(.refreshToken, token: response.refreshToken)
     }
 }

@@ -26,6 +26,11 @@ actor DefaultTokenService: TokenService {
             return try await task.value
         }
         let refreshToken = keychainService.read(.refreshToken)
+
+        guard !refreshToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
         let requestDTO = TokenReissueRequestDTO(refreshToken: refreshToken)
         
         let task = Task {
@@ -106,10 +111,8 @@ actor DefaultTokenService: TokenService {
     private func clearKeychain() {
         for key in KeyType.allCases {
             let token = keychainService.read(key)
-            if token.isEmpty {
-                keychainService.delete(key)
-                RouteeLogger.debug("\(key) 삭제")
-            }
+            keychainService.delete(key)
+            RouteeLogger.debug("\(key) 삭제")
         }
     }
 }
