@@ -14,6 +14,8 @@ final class MonthSelector: BaseUIView {
     
     // MARK: - Properties
 
+    var onMonthChanged: ((Date) -> Void)?
+    
     private var currentDate = Date().startOfMonth {
         didSet {
             updateMonthState()
@@ -99,6 +101,7 @@ final class MonthSelector: BaseUIView {
     private func updateMonthState() {
         updateMonthLabel()
         rightButton.isEnabled = !currentDate.isSameMonth(as: Date())
+        onMonthChanged?(currentDate)
     }
     
     // MARK: - Actions

@@ -19,4 +19,10 @@ extension Date {
         return calendar.component(.year, from: self) == calendar.component(.year, from: date)
         && calendar.component(.month, from: self) == calendar.component(.month, from: date)
     }
+    
+    static func date(_ year: Int, _ month: Int, _ day: Int) -> Date {
+        Calendar.current.date(
+            from: DateComponents(year: year, month: month, day: day)
+        )!
+    }
 }

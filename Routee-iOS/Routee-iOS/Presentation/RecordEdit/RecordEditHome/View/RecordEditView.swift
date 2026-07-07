@@ -46,6 +46,7 @@ final class RecordEditView: BaseUIView {
             $0.backgroundColor = .clear
             $0.showsVerticalScrollIndicator = false
             $0.contentInsetAdjustmentBehavior = .never
+            $0.contentInset.bottom = TabBarViewController.customTabBarHeight + 20
         }
     }
     
@@ -70,7 +71,11 @@ final class RecordEditView: BaseUIView {
             $0.top.equalTo(monthSelector.snp.bottom).offset(20)
             $0.centerX.equalToSuperview()
             $0.width.equalTo(327)
-            $0.bottom.equalTo(safeAreaLayoutGuide).inset(TabBarViewController.customTabBarHeight)
+            $0.bottom.equalTo(safeAreaLayoutGuide)
         }
+    }
+    
+    func setMonthChangedHandler(_ handler: @escaping (Date) -> Void) {
+        monthSelector.onMonthChanged = handler
     }
 }

@@ -49,7 +49,7 @@ final class WorkoutRecordCell: UICollectionViewCell {
         dateLabel.do {
             $0.text = "2026.03.23"
             $0.font = .label_m_12
-            $0.textColor = .staticWhite
+            $0.textColor = .white60
             $0.textAlignment = .center
         }
     }
@@ -79,8 +79,17 @@ final class WorkoutRecordCell: UICollectionViewCell {
             $0.bottom.lessThanOrEqualTo(contentView)
         }
     }
+
+    // MARK: - Private Methods
     
-    func configure(title: String) {
-        titleLabel.text = title
+    private let formatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy.MM.dd"
+        return formatter
+    }()
+
+    func configure(with workout: WorkoutRecordModel) {
+        titleLabel.text = workout.title
+        dateLabel.text = formatter.string(from: workout.date)
     }
 }

@@ -16,17 +16,8 @@ final class RecordEditViewController: BaseUIViewController, UICollectionViewDele
     
     var onMonthChanged: ((Date) -> Void)?
     private let rootView = RecordEditView()
-    
-    private let records = [
-        "숭실대 동기모임 2탄",
-        "북한산 백운대 코스",
-        "아차산 야경 산책",
-        "인왕산 둘레길",
-        "남산 순환로 러닝",
-        "한강공원 조깅",
-        "청계산 등산",
-        "석촌호수 산책"
-    ]
+    private let allRecords = WorkoutDummyData.dummyWorkoutRecords
+    private var records: [WorkoutRecordModel] = []
     
     // MARK: - Private Methods
     
@@ -38,6 +29,8 @@ final class RecordEditViewController: BaseUIViewController, UICollectionViewDele
         super.viewDidLoad()
         
         setCollectionView()
+        setMonthSelector()
+        updateRecords(for: Date())
     }
     
     private func setCollectionView() {
@@ -49,6 +42,17 @@ final class RecordEditViewController: BaseUIViewController, UICollectionViewDele
         rootView.workoutRecordCollectionView.dataSource = self
         rootView.workoutRecordCollectionView.delegate = self
     }
+    
+    private func setMonthSelector() {
+        rootView.setMonthChangedHandler { [weak self] date in
+            self?.updateRecords(for: date)
+        }
+    }
+    
+    private func updateRecords(for month: Date) {
+        records = allRecords.filter { $0.date.isSameMonth(as: month) }
+        rootView.workoutRecordCollectionView.reloadData()
+    }
 }
 
 extension RecordEditViewController: UICollectionViewDataSource {
@@ -57,7 +61,7 @@ extension RecordEditViewController: UICollectionViewDataSource {
         _ collectionView: UICollectionView,
         numberOfItemsInSection section: Int
     ) -> Int {
-        return records.count
+        records.count
     }
     
     func collectionView(
@@ -71,7 +75,7 @@ extension RecordEditViewController: UICollectionViewDataSource {
             return UICollectionViewCell()
         }
         
-        cell.configure(title: records[indexPath.item])
+        cell.configure(with: records[indexPath.item])
         
         return cell
     }
