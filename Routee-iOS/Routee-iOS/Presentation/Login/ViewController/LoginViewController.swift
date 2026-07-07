@@ -8,8 +8,13 @@
 import AuthenticationServices
 import UIKit
 
+protocol LoginViewControllerDelegate: AnyObject {
+    func bindToken(_ idToken: String)
+}
+
 final class LoginViewController: BaseUIViewController {
     let rootView = LoginView()
+    weak var delegate: LoginViewControllerDelegate?
     
     override func loadView() {
         view = rootView
@@ -70,39 +75,23 @@ extension LoginViewController: ASAuthorizationControllerDelegate {
             
             guard
                 let identityTokenData = appleIdCredential.identityToken,
-                let identityToken = String(data: identityTokenData, encoding: .utf8),
-                
-                let authorizationCodeData = appleIdCredential.authorizationCode,
-                let authorizationCode = String(
-                    data: authorizationCodeData,
-                    encoding: .utf8
-                )
+                let identityToken = String(data: identityTokenData, encoding: .utf8)
             else {
                 print("Token 변환 실패")
                 return
             }
-            
-            let userName = [fullName?.familyName, fullName?.givenName]
-                .compactMap { $0 }
-                .joined()
-            
-            let loginModel = LoginModel(
-                identityToken: identityToken,
-                appleUserIdentifier: userIdentifier,
-                userName: userName.isEmpty ? nil : userName
-            )
-            
+                        
             print("Apple ID 로그인에 성공하였습니다.")
             print("사용자 ID: \(userIdentifier)")
             print("전체 이름: \(fullName?.givenName ?? "") \(fullName?.familyName ?? "")")
             print("이메일: \(email ?? "")")
-            print("Token: \(identityToken)")
-            print("authorizationCode: \(authorizationCode)")
             
             // 여기에 로그인 성공 후 수행할 작업을 추가하세요.
-            let mainVC = SampleViewController()
-            mainVC.modalPresentationStyle = .fullScreen
-            present(mainVC, animated: true)
+            let onboardingViewController = OnboardingViewController()
+            delegate = onboardingViewController
+            delegate?.bindToken(identityToken)
+            onboardingViewController.modalPresentationStyle = .fullScreen
+            present(onboardingViewController, animated: true)
             
             // 암호 기반 인증에 성공한 경우(iCloud), 사용자의 인증 정보를 확인하고 필요한 작업을 수행합니다
         case let passwordCredential as ASPasswordCredential:
