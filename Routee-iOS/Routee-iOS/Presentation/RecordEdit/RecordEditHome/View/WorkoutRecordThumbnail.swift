@@ -52,7 +52,7 @@ final class WorkoutRecordThumbnail: BaseUIView {
         borderOverlayView.do {
             $0.backgroundColor = .clear
             $0.layer.borderWidth = 4
-            $0.layer.borderColor = UIColor.white30.cgColor
+            $0.layer.borderColor = UIColor.white_30.cgColor
             $0.layer.cornerRadius = 16
             $0.isUserInteractionEnabled = false
         }
