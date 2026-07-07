@@ -27,7 +27,7 @@ extension EndPoint {
         
         guard var urlComponents = URLComponents(string: urlString) else {
             RouteeLogger.error(RouteeError.URLError)
-            return URL(string: "")!
+            return URL(filePath: "")
         }
         
         if let queryParameters {
@@ -38,7 +38,7 @@ extension EndPoint {
         
         guard let url = urlComponents.url else {
             RouteeLogger.error(RouteeError.URLError)
-            return URL(string: "")!
+            return URL(filePath: "")
         }
         
         return url
