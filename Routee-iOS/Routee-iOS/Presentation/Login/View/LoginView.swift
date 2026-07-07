@@ -16,7 +16,6 @@ final class LoginView: BaseUIView {
     // MARK: - UI Properties
     
     private let backgroundImageView = UIImageView()
-    private let logoImageView = UIImageView()
     lazy var signInButton = UIButton()
     private let serviceAgreeLabel = UILabel()
     private let privacyPolicyLabel = UILabel()
@@ -37,11 +36,6 @@ final class LoginView: BaseUIView {
         
         backgroundImageView.do {
             $0.image = UIImage(resource: .imgBgLogin)
-            $0.contentMode = .scaleAspectFit
-        }
-        
-        logoImageView.do {
-            $0.image = UIImage(resource: .routeeSignatureGradientMd)
             $0.contentMode = .scaleAspectFit
         }
         

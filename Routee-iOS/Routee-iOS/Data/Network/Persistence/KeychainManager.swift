@@ -66,7 +66,7 @@ enum KeyChainManager {
                 return value
             } else { return nil }
         } else {
-            print("failed to loading, status code = \(status)")
+            RouteeLogger.data("failed to loading, status code = \(status)")
             return nil
         }
     }
