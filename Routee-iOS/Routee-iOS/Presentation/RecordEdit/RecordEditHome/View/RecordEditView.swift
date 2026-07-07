@@ -12,12 +12,6 @@ import Then
 
 final class RecordEditView: BaseUIView {
     
-    // MARK: - Metric
-    
-    private enum Metric {
-        static let bottomSpacingAboveTabBar: CGFloat = 20
-    }
-    
     // MARK: - UI Properties
     
     private let titleLabel = UILabel()
@@ -33,7 +27,7 @@ final class RecordEditView: BaseUIView {
         collectionViewLayout: flowLayout
     )
     
-    // MARK: - UI Settings
+    // MARK: - UI Setting
     
     override func setStyle() {
         backgroundColor = .bgPrimary
@@ -78,9 +72,17 @@ final class RecordEditView: BaseUIView {
     }
     
     override func setUI() {
-        addSubviews(titleLabel, monthSelector, workoutRecordCollectionView, emptyDataStackView)
+        addSubviews(
+            titleLabel,
+            monthSelector,
+            workoutRecordCollectionView,
+            emptyDataStackView
+        )
         
-        emptyDataStackView.addArrangedSubviews(emptyDataImageView, emptyDataLabel)
+        emptyDataStackView.addArrangedSubviews(
+            emptyDataImageView,
+            emptyDataLabel
+        )
     }
     
     override func setLayout() {
@@ -116,22 +118,18 @@ final class RecordEditView: BaseUIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        let bottomInset = safeAreaInsets.bottom
-        + TabBarViewController.customTabBarHeight
-        + Metric.bottomSpacingAboveTabBar
+        let bottomInset = safeAreaInsets.bottom + TabBarViewController.customTabBarHeight + 20
         
         workoutRecordCollectionView.contentInset.bottom = bottomInset
         workoutRecordCollectionView.verticalScrollIndicatorInsets.bottom = bottomInset
     }
     
-    // MARK: - Private Methods
+    // MARK: - Public Methods
     
     func updateView(isEmpty: Bool) {
         workoutRecordCollectionView.isHidden = isEmpty
         emptyDataStackView.isHidden = !isEmpty
     }
-    
-    // MARK: - Public Methods
 
     func setMonthChangedHandler(_ handler: @escaping (Date) -> Void) {
         monthSelector.onMonthChanged = handler

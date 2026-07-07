@@ -19,7 +19,7 @@ final class RecordEditViewController: BaseUIViewController, UICollectionViewDele
     private let allRecords = WorkoutDummyData.dummyWorkoutRecords
     private var records: [WorkoutRecordModel] = []
     
-    // MARK: - Private Methods
+    // MARK: - Life Cycle
     
     override func loadView() {
         view = rootView
@@ -32,6 +32,8 @@ final class RecordEditViewController: BaseUIViewController, UICollectionViewDele
         setMonthSelector()
         updateRecords(for: Date())
     }
+    
+    // MARK: - Private Methods
     
     private func setCollectionView() {
         rootView.workoutRecordCollectionView.register(
@@ -55,6 +57,8 @@ final class RecordEditViewController: BaseUIViewController, UICollectionViewDele
         rootView.workoutRecordCollectionView.reloadData()
     }
 }
+
+// MARK: - UICollectionViewDataSource
 
 extension RecordEditViewController: UICollectionViewDataSource {
     

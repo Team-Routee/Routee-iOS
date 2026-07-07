@@ -15,6 +15,12 @@ final class WorkoutRecordCell: UICollectionViewCell {
     // MARK: - Properties
     
     static let identifier = "WorkoutRecordCell"
+    
+    private let formatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy.MM.dd."
+        return formatter
+    }()
 
     // MARK: - UI Properties
     
@@ -22,7 +28,7 @@ final class WorkoutRecordCell: UICollectionViewCell {
     private let titleLabel = UILabel()
     private let dateLabel = UILabel()
     
-    // MARK: - init
+    // MARK: - Initializer
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -36,7 +42,15 @@ final class WorkoutRecordCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - UI Settings
+    // MARK: - Life Cycle
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        workoutRecordThumbnail.configure(imageNames: [])
+    }
+    
+    // MARK: - UI Setting
     
     private func setStyle() {
         titleLabel.do {
@@ -80,16 +94,11 @@ final class WorkoutRecordCell: UICollectionViewCell {
         }
     }
 
-    // MARK: - Private Methods
-    
-    private let formatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy.MM.dd"
-        return formatter
-    }()
+    // MARK: - Public Methods
 
     func configure(with workout: WorkoutRecordModel) {
         titleLabel.text = workout.title
         dateLabel.text = formatter.string(from: workout.date)
+        workoutRecordThumbnail.configure(imageNames: workout.imageNames)
     }
 }

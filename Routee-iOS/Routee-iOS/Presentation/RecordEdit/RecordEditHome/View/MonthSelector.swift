@@ -29,7 +29,7 @@ final class MonthSelector: BaseUIView {
     private let monthLabel = UILabel()
     private let rightButton = UIButton()
     
-    // MARK: - init
+    // MARK: - Initializer
     
     override init(frame: CGRect = .zero) {
         super.init(frame: frame)
@@ -42,7 +42,7 @@ final class MonthSelector: BaseUIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - UI Settings
+    // MARK: - UI Setting
     
     override func setStyle() {
         stackView.do {
@@ -70,7 +70,9 @@ final class MonthSelector: BaseUIView {
         addSubview(stackView)
         
         stackView.addArrangedSubviews(
-            leftButton, monthLabel, rightButton
+            leftButton,
+            monthLabel,
+            rightButton
         )
     }
     
@@ -104,6 +106,20 @@ final class MonthSelector: BaseUIView {
         onMonthChanged?(currentDate)
     }
     
+    private func setAddTarget() {
+        leftButton.addTarget(
+            self,
+            action: #selector(didTapPrevious),
+            for: .touchUpInside
+        )
+        
+        rightButton.addTarget(
+            self,
+            action: #selector(didTapNext),
+            for: .touchUpInside
+        )
+    }
+    
     // MARK: - Actions
     
     @objc
@@ -128,19 +144,5 @@ final class MonthSelector: BaseUIView {
         ) else { return }
 
         currentDate = date.startOfMonth
-    }
-    
-    private func setAddTarget() {
-        leftButton.addTarget(
-            self,
-            action: #selector(didTapPrevious),
-            for: .touchUpInside
-        )
-        
-        rightButton.addTarget(
-            self,
-            action: #selector(didTapNext),
-            for: .touchUpInside
-        )
     }
 }
