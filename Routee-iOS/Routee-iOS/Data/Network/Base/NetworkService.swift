@@ -34,6 +34,7 @@ final class DefaultNetworkService: NetworkService {
             .validate()
             .responseDecodable(of: BaseResponse<T>.self) { response in
                 Self.responseLogger(response)
+                Self.rawResponseLogger(response.data)
                 
                 switch response.result {
                 case .success(let data):
@@ -75,6 +76,21 @@ final class DefaultNetworkService: NetworkService {
         RouteeLogger.network("StatusCode: \(response.response?.statusCode ?? 0)")
         RouteeLogger.network("Header: \(response.response?.headers ?? HTTPHeaders())")
         RouteeLogger.network("Description: \(response.response?.description ?? "nil")")
+        print("AF debug response:", response.debugDescription)
+    }
+    
+    private static func rawResponseLogger(_ data: Data?) {
+        guard
+            let data,
+            let rawBody = String(data: data, encoding: .utf8)
+        else {
+            RouteeLogger.network("Raw response: nil")
+            print("Raw response: nil")
+            return
+        }
+        
+        RouteeLogger.network("Raw response: \(rawBody)")
+        print("Raw response:", rawBody)
     }
     
     private static func handleError(_ statusCode: Int, _ errorResponse: String) -> RouteeError {

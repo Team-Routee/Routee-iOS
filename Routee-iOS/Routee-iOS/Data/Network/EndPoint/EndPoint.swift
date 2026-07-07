@@ -49,6 +49,7 @@ enum HeaderType {
     case basic
     case withAuth
     case appleLoginHeader(identityToken: String, authorizationCode: String)
+    case refresh(accessToken: String)
     
     var value: HTTPHeaders {
         switch self {
@@ -64,6 +65,11 @@ enum HeaderType {
                 "Content-Type": "application/json",
                 "Authorization": "Bearer \(identityToken)",
                 "X-Apple-Code": "\(authorizationCode)"
+            ]
+        case .refresh(let accessToken):
+            return [
+                "Content-Type": "application/json",
+                "Authorization": "Bearer \(accessToken)"
             ]
         }
     }
