@@ -10,4 +10,5 @@ struct ProfileModel {
     let streakNumber: Int
     let pointNumber: Int
     let profileImageName: String
+    let joinedDate: String
 }
