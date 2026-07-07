@@ -110,7 +110,6 @@ actor DefaultTokenService: TokenService {
     
     private func clearKeychain() {
         for key in KeyType.allCases {
-            let token = keychainService.read(key)
             keychainService.delete(key)
             RouteeLogger.debug("\(key) 삭제")
         }

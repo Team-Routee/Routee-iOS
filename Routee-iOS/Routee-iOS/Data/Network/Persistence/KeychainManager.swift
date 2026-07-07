@@ -14,28 +14,51 @@ enum KeyType: String, CaseIterable {
 }
 
 enum KeyChainManager {
+    private static let service = Bundle.main.bundleIdentifier ?? "Routee-iOS"
+    
     static func create(key: KeyType, token: String) {
-        let query: NSDictionary = [
+        guard let tokenData = token.data(using: .utf8, allowLossyConversion: false) else {
+            RouteeLogger.error(RouteeError.unknownError)
+            return
+        }
+        
+        let query: [CFString: Any] = [
             kSecClass: kSecClassGenericPassword,
-            kSecAttrAccount: key,
-            kSecValueData: token.data(using: .utf8, allowLossyConversion: false) as Any
+            kSecAttrService: service,
+            kSecAttrAccount: key.rawValue
         ]
-        SecItemDelete(query)
-
-        let status = SecItemAdd(query, nil)
-        assert(status == noErr, "failed to save Token")
+        
+        let attributes: [CFString: Any] = [
+            kSecValueData: tokenData
+        ]
+        
+        let updateStatus = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
+        if updateStatus == errSecSuccess {
+            return
+        }
+        
+        var addQuery = query
+        addQuery[kSecValueData] = tokenData
+        
+        let addStatus = SecItemAdd(addQuery as CFDictionary, nil)
+        if addStatus != errSecSuccess {
+            RouteeLogger.error(
+                RouteeError.networkError(statusCode: Int(addStatus), message: "failed to save Token")
+            )
+        }
     }
     
     static func read(key: KeyType) -> String? {
-        let query: NSDictionary = [
+        let query: [CFString: Any] = [
             kSecClass: kSecClassGenericPassword,
-            kSecAttrAccount: key,
+            kSecAttrService: service,
+            kSecAttrAccount: key.rawValue,
             kSecReturnData: kCFBooleanTrue as Any,
             kSecMatchLimit: kSecMatchLimitOne
         ]
         
         var dataTypeRef: AnyObject?
-        let status = SecItemCopyMatching(query, &dataTypeRef)
+        let status = SecItemCopyMatching(query as CFDictionary, &dataTypeRef)
         
         if status == errSecSuccess {
             if let retrievedData: Data = dataTypeRef as? Data {
@@ -49,11 +72,16 @@ enum KeyChainManager {
     }
     
     static func delete(key: KeyType) {
-        let query: NSDictionary = [
+        let query: [CFString: Any] = [
             kSecClass: kSecClassGenericPassword,
-            kSecAttrAccount: key
+            kSecAttrService: service,
+            kSecAttrAccount: key.rawValue
         ]
-        let status = SecItemDelete(query)
-        assert(status == noErr, "failed to delete the value, status code = \(status)")
+        let status = SecItemDelete(query as CFDictionary)
+        if status != errSecSuccess && status != errSecItemNotFound {
+            RouteeLogger.error(
+                RouteeError.networkError(statusCode: Int(status), message: "failed to delete Token")
+            )
+        }
     }
 }
