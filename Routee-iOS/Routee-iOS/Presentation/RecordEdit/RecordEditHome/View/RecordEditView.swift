@@ -114,7 +114,6 @@ final class RecordEditView: BaseUIView {
         workoutRecordCollectionView.isHidden = isEmpty
         emptyDataStackView.isHidden = !isEmpty
     }
-
     
     // MARK: - Public Methods
 
