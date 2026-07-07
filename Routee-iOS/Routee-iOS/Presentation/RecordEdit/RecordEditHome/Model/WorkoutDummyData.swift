@@ -1,5 +1,5 @@
 //
-//  WorkoutDummyDate.swift
+//  WorkoutDummyData.swift
 //  Routee-iOS
 //
 //  Created by 김세령 on 7/7/26.

@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class RecordEditViewController: BaseUIViewController, UICollectionViewDelegate {
+final class RecordEditViewController: BaseUIViewController {
     
     // MARK: - Properties
     
@@ -35,16 +35,6 @@ final class RecordEditViewController: BaseUIViewController, UICollectionViewDele
     
     // MARK: - Private Methods
     
-    private func setCollectionView() {
-        rootView.workoutRecordCollectionView.register(
-            WorkoutRecordCell.self,
-            forCellWithReuseIdentifier: WorkoutRecordCell.identifier
-        )
-        
-        rootView.workoutRecordCollectionView.dataSource = self
-        rootView.workoutRecordCollectionView.delegate = self
-    }
-    
     private func setMonthSelector() {
         rootView.setMonthChangedHandler { [weak self] date in
             self?.updateRecords(for: date)
@@ -59,10 +49,21 @@ final class RecordEditViewController: BaseUIViewController, UICollectionViewDele
     }
 }
 
-// MARK: - UICollectionViewDataSource
+    // MARK: - extension
+
+extension RecordEditViewController: UICollectionViewDelegate {
+    private func setCollectionView() {
+        rootView.workoutRecordCollectionView.register(
+            WorkoutRecordCell.self,
+            forCellWithReuseIdentifier: WorkoutRecordCell.identifier
+        )
+        
+        rootView.workoutRecordCollectionView.dataSource = self
+        rootView.workoutRecordCollectionView.delegate = self
+    }
+}
 
 extension RecordEditViewController: UICollectionViewDataSource {
-    
     func collectionView(
         _ collectionView: UICollectionView,
         numberOfItemsInSection section: Int

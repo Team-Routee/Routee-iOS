@@ -54,14 +54,13 @@ final class RecordEditView: BaseUIView {
         }
         
         emptyDataImageView.do {
-            $0.image = UIImage(named: "graphic_empty_data_xl")
+            $0.image = .graphicEmptyDataXl
         }
         
         emptyDataLabel.do {
             $0.text = "기록이 없어요."
             $0.font = .label_m_16
             $0.textColor = .grey300
-            $0.numberOfLines = 0
         }
         
         workoutRecordCollectionView.do {
@@ -99,7 +98,7 @@ final class RecordEditView: BaseUIView {
         }
         
         emptyDataStackView.snp.makeConstraints {
-            $0.centerX.centerY.equalToSuperview()
+            $0.center.equalToSuperview()
         }
         
         emptyDataImageView.snp.makeConstraints {

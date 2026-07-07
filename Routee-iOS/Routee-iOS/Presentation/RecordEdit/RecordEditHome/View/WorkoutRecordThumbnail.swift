@@ -17,13 +17,10 @@ final class WorkoutRecordThumbnail: BaseUIView {
     private let backgroundContainerView = UIView()
     private let backgroundPhotoView = UIImageView()
     private let borderOverlayView = UIView()
-    
     private let emptyIconImageView = UIImageView()
-    
     private let firstPhotoView = UIImageView()
     private let secondPhotoView = UIImageView()
     private let thirdPhotoView = UIImageView()
-    
     private let editButton = UIButton()
     
     private lazy var foregroundPhotoViews = [
@@ -76,11 +73,11 @@ final class WorkoutRecordThumbnail: BaseUIView {
         }
         
         secondPhotoView.do {
-            $0.transform = CGAffineTransform(rotationAngle: 2 * .pi / 180)
+            $0.transform = CGAffineTransform(rotationAngle: 5 * .pi / 180)
         }
         
         thirdPhotoView.do {
-            $0.transform = CGAffineTransform(rotationAngle: 4 * .pi / 180)
+            $0.transform = CGAffineTransform(rotationAngle: 8 * .pi / 180)
         }
         
         editButton.do {
@@ -102,8 +99,6 @@ final class WorkoutRecordThumbnail: BaseUIView {
             thirdPhotoView,
             editButton
         )
-        
-        configure(imageNames: [])
     }
     
     override func setLayout() {
