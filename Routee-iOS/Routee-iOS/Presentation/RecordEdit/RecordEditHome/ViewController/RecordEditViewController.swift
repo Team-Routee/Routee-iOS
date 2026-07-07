@@ -51,6 +51,7 @@ final class RecordEditViewController: BaseUIViewController, UICollectionViewDele
     
     private func updateRecords(for month: Date) {
         records = allRecords.filter { $0.date.isSameMonth(as: month) }
+        rootView.updateView(isEmpty: records.isEmpty)
         rootView.workoutRecordCollectionView.reloadData()
     }
 }
