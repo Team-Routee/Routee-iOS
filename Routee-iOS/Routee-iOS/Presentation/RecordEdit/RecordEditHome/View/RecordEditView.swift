@@ -12,6 +12,12 @@ import Then
 
 final class RecordEditView: BaseUIView {
     
+    // MARK: - Metric
+    
+    private enum Metric {
+        static let bottomSpacingAboveTabBar: CGFloat = 20
+    }
+    
     // MARK: - UI Properties
     
     private let titleLabel = UILabel()
@@ -68,7 +74,6 @@ final class RecordEditView: BaseUIView {
             $0.backgroundColor = .clear
             $0.showsVerticalScrollIndicator = false
             $0.contentInsetAdjustmentBehavior = .never
-            $0.contentInset.bottom = TabBarViewController.customTabBarHeight + 40
         }
     }
     
@@ -104,8 +109,19 @@ final class RecordEditView: BaseUIView {
             $0.top.equalTo(monthSelector.snp.bottom).offset(20)
             $0.centerX.equalToSuperview()
             $0.width.equalTo(327)
-            $0.bottom.equalTo(safeAreaLayoutGuide)
+            $0.bottom.equalToSuperview()
         }
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        let bottomInset = safeAreaInsets.bottom
+        + TabBarViewController.customTabBarHeight
+        + Metric.bottomSpacingAboveTabBar
+        
+        workoutRecordCollectionView.contentInset.bottom = bottomInset
+        workoutRecordCollectionView.verticalScrollIndicatorInsets.bottom = bottomInset
     }
     
     // MARK: - Private Methods
