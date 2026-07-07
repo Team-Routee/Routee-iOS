@@ -21,8 +21,16 @@ extension Date {
     }
     
     static func date(_ year: Int, _ month: Int, _ day: Int) -> Date {
-        Calendar.current.date(
-            from: DateComponents(year: year, month: month, day: day)
-        )!
+        guard let date = Calendar.current.date(
+            from: DateComponents(
+                year: year,
+                month: month,
+                day: day
+            )
+        ) else {
+            return Date()
+        }
+        
+        return date
     }
 }
