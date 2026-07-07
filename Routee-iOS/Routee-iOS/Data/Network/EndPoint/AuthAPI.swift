@@ -11,12 +11,13 @@ import Alamofire
 
 enum AuthAPI {
     case login(header: HeaderType, requestDTO: LoginRequestDTO)
+    case reissue(header: HeaderType, requestDTO: TokenReissueRequestDTO)
 }
 
 extension AuthAPI: EndPoint {
     var basePath: String {
         switch self {
-        case .login:
+        case .login, .reissue:
             "/api/v1/auth"
         }
     }
@@ -25,26 +26,28 @@ extension AuthAPI: EndPoint {
         switch self {
         case .login:
             return "/login"
+        case .reissue:
+            return "/reissue"
         }
     }
     
     var method: Alamofire.HTTPMethod {
         switch self {
-        case .login:
+        case .login, .reissue:
             return .post
         }
     }
     
     var headers: HeaderType {
         switch self {
-        case .login(let header, _):
+        case .login(let header, _), .reissue(let header, _):
             return header
         }
     }
     
     var parameterEncoding: any Alamofire.ParameterEncoding {
         switch self {
-        case .login:
+        case .login, .reissue:
             return JSONEncoding.default
         }
     }
@@ -56,6 +59,8 @@ extension AuthAPI: EndPoint {
     var bodyParameters: Alamofire.Parameters? {
         switch self {
         case .login(_, let dto):
+            return dto.asParameters()
+        case .reissue(_, let dto):
             return dto.asParameters()
         }
     }
