@@ -130,6 +130,10 @@ final class RecordEditView: BaseUIView {
         workoutRecordCollectionView.isHidden = isEmpty
         emptyDataStackView.isHidden = !isEmpty
     }
+    
+    func scrollToTop() {
+        workoutRecordCollectionView.setContentOffset(.zero, animated: false)
+    }
 
     func setMonthChangedHandler(_ handler: @escaping (Date) -> Void) {
         monthSelector.onMonthChanged = handler

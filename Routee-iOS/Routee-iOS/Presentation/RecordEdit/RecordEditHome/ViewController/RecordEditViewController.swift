@@ -55,6 +55,7 @@ final class RecordEditViewController: BaseUIViewController, UICollectionViewDele
         records = allRecords.filter { $0.date.isSameMonth(as: month) }
         rootView.updateView(isEmpty: records.isEmpty)
         rootView.workoutRecordCollectionView.reloadData()
+        rootView.scrollToTop()
     }
 }
 
