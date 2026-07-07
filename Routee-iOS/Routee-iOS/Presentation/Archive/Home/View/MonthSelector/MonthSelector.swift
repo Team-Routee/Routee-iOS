@@ -42,7 +42,7 @@ final class MonthSelector: BaseUIView {
         stackView.do {
             $0.axis = .horizontal
             $0.alignment = .center
-            $0.spacing = 24
+            $0.spacing = 6
         }
 
         previousButton.do {
@@ -51,7 +51,7 @@ final class MonthSelector: BaseUIView {
 
         monthLabel.do {
             $0.textColor = .static_white
-            $0.font = .title_sb_20
+            $0.font = .body_r_16
             $0.textAlignment = .center
         }
 
@@ -67,24 +67,30 @@ final class MonthSelector: BaseUIView {
 
     override func setLayout() {
         stackView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.centerX.centerY.equalToSuperview()
         }
 
         previousButton.snp.makeConstraints {
-            $0.size.equalTo(32)
+            $0.size.equalTo(28)
         }
 
         nextButton.snp.makeConstraints {
-            $0.size.equalTo(32)
+            $0.size.equalTo(28)
         }
 
         monthLabel.snp.makeConstraints {
-            $0.width.greaterThanOrEqualTo(120)
+            $0.height.equalTo(22)
         }
     }
 
-    func configure(title: String) {
+    func configure(
+        title: String,
+        canMoveToPreviousMonth: Bool,
+        canMoveToNextMonth: Bool
+    ) {
         monthLabel.text = title
+        updateButton(previousButton, isEnabled: canMoveToPreviousMonth)
+        updateButton(nextButton, isEnabled: canMoveToNextMonth)
     }
 
     private func setAddTarget() {
@@ -109,5 +115,10 @@ final class MonthSelector: BaseUIView {
     @objc
     private func nextButtonDidTap() {
         onNextTap?()
+    }
+
+    private func updateButton(_ button: UIButton, isEnabled: Bool) {
+        button.isEnabled = isEnabled
+        button.alpha = isEnabled ? 1.0 : 0.3
     }
 }
