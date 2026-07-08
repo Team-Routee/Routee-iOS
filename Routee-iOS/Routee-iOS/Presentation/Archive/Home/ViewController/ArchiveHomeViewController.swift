@@ -83,13 +83,8 @@ final class ArchiveHomeViewController: BaseUIViewController {
         case .none:
             return
 
-        case .background:
+        case .background, .badge:
             navigationController?.pushViewController(SampleViewController(), animated: true)
-
-        case .badge:
-            let listViewController = ArchiveListViewController()
-            listViewController.modalPresentationStyle = .pageSheet
-            present(listViewController, animated: true)
         }
     }
 }
