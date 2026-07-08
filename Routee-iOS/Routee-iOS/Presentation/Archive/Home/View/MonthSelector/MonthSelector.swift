@@ -46,7 +46,7 @@ final class MonthSelector: BaseUIView {
         }
 
         previousButton.do {
-            $0.setImage(.icChevronLeftSmWhite, for: .normal)
+            configureButton($0, normalImage: .icChevronLeftSmWhite, disabledImage: .icChevronLeftSmGrey)
         }
 
         monthLabel.do {
@@ -56,7 +56,7 @@ final class MonthSelector: BaseUIView {
         }
 
         nextButton.do {
-            $0.setImage(.icChevronLeftSmWhite.withHorizontallyFlippedOrientation(), for: .normal)
+            configureButton($0, normalImage: .icChevronRightSmWhite, disabledImage: .icChevronRightSmGrey)
         }
     }
 
@@ -119,6 +119,18 @@ final class MonthSelector: BaseUIView {
 
     private func updateButton(_ button: UIButton, isEnabled: Bool) {
         button.isEnabled = isEnabled
-        button.alpha = isEnabled ? 1.0 : 0.3
+    }
+
+    private func configureButton(_ button: UIButton, normalImage: UIImage, disabledImage: UIImage) {
+        var configuration = UIButton.Configuration.plain()
+        configuration.contentInsets = .zero
+        configuration.image = normalImage
+        button.configuration = configuration
+
+        button.configurationUpdateHandler = { button in
+            var updatedConfiguration = button.configuration
+            updatedConfiguration?.image = button.isEnabled ? normalImage : disabledImage
+            button.configuration = updatedConfiguration
+        }
     }
 }
