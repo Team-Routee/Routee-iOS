@@ -1,5 +1,5 @@
 //
-//  ArchiveDummyData.swift
+//  ArchiveHomeDummyData.swift
 //  Routee-iOS
 //
 //  Created by Codex on 7/8/26.
@@ -14,7 +14,7 @@ struct ArchiveCalendarDummyModel {
     let coverImageName: String?
 }
 
-enum ArchiveDummyData {
+enum ArchiveHomeDummyData {
 
     private enum Metric {
         static let mountainMapItemCount = 33
