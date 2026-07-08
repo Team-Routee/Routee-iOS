@@ -30,6 +30,12 @@ final class WorkoutViewController: UIViewController {
         view = workoutView
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        navigationController?.setNavigationBarHidden(true, animated: false)
+    }
+    
     // MARK: - Private Methods
     
     private func requestCurrentLocationAuthorization() {
@@ -46,11 +52,15 @@ final class WorkoutViewController: UIViewController {
     }
     
     private func startShowingCurrentLocation() {
+        workoutView.mapView.locationOverlay.hidden = false
         workoutView.mapView.positionMode = .direction
+        workoutView.applyLocationOverlayStyle()
         locationManager.startUpdatingLocation()
+        locationManager.requestLocation()
     }
     
     private func stopShowingCurrentLocation() {
+        workoutView.mapView.locationOverlay.hidden = true
         workoutView.mapView.positionMode = .disabled
         locationManager.stopUpdatingLocation()
     }
@@ -62,6 +72,7 @@ final class WorkoutViewController: UIViewController {
         )
         
         workoutView.mapView.locationOverlay.location = currentLatLng
+        workoutView.applyLocationOverlayStyle()
         
         if location.course >= 0 {
             workoutView.mapView.locationOverlay.heading = location.course
