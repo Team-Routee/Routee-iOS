@@ -154,7 +154,7 @@ final class ProfileView: BaseUIView {
 
         profileImageView.image = UIImage(named: model.profileImageName) ?? .profileImgDefault
         nameLabel.text = userName
-        streakLabel.text = "\(streakNumber)일 연속"
+        streakLabel.text = "\(streakNumber)일째 루티와 함께하는 중"
         pointLabel.text = pointNumber
     }
 }
