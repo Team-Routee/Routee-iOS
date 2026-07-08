@@ -90,6 +90,7 @@ final class MountainMapView: BaseUIView {
         }
 
         stackView.snp.makeConstraints {
+            $0.top.equalTo(collectionView.snp.bottom).offset(10)
             $0.trailing.equalToSuperview().inset(20)
             $0.bottom.equalToSuperview().inset(10)
         }
