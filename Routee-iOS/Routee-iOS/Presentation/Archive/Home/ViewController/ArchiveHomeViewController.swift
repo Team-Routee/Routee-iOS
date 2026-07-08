@@ -21,7 +21,7 @@ final class ArchiveHomeViewController: BaseUIViewController {
 
     private let archiveHeaderView = ArchiveHeaderView()
     private let profileView = ProfileView()
-    private let monthSelector = MonthSelector()
+    private let monthSelector = ArchiveMonthSelector()
     private let mountainMapView = MountainMapView()
     private let calendarView = CalendarView()
 

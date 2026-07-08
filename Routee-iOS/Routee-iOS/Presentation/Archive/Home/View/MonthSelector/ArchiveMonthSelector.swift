@@ -1,5 +1,5 @@
 //
-//  MonthSelector
+//  ArchiveMonthSelector
 //  Routee-iOS
 //
 //  Created by 초긍정행운의포춘쿠키 on 7/7/26.
@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class MonthSelector: BaseUIView {
+final class ArchiveMonthSelector: BaseUIView {
 
     // MARK: - Properties
 
