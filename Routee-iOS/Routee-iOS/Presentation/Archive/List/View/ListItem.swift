@@ -1,5 +1,5 @@
 //
-//  ListItemView.swift
+//  ListItem.swift
 //  Routee-iOS
 //
 //  Created by Codex on 7/8/26.
@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class ListItemView: BaseUIView {
+final class ListItem: BaseUIView {
 
     private enum Metric {
         static let cardHeight: CGFloat = 66

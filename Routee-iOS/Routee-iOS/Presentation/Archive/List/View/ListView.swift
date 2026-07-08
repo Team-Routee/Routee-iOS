@@ -1,5 +1,5 @@
 //
-//  ArchiveListView.swift
+//  ListView.swift
 //  Routee-iOS
 //
 //  Created by 초긍정행운의포춘쿠키 on 7/7/26.
@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class ArchiveListView: BaseUIView {
+final class ListView: BaseUIView {
 
     private enum Metric {
         static let compactHeight: CGFloat = 247
@@ -96,7 +96,7 @@ final class ArchiveListView: BaseUIView {
         }
 
         model.items.forEach { item in
-            let itemView = ListItemView()
+            let itemView = ListItem()
             itemView.configure(with: item)
             stackView.addArrangedSubview(itemView)
         }

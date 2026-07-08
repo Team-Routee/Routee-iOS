@@ -1,5 +1,5 @@
 //
-//  CalendarView.swift
+//  Calendar.swift
 //  Routee-iOS
 //
 //  Created by 초긍정행운의포춘쿠키 on 7/8/26.
@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class CalendarView: BaseUIView {
+final class ArchiveCalendar: BaseUIView {
 
     // MARK: - Properties
 
@@ -122,7 +122,7 @@ final class CalendarView: BaseUIView {
 
 // MARK: - UICollectionViewDataSource
 
-extension CalendarView: UICollectionViewDataSource {
+extension ArchiveCalendar: UICollectionViewDataSource {
 
     func collectionView(
         _ collectionView: UICollectionView,
@@ -149,7 +149,7 @@ extension CalendarView: UICollectionViewDataSource {
 
 // MARK: - UICollectionViewDelegateFlowLayout
 
-extension CalendarView: UICollectionViewDelegateFlowLayout {
+extension ArchiveCalendar: UICollectionViewDelegateFlowLayout {
 
     func collectionView(
         _ collectionView: UICollectionView,

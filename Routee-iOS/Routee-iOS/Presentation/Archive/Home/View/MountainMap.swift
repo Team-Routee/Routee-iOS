@@ -1,5 +1,5 @@
 //
-//  MountainMapView.swift
+//  MountainMap.swift
 //  Routee-iOS
 //
 //  Created by 초긍정행운의포춘쿠키 on 7/7/26.
@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class MountainMapView: BaseUIView {
+final class MountainMap: BaseUIView {
 
     private enum Metric {
         static let itemCount = 33
@@ -111,7 +111,7 @@ final class MountainMapView: BaseUIView {
     }
 }
 
-extension MountainMapView: UICollectionViewDataSource {
+extension MountainMap: UICollectionViewDataSource {
 
     func collectionView(
         _ collectionView: UICollectionView,

@@ -1,5 +1,5 @@
 //
-//  ProfileView.swift
+//  Profile.swift
 //  Routee-iOS
 //
 //  Created by 초긍정행운의포춘쿠키 on 7/7/26.
@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class ProfileView: BaseUIView {
+final class Profile: BaseUIView {
     
     // MARK: - Properties
 
