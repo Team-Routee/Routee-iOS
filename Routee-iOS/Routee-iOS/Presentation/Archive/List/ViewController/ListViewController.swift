@@ -1,5 +1,5 @@
 //
-//  ArchiveListViewController.swift
+//  ListViewController.swift
 //  Routee-iOS
 //
 //  Created by 초긍정행운의포춘쿠키 on 7/7/26.
@@ -12,7 +12,7 @@ import Then
 
 final class ArchiveListViewController: BaseUIViewController {
 
-    private let rootView = ArchiveListView()
+    private let rootView = ListView()
     private let model: ListModel
 
     init(model: ListModel = ArchiveListDummyData.defaultModel) {
@@ -40,11 +40,11 @@ final class ArchiveListViewController: BaseUIViewController {
     }
 
     private func configureSheet() {
-        preferredContentSize = CGSize(width: 0, height: ArchiveListView.modalHeight(for: model.items.count))
+        preferredContentSize = CGSize(width: 0, height: ListView.modalHeight(for: model.items.count))
 
         guard let sheet = sheetPresentationController else { return }
 
-        let targetHeight = ArchiveListView.modalHeight(for: model.items.count)
+        let targetHeight = ListView.modalHeight(for: model.items.count)
         sheet.detents = [
             .custom { _ in targetHeight }
         ]
