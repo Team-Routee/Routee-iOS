@@ -49,6 +49,8 @@ final class WorkoutView: BaseUIView {
         routeeMapView.mapView
     }
     
+    // MARK: - UI Setting
+    
     override func setUI() {
         addSubview(routeeMapView)
         
@@ -119,14 +121,6 @@ final class WorkoutView: BaseUIView {
         }
     }
     
-    private func updateSubviewsConstraints() {
-        [moveToUserlocationButton].forEach { view in
-            view.snp.updateConstraints { make in
-                make.bottom.equalToSuperview().inset(98 + bottomPadding)
-            }
-        }
-    }
-    
     override func setLayout() {
         routeeMapView.snp.makeConstraints {
             $0.edges.equalToSuperview()
@@ -159,6 +153,14 @@ final class WorkoutView: BaseUIView {
         recordButton.snp.makeConstraints {
             $0.centerX.equalToSuperview()
             $0.bottom.equalTo(routeeMapView.safeAreaLayoutGuide).inset(78)
+        }
+    }
+    
+    private func updateSubviewsConstraints() {
+        [moveToUserlocationButton].forEach { view in
+            view.snp.updateConstraints { make in
+                make.bottom.equalToSuperview().inset(98 + bottomPadding)
+            }
         }
     }
     
