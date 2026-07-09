@@ -141,29 +141,13 @@ final class RecordEditTabBar: BaseUIView {
     // MARK: - Private Methods
 
     private func setActions() {
-        backgroundItem.addTarget(
-            self,
-            action: #selector(backgroundButtonTapped),
-            for: .touchUpInside
-        )
-        colorItem.addTarget(
-            self,
-            action: #selector(colorButtonTapped),
-            for: .touchUpInside
-        )
-        stickerItem.addTarget(
-            self,
-            action: #selector(stickerButtonTapped),
-            for: .touchUpInside
-        )
+        backgroundItem.addTarget(self, action: #selector(backgroundButtonTapped), for: .touchUpInside)
+        colorItem.addTarget(self, action: #selector(colorButtonTapped), for: .touchUpInside)
+        stickerItem.addTarget(self, action: #selector(stickerButtonTapped), for: .touchUpInside)
 
-        colorPalette.onColorSelected = { [weak self] color in
-            self?.onColorSelected?(color)
-        }
+        colorPalette.onColorSelected = { [weak self] color in self?.onColorSelected?(color) }
 
-        stickerSelector.onStickerSelected = { [weak self] sticker in
-            self?.onStickerSelected?(sticker)
-        }
+        stickerSelector.onStickerSelected = { [weak self] sticker in self?.onStickerSelected?(sticker) }
     }
 
     private func selectItem(_ selectedItem: RecordEditTabBarItem) {
