@@ -10,7 +10,7 @@ import UIKit
 
 import NMapsMap
 
-final class WorkoutViewController: UIViewController {
+final class WorkoutViewController: BaseUIViewController {
     
     // MARK: - Properties
     
@@ -19,6 +19,8 @@ final class WorkoutViewController: UIViewController {
     private let reverseGeocodingRepository: ReverseGeocodingRepository
     private var lastReverseGeocodingLocation: CLLocation?
     private var initialLocation = false
+    private var isRecordingRoute = false
+    private var routeLocations: [NMGLatLng] = []
     
     init(reverseGeocodingRepository: ReverseGeocodingRepository = DefaultReverseGeocodingRepository()) {
         self.reverseGeocodingRepository = reverseGeocodingRepository
@@ -40,12 +42,6 @@ final class WorkoutViewController: UIViewController {
     
     override func loadView() {
         view = workoutView
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        navigationController?.setNavigationBarHidden(true, animated: false)
     }
     
     // MARK: - Private Methods
@@ -85,6 +81,7 @@ final class WorkoutViewController: UIViewController {
         
         workoutView.mapView.locationOverlay.location = currentLatLng
         workoutView.applyLocationOverlayStyle()
+        appendRouteLocationIfNeeded(currentLatLng)
         updateCurrentAddressIfNeeded(location)
         
         if location.course >= 0 {
@@ -97,6 +94,13 @@ final class WorkoutViewController: UIViewController {
         let cameraUpdate = NMFCameraUpdate(scrollTo: currentLatLng, zoomTo: 16)
         cameraUpdate.animation = .easeIn
         workoutView.mapView.moveCamera(cameraUpdate)
+    }
+    
+    private func appendRouteLocationIfNeeded(_ location: NMGLatLng) {
+        guard isRecordingRoute else { return }
+        
+        routeLocations.append(location)
+        workoutView.updateRoutePath(routeLocations)
     }
     
     private func updateCurrentAddressIfNeeded(_ location: CLLocation) {
@@ -125,36 +129,68 @@ final class WorkoutViewController: UIViewController {
         }
     }
     
-        func moveToUserLocation() -> Self {
-            guard let userLatLng = getUserLocation() else { return self }
-            
-            let cameraUpdate = NMFCameraUpdate(scrollTo: userLatLng)
-            
-            DispatchQueue.main.async { [weak self] in
-                cameraUpdate.animation = .easeIn
-                self?.workoutView.mapView.moveCamera(cameraUpdate)
-            }
-            return self
+    private func moveToUserLocation() {
+        guard let userLatLng = getUserLocation() else {
+            locationManager.requestLocation()
+            return
         }
         
-        func getUserLocation() -> NMGLatLng? {
-            guard let userLocation = locationManager.location?.coordinate else { return nil }
-            
-            return NMGLatLng(
-                lat: userLocation.latitude,
-                lng: userLocation.longitude
-            )
-        }
+        moveToLocation(userLatLng)
+    }
+    
+    private func getUserLocation() -> NMGLatLng? {
+        guard let userLocation = locationManager.location?.coordinate else { return nil }
         
-        @discardableResult
-        func moveToLocation(location: NMGLatLng) -> Self {
-            let cameraUpdate = NMFCameraUpdate(scrollTo: location)
-            DispatchQueue.main.async { [weak self] in
-                cameraUpdate.animation = .easeIn
-                self?.workoutView.mapView.moveCamera(cameraUpdate)
-            }
-            return self
+        return NMGLatLng(
+            lat: userLocation.latitude,
+            lng: userLocation.longitude
+        )
+    }
+    
+    private func moveToLocation(_ location: NMGLatLng) {
+        let cameraUpdate = NMFCameraUpdate(scrollTo: location)
+        cameraUpdate.animation = .easeIn
+        workoutView.mapView.moveCamera(cameraUpdate)
+    }
+    
+    // MARK: - Actions
+    
+    override func setAddTarget() {
+        workoutView.moveToUserlocationButton.addTarget(
+            self,
+            action: #selector(didTapMoveToUserLocationButton),
+            for: .touchUpInside
+        )
+        workoutView.recordButton.addTarget(self, action: #selector(recordButtonDidTap), for: .touchUpInside)
+    }
+    
+    @objc
+    private func didTapMoveToUserLocationButton() {
+        switch locationManager.authorizationStatus {
+        case .notDetermined:
+            locationManager.requestWhenInUseAuthorization()
+        case .authorizedAlways, .authorizedWhenInUse:
+            startShowingCurrentLocation()
+            moveToUserLocation()
+        case .denied, .restricted:
+            stopShowingCurrentLocation()
+        @unknown default:
+            stopShowingCurrentLocation()
         }
+    }
+    
+    @objc
+    private func recordButtonDidTap() {
+        isRecordingRoute = true
+        routeLocations.removeAll()
+        
+        if let userLocation = getUserLocation() {
+            routeLocations.append(userLocation)
+            workoutView.updateRoutePath(routeLocations)
+        } else {
+            locationManager.requestLocation()
+        }
+    }
 }
 
 // MARK: - CLLocationManagerDelegate
