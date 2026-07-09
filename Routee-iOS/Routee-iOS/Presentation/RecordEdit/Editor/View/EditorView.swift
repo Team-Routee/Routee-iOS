@@ -13,7 +13,8 @@ import Then
 final class EditorView: BaseUIView {
 
     // MARK: - UI Properties
-
+    
+    private let backgroundGradientView = RouteeEllipseBackground()
     let topNavigationBar = TopNavigationBar(rightTitle: "완료")
     private let backgroundImageView = UIImageView()
     private let dataInfo = RecordInfo()
@@ -36,6 +37,7 @@ final class EditorView: BaseUIView {
 
     override func setUI() {
         addSubviews(
+            backgroundGradientView,
             backgroundImageView,
             dataInfo,
             topNavigationBar,
@@ -46,6 +48,10 @@ final class EditorView: BaseUIView {
     }
 
     override func setLayout() {
+        backgroundGradientView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
         topNavigationBar.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide)
             $0.horizontalEdges.equalToSuperview()
