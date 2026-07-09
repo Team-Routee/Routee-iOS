@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class Profile: BaseUIView {
+final class ArchiveProfile: BaseUIView {
     
     // MARK: - Properties
 
@@ -31,19 +31,12 @@ final class Profile: BaseUIView {
     // MARK: - UI Properties
     
     private let profileImageView = UIImageView()
-    
     private let profileInfoView = UIView()
-    
     private let nameLabel = UILabel()
-    
     private let streakImage = UIImageView()
-    
     private let streakLabel = UILabel()
-    
     private let pointView = UIView()
-    
     private let pointImage = UIImageView()
-    
     private let pointLabel = UILabel()
     
     // MARK: - UI Setting
@@ -146,7 +139,7 @@ final class Profile: BaseUIView {
             $0.height.equalTo(28)
         }
     }
-    
+    // MARK: - public Methods
     func configure(with model: ProfileModel) {
         userName = model.userName
         streakNumber = "\(model.streakNumber)"
