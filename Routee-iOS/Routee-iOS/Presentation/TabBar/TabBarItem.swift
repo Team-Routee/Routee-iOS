@@ -98,6 +98,6 @@ final class TabBarItem: UIControl {
 
     private func updateAppearance() {
         imageView.image = isSelected ? selectedImage : normalImage
-        titleLabel.textColor = isSelected ? .staticWhite : .grey400
+        titleLabel.textColor = isSelected ? .static_white : .grey_400
     }
 }
