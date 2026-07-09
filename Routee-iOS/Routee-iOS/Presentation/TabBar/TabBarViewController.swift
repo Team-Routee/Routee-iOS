@@ -53,6 +53,8 @@ final class TabBarViewController: UITabBarController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
+        tabBar.isHidden = true
+        
         guard !didSetInitialSelection else { return }
         didSetInitialSelection = true
         
@@ -67,7 +69,10 @@ final class TabBarViewController: UITabBarController {
         let archive = UINavigationController(rootViewController: SampleViewController())
         let setting = UINavigationController(rootViewController: SampleViewController())
         
-        [workout, recordEdit, archive, setting].forEach { $0.navigationBar.isHidden = true }
+        [workout, recordEdit, archive, setting].forEach {
+            $0.delegate = self
+            $0.navigationBar.isHidden = true
+        }
         
         viewControllers = [
             workout,
@@ -186,12 +191,17 @@ final class TabBarViewController: UITabBarController {
         selectedIndex = index
         updateItemAppearance(selectedIndex: index)
         moveSelectionView(to: index, animated: animated)
+        updateCustomTabBarVisibility()
     }
     
     private func updateItemAppearance(selectedIndex: Int) {
         tabBarItems.enumerated().forEach { index, item in
             item.isSelected = index == selectedIndex
         }
+    }
+    
+    private func shouldHideCustomTabBar(for viewController: UIViewController?) -> Bool {
+        viewController is EditorViewController
     }
     
     private func moveSelectionView(to index: Int, animated: Bool) {
@@ -214,10 +224,30 @@ final class TabBarViewController: UITabBarController {
         }
     }
     
+    private func updateCustomTabBarVisibility() {
+        guard let navigationController = viewControllers?[selectedIndex] as? UINavigationController else {
+            return
+        }
+        
+        customTabBar.isHidden = shouldHideCustomTabBar(for: navigationController.topViewController)
+        tabBar.isHidden = true
+    }
+    
     // MARK: - Actions
     
     @objc
     private func tabDidTap(_ sender: TabBarItem) {
         updateSelection(index: sender.tag)
+    }
+}
+
+extension TabBarViewController: UINavigationControllerDelegate {
+    func navigationController(
+        _ navigationController: UINavigationController,
+        willShow viewController: UIViewController,
+        animated: Bool
+    ) {
+        customTabBar.isHidden = shouldHideCustomTabBar(for: viewController)
+        tabBar.isHidden = true
     }
 }
