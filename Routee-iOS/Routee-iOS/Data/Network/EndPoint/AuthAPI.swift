@@ -14,7 +14,7 @@ enum AuthAPI {
     case reissue(header: HeaderType, requestDTO: TokenReissueRequestDTO)
 }
 
-extension AuthAPI: EndPoint {
+extension AuthAPI: RouteeEndPoint {
     var basePath: String {
         switch self {
         case .login, .reissue:
