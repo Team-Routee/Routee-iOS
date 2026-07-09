@@ -12,6 +12,10 @@ import Then
 
 final class WorkoutRecordThumbnail: BaseUIView {
     
+    // MARK: - Property
+    
+    var editButtonAction: (() -> Void)?
+    
     // MARK: - UI Properties
     
     private let backgroundContainerView = UIView()
@@ -84,6 +88,7 @@ final class WorkoutRecordThumbnail: BaseUIView {
             $0.setImage(UIImage(named: "ic_edit_sm_fill_mint"), for: .normal)
             $0.backgroundColor = .dimSecondary
             $0.layer.cornerRadius = 12
+            $0.addTarget(self, action: #selector(didTapEditButton), for: .touchUpInside)
         }
     }
     
@@ -173,5 +178,12 @@ final class WorkoutRecordThumbnail: BaseUIView {
             imageView.image = hasForegroundImage ? UIImage(named: imageNames[imageIndex]) : nil
             imageView.isHidden = !hasForegroundImage
         }
+    }
+    
+    // MARK: - Actions
+    
+    @objc
+    private func didTapEditButton() {
+        editButtonAction?()
     }
 }
