@@ -9,6 +9,9 @@ import Foundation
 
 enum ConfigKey: String {
     case baseURL = "BASE_URL"
+    case naverMapBaseURL = "NAVER_MAP_BASE_URL"
+    case naverMapClientID = "NAVER_MAP_CLIENT_ID"
+    case naverMapClientSecret = "NAVER_MAP_CLIENT_SECRET"
 }
 
 struct ConfigManager {
@@ -22,4 +25,7 @@ struct ConfigManager {
     }
     
     static var baseURL: String { toString(for: .baseURL) }
+    static var naverMapBaseURL: String { toString(for: .naverMapBaseURL) }
+    static var naverMapClientID: String { toString(for: .naverMapClientID) }
+    static var naverMapClientSecret: String { toString(for: .naverMapClientSecret) }
 }
