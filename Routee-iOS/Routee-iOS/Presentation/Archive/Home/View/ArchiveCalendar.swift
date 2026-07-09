@@ -14,9 +14,9 @@ final class ArchiveCalendar: BaseUIView {
 
     // MARK: - Properties
 
-    var onSelectDay: ((CalendarDayCellModel) -> Void)?
+    var onSelectDay: ((DayCellModel) -> Void)?
 
-    private var days: [CalendarDayCellModel] = []
+    private var days: [DayCellModel] = []
 
     private enum Metric {
         static let sectionHorizontalInset: CGFloat = 9
@@ -114,7 +114,7 @@ final class ArchiveCalendar: BaseUIView {
 
     // MARK: - Public Methods
 
-    func configure(days: [CalendarDayCellModel]) {
+    func configure(days: [DayCellModel]) {
         self.days = days
         collectionView.reloadData()
     }
@@ -122,17 +122,17 @@ final class ArchiveCalendar: BaseUIView {
     static func makeDays(
         year: Int,
         month: Int,
-        records: [ArchiveCalendarRecord]
-    ) -> [CalendarDayCellModel] {
+        records: [RecordModel]
+    ) -> [DayCellModel] {
         let recordsByDay = Dictionary(
-            uniqueKeysWithValues: records.compactMap { record -> (Int, ArchiveCalendarRecord)? in
+            uniqueKeysWithValues: records.compactMap { record -> (Int, RecordModel)? in
                 guard let dayValue = day(from: record.activityDate) else { return nil }
                 return (dayValue, record)
             }
         )
 
         var days = Array(
-            repeating: CalendarDayCellModel(
+            repeating: DayCellModel(
                 content: .empty,
                 recordState: .none,
                 coverImageName: nil,
@@ -144,7 +144,7 @@ final class ArchiveCalendar: BaseUIView {
         for dayValue in 1...numberOfDays(year: year, month: month) {
             let record = recordsByDay[dayValue]
             days.append(
-                CalendarDayCellModel(
+                DayCellModel(
                     content: .day(dayValue),
                     recordState: .init(activityCount: record?.activityCount ?? 0),
                     coverImageName: record?.coverImageName,

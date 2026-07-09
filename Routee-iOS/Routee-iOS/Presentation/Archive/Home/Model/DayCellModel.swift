@@ -1,5 +1,5 @@
 //
-//  calendarModel.swift
+//  DayCellModel.swift
 //  Routee-iOS
 //
 //  Created by 초긍정행운의포춘쿠키 on 7/6/26.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-struct CalendarDayItem {
+struct DayCellModel {
 
     enum Content {
         case empty
@@ -26,7 +26,7 @@ struct CalendarDayItem {
     let activityDate: String?
 }
 
-extension CalendarDayItem.RecordState {
+extension DayCellModel.RecordState {
 
     init(activityCount: Int) {
         if activityCount == 0 {

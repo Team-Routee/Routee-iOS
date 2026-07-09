@@ -19,7 +19,7 @@ final class ArchiveMonthSelector: BaseUIView {
 
     // MARK: - UI Properties
 
-    private let stackView = UIStackView()
+    private let selectorStackView = UIStackView()
     private let previousButton = UIButton(type: .custom)
     private let monthLabel = UILabel()
     private let nextButton = UIButton(type: .custom)
@@ -39,7 +39,7 @@ final class ArchiveMonthSelector: BaseUIView {
     // MARK: - UI Setting
 
     override func setStyle() {
-        stackView.do {
+        selectorStackView.do {
             $0.axis = .horizontal
             $0.alignment = .center
             $0.spacing = 6
@@ -61,12 +61,12 @@ final class ArchiveMonthSelector: BaseUIView {
     }
 
     override func setUI() {
-        addSubview(stackView)
-        stackView.addArrangedSubviews(previousButton, monthLabel, nextButton)
+        addSubview(selectorStackView)
+        selectorStackView.addArrangedSubviews(previousButton, monthLabel, nextButton)
     }
 
     override func setLayout() {
-        stackView.snp.makeConstraints {
+        selectorStackView.snp.makeConstraints {
             $0.centerX.centerY.equalToSuperview()
         }
 
@@ -82,7 +82,9 @@ final class ArchiveMonthSelector: BaseUIView {
             $0.height.equalTo(22)
         }
     }
-
+    
+    // MARK: - Public Methods
+    
     func configure(
         title: String,
         canMoveToPreviousMonth: Bool,
@@ -92,7 +94,9 @@ final class ArchiveMonthSelector: BaseUIView {
         updateButton(previousButton, isEnabled: canMoveToPreviousMonth)
         updateButton(nextButton, isEnabled: canMoveToNextMonth)
     }
-
+    
+    // MARK: - Private Methods
+    
     private func setAddTarget() {
         previousButton.addTarget(
             self,

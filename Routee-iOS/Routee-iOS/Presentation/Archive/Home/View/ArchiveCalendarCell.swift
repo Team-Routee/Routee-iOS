@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class CalendarCell: UICollectionViewCell {
+final class ArchiveCalendarCell: UICollectionViewCell {
 
     // MARK: - Properties
 
@@ -102,7 +102,7 @@ final class CalendarCell: UICollectionViewCell {
 
     // MARK: - Public Methods
 
-    func configure(with date: CalendarModel) {
+    func configure(with date: DayCellModel) {
         resetCell()
 
         switch date.content {

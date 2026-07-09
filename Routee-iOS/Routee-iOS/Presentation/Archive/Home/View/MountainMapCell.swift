@@ -12,10 +12,16 @@ import Then
 
 final class MountainMapCell: UICollectionViewCell {
 
+    // MARK: - Properties
+    
     static let reuseIdentifier = "MountainMapCell"
 
-    private let imageView = UIImageView()
+    // MARK: - UI Properties
+    
+    private let mountainMapItem = UIImageView()
 
+    // MARK: - Initializer
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
 
@@ -27,25 +33,30 @@ final class MountainMapCell: UICollectionViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
-    func configure(level: Int) {
-        let clampedLevel = min(max(level, 0), 4)
-        imageView.image = UIImage(named: "activityLevel\(clampedLevel)")
-    }
-
+    
+    // MARK: - UI Setting
+    
     private func setStyle() {
-        imageView.do {
+        mountainMapItem.do {
             $0.contentMode = .scaleAspectFit
         }
     }
 
     private func setUI() {
-        contentView.addSubview(imageView)
+        contentView.addSubview(mountainMapItem)
     }
 
     private func setLayout() {
-        imageView.snp.makeConstraints {
+        mountainMapItem.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
     }
+    
+    // MARK: - Public Methods
+    
+    func configure(level: Int) {
+        let clampedLevel = min(max(level, 0), 4)
+        mountainMapItem.image = UIImage(named: "activityLevel\(clampedLevel)")
+    }
+
 }

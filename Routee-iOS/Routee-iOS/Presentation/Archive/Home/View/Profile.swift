@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class ArchiveProfile: BaseUIView {
+final class Profile: BaseUIView {
     
     // MARK: - Properties
 
