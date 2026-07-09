@@ -38,6 +38,8 @@ final class WorkoutView: BaseUIView {
     
     var mapView: NMFMapView { routeeMapView.mapView }
     
+    // MARK: - UI Setting
+    
     override func setUI() {
         addSubview(routeeMapView)
         
@@ -50,10 +52,7 @@ final class WorkoutView: BaseUIView {
         
         routeeMapView.layer.addSublayer(gradiantHeaderLayer)
         
-        currentLocationStackView.addArrangedSubviews(
-            currentLocationImage,
-            currentLocationLabel
-        )
+        currentLocationStackView.addArrangedSubviews(currentLocationImage, currentLocationLabel)
     }
     
     override func setStyle() {
@@ -132,6 +131,10 @@ final class WorkoutView: BaseUIView {
             $0.height.equalTo(32)
         }
         
+        currentLocationImage.snp.makeConstraints {
+            $0.size.equalTo(24)
+        }
+        
         moveToUserlocationButton.snp.makeConstraints {
             $0.trailing.equalTo(recordButton)
             $0.bottom.equalTo(recordButton.snp.top).offset(-12)
@@ -141,6 +144,14 @@ final class WorkoutView: BaseUIView {
         recordButton.snp.makeConstraints {
             $0.centerX.equalToSuperview()
             $0.bottom.equalTo(routeeMapView.safeAreaLayoutGuide).inset(78)
+        }
+    }
+        
+    private func updateSubviewsConstraints() {
+        [moveToUserlocationButton].forEach { view in
+            view.snp.updateConstraints { make in
+                make.bottom.equalToSuperview().inset(98 + bottomPadding)
+            }
         }
     }
     
@@ -175,6 +186,13 @@ final class WorkoutView: BaseUIView {
         }
     }
     
+    // MARK: - Actions
+    
+    @objc
+    func locationButtonDidTap() {
+        mapView.positionMode = .direction
+        applyLocationOverlayStyle()
+    }
     func updateRoutePath(_ locations: [NMGLatLng]) {
         guard locations.count >= 2 else {
             pathOverlay.mapView = nil

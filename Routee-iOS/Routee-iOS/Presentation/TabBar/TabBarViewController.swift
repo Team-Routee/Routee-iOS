@@ -118,7 +118,7 @@ final class TabBarViewController: UITabBarController {
     private func setStyle() {
         customTabBar.do {
             $0.backgroundColor = .grey900
-            $0.layer.cornerRadius = .r32
+            $0.layer.cornerRadius = 31
             $0.layer.masksToBounds = true
         }
         

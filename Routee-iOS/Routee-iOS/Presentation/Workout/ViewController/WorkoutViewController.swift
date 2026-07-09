@@ -15,15 +15,14 @@ final class WorkoutViewController: BaseUIViewController {
     // MARK: - Properties
     
     private let workoutView = WorkoutView()
+    private let viewModel: WorkoutViewModel
     private let locationManager = CLLocationManager()
-    private let reverseGeocodingRepository: ReverseGeocodingRepository
-    private var lastReverseGeocodingLocation: CLLocation?
     private var initialLocation = false
     private var isRecordingRoute = false
     private var routeLocations: [NMGLatLng] = []
     
-    init(reverseGeocodingRepository: ReverseGeocodingRepository = DefaultReverseGeocodingRepository()) {
-        self.reverseGeocodingRepository = reverseGeocodingRepository
+    init(viewModel: WorkoutViewModel = WorkoutViewModel()) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -103,7 +102,7 @@ final class WorkoutViewController: BaseUIViewController {
         workoutView.updateRoutePath(routeLocations)
     }
     
-    private func updateCurrentAddressIfNeeded(_ location: CLLocation) {
+    private func updateCurrentAddress(_ location: CLLocation) {
         if let lastReverseGeocodingLocation,
            location.distance(from: lastReverseGeocodingLocation) < 50 {
             return
@@ -115,10 +114,9 @@ final class WorkoutViewController: BaseUIViewController {
             guard let self else { return }
             
             do {
-                let address = try await reverseGeocodingRepository.roadAddress(
-                    latitude: location.coordinate.latitude,
-                    longitude: location.coordinate.longitude
-                )
+                guard let address = try await viewModel.currentAddress(for: location) else {
+                    return
+                }
                 
                 await MainActor.run {
                     self.workoutView.updateCurrentLocationAddress(address)
@@ -129,16 +127,19 @@ final class WorkoutViewController: BaseUIViewController {
         }
     }
     
-    private func moveToUserLocation() {
-        guard let userLatLng = getUserLocation() else {
-            locationManager.requestLocation()
-            return
-        }
+    func moveToUserLocation() -> Self {
+        guard let userLatLng = getUserLocation() else { return self }
         
-        moveToLocation(userLatLng)
+        let cameraUpdate = NMFCameraUpdate(scrollTo: userLatLng)
+        
+        DispatchQueue.main.async { [weak self] in
+            cameraUpdate.animation = .easeIn
+            self?.workoutView.mapView.moveCamera(cameraUpdate)
+        }
+        return self
     }
     
-    private func getUserLocation() -> NMGLatLng? {
+    func getUserLocation() -> NMGLatLng? {
         guard let userLocation = locationManager.location?.coordinate else { return nil }
         
         return NMGLatLng(
@@ -147,49 +148,14 @@ final class WorkoutViewController: BaseUIViewController {
         )
     }
     
-    private func moveToLocation(_ location: NMGLatLng) {
+    @discardableResult
+    func moveToLocation(location: NMGLatLng) -> Self {
         let cameraUpdate = NMFCameraUpdate(scrollTo: location)
-        cameraUpdate.animation = .easeIn
-        workoutView.mapView.moveCamera(cameraUpdate)
-    }
-    
-    // MARK: - Actions
-    
-    override func setAddTarget() {
-        workoutView.moveToUserlocationButton.addTarget(
-            self,
-            action: #selector(didTapMoveToUserLocationButton),
-            for: .touchUpInside
-        )
-        workoutView.recordButton.addTarget(self, action: #selector(recordButtonDidTap), for: .touchUpInside)
-    }
-    
-    @objc
-    private func didTapMoveToUserLocationButton() {
-        switch locationManager.authorizationStatus {
-        case .notDetermined:
-            locationManager.requestWhenInUseAuthorization()
-        case .authorizedAlways, .authorizedWhenInUse:
-            startShowingCurrentLocation()
-            moveToUserLocation()
-        case .denied, .restricted:
-            stopShowingCurrentLocation()
-        @unknown default:
-            stopShowingCurrentLocation()
+        DispatchQueue.main.async { [weak self] in
+            cameraUpdate.animation = .easeIn
+            self?.workoutView.mapView.moveCamera(cameraUpdate)
         }
-    }
-    
-    @objc
-    private func recordButtonDidTap() {
-        isRecordingRoute = true
-        routeLocations.removeAll()
-        
-        if let userLocation = getUserLocation() {
-            routeLocations.append(userLocation)
-            workoutView.updateRoutePath(routeLocations)
-        } else {
-            locationManager.requestLocation()
-        }
+        return self
     }
 }
 
