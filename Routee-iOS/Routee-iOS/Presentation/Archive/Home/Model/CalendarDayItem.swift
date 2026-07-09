@@ -7,7 +7,7 @@
 
 import UIKit
 
-struct CalendarModel {
+struct CalendarDayItem {
 
     enum Content {
         case empty
@@ -26,7 +26,7 @@ struct CalendarModel {
     let activityDate: String?
 }
 
-extension CalendarModel.RecordState {
+extension CalendarDayItem.RecordState {
 
     init(activityCount: Int) {
         if activityCount == 0 {
