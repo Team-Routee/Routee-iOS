@@ -62,13 +62,14 @@ final class TopNavigationBar: BaseUIView {
         backButton.snp.makeConstraints {
             $0.leading.equalToSuperview().inset(4)
             $0.centerY.equalToSuperview()
-            $0.size.equalTo(42)
+            $0.size.equalTo(44)
         }
         
         rightButton.snp.makeConstraints {
             $0.trailing.equalToSuperview().inset(4)
             $0.centerY.equalToSuperview()
             $0.height.equalTo(42)
+            $0.width.equalTo(63)
         }
     }
     
