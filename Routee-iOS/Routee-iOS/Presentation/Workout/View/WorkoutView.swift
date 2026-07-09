@@ -155,7 +155,7 @@ final class WorkoutView: BaseUIView {
             $0.bottom.equalTo(routeeMapView.safeAreaLayoutGuide).inset(78)
         }
     }
-    
+        
     private func updateSubviewsConstraints() {
         [moveToUserlocationButton].forEach { view in
             view.snp.updateConstraints { make in
@@ -189,6 +189,8 @@ final class WorkoutView: BaseUIView {
             )
         }
     }
+    
+    // MARK: - Actions
     
     @objc
     func locationButtonDidTap() {
