@@ -30,12 +30,19 @@ final class ArchiveHomeViewController: BaseUIViewController {
     private func loadDummyData() {
         rootView.configureProfile(with: ArchiveHomeDummyData.profile)
         rootView.configureMonthSelector(
-            title: ArchiveHomeDummyData.monthTitle(year: year, month: month),
-            canMoveToPreviousMonth: ArchiveHomeDummyData.canMoveToPreviousMonth(year: year, month: month),
-            canMoveToNextMonth: ArchiveHomeDummyData.canMoveToNextMonth(year: year, month: month)
+            title: monthTitle(year: year, month: month),
+            canMoveToPreviousMonth: canMoveToPreviousMonth(year: year, month: month),
+            canMoveToNextMonth: canMoveToNextMonth(year: year, month: month)
         )
-        rootView.configureMountainMap(levels: ArchiveHomeDummyData.mountainLevels(year: year, month: month))
-        rootView.configureCalendar(days: ArchiveHomeDummyData.calendarDays(year: year, month: month))
+        rootView.configureMountainMap(durationMinutes: ArchiveHomeDummyData.dummyMountainDurationMinutes)
+        rootView.configureCalendar(
+            days: ArchiveCalendar.makeDays(
+                year: year,
+                month: month,
+                records: ArchiveHomeDummyData
+                    .dummyCalendarRecordsByMonth[monthKey(year: year, month: month)] ?? []
+            )
+        )
     }
 
     override func setAddTarget() {
@@ -53,7 +60,7 @@ final class ArchiveHomeViewController: BaseUIViewController {
     }
 
     private func moveToPreviousMonth() {
-        guard ArchiveHomeDummyData.canMoveToPreviousMonth(year: year, month: month) else { return }
+        guard canMoveToPreviousMonth(year: year, month: month) else { return }
 
         if month == 1 {
             year -= 1
@@ -66,7 +73,7 @@ final class ArchiveHomeViewController: BaseUIViewController {
     }
 
     private func moveToNextMonth() {
-        guard ArchiveHomeDummyData.canMoveToNextMonth(year: year, month: month) else { return }
+        guard canMoveToNextMonth(year: year, month: month) else { return }
 
         if month == 12 {
             year += 1
@@ -78,7 +85,7 @@ final class ArchiveHomeViewController: BaseUIViewController {
         loadDummyData()
     }
 
-    private func route(to day: CalendarModel) {
+    private func route(to day: DayCellModel) {
         switch day.recordState {
         case .none:
             return
@@ -86,5 +93,45 @@ final class ArchiveHomeViewController: BaseUIViewController {
         case .background, .badge:
             navigationController?.pushViewController(SampleViewController(), animated: true)
         }
+    }
+
+    private func monthTitle(year: Int, month: Int) -> String {
+        "\(year)년 \(month)월"
+    }
+
+    private func monthKey(year: Int, month: Int) -> String {
+        String(format: "%04d-%02d", year, month)
+    }
+
+    private func canMoveToPreviousMonth(year: Int, month: Int) -> Bool {
+        monthStart(year: year, month: month) > monthStart(from: ArchiveHomeDummyData.profile.joinedDate)
+    }
+
+    private func canMoveToNextMonth(year: Int, month: Int) -> Bool {
+        monthStart(year: year, month: month) < monthStart(from: Date())
+    }
+
+    private func monthStart(from joinedDate: String) -> Date {
+        let formatter = DateFormatter()
+        formatter.calendar = Foundation.Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+
+        let date = formatter.date(from: joinedDate) ?? Date()
+        return monthStart(from: date)
+    }
+
+    private func monthStart(from date: Date) -> Date {
+        let components = Foundation.Calendar.current.dateComponents([.year, .month], from: date)
+        return Foundation.Calendar.current.date(from: components) ?? date
+    }
+
+    private func monthStart(year: Int, month: Int) -> Date {
+        var components = DateComponents()
+        components.year = year
+        components.month = month
+        components.day = 1
+
+        return Foundation.Calendar.current.date(from: components) ?? Date()
     }
 }
