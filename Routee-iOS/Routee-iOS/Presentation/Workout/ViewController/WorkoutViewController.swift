@@ -15,13 +15,12 @@ final class WorkoutViewController: UIViewController {
     // MARK: - Properties
     
     private let workoutView = WorkoutView()
+    private let viewModel: WorkoutViewModel
     private let locationManager = CLLocationManager()
-    private let reverseGeocodingRepository: ReverseGeocodingRepository
-    private var lastReverseGeocodingLocation: CLLocation?
     private var initialLocation = false
     
-    init(reverseGeocodingRepository: ReverseGeocodingRepository = DefaultReverseGeocodingRepository()) {
-        self.reverseGeocodingRepository = reverseGeocodingRepository
+    init(viewModel: WorkoutViewModel = WorkoutViewModel()) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -85,7 +84,7 @@ final class WorkoutViewController: UIViewController {
         
         workoutView.mapView.locationOverlay.location = currentLatLng
         workoutView.applyLocationOverlayStyle()
-        updateCurrentAddressIfNeeded(location)
+        updateCurrentAddress(location)
         
         if location.course >= 0 {
             workoutView.mapView.locationOverlay.heading = location.course
@@ -99,22 +98,14 @@ final class WorkoutViewController: UIViewController {
         workoutView.mapView.moveCamera(cameraUpdate)
     }
     
-    private func updateCurrentAddressIfNeeded(_ location: CLLocation) {
-        if let lastReverseGeocodingLocation,
-           location.distance(from: lastReverseGeocodingLocation) < 50 {
-            return
-        }
-        
-        lastReverseGeocodingLocation = location
-        
+    private func updateCurrentAddress(_ location: CLLocation) {
         Task { [weak self] in
             guard let self else { return }
             
             do {
-                let address = try await reverseGeocodingRepository.roadAddress(
-                    latitude: location.coordinate.latitude,
-                    longitude: location.coordinate.longitude
-                )
+                guard let address = try await viewModel.currentAddress(for: location) else {
+                    return
+                }
                 
                 await MainActor.run {
                     self.workoutView.updateCurrentLocationAddress(address)
@@ -125,36 +116,36 @@ final class WorkoutViewController: UIViewController {
         }
     }
     
-        func moveToUserLocation() -> Self {
-            guard let userLatLng = getUserLocation() else { return self }
-            
-            let cameraUpdate = NMFCameraUpdate(scrollTo: userLatLng)
-            
-            DispatchQueue.main.async { [weak self] in
-                cameraUpdate.animation = .easeIn
-                self?.workoutView.mapView.moveCamera(cameraUpdate)
-            }
-            return self
-        }
+    func moveToUserLocation() -> Self {
+        guard let userLatLng = getUserLocation() else { return self }
         
-        func getUserLocation() -> NMGLatLng? {
-            guard let userLocation = locationManager.location?.coordinate else { return nil }
-            
-            return NMGLatLng(
-                lat: userLocation.latitude,
-                lng: userLocation.longitude
-            )
-        }
+        let cameraUpdate = NMFCameraUpdate(scrollTo: userLatLng)
         
-        @discardableResult
-        func moveToLocation(location: NMGLatLng) -> Self {
-            let cameraUpdate = NMFCameraUpdate(scrollTo: location)
-            DispatchQueue.main.async { [weak self] in
-                cameraUpdate.animation = .easeIn
-                self?.workoutView.mapView.moveCamera(cameraUpdate)
-            }
-            return self
+        DispatchQueue.main.async { [weak self] in
+            cameraUpdate.animation = .easeIn
+            self?.workoutView.mapView.moveCamera(cameraUpdate)
         }
+        return self
+    }
+    
+    func getUserLocation() -> NMGLatLng? {
+        guard let userLocation = locationManager.location?.coordinate else { return nil }
+        
+        return NMGLatLng(
+            lat: userLocation.latitude,
+            lng: userLocation.longitude
+        )
+    }
+    
+    @discardableResult
+    func moveToLocation(location: NMGLatLng) -> Self {
+        let cameraUpdate = NMFCameraUpdate(scrollTo: location)
+        DispatchQueue.main.async { [weak self] in
+            cameraUpdate.animation = .easeIn
+            self?.workoutView.mapView.moveCamera(cameraUpdate)
+        }
+        return self
+    }
 }
 
 // MARK: - CLLocationManagerDelegate
