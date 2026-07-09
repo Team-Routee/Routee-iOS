@@ -16,7 +16,7 @@ final class TopNavigationBar: BaseUIView {
     
     var backButtonAction: (() -> Void)?
     var rightButtonAction: (() -> Void)?
-    private let rightTitle: String
+    private let rightTitle: String?
     
     // MARK: - UI Properties
     
@@ -25,7 +25,7 @@ final class TopNavigationBar: BaseUIView {
     
     // MARK: - Initializer
     
-    init(rightTitle: String) {
+    init(rightTitle: String? = nil) {
         self.rightTitle = rightTitle
         super.init(frame: .zero)
     }
@@ -39,19 +39,21 @@ final class TopNavigationBar: BaseUIView {
     override func setStyle() {
         backButton.do {
             $0.setImage(UIImage(named: "ic_arrow_left_sm_white"), for: .normal)
-            $0.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
         }
         
         rightButton.do {
             $0.setTitle(rightTitle, for: .normal)
             $0.setTitleColor(.staticWhite, for: .normal)
             $0.titleLabel?.font = .label_sb_18
-            $0.addTarget(self, action: #selector(didTapRightButton), for: .touchUpInside)
+            $0.isHidden = rightTitle == nil
+            $0.isUserInteractionEnabled = rightTitle != nil
         }
     }
     
     override func setUI() {
         addSubviews(backButton, rightButton)
+        
+        setActions()
     }
     
     override func setLayout() {
@@ -71,6 +73,21 @@ final class TopNavigationBar: BaseUIView {
             $0.height.equalTo(42)
             $0.width.equalTo(63)
         }
+    }
+    
+    // MARK: - Private Methods
+
+    private func setActions() {
+        backButton.addTarget(
+            self,
+            action: #selector(didTapBackButton),
+            for: .touchUpInside
+        )
+        rightButton.addTarget(
+            self,
+            action: #selector(didTapRightButton),
+            for: .touchUpInside
+        )
     }
     
     // MARK: - Actions
