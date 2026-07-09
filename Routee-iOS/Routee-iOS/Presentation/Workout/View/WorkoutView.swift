@@ -60,10 +60,7 @@ final class WorkoutView: BaseUIView {
             recordButton
         )
         
-        currentLocationStackView.addArrangedSubviews(
-            currentLocationImage,
-            currentLocationLabel
-        )
+        currentLocationStackView.addArrangedSubviews(currentLocationImage, currentLocationLabel)
     }
     
     override func setStyle() {
