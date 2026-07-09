@@ -11,17 +11,23 @@ import SnapKit
 import Then
 
 final class RecordEditTabBarItem: UIControl {
-    
+
+    // MARK: - Properties
+
     private let normalImage: UIImage
     private let selectedImage: UIImage
-    
+
     override var isSelected: Bool { didSet { updateAppearance() } }
-    
+
+    // MARK: - UI Properties
+
     private let lineView = UIView()
     private let iconImageView = UIImageView()
     private let titleLabel = UILabel()
-    private let stackView = UIStackView()
-    
+    private let buttonStackView = UIStackView()
+
+    // MARK: - Initializer
+
     init(title: String, normalImage: UIImage, selectedImage: UIImage) {
         self.normalImage = normalImage
         self.selectedImage = selectedImage
@@ -37,52 +43,58 @@ final class RecordEditTabBarItem: UIControl {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
+    // MARK: - UI Setting
+
     private func setStyle() {
         layer.cornerRadius = 0
-        
+
         lineView.backgroundColor = .white_10
         lineView.isHidden = true
         iconImageView.contentMode = .scaleAspectFit
-        
+
         titleLabel.do {
             $0.font = .label_m_12
             $0.numberOfLines = 1
             $0.textAlignment = .center
             $0.setContentCompressionResistancePriority(.required, for: .horizontal)
         }
-        
-        stackView.axis = .vertical
-        stackView.alignment = .center
-        stackView.spacing = 2
-        stackView.isUserInteractionEnabled = false
+
+        buttonStackView.do {
+            $0.axis = .vertical
+            $0.alignment = .center
+            $0.spacing = 2
+            $0.isUserInteractionEnabled = false
+        }
     }
     
     private func setUI() {
-        addSubviews(lineView, stackView)
-        stackView.addArrangedSubviews(iconImageView, titleLabel)
+        addSubviews(lineView, buttonStackView)
+        buttonStackView.addArrangedSubviews(iconImageView, titleLabel)
     }
-    
+
     private func setLayout() {
         lineView.snp.makeConstraints {
             $0.top.leading.trailing.equalToSuperview()
             $0.height.equalTo(2)
         }
-        
-        stackView.snp.makeConstraints {
+
+        buttonStackView.snp.makeConstraints {
             $0.top.bottom.equalToSuperview().inset(14)
             $0.centerX.equalToSuperview()
         }
-        
+
         iconImageView.snp.makeConstraints {
             $0.size.equalTo(24)
         }
-        
+
         titleLabel.snp.makeConstraints {
             $0.height.equalTo(17)
         }
     }
-    
+
+    // MARK: - Private Methods
+
     private func updateAppearance() {
         backgroundColor = isSelected ? .white_10 : .clear
         lineView.isHidden = !isSelected
