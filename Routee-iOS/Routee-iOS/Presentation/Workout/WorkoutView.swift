@@ -96,7 +96,7 @@ final class WorkoutView: BaseUIView {
         }
         
         currentLocationLabel.do {
-            $0.text = "영등포구 의사당대로"
+            $0.text = "위치 권한 허용이 필요합니다."
             $0.font = .label_m_12
             $0.textColor = .grey_50
         }
@@ -200,6 +200,10 @@ final class WorkoutView: BaseUIView {
     func applyLocationOverlayStyle() {
         let locationOverlay = mapView.locationOverlay
         locationOverlay.icon = locationOverlayIcon
+    }
+    
+    func updateCurrentLocationAddress(_ address: String) {
+        currentLocationLabel.text = address
     }
 }
 
