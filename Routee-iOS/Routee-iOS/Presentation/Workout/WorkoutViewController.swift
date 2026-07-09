@@ -16,7 +16,19 @@ final class WorkoutViewController: UIViewController {
     
     private let workoutView = WorkoutView()
     private let locationManager = CLLocationManager()
+    private let reverseGeocodingRepository: ReverseGeocodingRepository
+    private var lastReverseGeocodingLocation: CLLocation?
     private var initialLocation = false
+    
+    init(reverseGeocodingRepository: ReverseGeocodingRepository = DefaultReverseGeocodingRepository()) {
+        self.reverseGeocodingRepository = reverseGeocodingRepository
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        nil
+    }
     
     // MARK: - Life Cycle
     
@@ -73,6 +85,7 @@ final class WorkoutViewController: UIViewController {
         
         workoutView.mapView.locationOverlay.location = currentLatLng
         workoutView.applyLocationOverlayStyle()
+        updateCurrentAddressIfNeeded(location)
         
         if location.course >= 0 {
             workoutView.mapView.locationOverlay.heading = location.course
@@ -85,6 +98,63 @@ final class WorkoutViewController: UIViewController {
         cameraUpdate.animation = .easeIn
         workoutView.mapView.moveCamera(cameraUpdate)
     }
+    
+    private func updateCurrentAddressIfNeeded(_ location: CLLocation) {
+        if let lastReverseGeocodingLocation,
+           location.distance(from: lastReverseGeocodingLocation) < 50 {
+            return
+        }
+        
+        lastReverseGeocodingLocation = location
+        
+        Task { [weak self] in
+            guard let self else { return }
+            
+            do {
+                let address = try await reverseGeocodingRepository.roadAddress(
+                    latitude: location.coordinate.latitude,
+                    longitude: location.coordinate.longitude
+                )
+                
+                await MainActor.run {
+                    self.workoutView.updateCurrentLocationAddress(address)
+                }
+            } catch {
+                RouteeLogger.error(error)
+            }
+        }
+    }
+    
+        func moveToUserLocation() -> Self {
+            guard let userLatLng = getUserLocation() else { return self }
+            
+            let cameraUpdate = NMFCameraUpdate(scrollTo: userLatLng)
+            
+            DispatchQueue.main.async { [weak self] in
+                cameraUpdate.animation = .easeIn
+                self?.workoutView.mapView.moveCamera(cameraUpdate)
+            }
+            return self
+        }
+        
+        func getUserLocation() -> NMGLatLng? {
+            guard let userLocation = locationManager.location?.coordinate else { return nil }
+            
+            return NMGLatLng(
+                lat: userLocation.latitude,
+                lng: userLocation.longitude
+            )
+        }
+        
+        @discardableResult
+        func moveToLocation(location: NMGLatLng) -> Self {
+            let cameraUpdate = NMFCameraUpdate(scrollTo: location)
+            DispatchQueue.main.async { [weak self] in
+                cameraUpdate.animation = .easeIn
+                self?.workoutView.mapView.moveCamera(cameraUpdate)
+            }
+            return self
+        }
 }
 
 // MARK: - CLLocationManagerDelegate
@@ -108,4 +178,6 @@ extension WorkoutViewController: CLLocationManagerDelegate {
         
         updateCurrentLocation(location)
     }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) { }
 }
