@@ -14,9 +14,9 @@ final class ArchiveCalendar: BaseUIView {
 
     // MARK: - Properties
 
-    var onSelectDay: ((CalendarModel) -> Void)?
+    var onSelectDay: ((CalendarDayCellModel) -> Void)?
 
-    private var days: [CalendarModel] = []
+    private var days: [CalendarDayCellModel] = []
 
     private enum Metric {
         static let sectionHorizontalInset: CGFloat = 9
@@ -65,7 +65,7 @@ final class ArchiveCalendar: BaseUIView {
             $0.itemSize = Metric.itemSize
             $0.minimumLineSpacing = Metric.lineSpacing
             $0.sectionInset = UIEdgeInsets(
-                top: 0,
+                top: 20,
                 left: Metric.sectionHorizontalInset,
                 bottom: 0,
                 right: Metric.sectionHorizontalInset
@@ -79,8 +79,8 @@ final class ArchiveCalendar: BaseUIView {
             $0.dataSource = self
             $0.delegate = self
             $0.register(
-                CalendarCell.self,
-                forCellWithReuseIdentifier: CalendarCell.reuseIdentifier
+                ArchiveCalendarCell.self,
+                forCellWithReuseIdentifier: ArchiveCalendarCell.reuseIdentifier
             )
         }
     }
@@ -97,7 +97,7 @@ final class ArchiveCalendar: BaseUIView {
         }
 
         collectionView.snp.makeConstraints {
-            $0.top.equalTo(weekDayStackView.snp.bottom).offset(20)
+            $0.top.equalTo(weekDayStackView.snp.bottom)
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
@@ -114,13 +114,50 @@ final class ArchiveCalendar: BaseUIView {
 
     // MARK: - Public Methods
 
-    func configure(days: [CalendarModel]) {
+    func configure(days: [CalendarDayCellModel]) {
         self.days = days
         collectionView.reloadData()
     }
+
+    static func makeDays(
+        year: Int,
+        month: Int,
+        records: [ArchiveCalendarRecord]
+    ) -> [CalendarDayCellModel] {
+        let recordsByDay = Dictionary(
+            uniqueKeysWithValues: records.compactMap { record -> (Int, ArchiveCalendarRecord)? in
+                guard let dayValue = day(from: record.activityDate) else { return nil }
+                return (dayValue, record)
+            }
+        )
+
+        var days = Array(
+            repeating: CalendarDayCellModel(
+                content: .empty,
+                recordState: .none,
+                coverImageName: nil,
+                activityDate: nil
+            ),
+            count: leadingEmptyCount(year: year, month: month)
+        )
+
+        for dayValue in 1...numberOfDays(year: year, month: month) {
+            let record = recordsByDay[dayValue]
+            days.append(
+                CalendarDayCellModel(
+                    content: .day(dayValue),
+                    recordState: .init(activityCount: record?.activityCount ?? 0),
+                    coverImageName: record?.coverImageName,
+                    activityDate: record?.activityDate
+                )
+            )
+        }
+
+        return days
+    }
 }
 
-// MARK: - UICollectionViewDataSource
+// MARK: - Extensions
 
 extension ArchiveCalendar: UICollectionViewDataSource {
 
@@ -136,9 +173,9 @@ extension ArchiveCalendar: UICollectionViewDataSource {
         cellForItemAt indexPath: IndexPath
     ) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: CalendarCell.reuseIdentifier,
+            withReuseIdentifier: ArchiveCalendarCell.reuseIdentifier,
             for: indexPath
-        ) as? CalendarCell else {
+        ) as? ArchiveCalendarCell else {
             return UICollectionViewCell()
         }
 
@@ -146,8 +183,6 @@ extension ArchiveCalendar: UICollectionViewDataSource {
         return cell
     }
 }
-
-// MARK: - UICollectionViewDelegateFlowLayout
 
 extension ArchiveCalendar: UICollectionViewDelegateFlowLayout {
 
@@ -176,30 +211,6 @@ extension ArchiveCalendar: UICollectionViewDelegateFlowLayout {
         onSelectDay?(days[indexPath.item])
     }
 
-    func collectionView(
-        _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        sizeForItemAt indexPath: IndexPath
-    ) -> CGSize {
-        Metric.itemSize
-    }
-
-    func collectionView(
-        _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        minimumInteritemSpacingForSectionAt section: Int
-    ) -> CGFloat {
-        calculatedInterItemSpacing()
-    }
-
-    func collectionView(
-        _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        minimumLineSpacingForSectionAt section: Int
-    ) -> CGFloat {
-        Metric.lineSpacing
-    }
-
     private func calculatedInterItemSpacing() -> CGFloat {
         let totalHorizontalInset = Metric.sectionHorizontalInset * 2
         let totalItemWidth = Metric.itemSize.width * Metric.columnCount
@@ -208,5 +219,36 @@ extension ArchiveCalendar: UICollectionViewDelegateFlowLayout {
 
         guard spacingCount > 0 else { return 0 }
         return max(0, (availableSpacing / spacingCount) - Metric.spacingEpsilon)
+    }
+}
+
+private extension ArchiveCalendar {
+    static func day(from activityDate: String) -> Int? {
+        Int(activityDate.split(separator: "-").last ?? "")
+    }
+
+    static func leadingEmptyCount(year: Int, month: Int) -> Int {
+        var components = DateComponents()
+        components.year = year
+        components.month = month
+        components.day = 1
+
+        guard let date = Foundation.Calendar.current.date(from: components) else { return 0 }
+
+        let weekday = Foundation.Calendar.current.component(.weekday, from: date)
+        return (weekday + 5) % 7
+    }
+
+    static func numberOfDays(year: Int, month: Int) -> Int {
+        var components = DateComponents()
+        components.year = year
+        components.month = month
+
+        guard
+            let date = Foundation.Calendar.current.date(from: components),
+            let range = Foundation.Calendar.current.range(of: .day, in: .month, for: date)
+        else { return 30 }
+
+        return range.count
     }
 }
