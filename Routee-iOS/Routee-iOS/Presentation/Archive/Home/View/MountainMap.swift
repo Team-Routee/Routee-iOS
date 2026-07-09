@@ -12,23 +12,24 @@ import Then
 
 final class MountainMap: BaseUIView {
 
-    private enum Metric {
-        static let itemCount = 33
-    }
+    // MARK: - Properties
 
+    private let itemCount = 33
     private var levels: [Int] = []
-
     private let flowLayout = UICollectionViewFlowLayout()
-
     private lazy var collectionView = UICollectionView(
         frame: .zero,
         collectionViewLayout: flowLayout
     )
 
+    // MARK: - UI Properties
+    
     private let lessLabel = UILabel()
     private let intensityImageView = UIImageView()
     private let moreLabel = UILabel()
-    private let stackView = UIStackView()
+    private let intensityStackView = UIStackView()
+
+    // MARK: - UI Setting
 
     override func setStyle() {
         backgroundColor = .grey_900
@@ -70,7 +71,7 @@ final class MountainMap: BaseUIView {
             $0.font = .label_m_12
         }
 
-        stackView.do {
+        intensityStackView.do {
             $0.axis = .horizontal
             $0.alignment = .center
             $0.spacing = .s6
@@ -78,8 +79,8 @@ final class MountainMap: BaseUIView {
     }
 
     override func setUI() {
-        addSubviews(collectionView, stackView)
-        stackView.addArrangedSubviews(lessLabel, intensityImageView, moreLabel)
+        addSubviews(collectionView, intensityStackView)
+        intensityStackView.addArrangedSubviews(lessLabel, intensityImageView, moreLabel)
     }
 
     override func setLayout() {
@@ -89,7 +90,7 @@ final class MountainMap: BaseUIView {
             $0.horizontalEdges.equalToSuperview().inset(20)
         }
 
-        stackView.snp.makeConstraints {
+        intensityStackView.snp.makeConstraints {
             $0.top.equalTo(collectionView.snp.bottom).offset(10)
             $0.trailing.equalToSuperview().inset(20)
             $0.bottom.equalToSuperview().inset(10)
@@ -101,15 +102,48 @@ final class MountainMap: BaseUIView {
         }
     }
 
+    // MARK: - Public Methods
+
     func configure(levels: [Int]) {
-        let visibleLevels = Array(levels.prefix(Metric.itemCount))
+        let visibleLevels = Array(levels.prefix(itemCount))
         self.levels = visibleLevels + Array(
             repeating: 0,
-            count: max(0, Metric.itemCount - visibleLevels.count)
+            count: max(0, itemCount - visibleLevels.count)
         )
         collectionView.reloadData()
     }
+
+    func makeLevels(from durationMinutes: [Int]) -> [Int] {
+        let levels = durationMinutes
+            .prefix(itemCount)
+            .map { mountainLevel(durationMinutes: $0) }
+
+        guard levels.count < itemCount else {
+            return levels
+        }
+
+        return levels + Array(repeating: 0, count: itemCount - levels.count)
+    }
+
+    // MARK: - Private Methods
+
+    private func mountainLevel(durationMinutes: Int) -> Int {
+        switch durationMinutes {
+        case ...0:
+            return 0
+        case 1...60:
+            return 1
+        case 61...120:
+            return 2
+        case 121...180:
+            return 3
+        default:
+            return 4
+        }
+    }
 }
+
+// MARK: - Extension
 
 extension MountainMap: UICollectionViewDataSource {
 
