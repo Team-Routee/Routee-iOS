@@ -67,7 +67,7 @@ final class RecordEditViewController: BaseUIViewController {
     }
 }
 
-// MARK: - UICollectionViewDelegate
+    // MARK: - extensions
 
 extension RecordEditViewController: UICollectionViewDelegate {
     func collectionView(
@@ -77,8 +77,6 @@ extension RecordEditViewController: UICollectionViewDelegate {
         pushEditorViewController()
     }
 }
-
-// MARK: - UICollectionViewDataSource
 
 extension RecordEditViewController: UICollectionViewDataSource {
     func collectionView(
