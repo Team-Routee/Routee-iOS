@@ -144,6 +144,10 @@ final class WorkoutView: BaseUIView {
             $0.height.equalTo(32)
         }
         
+        currentLocationImage.snp.makeConstraints {
+            $0.size.equalTo(24)
+        }
+        
         moveToUserlocationButton.snp.makeConstraints {
             $0.trailing.equalTo(recordButton)
             $0.bottom.equalTo(recordButton.snp.top).offset(-12)
