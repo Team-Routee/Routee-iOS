@@ -85,7 +85,7 @@ final class RecordInfo: BaseUIView {
     override func setUI() {
         addSubview(dataInfoStackView)
         
-        dataInfoStackView.addArrangedSubviews(distanceStackView,timeStackView, altitudeStackView)
+        dataInfoStackView.addArrangedSubviews(distanceStackView, timeStackView, altitudeStackView)
         
         distanceStackView.addArrangedSubviews(distanceLabel, distanceDataLabel)
         
