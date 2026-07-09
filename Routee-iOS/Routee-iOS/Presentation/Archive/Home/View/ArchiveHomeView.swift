@@ -31,7 +31,7 @@ final class ArchiveHomeView: BaseUIView {
         }
     }
 
-    var onSelectDay: ((CalendarModel) -> Void)? {
+    var onSelectDay: ((DayCellModel) -> Void)? {
         didSet {
             calendarView.onSelectDay = onSelectDay
         }
@@ -107,11 +107,11 @@ final class ArchiveHomeView: BaseUIView {
         )
     }
 
-    func configureMountainMap(levels: [Int]) {
-        mountainMapView.configure(levels: levels)
+    func configureMountainMap(durationMinutes: [Int]) {
+        mountainMapView.configure(levels: mountainMapView.makeLevels(from: durationMinutes))
     }
 
-    func configureCalendar(days: [CalendarModel]) {
+    func configureCalendar(days: [DayCellModel]) {
         calendarView.configure(days: days)
     }
 }

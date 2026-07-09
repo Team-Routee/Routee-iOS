@@ -12,8 +12,12 @@ import Then
 
 final class ArchiveHeader: BaseUIView {
 
+    // MARK: - UI Properties
+    
     private let titleLabel = UILabel()
 
+    // MARK: - UI Setting
+    
     override func setStyle() {
         titleLabel.do {
             $0.text = "아카이브"
