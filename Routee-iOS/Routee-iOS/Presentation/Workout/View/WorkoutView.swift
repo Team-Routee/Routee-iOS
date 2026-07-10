@@ -106,7 +106,7 @@ final class WorkoutView: BaseUIView {
         pathOverlay.do {
             $0.color = .mint_300
             $0.outlineWidth = 0
-            $0.width = 3
+            $0.width = 4
         }
     }
     
