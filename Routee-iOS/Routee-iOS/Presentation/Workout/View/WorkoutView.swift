@@ -15,19 +15,14 @@ import Then
 
 final class WorkoutView: BaseUIView {
     
-    // MARK: - Properties
-            
-    private let locationManager = CLLocationManager()
-    private var isDrawMode: Bool = false
-    
     // MARK: - UI Properties
     
     private let routeeMapView = NMFNaverMapView()
     private let gradiantHeaderLayer = CAGradientLayer()
     private let routeeLogo = UIImageView()
+    private let currentLocationStackView = UIStackView()
     private let currentLocationImage = UIImageView()
     private let currentLocationLabel = UILabel()
-    private let currentLocationStackView = UIStackView()
     private let userLocationIcon = NMFOverlayImage(
         image: UIImage.icNow.resized(to: CGSize(width: 42, height: 42))
     )
@@ -36,7 +31,7 @@ final class WorkoutView: BaseUIView {
     lazy var moveToUserlocationButton = UIButton(type: .custom)
     lazy var recordButton = RouteeButton(titleText: "등산 기록", type: .enabled)
     
-    var mapView: NMFMapView { routeeMapView.mapView }
+    private var mapView: NMFMapView { routeeMapView.mapView }
     
     // MARK: - UI Setting
     
@@ -58,7 +53,7 @@ final class WorkoutView: BaseUIView {
     override func setStyle() {
         applyLocationOverlayStyle()
         mapSetting()
-                
+        
         routeeLogo.do {
             $0.image = .routeeLogoMintMd
             $0.contentMode = .scaleAspectFit
@@ -113,7 +108,7 @@ final class WorkoutView: BaseUIView {
             $0.outlineWidth = 0
             $0.width = 3
         }
-}
+    }
     
     override func setLayout() {
         routeeMapView.snp.makeConstraints {
@@ -146,14 +141,6 @@ final class WorkoutView: BaseUIView {
             $0.bottom.equalTo(routeeMapView.safeAreaLayoutGuide).inset(78)
         }
     }
-        
-    private func updateSubviewsConstraints() {
-        [moveToUserlocationButton].forEach { view in
-            view.snp.updateConstraints { make in
-                make.bottom.equalToSuperview().inset(98 + bottomPadding)
-            }
-        }
-    }
     
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -175,7 +162,7 @@ final class WorkoutView: BaseUIView {
             $0.mapView.isNightModeEnabled = true
             $0.mapView.addCameraDelegate(delegate: self)
             $0.mapView.setLayerGroup(NMF_LAYER_GROUP_MOUNTAIN, isEnabled: true)
-
+            
             $0.mapView.logoAlign = .leftBottom
             $0.mapView.logoMargin = UIEdgeInsets(
                 top: 0,
@@ -186,13 +173,8 @@ final class WorkoutView: BaseUIView {
         }
     }
     
-    // MARK: - Actions
+    // MARK: - Public Methods
     
-    @objc
-    func locationButtonDidTap() {
-        mapView.positionMode = .direction
-        applyLocationOverlayStyle()
-    }
     func updateRoutePath(_ locations: [NMGLatLng]) {
         guard locations.count >= 2 else {
             pathOverlay.mapView = nil
@@ -203,13 +185,50 @@ final class WorkoutView: BaseUIView {
         pathOverlay.mapView = mapView
     }
     
-    func applyLocationOverlayStyle() {
-        let locationOverlay = mapView.locationOverlay
-        locationOverlay.icon = userLocationIcon
-    }
-    
     func updateCurrentLocationAddress(_ address: String) {
         currentLocationLabel.text = address
+    }
+    
+    func showLocationOverlay() {
+        mapView.locationOverlay.hidden = false
+        mapView.positionMode = .direction
+        applyLocationOverlayStyle()
+    }
+    
+    func hideLocationOverlay() {
+        mapView.locationOverlay.hidden = true
+        mapView.positionMode = .disabled
+    }
+    
+    func updateUserLocation(_ latLng: NMGLatLng, course: CLLocationDirection) {
+        mapView.locationOverlay.location = latLng
+        applyLocationOverlayStyle()
+        
+        guard course >= 0 else { return }
+        
+        mapView.locationOverlay.heading = course
+    }
+    
+    func focusOnUserDirection() {
+        mapView.positionMode = .direction
+        applyLocationOverlayStyle()
+    }
+    
+    func moveCamera(to latLng: NMGLatLng, zoomTo zoom: Double? = nil) {
+        let cameraUpdate = zoom.map { NMFCameraUpdate(scrollTo: latLng, zoomTo: $0) }
+        ?? NMFCameraUpdate(scrollTo: latLng)
+        cameraUpdate.animation = .easeIn
+        mapView.moveCamera(cameraUpdate)
+    }
+    
+    func setRecording(_ isRecording: Bool) {
+        recordButton.setTitle(isRecording ? "기록 종료" : "등산 기록", for: .normal)
+    }
+    
+    // MARK: - Private Methods
+    
+    private func applyLocationOverlayStyle() {
+        mapView.locationOverlay.icon = userLocationIcon
     }
 }
 
