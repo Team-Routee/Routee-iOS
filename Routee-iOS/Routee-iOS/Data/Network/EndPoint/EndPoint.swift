@@ -10,6 +10,7 @@ import Foundation
 import Alamofire
 
 protocol EndPoint {
+    var baseURL: String { get }
     var basePath: String { get }
     var path: String { get }
     var method: HTTPMethod { get }
@@ -20,9 +21,10 @@ protocol EndPoint {
     var requestURL: URL { get }
 }
 
+protocol RouteeEndPoint: EndPoint { }
+
 extension EndPoint {
     var requestURL: URL {
-        let baseURL = ConfigManager.baseURL
         let urlString = baseURL + basePath + path
         
         guard var urlComponents = URLComponents(string: urlString) else {
@@ -50,6 +52,7 @@ enum HeaderType {
     case withAuth
     case appleLoginHeader(identityToken: String, authorizationCode: String)
     case refresh(accessToken: String)
+    case naverMaps
     
     var value: HTTPHeaders {
         switch self {
@@ -71,6 +74,17 @@ enum HeaderType {
                 "Content-Type": "application/json",
                 "Authorization": "Bearer \(accessToken)"
             ]
+        case .naverMaps:
+            return [
+                "X-NCP-APIGW-API-KEY-ID": ConfigManager.naverMapClientID,
+                "X-NCP-APIGW-API-KEY": ConfigManager.naverMapClientSecret
+            ]
         }
+    }
+}
+
+extension RouteeEndPoint {
+    var baseURL: String {
+        ConfigManager.baseURL
     }
 }
