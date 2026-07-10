@@ -12,7 +12,7 @@ import Then
 
 final class ListView: BaseUIView {
     
-    //MARK: - UI Properties
+    // MARK: - UI Properties
     
     private let handleView = UIView()
     private let dateLabel = UILabel()
@@ -20,7 +20,7 @@ final class ListView: BaseUIView {
     private let contentView = UIView()
     private let stackView = UIStackView()
     
-    //MARK: - UI Setting
+    // MARK: - UI Setting
     
     override func setStyle() {
         backgroundColor = .grey900
@@ -90,7 +90,7 @@ final class ListView: BaseUIView {
         }
     }
     
-    //MARK: - Public Methods
+    // MARK: - Public Methods
     
     func configure(with model: ListModel) {
         dateLabel.text = model.dateText
@@ -111,6 +111,7 @@ final class ListView: BaseUIView {
         scrollView.bounces = false
         scrollView.alwaysBounceVertical = false
     }
+
     static func modalHeight(for itemCount: Int) -> CGFloat {
         itemCount <= 2 ? 247 : 344
     }
