@@ -52,9 +52,7 @@ final class TabBarViewController: UITabBarController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        
-        tabBar.isHidden = true
-        
+
         guard !didSetInitialSelection else { return }
         didSetInitialSelection = true
         
@@ -201,7 +199,7 @@ final class TabBarViewController: UITabBarController {
     }
     
     private func shouldHideCustomTabBar(for viewController: UIViewController?) -> Bool {
-        viewController is EditorViewController
+        viewController?.hidesBottomBarWhenPushed == true
     }
     
     private func moveSelectionView(to index: Int, animated: Bool) {
@@ -230,7 +228,6 @@ final class TabBarViewController: UITabBarController {
         }
         
         customTabBar.isHidden = shouldHideCustomTabBar(for: navigationController.topViewController)
-        tabBar.isHidden = true
     }
     
     // MARK: - Actions
@@ -238,8 +235,10 @@ final class TabBarViewController: UITabBarController {
     @objc
     private func tabDidTap(_ sender: TabBarItem) {
         updateSelection(index: sender.tag)
-    }
+    } 
 }
+
+    // MARK: - Extension
 
 extension TabBarViewController: UINavigationControllerDelegate {
     func navigationController(
@@ -248,6 +247,5 @@ extension TabBarViewController: UINavigationControllerDelegate {
         animated: Bool
     ) {
         customTabBar.isHidden = shouldHideCustomTabBar(for: viewController)
-        tabBar.isHidden = true
     }
 }
