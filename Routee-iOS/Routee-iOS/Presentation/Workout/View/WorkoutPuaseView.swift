@@ -56,12 +56,12 @@ final class WorkoutPuaseView: BaseUIView {
         backgroundGradientLayer.do {
             $0.type = .radial
             $0.colors = [
-                UIColor(red: 1.0, green: 1.0, blue: 0.4, alpha: 1.0).cgColor, // 중앙 노란색
-                UIColor(red: 0.4, green: 0.85, blue: 0.9, alpha: 1.0).cgColor // 바깥 민트색
+                UIColor.lime300.cgColor,
+                UIColor.lime300.withAlphaComponent(0).cgColor
             ]
             $0.locations = [0.0, 1.0]
-            $0.startPoint = CGPoint(x: 0.5, y: 0.5) // 중심
-            $0.endPoint = CGPoint(x: 1.0, y: 1.0)   // 반경 결정 (대각선 방향)
+            $0.startPoint = CGPoint(x: 0.5, y: 0.5)
+            $0.endPoint = CGPoint(x: 1.0, y: 1.0)
         }
 
         layer.insertSublayer(backgroundGradientLayer, at: 0)
@@ -142,7 +142,7 @@ final class WorkoutPuaseView: BaseUIView {
     override func setLayout() {
         recordInfoStackView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.top.equalToSuperview().inset(196)
+            $0.bottom.equalTo(restartButton.snp.top).offset(-190)
             $0.horizontalEdges.equalToSuperview()
         }
         
