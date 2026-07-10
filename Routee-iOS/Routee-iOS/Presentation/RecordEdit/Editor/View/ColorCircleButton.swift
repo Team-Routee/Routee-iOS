@@ -70,10 +70,6 @@ final class ColorCircleButton: UIButton {
         selectedBorderView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-
-        snp.makeConstraints {
-            $0.size.equalTo(36)
-        }
     }
 
     // MARK: - Public Methods

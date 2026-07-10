@@ -25,9 +25,7 @@ final class EditorViewController: BaseUIViewController {
     // MARK: - Private Methods
 
     private func popViewController() {
-        UIView.performWithoutAnimation {
-            navigationController?.popViewController(animated: false)
-        }
+        navigationController?.popViewController(animated: false)
     }
     
     // MARK: - Actions

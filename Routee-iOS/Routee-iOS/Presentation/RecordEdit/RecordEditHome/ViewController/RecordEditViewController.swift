@@ -63,6 +63,7 @@ final class RecordEditViewController: BaseUIViewController {
 
     private func pushEditorViewController() {
         let editorViewController = EditorViewController()
+        editorViewController.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(editorViewController, animated: false)
     }
 }
