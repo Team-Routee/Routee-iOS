@@ -18,14 +18,6 @@ final class ArchiveCalendar: BaseUIView {
 
     private var days: [DayCellModel] = []
 
-    private enum Metric {
-        static let sectionHorizontalInset: CGFloat = 9
-        static let lineSpacing: CGFloat = 14
-        static let itemSize = CGSize(width: 38, height: 38)
-        static let columnCount: CGFloat = 7
-        static let spacingEpsilon: CGFloat = 0.1
-    }
-
     private let weekDayArray = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
     // MARK: - UI Properties
@@ -38,7 +30,7 @@ final class ArchiveCalendar: BaseUIView {
             label.textColor = .grey_400
             label.textAlignment = .center
             label.snp.makeConstraints {
-                $0.width.equalTo(Metric.itemSize.width)
+                $0.width.equalTo(38)
             }
             return label
         }
@@ -62,13 +54,13 @@ final class ArchiveCalendar: BaseUIView {
 
         flowLayout.do {
             $0.scrollDirection = .vertical
-            $0.itemSize = Metric.itemSize
-            $0.minimumLineSpacing = Metric.lineSpacing
+            $0.itemSize = CGSize(width: 38, height: 38)
+            $0.minimumLineSpacing = 14
             $0.sectionInset = UIEdgeInsets(
                 top: 20,
-                left: Metric.sectionHorizontalInset,
+                left: 9,
                 bottom: 0,
-                right: Metric.sectionHorizontalInset
+                right: 9
             )
         }
 
@@ -92,7 +84,7 @@ final class ArchiveCalendar: BaseUIView {
     override func setLayout() {
         weekDayStackView.snp.makeConstraints {
             $0.top.equalToSuperview()
-            $0.horizontalEdges.equalToSuperview().inset(Metric.sectionHorizontalInset)
+            $0.horizontalEdges.equalToSuperview().inset(9)
             $0.height.equalTo(16)
         }
 
@@ -212,13 +204,12 @@ extension ArchiveCalendar: UICollectionViewDelegateFlowLayout {
     }
 
     private func calculatedInterItemSpacing() -> CGFloat {
-        let totalHorizontalInset = Metric.sectionHorizontalInset * 2
-        let totalItemWidth = Metric.itemSize.width * Metric.columnCount
+        let totalHorizontalInset: CGFloat = 9 * 2
+        let totalItemWidth: CGFloat = 38 * 7
         let availableSpacing = collectionView.bounds.width - totalHorizontalInset - totalItemWidth
-        let spacingCount = Metric.columnCount - 1
+        let spacingCount: CGFloat = 7 - 1
 
-        guard spacingCount > 0 else { return 0 }
-        return max(0, (availableSpacing / spacingCount) - Metric.spacingEpsilon)
+        return max(0, (availableSpacing / spacingCount) - 0.1)
     }
 }
 

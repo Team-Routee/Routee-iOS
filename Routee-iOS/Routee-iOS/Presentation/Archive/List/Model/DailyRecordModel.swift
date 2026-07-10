@@ -1,17 +1,17 @@
 //
-//  ListModel.swift
+//  DailyRecordModel.swift
 //  Routee-iOS
 //
 
 import Foundation
 
-struct ListItemModel {
+struct DailyRecordModel {
     let activityId: Int
     let title: String
     let thumbnailUrl: String?
 }
 
-struct ListModel {
+struct CalendarDateModel {
     let dateText: String
-    let items: [ListItemModel]
+    let items: [DailyRecordModel]
 }

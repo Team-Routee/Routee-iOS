@@ -1,13 +1,13 @@
 //
-//  ArchiveListDummyData.swift
+//  DailyDummyData.swift
 //  Routee-iOS
 //
 
 import Foundation
 
-enum ArchiveListDummyData {
+enum DailyDummyData {
 
-    static let dummyModelsByDate: [String: ListModel] = [
+    static let dummyModelsByDate: [String: CalendarDateModel] = [
         "2026.03.14": .init(
             dateText: "2026.03.14",
             items: [

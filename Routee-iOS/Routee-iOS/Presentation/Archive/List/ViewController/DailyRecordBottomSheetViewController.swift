@@ -1,5 +1,5 @@
 //
-//  ListViewController.swift
+//  DailyRecordBottomSheetViewController.swift
 //  Routee-iOS
 //
 //  Created by 초긍정행운의포춘쿠키 on 7/7/26.
@@ -10,19 +10,19 @@ import UIKit
 import SnapKit
 import Then
 
-final class ArchiveListViewController: BaseUIViewController {
+final class DailyRecordBottomSheetViewController: BaseUIViewController {
 
     // MARK: - UI Properties
     
-    private let rootView = ListView()
-    private let model: ListModel
+    private let rootView = DailyRecordBottomSheet()
+    private let model: CalendarDateModel
     private var sheetHeight: CGFloat {
-        ListView.modalHeight(for: model.items.count)
+        DailyRecordBottomSheet.modalHeight(for: model.items.count)
     }
 
     // MARK: - Initializer
     
-    init(model: ListModel) {
+    init(model: CalendarDateModel) {
         self.model = model
         super.init(nibName: nil, bundle: nil)
     }
@@ -55,7 +55,7 @@ final class ArchiveListViewController: BaseUIViewController {
 
         sheet.detents = [
             .custom { [weak self] _ in
-                self?.sheetHeight ?? ListView.modalHeight(for: 0)
+                self?.sheetHeight ?? DailyRecordBottomSheet.modalHeight(for: 0)
             }
         ]
         sheet.prefersGrabberVisible = false

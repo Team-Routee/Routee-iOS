@@ -1,5 +1,5 @@
 //
-//  ListView.swift
+//  DailyRecordBottomSheet.swift
 //  Routee-iOS
 //
 //  Created by 초긍정행운의포춘쿠키 on 7/7/26.
@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class ListView: BaseUIView {
+final class DailyRecordBottomSheet: BaseUIView {
     
     // MARK: - UI Properties
     
@@ -92,7 +92,7 @@ final class ListView: BaseUIView {
     
     // MARK: - Public Methods
     
-    func configure(with model: ListModel) {
+    func configure(with model: CalendarDateModel) {
         dateLabel.text = model.dateText
         
         stackView.arrangedSubviews.forEach {
@@ -101,7 +101,7 @@ final class ListView: BaseUIView {
         }
         
         model.items.forEach { item in
-            let itemView = ListItem()
+            let itemView = DailyRecord()
             itemView.configure(with: item)
             stackView.addArrangedSubview(itemView)
         }

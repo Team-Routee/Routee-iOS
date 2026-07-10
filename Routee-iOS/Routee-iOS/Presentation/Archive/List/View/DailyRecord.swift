@@ -1,5 +1,5 @@
 //
-//  ListItem.swift
+//  DailyRecord.swift
 //  Routee-iOS
 //
 
@@ -8,7 +8,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class ListItem: BaseUIView {
+final class DailyRecord: BaseUIView {
 
     // MARK: - UI Properties
     
@@ -71,7 +71,7 @@ final class ListItem: BaseUIView {
     
     // MARK: - Public Methods
     
-    func configure(with model: ListItemModel) {
+    func configure(with model: DailyRecordModel) {
         recordListLabel.text = model.title
         thumbnailImageView.image = thumbnailImage(thumbnailUrl: model.thumbnailUrl)
     }
