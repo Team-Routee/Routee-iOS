@@ -8,7 +8,12 @@
 import UIKit
 
 final class WorkoutPuaseViewController: BaseUIViewController {
+    
+    // MARK: - Properties
+    
     private let workoutPuaseView = WorkoutPuaseView()
+    
+    // MARK: - Life Cycle
     
     override func loadView() {
         view = workoutPuaseView

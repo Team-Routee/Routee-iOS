@@ -12,10 +12,6 @@ import Then
 
 final class WorkoutPuaseView: BaseUIView {
     
-    // MARK: - Initializer
-    
-    // MARK: - properties
-    
     // MARK: - UI Properties
     
     private let backgroundGradientLayer = CAGradientLayer()
