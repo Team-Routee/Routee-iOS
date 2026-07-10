@@ -21,13 +21,17 @@ final class EditorViewController: BaseUIViewController {
     override func loadView() {
         view = rootView
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        (tabBarController as? TabBarViewController)?.setCustomTabBarHidden(true)
+    }
 
     // MARK: - Private Methods
 
     private func popViewController() {
-        UIView.performWithoutAnimation {
-            navigationController?.popViewController(animated: false)
-        }
+        navigationController?.popViewController(animated: false)
     }
     
     // MARK: - Actions
