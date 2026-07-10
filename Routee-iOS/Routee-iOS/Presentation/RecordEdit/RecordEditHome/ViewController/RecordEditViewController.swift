@@ -35,6 +35,12 @@ final class RecordEditViewController: BaseUIViewController {
         setMonthSelector()
         updateRecords(for: Date())
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        (tabBarController as? TabBarViewController)?.setCustomTabBarHidden(false)
+    }
 
     // MARK: - Private Methods
 
@@ -63,7 +69,6 @@ final class RecordEditViewController: BaseUIViewController {
 
     private func pushEditorViewController() {
         let editorViewController = EditorViewController()
-        editorViewController.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(editorViewController, animated: false)
     }
 }
