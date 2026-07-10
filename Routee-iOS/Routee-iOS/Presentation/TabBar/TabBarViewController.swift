@@ -194,12 +194,17 @@ final class TabBarViewController: UITabBarController {
         selectedIndex = index
         updateItemAppearance(selectedIndex: index)
         moveSelectionView(to: index, animated: animated)
+        updateCustomTabBarVisibility()
     }
     
     private func updateItemAppearance(selectedIndex: Int) {
         tabBarItems.enumerated().forEach { index, item in
             item.isSelected = index == selectedIndex
         }
+    }
+    
+    private func shouldHideCustomTabBar(for viewController: UIViewController?) -> Bool {
+        viewController?.hidesBottomBarWhenPushed == true
     }
     
     private func moveSelectionView(to index: Int, animated: Bool) {
@@ -220,6 +225,14 @@ final class TabBarViewController: UITabBarController {
         } else {
             animation()
         }
+    }
+    
+    private func updateCustomTabBarVisibility() {
+        guard let navigationController = viewControllers?[selectedIndex] as? UINavigationController else {
+            return
+        }
+        
+        customTabBar.isHidden = shouldHideCustomTabBar(for: navigationController.topViewController)
     }
     
     // MARK: - Actions
