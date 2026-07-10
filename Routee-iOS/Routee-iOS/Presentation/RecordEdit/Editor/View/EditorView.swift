@@ -93,12 +93,10 @@ final class EditorView: BaseUIView {
     
     // MARK: - Public Methods
     
-    // 선택한 이미지를 배경 이미지뷰에 적용합니다.
     func updateBackgroundImage(_ image: UIImage) {
         backgroundImageView.image = image
     }
     
-    // 하단 탭바의 배경 변경 액션을 외부에서 연결합니다.
     func setBackgroundTapAction(_ action: @escaping () -> Void) {
         recordEditTabBar.onBackgroundTap = action
     }
