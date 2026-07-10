@@ -5,6 +5,7 @@
 //  Created by 김세령 on 7/8/26.
 //
 
+import PhotosUI
 import UIKit
 
 import SnapKit
@@ -34,6 +35,28 @@ final class EditorViewController: BaseUIViewController {
         navigationController?.popViewController(animated: false)
     }
     
+    private func presentImagePicker() {
+        var configuration = PHPickerConfiguration()
+        configuration.filter = .images
+        configuration.selectionLimit = 1
+        
+        let picker = PHPickerViewController(configuration: configuration)
+        picker.delegate = self
+        
+        present(picker, animated: true)
+    }
+    
+    private func pushImageCropViewController(with image: UIImage) {
+        let imageCropViewController = ImageCropViewController(image: image)
+        
+        imageCropViewController.onCropCompleted = { [weak self] croppedImage in
+            self?.rootView.updateBackgroundImage(croppedImage)
+        }
+        
+        navigationController?.pushViewController(imageCropViewController, animated: false)
+        navigationController?.navigationBar.isHidden = true
+    }
+    
     // MARK: - Actions
     
     override func setAddTarget() {
@@ -43,6 +66,35 @@ final class EditorViewController: BaseUIViewController {
 
         rootView.topNavigationBar.rightButtonAction = { [weak self] in
             self?.popViewController()
+        }
+        
+        rootView.setBackgroundTapAction { [weak self] in
+            self?.presentImagePicker()
+        }
+    }
+}
+
+// MARK: - PHPickerViewControllerDelegate
+
+extension EditorViewController: PHPickerViewControllerDelegate {
+
+    func picker(
+        _ picker: PHPickerViewController,
+        didFinishPicking results: [PHPickerResult]
+    ) {
+        guard let result = results.first else {
+            picker.dismiss(animated: true)
+            return
+        }
+        
+        result.itemProvider.loadObject(ofClass: UIImage.self) { [weak self] object, _ in
+            guard let image = object as? UIImage else { return }
+            
+            DispatchQueue.main.async {
+                picker.dismiss(animated: true) {
+                    self?.pushImageCropViewController(with: image)
+                }
+            }
         }
     }
 }
