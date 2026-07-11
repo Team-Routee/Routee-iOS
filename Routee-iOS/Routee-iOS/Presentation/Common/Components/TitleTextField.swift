@@ -21,10 +21,7 @@ final class TitleTextField: BaseUIView {
     private let titleTextField = UITextField()
     private let editButton = UIButton()
     
-    init(
-        title: String,
-        showsEditIcon: Bool
-    ) {
+    init(title: String, showsEditIcon: Bool) {
         self.title = title
         self.showsEditIcon = showsEditIcon
         

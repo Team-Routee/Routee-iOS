@@ -18,9 +18,7 @@ final class TimeLineCard: BaseUIView {
     private var imageViews: [UIImageView] = []
     private var imageCount = 0
     
-    init(
-        imageNames: [String]
-    ) {
+    init(imageNames: [String]) {
         imageViews = imageNames.map { imageName in
             let imageView = UIImageView()
             imageView.image = UIImage(named: imageName)
