@@ -61,8 +61,7 @@ final class TrackMap: BaseUIView {
 
     override func setLayout() {
         backgroundImageView.snp.makeConstraints {
-            $0.width.equalTo(343)
-            $0.height.equalTo(480)
+            $0.edges.equalToSuperview()
         }
     }
 

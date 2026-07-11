@@ -101,14 +101,15 @@ final class WorkoutTimeLineView: BaseUIView {
 
         workoutMetric.snp.makeConstraints {
             $0.top.equalTo(titleTextField.snp.bottom).offset(8)
-            $0.centerX.equalToSuperview()
-            $0.width.equalTo(343)
+            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.width.greaterThanOrEqualTo(343)
             $0.height.equalTo(91)
         }
 
         trackMap.snp.makeConstraints {
             $0.top.equalTo(workoutMetric.snp.bottom).offset(8)
             $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.width.greaterThanOrEqualTo(343)
             $0.height.equalTo(481)
         }
 
