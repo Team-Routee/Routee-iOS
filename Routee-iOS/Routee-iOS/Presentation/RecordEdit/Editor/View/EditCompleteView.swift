@@ -75,8 +75,8 @@ final class EditCompleteView: BaseUIView {
         backgroundImageView.snp.makeConstraints {
             $0.top.equalTo(topNavigationBar.snp.bottom).offset(24)
             $0.centerX.equalToSuperview()
-            $0.width.equalTo(304)
-            $0.height.equalTo(540)
+            $0.horizontalEdges.equalToSuperview().inset(35)
+            $0.bottom.equalTo(safeAreaInsets).inset(158)
         }
         
         buttonStackView.snp.makeConstraints {
@@ -97,5 +97,15 @@ final class EditCompleteView: BaseUIView {
     
     func updateImage(_ image: UIImage) {
         backgroundImageView.image = image
+    }
+    
+    // MARK: - Actions
+    
+    func setDownloadButtonAction(_ action: @escaping () -> Void) {
+        downloadButton.addAction(UIAction { _ in action() }, for: .touchUpInside)
+    }
+
+    func setExportButtonAction(_ action: @escaping () -> Void) {
+        exportButton.addAction(UIAction { _ in action() }, for: .touchUpInside)
     }
 }
