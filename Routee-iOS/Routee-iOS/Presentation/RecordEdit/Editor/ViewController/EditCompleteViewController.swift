@@ -7,6 +7,8 @@
 
 import UIKit
 
+import Photos
+
 final class EditCompleteViewController: BaseUIViewController {
     
     // MARK: - Properties
@@ -46,6 +48,40 @@ final class EditCompleteViewController: BaseUIViewController {
         navigationController?.popViewController(animated: false)
     }
     
+    private func saveImageToPhotoLibrary() {
+        PHPhotoLibrary.requestAuthorization(for: .addOnly) { [weak self] status in
+            guard let self else { return }
+
+            guard status == .authorized || status == .limited else {
+                DispatchQueue.main.async {
+                    self.view.showToast(title: "사진 접근 권한이 필요해요")
+                }
+                return
+            }
+
+            PHPhotoLibrary.shared().performChanges {
+                PHAssetChangeRequest.creationRequestForAsset(from: self.editedImage)
+            } completionHandler: { success, _ in
+                DispatchQueue.main.async {
+                    if success {
+                        self.view.showToast(title: "갤러리에 저장되었습니다.")
+                    } else {
+                        self.view.showToast(title: "갤러리 저장에 실패했습니다.")
+                    }
+                }
+            }
+        }
+    }
+    
+    private func exportImage() {
+        let activityViewController = UIActivityViewController(
+            activityItems: [editedImage],
+            applicationActivities: nil
+        )
+
+        present(activityViewController, animated: true)
+    }
+    
     // MARK: - Actions
     
     override func setAddTarget() {
@@ -55,6 +91,14 @@ final class EditCompleteViewController: BaseUIViewController {
         
         rootView.topNavigationBar.rightButtonAction = { [weak self] in
             self?.popViewController()
+        }
+        
+        rootView.setDownloadButtonAction { [weak self] in
+            self?.saveImageToPhotoLibrary()
+        }
+        
+        rootView.setExportButtonAction { [weak self] in
+            self?.exportImage()
         }
     }
 }
