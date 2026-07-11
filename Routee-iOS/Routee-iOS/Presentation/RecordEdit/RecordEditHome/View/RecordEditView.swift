@@ -102,7 +102,7 @@ final class RecordEditView: BaseUIView {
         
         titleLabel.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide).inset(16)
-            $0.leading.equalToSuperview().inset(16)
+            $0.leading.equalTo(workoutRecordCollectionView.snp.leading).offset(-8)
         }
         
         monthSelector.snp.makeConstraints {
