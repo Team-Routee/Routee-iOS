@@ -22,11 +22,12 @@ final class WorkoutViewModel {
             return nil
         }
         
-        return try await reverseGeocodingRepository.roadAddress(
+        let address = try await reverseGeocodingRepository.roadAddress(
             latitude: location.coordinate.latitude,
             longitude: location.coordinate.longitude
         )
         
         lastReverseGeocodingLocation = location
+        return address
     }
 }
