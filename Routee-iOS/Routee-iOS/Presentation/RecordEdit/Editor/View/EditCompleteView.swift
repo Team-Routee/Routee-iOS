@@ -76,7 +76,7 @@ final class EditCompleteView: BaseUIView {
             $0.top.equalTo(topNavigationBar.snp.bottom).offset(24)
             $0.centerX.equalToSuperview()
             $0.horizontalEdges.equalToSuperview().inset(35)
-            $0.bottom.equalTo(safeAreaInsets).inset(158)
+            $0.bottom.equalTo(safeAreaLayoutGuide).inset(125)
         }
         
         buttonStackView.snp.makeConstraints {
