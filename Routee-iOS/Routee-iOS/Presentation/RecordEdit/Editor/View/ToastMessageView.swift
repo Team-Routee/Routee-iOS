@@ -51,5 +51,4 @@ final class ToastMessageView: BaseUIView {
             $0.centerY.equalToSuperview()
         }
     }
-    
 }

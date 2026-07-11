@@ -85,10 +85,8 @@ final class StickerBox: BaseUIView {
     // MARK: - Actions
     
     private func setGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleStickerTapped)
-        )
-        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handleStickerPanned(_:))
-        )
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleStickerTapped))
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handleStickerPanned(_:)))
         
         addGestureRecognizer(tapGesture)
         addGestureRecognizer(panGesture)
