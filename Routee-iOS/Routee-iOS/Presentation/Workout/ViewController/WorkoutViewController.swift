@@ -10,24 +10,18 @@ import UIKit
 
 import NMapsMap
 
-final class WorkoutViewController: UIViewController {
+final class WorkoutViewController: BaseUIViewController {
     
     // MARK: - Properties
     
     private let workoutView = WorkoutView()
-    private let viewModel: WorkoutViewModel
+    private let viewModel = WorkoutViewModel()
     private let locationManager = CLLocationManager()
     private var initialLocation = false
-    
-    init(viewModel: WorkoutViewModel = WorkoutViewModel()) {
-        self.viewModel = viewModel
-        super.init(nibName: nil, bundle: nil)
-    }
-    
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        nil
-    }
+    private var isRecordingRoute = false
+    private var lastReverseGeocodingLocation: CLLocation?
+    private var lastRecordedLocation: CLLocation?
+    private var routeLocations: [NMGLatLng] = []
     
     // MARK: - Life Cycle
     
@@ -41,12 +35,6 @@ final class WorkoutViewController: UIViewController {
         view = workoutView
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        navigationController?.setNavigationBarHidden(true, animated: false)
-    }
-    
     // MARK: - Private Methods
     
     private func requestCurrentLocationAuthorization() {
@@ -57,22 +45,19 @@ final class WorkoutViewController: UIViewController {
             startShowingCurrentLocation()
         case .denied, .restricted:
             stopShowingCurrentLocation()
-        @unknown default:
+        default:
             stopShowingCurrentLocation()
         }
     }
     
     private func startShowingCurrentLocation() {
-        workoutView.mapView.locationOverlay.hidden = false
-        workoutView.mapView.positionMode = .direction
-        workoutView.applyLocationOverlayStyle()
+        workoutView.showLocationOverlay()
         locationManager.startUpdatingLocation()
         locationManager.requestLocation()
     }
     
     private func stopShowingCurrentLocation() {
-        workoutView.mapView.locationOverlay.hidden = true
-        workoutView.mapView.positionMode = .disabled
+        workoutView.hideLocationOverlay()
         locationManager.stopUpdatingLocation()
     }
     
@@ -82,23 +67,54 @@ final class WorkoutViewController: UIViewController {
             lng: location.coordinate.longitude
         )
         
-        workoutView.mapView.locationOverlay.location = currentLatLng
-        workoutView.applyLocationOverlayStyle()
+        workoutView.updateUserLocation(currentLatLng, course: location.course)
+        appendRouteLocationIfNeeded(location)
         updateCurrentAddress(location)
-        
-        if location.course >= 0 {
-            workoutView.mapView.locationOverlay.heading = location.course
-        }
         
         guard !initialLocation else { return }
         
         initialLocation = true
-        let cameraUpdate = NMFCameraUpdate(scrollTo: currentLatLng, zoomTo: 16)
-        cameraUpdate.animation = .easeIn
-        workoutView.mapView.moveCamera(cameraUpdate)
+        workoutView.moveCamera(to: currentLatLng, zoomTo: 16)
+    }
+    
+    private func appendRouteLocationIfNeeded(_ location: CLLocation) {
+        guard isRecordingRoute else { return }
+        
+        let currentLatLng = NMGLatLng(
+            lat: location.coordinate.latitude,
+            lng: location.coordinate.longitude
+        )
+        
+        lastRecordedLocation = location
+        routeLocations.append(currentLatLng)
+        workoutView.updateRoutePath(routeLocations)
+    }
+    
+    private func startRecordingRoute() {
+        isRecordingRoute = true
+        lastRecordedLocation = nil
+        routeLocations.removeAll()
+        workoutView.updateRoutePath(routeLocations)
+        workoutView.setRecording(true)
+        
+        if let currentLocation = locationManager.location {
+            appendRouteLocationIfNeeded(currentLocation)
+        }
+    }
+    
+    private func stopRecordingRoute() {
+        isRecordingRoute = false
+        workoutView.setRecording(false)
     }
     
     private func updateCurrentAddress(_ location: CLLocation) {
+        if let lastReverseGeocodingLocation,
+           location.distance(from: lastReverseGeocodingLocation) < 50 {
+            return
+        }
+        
+        lastReverseGeocodingLocation = location
+        
         Task { [weak self] in
             guard let self else { return }
             
@@ -119,12 +135,7 @@ final class WorkoutViewController: UIViewController {
     func moveToUserLocation() -> Self {
         guard let userLatLng = getUserLocation() else { return self }
         
-        let cameraUpdate = NMFCameraUpdate(scrollTo: userLatLng)
-        
-        DispatchQueue.main.async { [weak self] in
-            cameraUpdate.animation = .easeIn
-            self?.workoutView.mapView.moveCamera(cameraUpdate)
-        }
+        workoutView.moveCamera(to: userLatLng)
         return self
     }
     
@@ -139,12 +150,38 @@ final class WorkoutViewController: UIViewController {
     
     @discardableResult
     func moveToLocation(location: NMGLatLng) -> Self {
-        let cameraUpdate = NMFCameraUpdate(scrollTo: location)
-        DispatchQueue.main.async { [weak self] in
-            cameraUpdate.animation = .easeIn
-            self?.workoutView.mapView.moveCamera(cameraUpdate)
-        }
+        workoutView.moveCamera(to: location)
         return self
+    }
+    
+    // MARK: - Actions
+    
+    override func setAddTarget() {
+        workoutView.recordButton.addTarget(
+            self,
+            action: #selector(didTapRecordButton),
+            for: .touchUpInside
+        )
+        
+        workoutView.moveToUserlocationButton.addTarget(
+            self,
+            action: #selector(locationButtonDidTap),
+            for: .touchUpInside
+        )
+    }
+    
+    @objc
+    private func didTapRecordButton() {
+        if isRecordingRoute {
+            stopRecordingRoute()
+        } else {
+            startRecordingRoute()
+        }
+    }
+    
+    @objc
+    func locationButtonDidTap() {
+        workoutView.focusOnUserDirection()
     }
 }
 

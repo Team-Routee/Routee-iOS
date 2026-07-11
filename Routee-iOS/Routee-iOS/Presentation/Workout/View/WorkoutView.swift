@@ -15,39 +15,23 @@ import Then
 
 final class WorkoutView: BaseUIView {
     
-    // MARK: - Properties
-    
-    @Published var pathDistance: Double = 0
-    
-    private let screenWidth = UIScreen.main.bounds.width
-    private let screenHeight = UIScreen.main.bounds.height
-    
-    let pathImage = PassthroughSubject<UIImage?, Never>()
-    private var cancelBag = Set<AnyCancellable>()
-    
-    private let locationManager = CLLocationManager()
-    private var isDrawMode: Bool = false
-    private var bottomPadding: CGFloat = 0
-    private let locationOverlayIcon = NMFOverlayImage(
-        image: UIImage.icNow.resized(to: CGSize(width: 42, height: 42))
-    )
-    private let gradiantHeaderLayer = CAGradientLayer()
-    
     // MARK: - UI Properties
     
     private let routeeMapView = NMFNaverMapView()
-    private let gradiantHeaderView = UIView()
+    private let gradiantHeaderLayer = CAGradientLayer()
     private let routeeLogo = UIImageView()
+    private let currentLocationStackView = UIStackView()
     private let currentLocationImage = UIImageView()
     private let currentLocationLabel = UILabel()
-    private let currentLocationStackView = UIStackView()
+    private let userLocationIcon = NMFOverlayImage(
+        image: UIImage.icNow.resized(to: CGSize(width: 42, height: 42))
+    )
     private let pathOverlay = NMFPath()
-    private let moveToUserlocationButton = UIButton(type: .custom)
-    private lazy var recordButton = RouteeButton(titleText: "등산 기록", type: .enabled)
     
-    var mapView: NMFMapView {
-        routeeMapView.mapView
-    }
+    lazy var moveToUserlocationButton = UIButton(type: .custom)
+    lazy var recordButton = RouteeButton(titleText: "등산 기록", type: .enabled)
+    
+    private var mapView: NMFMapView { routeeMapView.mapView }
     
     // MARK: - UI Setting
     
@@ -55,12 +39,13 @@ final class WorkoutView: BaseUIView {
         addSubview(routeeMapView)
         
         routeeMapView.addSubviews(
-            gradiantHeaderView,
             routeeLogo,
             currentLocationStackView,
             moveToUserlocationButton,
             recordButton
         )
+        
+        routeeMapView.layer.addSublayer(gradiantHeaderLayer)
         
         currentLocationStackView.addArrangedSubviews(currentLocationImage, currentLocationLabel)
     }
@@ -69,9 +54,10 @@ final class WorkoutView: BaseUIView {
         applyLocationOverlayStyle()
         mapSetting()
         
-        gradiantHeaderView.do {
-            $0.isUserInteractionEnabled = false
-            $0.layer.addSublayer(gradiantHeaderLayer)
+        routeeLogo.do {
+            $0.image = .routeeLogoMintMd
+            $0.contentMode = .scaleAspectFit
+            $0.layer.zPosition = 2
         }
         
         gradiantHeaderLayer.do {
@@ -82,11 +68,7 @@ final class WorkoutView: BaseUIView {
             $0.locations = [0, 1]
             $0.startPoint = CGPoint(x: 0, y: 0.15)
             $0.endPoint = CGPoint(x: 0, y: 1)
-        }
-        
-        routeeLogo.do {
-            $0.image = .routeeLogoMintMd
-            $0.contentMode = .scaleAspectFit
+            $0.zPosition = 1
         }
         
         currentLocationImage.do {
@@ -109,6 +91,7 @@ final class WorkoutView: BaseUIView {
             $0.clipsToBounds = true
             $0.layoutMargins = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 12)
             $0.isLayoutMarginsRelativeArrangement = true
+            $0.layer.zPosition = 2
         }
         
         moveToUserlocationButton.do {
@@ -117,20 +100,19 @@ final class WorkoutView: BaseUIView {
             $0.layer.cornerRadius = 22
             $0.clipsToBounds = true
             $0.isHidden = false
-            $0.addTarget(self, action: #selector(locationButtonDidTap), for: .touchUpInside)
+            $0.layer.zPosition = 2
+        }
+        
+        pathOverlay.do {
+            $0.color = .mint_300
+            $0.outlineWidth = 0
+            $0.width = 4
         }
     }
     
     override func setLayout() {
         routeeMapView.snp.makeConstraints {
             $0.edges.equalToSuperview()
-        }
-        
-        gradiantHeaderView.snp.makeConstraints {
-            $0.top.equalToSuperview()
-            $0.centerX.equalToSuperview()
-            $0.height.equalTo(141)
-            $0.horizontalEdges.equalToSuperview()
         }
         
         routeeLogo.snp.makeConstraints {
@@ -159,19 +141,16 @@ final class WorkoutView: BaseUIView {
             $0.bottom.equalTo(routeeMapView.safeAreaLayoutGuide).inset(78)
         }
     }
-        
-    private func updateSubviewsConstraints() {
-        [moveToUserlocationButton].forEach { view in
-            view.snp.updateConstraints { make in
-                make.bottom.equalToSuperview().inset(98 + bottomPadding)
-            }
-        }
-    }
     
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        gradiantHeaderLayer.frame = gradiantHeaderView.bounds
+        gradiantHeaderLayer.frame = CGRect(
+            x: 0,
+            y: 0,
+            width: bounds.width,
+            height: 141
+        )
     }
     
     private func mapSetting() {
@@ -183,7 +162,7 @@ final class WorkoutView: BaseUIView {
             $0.mapView.isNightModeEnabled = true
             $0.mapView.addCameraDelegate(delegate: self)
             $0.mapView.setLayerGroup(NMF_LAYER_GROUP_MOUNTAIN, isEnabled: true)
-
+            
             $0.mapView.logoAlign = .leftBottom
             $0.mapView.logoMargin = UIEdgeInsets(
                 top: 0,
@@ -194,27 +173,68 @@ final class WorkoutView: BaseUIView {
         }
     }
     
-    // MARK: - Actions
+    // MARK: - Public Methods
     
-    @objc
-    func locationButtonDidTap() {
-        mapView.positionMode = .direction
-        applyLocationOverlayStyle()
-    }
-    
-    func applyLocationOverlayStyle() {
-        let locationOverlay = mapView.locationOverlay
-        locationOverlay.icon = locationOverlayIcon
+    func updateRoutePath(_ locations: [NMGLatLng]) {
+        guard locations.count >= 2 else {
+            pathOverlay.mapView = nil
+            return
+        }
+        
+        pathOverlay.path = NMGLineString(points: locations)
+        pathOverlay.mapView = mapView
     }
     
     func updateCurrentLocationAddress(_ address: String) {
         currentLocationLabel.text = address
     }
+    
+    func showLocationOverlay() {
+        mapView.locationOverlay.hidden = false
+        mapView.positionMode = .direction
+        applyLocationOverlayStyle()
+    }
+    
+    func hideLocationOverlay() {
+        mapView.locationOverlay.hidden = true
+        mapView.positionMode = .disabled
+    }
+    
+    func updateUserLocation(_ latLng: NMGLatLng, course: CLLocationDirection) {
+        mapView.locationOverlay.location = latLng
+        applyLocationOverlayStyle()
+        
+        guard course >= 0 else { return }
+        
+        mapView.locationOverlay.heading = course
+    }
+    
+    func focusOnUserDirection() {
+        mapView.positionMode = .direction
+        applyLocationOverlayStyle()
+    }
+    
+    func moveCamera(to latLng: NMGLatLng, zoomTo zoom: Double? = nil) {
+        let cameraUpdate = zoom.map { NMFCameraUpdate(scrollTo: latLng, zoomTo: $0) }
+        ?? NMFCameraUpdate(scrollTo: latLng)
+        cameraUpdate.animation = .easeIn
+        mapView.moveCamera(cameraUpdate)
+    }
+    
+    func setRecording(_ isRecording: Bool) {
+        recordButton.setTitle(isRecording ? "기록 종료" : "등산 기록", for: .normal)
+    }
+    
+    // MARK: - Private Methods
+    
+    private func applyLocationOverlayStyle() {
+        mapView.locationOverlay.icon = userLocationIcon
+    }
 }
 
 extension WorkoutView: NMFMapViewCameraDelegate {
     func mapView(_ mapView: NMFMapView, cameraDidChangeByReason reason: Int, animated: Bool) {
-        guard mapView.locationOverlay.icon !== locationOverlayIcon else { return }
+        guard mapView.locationOverlay.icon !== userLocationIcon else { return }
         
         applyLocationOverlayStyle()
     }
