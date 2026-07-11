@@ -54,7 +54,7 @@ final class EditCompleteViewController: BaseUIViewController {
 
             guard status == .authorized || status == .limited else {
                 DispatchQueue.main.async {
-                    self.view.showToast(title: "사진 접근 권한이 필요해요")
+                    self.rootView.showToast(title: "사진 접근 권한이 필요해요")
                 }
                 return
             }
@@ -64,9 +64,9 @@ final class EditCompleteViewController: BaseUIViewController {
             } completionHandler: { success, _ in
                 DispatchQueue.main.async {
                     if success {
-                        self.view.showToast(title: "갤러리에 저장되었습니다.")
+                        self.rootView.showToast(title: "갤러리에 저장되었습니다.")
                     } else {
-                        self.view.showToast(title: "갤러리 저장에 실패했습니다.")
+                        self.rootView.showToast(title: "갤러리 저장에 실패했습니다.")
                     }
                 }
             }
