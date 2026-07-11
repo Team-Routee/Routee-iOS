@@ -12,6 +12,10 @@ import Then
 
 final class WorkoutRecordThumbnail: BaseUIView {
     
+    // MARK: - Properties
+    
+    var editButtonAction: (() -> Void)?
+    
     // MARK: - UI Properties
     
     private let backgroundContainerView = UIView()
@@ -99,6 +103,8 @@ final class WorkoutRecordThumbnail: BaseUIView {
             thirdPhotoView,
             editButton
         )
+
+        setActions()
     }
     
     override func setLayout() {
@@ -173,5 +179,22 @@ final class WorkoutRecordThumbnail: BaseUIView {
             imageView.image = hasForegroundImage ? UIImage(named: imageNames[imageIndex]) : nil
             imageView.isHidden = !hasForegroundImage
         }
+    }
+
+    // MARK: - Private Methods
+
+    private func setActions() {
+        editButton.addTarget(
+            self,
+            action: #selector(didTapEditButton),
+            for: .touchUpInside
+        )
+    }
+    
+    // MARK: - Actions
+    
+    @objc
+    private func didTapEditButton() {
+        editButtonAction?()
     }
 }

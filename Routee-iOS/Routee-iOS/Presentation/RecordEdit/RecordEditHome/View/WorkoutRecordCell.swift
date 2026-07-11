@@ -15,6 +15,7 @@ final class WorkoutRecordCell: UICollectionViewCell {
     // MARK: - Properties
     
     static let identifier = "WorkoutRecordCell"
+    var editButtonAction: (() -> Void)?
     
     private let formatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -47,6 +48,7 @@ final class WorkoutRecordCell: UICollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         
+        editButtonAction = nil
         workoutRecordThumbnail.configure(imageNames: [])
     }
     
@@ -61,7 +63,7 @@ final class WorkoutRecordCell: UICollectionViewCell {
         }
         
         dateLabel.do {
-            $0.text = "2026.03.23"
+            $0.text = "2026.03.23."
             $0.font = .label_m_12
             $0.textColor = .white60
             $0.textAlignment = .center
@@ -100,5 +102,8 @@ final class WorkoutRecordCell: UICollectionViewCell {
         titleLabel.text = workout.title
         dateLabel.text = formatter.string(from: workout.date)
         workoutRecordThumbnail.configure(imageNames: workout.imageNames)
+        workoutRecordThumbnail.editButtonAction = { [weak self] in
+            self?.editButtonAction?()
+        }
     }
 }
