@@ -20,6 +20,8 @@ final class EditorView: BaseUIView {
     private let backgroundImageView = UIImageView()
     private let dataInfo = RecordInfo()
     private let recordEditTabBar = RecordEditTabBar()
+    private let routeSticker = RouteSticker()
+    private lazy var stickerBox = StickerBox(contentView: routeSticker)
     private lazy var hideOptionViewTapGesture = UITapGestureRecognizer(
         target: self,
         action: #selector(handleViewTapped(_:))
@@ -53,6 +55,7 @@ final class EditorView: BaseUIView {
         )
 
         addGestureRecognizer(hideOptionViewTapGesture)
+        setStickerAction()
     }
 
     override func setLayout() {
@@ -100,14 +103,92 @@ final class EditorView: BaseUIView {
     func setBackgroundTapAction(_ action: @escaping () -> Void) {
         recordEditTabBar.onBackgroundTap = action
     }
+    
+    func makeEditedImage() -> UIImage {
+        stickerBox.setCloseButton(isSelected: false)
+        layoutIfNeeded()
+        
+        let renderFrame = backgroundImageView.frame
+        let renderer = UIGraphicsImageRenderer(size: renderFrame.size)
+        
+        return renderer.image { context in
+            context.cgContext.translateBy(
+                x: -renderFrame.minX,
+                y: -renderFrame.minY
+            )
+            layer.render(in: context.cgContext)
+        }
+    }
+    
+    func addSticker(_ contentView: UIView) {
+        let stickerBox = StickerBox(contentView: contentView)
+
+        addSubview(stickerBox)
+        let stickerSize = stickerBoxSize(for: stickerBox)
+
+        stickerBox.frame = CGRect(
+            x: 100,
+            y: 200,
+            width: stickerSize.width,
+            height: stickerSize.height
+        )
+        
+        stickerBox.onDeleted = { [weak stickerBox] in
+            stickerBox?.removeFromSuperview()
+        }
+    }
+
+    // MARK: - Private Methods
+
+    private func setStickerAction() {
+        recordEditTabBar.onStickerSelected = { [weak self] stickerType in
+            guard stickerType == .route else { return }
+            self?.showRouteSticker()
+        }
+    }
+
+    private func showRouteSticker() {
+        guard stickerBox.superview == nil else {
+            bringSubviewToFront(stickerBox)
+            return
+        }
+
+        addSubview(stickerBox)
+        let stickerSize = stickerBoxSize(for: stickerBox)
+
+        stickerBox.frame = CGRect(
+            x: 100,
+            y: 200,
+            width: stickerSize.width,
+            height: stickerSize.height
+        )
+
+        stickerBox.onDeleted = { [weak self] in
+            self?.stickerBox.removeFromSuperview()
+        }
+    }
+    
+    private func stickerBoxSize(for stickerBox: StickerBox) -> CGSize {
+        stickerBox.setNeedsLayout()
+        stickerBox.layoutIfNeeded()
+        
+        return stickerBox.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
+    }
 
     // MARK: - Actions
 
     @objc
     private func handleViewTapped(_ gesture: UITapGestureRecognizer) {
         let point = gesture.location(in: recordEditTabBar)
+        let stickerPoint = gesture.location(in: stickerBox)
 
         guard !recordEditTabBar.containsInteractivePoint(point) else { return }
+        
+        if stickerBox.superview != nil,
+           stickerBox.isSelected,
+           !stickerBox.bounds.contains(stickerPoint) {
+            stickerBox.setCloseButton(isSelected: false)
+        }
 
         recordEditTabBar.hideOptionView()
     }

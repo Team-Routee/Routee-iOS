@@ -17,13 +17,13 @@ final class RecordInfo: BaseUIView {
     private let dataInfoStackView = UIStackView()
     private let distanceStackView = UIStackView()
     private let distanceLabel = UILabel()
-    private let distanceDataLabel = UILabel()
+    private let distanceDataLabel = ItalicPaddingLabel()
     private let timeStackView = UIStackView()
     private let timeLabel = UILabel()
-    private let timeDataLabel = UILabel()
+    private let timeDataLabel = ItalicPaddingLabel()
     private let altitudeStackView = UIStackView()
     private let altitudeLabel = UILabel()
-    private let altitudeDataLabel = UILabel()
+    private let altitudeDataLabel = ItalicPaddingLabel()
 
     // MARK: - UI Setting
     
