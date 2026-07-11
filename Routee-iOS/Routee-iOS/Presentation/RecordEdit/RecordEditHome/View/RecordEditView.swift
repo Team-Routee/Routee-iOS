@@ -14,18 +14,28 @@ final class RecordEditView: BaseUIView {
     
     // MARK: - UI Properties
     
+    private let backgroundImageView = RouteeEllipseBackground()
     private let titleLabel = UILabel()
     private let monthSelector = MonthSelector()
-    
     private let emptyDataStackView = UIStackView()
     private let emptyDataImageView = UIImageView()
     private let emptyDataLabel = UILabel()
-    
     private let flowLayout = UICollectionViewFlowLayout()
     private(set) lazy var workoutRecordCollectionView = UICollectionView(
         frame: .zero,
         collectionViewLayout: flowLayout
     )
+
+    // MARK: - Life Cycle
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        let bottomInset = safeAreaInsets.bottom + TabBarViewController.customTabBarHeight + 20
+
+        workoutRecordCollectionView.contentInset.bottom = bottomInset
+        workoutRecordCollectionView.verticalScrollIndicatorInsets.bottom = bottomInset
+    }
     
     // MARK: - UI Setting
     
@@ -72,6 +82,7 @@ final class RecordEditView: BaseUIView {
     
     override func setUI() {
         addSubviews(
+            backgroundImageView,
             titleLabel,
             monthSelector,
             workoutRecordCollectionView,
@@ -85,9 +96,13 @@ final class RecordEditView: BaseUIView {
     }
     
     override func setLayout() {
+        backgroundImageView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
         titleLabel.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide).inset(16)
-            $0.leading.equalToSuperview().inset(16)
+            $0.leading.equalTo(workoutRecordCollectionView.snp.leading).offset(-8)
         }
         
         monthSelector.snp.makeConstraints {
@@ -114,15 +129,6 @@ final class RecordEditView: BaseUIView {
         }
     }
     
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        
-        let bottomInset = safeAreaInsets.bottom + TabBarViewController.customTabBarHeight + 20
-        
-        workoutRecordCollectionView.contentInset.bottom = bottomInset
-        workoutRecordCollectionView.verticalScrollIndicatorInsets.bottom = bottomInset
-    }
-    
     // MARK: - Public Methods
     
     func updateView(isEmpty: Bool) {
@@ -133,7 +139,7 @@ final class RecordEditView: BaseUIView {
     func scrollToTop() {
         workoutRecordCollectionView.setContentOffset(.zero, animated: false)
     }
-
+    
     func setMonthChangedHandler(_ handler: @escaping (Date) -> Void) {
         monthSelector.onMonthChanged = handler
     }

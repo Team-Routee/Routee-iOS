@@ -11,55 +11,76 @@ import SnapKit
 import Then
 
 final class RecordEditViewController: BaseUIViewController {
-    
+
     // MARK: - Properties
-    
+
     var onMonthChanged: ((Date) -> Void)?
-    private let rootView = RecordEditView()
     private let allRecords = WorkoutDummyData.dummyWorkoutRecords
     private var records: [WorkoutRecordModel] = []
-    
+
+    // MARK: - UI Properties
+
+    private let rootView = RecordEditView()
+
     // MARK: - Life Cycle
-    
+
     override func loadView() {
         view = rootView
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         setCollectionView()
         setMonthSelector()
         updateRecords(for: Date())
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        (tabBarController as? TabBarViewController)?.setCustomTabBarHidden(false)
+    }
+
     // MARK: - Private Methods
-    
+
+    private func setCollectionView() {
+        rootView.workoutRecordCollectionView.register(
+            WorkoutRecordCell.self,
+            forCellWithReuseIdentifier: WorkoutRecordCell.identifier
+        )
+
+        rootView.workoutRecordCollectionView.dataSource = self
+        rootView.workoutRecordCollectionView.delegate = self
+    }
+
     private func setMonthSelector() {
         rootView.setMonthChangedHandler { [weak self] date in
             self?.updateRecords(for: date)
         }
     }
-    
+
     private func updateRecords(for month: Date) {
         records = allRecords.filter { $0.date.isSameMonth(as: month) }
         rootView.updateView(isEmpty: records.isEmpty)
         rootView.workoutRecordCollectionView.reloadData()
         rootView.scrollToTop()
     }
+
+    private func pushEditorViewController() {
+        let editorViewController = EditorViewController()
+        navigationController?.pushViewController(editorViewController, animated: false)
+    }
 }
 
-    // MARK: - extension
+    // MARK: - extensions
 
 extension RecordEditViewController: UICollectionViewDelegate {
-    private func setCollectionView() {
-        rootView.workoutRecordCollectionView.register(
-            WorkoutRecordCell.self,
-            forCellWithReuseIdentifier: WorkoutRecordCell.identifier
-        )
-        
-        rootView.workoutRecordCollectionView.dataSource = self
-        rootView.workoutRecordCollectionView.delegate = self
+    func collectionView(
+        _ collectionView: UICollectionView,
+        didSelectItemAt indexPath: IndexPath
+    ) {
+        pushEditorViewController()
     }
 }
 
@@ -70,7 +91,7 @@ extension RecordEditViewController: UICollectionViewDataSource {
     ) -> Int {
         records.count
     }
-    
+
     func collectionView(
         _ collectionView: UICollectionView,
         cellForItemAt indexPath: IndexPath
@@ -81,9 +102,12 @@ extension RecordEditViewController: UICollectionViewDataSource {
         ) as? WorkoutRecordCell else {
             return UICollectionViewCell()
         }
-        
+
         cell.configure(with: records[indexPath.item])
-        
+        cell.editButtonAction = { [weak self] in
+            self?.pushEditorViewController()
+        }
+
         return cell
     }
 }
