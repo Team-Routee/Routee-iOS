@@ -14,6 +14,18 @@ final class ImageCropView: BaseUIView {
     // MARK: - UI Properties
     
     let topNavigationBar = TopNavigationBar(rightTitle: "확인")
+    private let cropContentView: UIView
+    
+    // MARK: - Initializer
+    
+    init(cropContentView: UIView) {
+        self.cropContentView = cropContentView
+        super.init(frame: .zero)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError()
+    }
     
     // MARK: - UI Setting
     
@@ -22,7 +34,7 @@ final class ImageCropView: BaseUIView {
     }
     
     override func setUI() {
-        addSubview(topNavigationBar)
+        addSubviews(topNavigationBar, cropContentView)
     }
     
     override func setLayout() {
@@ -30,12 +42,6 @@ final class ImageCropView: BaseUIView {
             $0.top.equalTo(safeAreaLayoutGuide)
             $0.horizontalEdges.equalToSuperview()
         }
-    }
-    
-    // MARK: - Public Methods
-    
-    func setCropContentView(_ cropContentView: UIView) {
-        addSubview(cropContentView)
         
         cropContentView.snp.makeConstraints {
             $0.top.equalTo(topNavigationBar.snp.bottom)
