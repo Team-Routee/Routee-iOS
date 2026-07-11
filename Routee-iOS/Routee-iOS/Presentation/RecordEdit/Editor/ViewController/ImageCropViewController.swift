@@ -46,28 +46,6 @@ final class ImageCropViewController: BaseUIViewController {
         cropViewController.didMove(toParent: self)
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        setCropToolbarButtons()
-        cropViewController.hidesNavigationBar = false
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        
-        setCropToolbarButtons()
-        DispatchQueue.main.async { [weak self] in
-            self?.setCropToolbarButtons()
-        }
-    }
-    
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        
-        setCropToolbarButtons()
-    }
-    
     // MARK: - Private Methods
     
     private func setCropViewController() {
@@ -75,24 +53,16 @@ final class ImageCropViewController: BaseUIViewController {
         cropViewController.aspectRatioPreset = CGSize(width: 343, height: 610)
         cropViewController.aspectRatioLockEnabled = true
         cropViewController.resetAspectRatioEnabled = false
-        cropViewController.rotateButtonsHidden = false
-        cropViewController.rotateClockwiseButtonHidden = false
-        cropViewController.resetButtonHidden = false
-        cropViewController.aspectRatioPickerButtonHidden = true
+        cropViewController.hidesNavigationBar = false
+        
         setCropToolbarButtons()
     }
     
     private func setCropToolbarButtons() {
         cropViewController.doneButtonHidden = true
         cropViewController.cancelButtonHidden = true
-        cropViewController.rotateButtonsHidden = false
-        cropViewController.rotateClockwiseButtonHidden = false
-        cropViewController.resetButtonHidden = false
         cropViewController.aspectRatioPickerButtonHidden = true
         
-        cropViewController.toolbar.alpha = 1
-        cropViewController.toolbar.isHidden = false
-        cropViewController.toolbar.isUserInteractionEnabled = true
         cropViewController.toolbar.doneButtonHidden = true
         cropViewController.toolbar.cancelButtonHidden = true
         cropViewController.toolbar.rotateCounterclockwiseButtonHidden = false
@@ -107,7 +77,6 @@ final class ImageCropViewController: BaseUIViewController {
     }
     
     private func completeCrop() {
-        setCropToolbarButtons()
         cropViewController.commitCurrentCrop()
     }
     
