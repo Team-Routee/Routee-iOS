@@ -36,7 +36,6 @@ final class ToastMessageView: BaseUIView {
             $0.textColor = .staticWhite
             $0.font = .label_m_14
             $0.textAlignment = .center
-            $0.numberOfLines = 1
             $0.lineBreakMode = .byTruncatingTail
         }
     }   

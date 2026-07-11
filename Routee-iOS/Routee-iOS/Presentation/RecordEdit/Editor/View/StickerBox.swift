@@ -60,7 +60,7 @@ final class StickerBox: BaseUIView {
     
     override func setLayout() {
         contentView.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview().inset(13)
+            $0.verticalEdges.equalToSuperview().inset(13)
             $0.top.bottom.equalToSuperview().inset(10)
         }
         
