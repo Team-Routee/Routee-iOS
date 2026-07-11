@@ -68,7 +68,7 @@ final class TitleTextField: BaseUIView {
         titleTextField.snp.makeConstraints {
             $0.leading.equalToSuperview().inset(16)
             $0.centerY.equalToSuperview()
-            $0.trailing.lessThanOrEqualTo(editButton.snp.leading).offset(-161)
+            $0.trailing.lessThanOrEqualTo(editButton.snp.leading).offset(-16)
             $0.height.equalTo(44)
         }
         
