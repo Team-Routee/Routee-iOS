@@ -10,15 +10,26 @@ import UIKit
 
 import NMapsMap
 
+enum WorkoutMode: Equatable {
+    case ready
+    case recording
+    case paused
+}
+
 final class WorkoutViewController: BaseUIViewController {
     
     // MARK: - Properties
     
     private let workoutView = WorkoutView()
+    private var workoutMode: WorkoutMode = .ready {
+        didSet {
+            guard oldValue != workoutMode else { return }
+            updateUI(for: workoutMode)
+        }
+    }
     private let viewModel = WorkoutViewModel()
     private let locationManager = CLLocationManager()
     private var initialLocation = false
-    private var isRecordingRoute = false
     private var lastReverseGeocodingLocation: CLLocation?
     private var lastRecordedLocation: CLLocation?
     private var routeLocations: [NMGLatLng] = []
@@ -29,14 +40,21 @@ final class WorkoutViewController: BaseUIViewController {
         super.viewDidLoad()
         
         setLocationManager()
+        updateUI(for: workoutMode)
     }
-    
+
     override func loadView() {
         view = workoutView
     }
     
     // MARK: - Private Methods
     
+    private func updateUI(for mode: WorkoutMode) {
+        workoutView.configure(for: mode)
+        let shouldHideTabBar = mode != .ready
+        (tabBarController as? TabBarViewController)?.setCustomTabBarHidden(shouldHideTabBar)
+    }
+
     private func requestCurrentLocationAuthorization() {
         switch locationManager.authorizationStatus {
         case .notDetermined:
@@ -78,7 +96,7 @@ final class WorkoutViewController: BaseUIViewController {
     }
     
     private func appendRouteLocationIfNeeded(_ location: CLLocation) {
-        guard isRecordingRoute else { return }
+        guard workoutMode == .recording else { return }
         
         let currentLatLng = NMGLatLng(
             lat: location.coordinate.latitude,
@@ -91,20 +109,27 @@ final class WorkoutViewController: BaseUIViewController {
     }
     
     private func startRecordingRoute() {
-        isRecordingRoute = true
+        workoutMode = .recording
         lastRecordedLocation = nil
         routeLocations.removeAll()
         workoutView.updateRoutePath(routeLocations)
-        workoutView.setRecording(true)
         
         if let currentLocation = locationManager.location {
             appendRouteLocationIfNeeded(currentLocation)
         }
     }
     
-    private func stopRecordingRoute() {
-        isRecordingRoute = false
-        workoutView.setRecording(false)
+    private func pauseRecordingRoute() {
+        workoutMode = .paused
+    }
+
+    private func resumeRecordingRoute() {
+        workoutMode = .recording
+    }
+
+    private func finishRecordingRoute() {
+        workoutMode = .ready
+        lastRecordedLocation = nil
     }
     
     private func updateCurrentAddress(_ location: CLLocation) {
@@ -168,15 +193,44 @@ final class WorkoutViewController: BaseUIViewController {
             action: #selector(locationButtonDidTap),
             for: .touchUpInside
         )
+
+        workoutView.puaseButton.addTarget(
+            self,
+            action: #selector(didTapPauseButton),
+            for: .touchUpInside
+        )
+
+        workoutView.restartButton.addTarget(
+            self,
+            action: #selector(didTapRestartButton),
+            for: .touchUpInside
+        )
+
+        workoutView.finishButton.addTarget(
+            self,
+            action: #selector(didTapFinishButton),
+            for: .touchUpInside
+        )
     }
     
     @objc
     private func didTapRecordButton() {
-        if isRecordingRoute {
-            stopRecordingRoute()
-        } else {
-            startRecordingRoute()
-        }
+        startRecordingRoute()
+    }
+
+    @objc
+    private func didTapPauseButton() {
+        pauseRecordingRoute()
+    }
+
+    @objc
+    private func didTapRestartButton() {
+        resumeRecordingRoute()
+    }
+
+    @objc
+    private func didTapFinishButton() {
+        finishRecordingRoute()
     }
     
     @objc

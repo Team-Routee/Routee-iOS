@@ -15,6 +15,12 @@ import Then
 
 final class WorkoutView: BaseUIView {
     
+    // MARK: - Properties
+    
+    var distance = "15.52"
+    var time = "00:00"
+    var altitude = "2312"
+    
     // MARK: - UI Properties
     
     private let routeeMapView = NMFNaverMapView()
@@ -23,13 +29,20 @@ final class WorkoutView: BaseUIView {
     private let currentLocationStackView = UIStackView()
     private let currentLocationImage = UIImageView()
     private let currentLocationLabel = UILabel()
+    private lazy var workoutMetric = WorkoutMetric(distance: distance, time: time, altitude: altitude)
     private let userLocationIcon = NMFOverlayImage(
         image: UIImage.icNow.resized(to: CGSize(width: 42, height: 42))
     )
     private let pathOverlay = NMFPath()
-    
     lazy var moveToUserlocationButton = UIButton(type: .custom)
     lazy var recordButton = RouteeButton(titleText: "등산 기록", type: .enabled)
+    lazy var puaseButton = UIButton()
+    lazy var cameraOnButton = UIButton()
+    private let activityButtonStackView = UIStackView()
+    private let workoutPauseView = WorkoutPauseView()
+
+    var restartButton: UIButton { workoutPauseView.restartButton }
+    var finishButton: UIButton { workoutPauseView.finishButton }
     
     private var mapView: NMFMapView { routeeMapView.mapView }
     
@@ -37,17 +50,21 @@ final class WorkoutView: BaseUIView {
     
     override func setUI() {
         addSubview(routeeMapView)
+        addSubview(workoutPauseView)
         
         routeeMapView.addSubviews(
             routeeLogo,
             currentLocationStackView,
+            workoutMetric,
             moveToUserlocationButton,
-            recordButton
+            recordButton,
+            activityButtonStackView
         )
         
         routeeMapView.layer.addSublayer(gradiantHeaderLayer)
         
         currentLocationStackView.addArrangedSubviews(currentLocationImage, currentLocationLabel)
+        activityButtonStackView.addArrangedSubviews(puaseButton, cameraOnButton)
     }
     
     override func setStyle() {
@@ -59,7 +76,7 @@ final class WorkoutView: BaseUIView {
             $0.contentMode = .scaleAspectFit
             $0.layer.zPosition = 2
         }
-        
+
         gradiantHeaderLayer.do {
             $0.colors = [
                 UIColor.grey_900.cgColor,
@@ -70,18 +87,18 @@ final class WorkoutView: BaseUIView {
             $0.endPoint = CGPoint(x: 0, y: 1)
             $0.zPosition = 1
         }
-        
+
         currentLocationImage.do {
             $0.image = .icLocationInfoSmGradient
             $0.contentMode = .scaleAspectFit
         }
-        
+
         currentLocationLabel.do {
             $0.text = "위치 권한 허용이 필요합니다."
             $0.font = .label_m_12
             $0.textColor = .grey_50
         }
-        
+
         currentLocationStackView.do {
             $0.axis = .horizontal
             $0.alignment = .center
@@ -93,7 +110,7 @@ final class WorkoutView: BaseUIView {
             $0.isLayoutMarginsRelativeArrangement = true
             $0.layer.zPosition = 2
         }
-        
+
         moveToUserlocationButton.do {
             $0.setImage(.icInplace, for: .normal)
             $0.backgroundColor = .static_black
@@ -102,16 +119,45 @@ final class WorkoutView: BaseUIView {
             $0.isHidden = false
             $0.layer.zPosition = 2
         }
-        
+
         pathOverlay.do {
             $0.color = .mint_300
             $0.outlineWidth = 0
             $0.width = 4
         }
+
+        puaseButton.do {
+            $0.setTitle("정지", for: .normal)
+            $0.setImage(.icStop, for: .normal)
+            $0.titleLabel?.font = .label_sb_16
+            $0.setTitleColor(.bgPrimary, for: .normal)
+            $0.backgroundColor = .staticWhite
+            $0.layer.cornerRadius = 30
+            $0.clipsToBounds = true
+        }
+
+        cameraOnButton.do {
+            $0.setImage(.icCameraFillBlack, for: .normal)
+            $0.backgroundColor = .mint300
+            $0.layer.cornerRadius = 30
+            $0.clipsToBounds = true
+        }
+
+        activityButtonStackView.do {
+            $0.spacing = 12
+            $0.axis = .horizontal
+            $0.alignment = .center
+        }
+
+        workoutPauseView.isHidden = true
     }
     
     override func setLayout() {
         routeeMapView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+
+        workoutPauseView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
         
@@ -124,6 +170,11 @@ final class WorkoutView: BaseUIView {
             $0.top.equalTo(routeeLogo.snp.bottom).offset(22)
             $0.centerX.equalTo(routeeLogo)
             $0.height.equalTo(32)
+        }
+        
+        workoutMetric.snp.makeConstraints {
+            $0.top.equalTo(safeAreaLayoutGuide).offset(20)
+            $0.horizontalEdges.equalToSuperview().inset(16)
         }
         
         currentLocationImage.snp.makeConstraints {
@@ -139,6 +190,21 @@ final class WorkoutView: BaseUIView {
         recordButton.snp.makeConstraints {
             $0.centerX.equalToSuperview()
             $0.bottom.equalTo(routeeMapView.safeAreaLayoutGuide).inset(78)
+        }
+
+        puaseButton.snp.makeConstraints {
+            $0.width.equalTo(108)
+            $0.height.equalTo(60)
+        }
+
+        cameraOnButton.snp.makeConstraints {
+            $0.width.equalTo(60)
+            $0.height.equalTo(60)
+        }
+
+        activityButtonStackView.snp.makeConstraints {
+            $0.bottom.equalTo(safeAreaLayoutGuide).inset(31)
+            $0.centerX.equalToSuperview()
         }
     }
     
@@ -175,6 +241,19 @@ final class WorkoutView: BaseUIView {
     
     // MARK: - Public Methods
     
+    func configure(for mode: WorkoutMode) {
+        let isReady = mode == .ready
+        let isRecording = mode == .recording
+
+        routeeLogo.isHidden = !isReady
+        currentLocationStackView.isHidden = !isReady
+        workoutMetric.isHidden = !isRecording
+        moveToUserlocationButton.isHidden = !isReady
+        recordButton.isHidden = !isReady
+        activityButtonStackView.isHidden = !isRecording
+        workoutPauseView.isHidden = mode != .paused
+    }
+
     func updateRoutePath(_ locations: [NMGLatLng]) {
         guard locations.count >= 2 else {
             pathOverlay.mapView = nil
