@@ -16,6 +16,7 @@ final class EditorView: BaseUIView {
     
     private let backgroundGradientView = RouteeEllipseBackground()
     let topNavigationBar = TopNavigationBar(rightTitle: "완료")
+    private let backgroundOpacityView = UIView()
     private let backgroundImageView = UIImageView()
     private let dataInfo = RecordInfo()
     private let recordEditTabBar = RecordEditTabBar()
@@ -29,9 +30,15 @@ final class EditorView: BaseUIView {
     override func setStyle() {
         backgroundColor = .bgPrimary
         hideOptionViewTapGesture.cancelsTouchesInView = false
+        
+        backgroundOpacityView.do {
+            $0.backgroundColor = .black40
+        }
 
         backgroundImageView.do {
             $0.image = UIImage(resource: .imgNavermapMain)
+            $0.contentMode = .scaleAspectFill
+            $0.clipsToBounds = true
         }
     }
 
@@ -39,6 +46,7 @@ final class EditorView: BaseUIView {
         addSubviews(
             backgroundGradientView,
             backgroundImageView,
+            backgroundOpacityView,
             dataInfo,
             topNavigationBar,
             recordEditTabBar
@@ -62,6 +70,12 @@ final class EditorView: BaseUIView {
             $0.bottom.equalTo(safeAreaLayoutGuide)
             $0.height.equalTo(71)
         }
+        
+        backgroundOpacityView.snp.makeConstraints {
+            $0.top.equalTo(topNavigationBar.snp.bottom).offset(12)
+            $0.bottom.equalTo(recordEditTabBar.snp.top)
+            $0.leading.trailing.equalToSuperview().inset(16)
+        }
 
         backgroundImageView.snp.makeConstraints {
             $0.top.equalTo(topNavigationBar.snp.bottom).offset(12)
@@ -75,6 +89,16 @@ final class EditorView: BaseUIView {
             $0.height.equalTo(164)
             $0.width.equalTo(85)
         }
+    }
+    
+    // MARK: - Public Methods
+    
+    func updateBackgroundImage(_ image: UIImage) {
+        backgroundImageView.image = image
+    }
+    
+    func setBackgroundTapAction(_ action: @escaping () -> Void) {
+        recordEditTabBar.onBackgroundTap = action
     }
 
     // MARK: - Actions

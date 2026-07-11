@@ -1,5 +1,5 @@
 //
-//  ArchiveHomeView.swift
+//  ArchiveView.swift
 //  Routee-iOS
 //
 //  Created by 초긍정행운의포춘쿠키 on 7/9/26.
@@ -9,7 +9,7 @@ import UIKit
 
 import SnapKit
 
-final class ArchiveHomeView: BaseUIView {
+final class ArchiveView: BaseUIView {
 
     // MARK: - UI Properties
 

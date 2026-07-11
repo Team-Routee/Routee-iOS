@@ -64,7 +64,7 @@ final class TabBarViewController: UITabBarController {
     private func configureViewControllers() {
         let workout = UINavigationController(rootViewController: WorkoutViewController())
         let recordEdit = UINavigationController(rootViewController: RecordEditViewController())
-        let archive = UINavigationController(rootViewController: SampleViewController())
+        let archive = UINavigationController(rootViewController: ArchiveViewController())
         let setting = UINavigationController(rootViewController: SampleViewController())
         
         [workout, recordEdit, archive, setting].forEach {
