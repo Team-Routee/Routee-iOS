@@ -16,14 +16,22 @@ final class DailyRecordBottomSheetViewController: BaseUIViewController {
     
     private let rootView = DailyRecordBottomSheet()
     private let model: CalendarDateModel
+    private weak var pushNavigationController: UINavigationController?
+    private let onPushNavigation: (() -> Void)?
     private var sheetHeight: CGFloat {
         DailyRecordBottomSheet.modalHeight(for: model.items.count)
     }
 
     // MARK: - Initializer
     
-    init(model: CalendarDateModel) {
+    init(
+        model: CalendarDateModel,
+        pushNavigationController: UINavigationController?,
+        onPushNavigation: (() -> Void)?
+    ) {
         self.model = model
+        self.pushNavigationController = pushNavigationController
+        self.onPushNavigation = onPushNavigation
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -34,7 +42,6 @@ final class DailyRecordBottomSheetViewController: BaseUIViewController {
     // MARK: - Life Cycle
     
     override func loadView() {
-        rootView.backgroundColor = .grey900
         view = rootView
     }
     
@@ -42,6 +49,9 @@ final class DailyRecordBottomSheetViewController: BaseUIViewController {
         super.viewDidLoad()
 
         rootView.configure(with: model)
+        rootView.onRecordChevronTap = { [weak self] _ in
+            self?.navigateToSampleView()
+        }
         configureSheet()
     }
 
@@ -61,5 +71,18 @@ final class DailyRecordBottomSheetViewController: BaseUIViewController {
         sheet.prefersGrabberVisible = false
         sheet.preferredCornerRadius = 24
         sheet.prefersScrollingExpandsWhenScrolledToEdge = false
+    }
+
+    private func navigateToSampleView() {
+        let sampleViewController = SampleViewController()
+
+        guard let pushNavigationController else {
+            return
+        }
+
+        onPushNavigation?()
+        dismiss(animated: false) {
+            pushNavigationController.pushViewController(sampleViewController, animated: true)
+        }
     }
 }

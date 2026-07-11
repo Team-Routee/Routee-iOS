@@ -95,7 +95,11 @@ final class ArchiveViewController: BaseUIViewController {
             guard let dateText = listDateText(from: day.activityDate) else { return }
 
             let listViewController = DailyRecordBottomSheetViewController(
-                model: listModel(dateText: dateText)
+                model: listModel(dateText: dateText),
+                pushNavigationController: navigationController,
+                onPushNavigation: { [weak self] in
+                    self?.hideDimView(animated: false)
+                }
             )
             listViewController.modalPresentationStyle = .pageSheet
             listViewController.presentationController?.delegate = self
@@ -121,8 +125,14 @@ final class ArchiveViewController: BaseUIViewController {
         self.dimView = dimView
     }
 
-    private func hideDimView() {
+    private func hideDimView(animated: Bool = true) {
         guard let dimView else { return }
+
+        guard animated else {
+            dimView.removeFromSuperview()
+            self.dimView = nil
+            return
+        }
 
         UIView.animate(withDuration: 0.2) {
             dimView.alpha = 0

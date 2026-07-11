@@ -19,6 +19,10 @@ final class DailyRecordBottomSheet: BaseUIView {
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     private let recordStackView = UIStackView()
+
+    // MARK: - Properties
+
+    var onRecordChevronTap: ((DailyRecordModel) -> Void)?
     
     // MARK: - UI Setting
     
@@ -103,6 +107,9 @@ final class DailyRecordBottomSheet: BaseUIView {
         model.items.forEach { item in
             let itemView = DailyRecord()
             itemView.configure(with: item)
+            itemView.onChevronTap = { [weak self] in
+                self?.onRecordChevronTap?(item)
+            }
             recordStackView.addArrangedSubview(itemView)
         }
         
