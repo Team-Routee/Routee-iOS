@@ -77,7 +77,6 @@ final class WorkoutMetric: BaseUIView {
             $0.textAlignment = .center
         }
         
-        
         [distanceLabel, timeLabel, highestAltitudeLabel].forEach {
             $0.font = .label_sb_12
             $0.textColor = .mint_300
@@ -100,10 +99,7 @@ final class WorkoutMetric: BaseUIView {
     
     override func setLayout() {
         measureStackView.snp.makeConstraints {
-            $0.horizontalEdges.equalToSuperview().inset(16)
-            $0.top.equalTo(safeAreaLayoutGuide)
-            $0.height.equalTo(91)
-            $0.width.equalTo(343)
+            $0.edges.equalToSuperview()
         }
     }
 }

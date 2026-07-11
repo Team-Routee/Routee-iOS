@@ -43,6 +43,7 @@ final class TrackMap: BaseUIView {
             $0.image = backgroundImage
             $0.contentMode = .scaleAspectFill
             $0.clipsToBounds = true
+            $0.layer.cornerRadius = 12
         }
 
         routeLayer.do {
@@ -61,7 +62,7 @@ final class TrackMap: BaseUIView {
     override func setLayout() {
         backgroundImageView.snp.makeConstraints {
             $0.width.equalTo(343)
-            $0.height.equalTo(481)
+            $0.height.equalTo(480)
         }
     }
 
