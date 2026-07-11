@@ -1,5 +1,5 @@
 //
-//  WorkoutPuaseView.swift
+//  WorkoutPauseView.swift
 //  Routee-iOS
 //
 //  Created by LEESANGYUP on 7/10/26.
@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class WorkoutPuaseView: BaseUIView {
+final class WorkoutPauseView: BaseUIView {
     
     // MARK: - UI Properties
     
