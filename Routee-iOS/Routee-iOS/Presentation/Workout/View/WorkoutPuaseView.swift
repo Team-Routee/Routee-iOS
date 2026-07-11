@@ -115,8 +115,8 @@ final class WorkoutPuaseView: BaseUIView {
             $0.titleLabel?.font = .label_sb_16
             $0.setTitleColor(.bgPrimary, for: .normal)
             $0.backgroundColor = .staticWhite
-            $0.clipsToBounds = true
             $0.layer.cornerRadius = 30
+            $0.clipsToBounds = true
         }
         
         finishButton.do {
@@ -124,8 +124,8 @@ final class WorkoutPuaseView: BaseUIView {
             $0.titleLabel?.font = .label_sb_16
             $0.setTitleColor(.lime400, for: .normal)
             $0.backgroundColor = .staticBlack
-            $0.clipsToBounds = true
             $0.layer.cornerRadius = 30
+            $0.clipsToBounds = true
         }
         
         buttonStackView.do {
