@@ -18,7 +18,7 @@ final class DailyRecordBottomSheet: BaseUIView {
     private let dateLabel = UILabel()
     private let scrollView = UIScrollView()
     private let contentView = UIView()
-    private let stackView = UIStackView()
+    private let recordStackView = UIStackView()
     
     // MARK: - UI Setting
     
@@ -47,7 +47,7 @@ final class DailyRecordBottomSheet: BaseUIView {
             $0.contentInsetAdjustmentBehavior = .never
         }
         
-        stackView.do {
+        recordStackView.do {
             $0.axis = .vertical
             $0.spacing = 12
         }
@@ -57,7 +57,7 @@ final class DailyRecordBottomSheet: BaseUIView {
     override func setUI() {
         addSubviews(handleView, dateLabel, scrollView)
         scrollView.addSubview(contentView)
-        contentView.addSubview(stackView)
+        contentView.addSubview(recordStackView)
     }
     
     override func setLayout() {
@@ -83,7 +83,7 @@ final class DailyRecordBottomSheet: BaseUIView {
             $0.width.equalTo(scrollView.frameLayoutGuide)
         }
         
-        stackView.snp.makeConstraints {
+        recordStackView.snp.makeConstraints {
             $0.top.equalToSuperview()
             $0.horizontalEdges.equalToSuperview().inset(16)
             $0.bottom.equalToSuperview().inset(16)
@@ -95,15 +95,15 @@ final class DailyRecordBottomSheet: BaseUIView {
     func configure(with model: CalendarDateModel) {
         dateLabel.text = model.dateText
         
-        stackView.arrangedSubviews.forEach {
-            stackView.removeArrangedSubview($0)
+        recordStackView.arrangedSubviews.forEach {
+            recordStackView.removeArrangedSubview($0)
             $0.removeFromSuperview()
         }
         
         model.items.forEach { item in
             let itemView = DailyRecord()
             itemView.configure(with: item)
-            stackView.addArrangedSubview(itemView)
+            recordStackView.addArrangedSubview(itemView)
         }
         
         let shouldScroll = model.items.count > 3
