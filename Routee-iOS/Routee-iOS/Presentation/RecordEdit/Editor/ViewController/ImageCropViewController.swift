@@ -19,12 +19,15 @@ final class ImageCropViewController: BaseUIViewController {
     
     // MARK: - UI Property
     
-    private let rootView = ImageCropView()
+    private let rootView: ImageCropView
     
     // MARK: - Initializer
     
     init(image: UIImage) {
-        self.cropViewController = CropViewController(image: image)
+        let cropViewController = CropViewController(image: image)
+        
+        self.cropViewController = cropViewController
+        self.rootView = ImageCropView(cropContentView: cropViewController.view)
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -42,7 +45,6 @@ final class ImageCropViewController: BaseUIViewController {
         setCropViewController()
         
         addChild(cropViewController)
-        rootView.setCropContentView(cropViewController.view)
         cropViewController.didMove(toParent: self)
     }
     
