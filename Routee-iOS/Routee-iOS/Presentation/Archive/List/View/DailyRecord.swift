@@ -14,7 +14,11 @@ final class DailyRecord: BaseUIView {
     
     private let thumbnailImageView = UIImageView()
     private let recordListLabel = UILabel()
-    private let chevronIcon = UIImageView()
+    private let chevronIcon = UIButton(type: .custom)
+
+    // MARK: - Properties
+
+    var onChevronTap: (() -> Void)?
     
     // MARK: - UI Setting
     
@@ -36,8 +40,9 @@ final class DailyRecord: BaseUIView {
         }
 
         chevronIcon.do {
-            $0.image = .icChevronRightSmGrey
-            $0.contentMode = .scaleAspectFit
+            $0.setImage(.icChevronRightSmGrey, for: .normal)
+            $0.adjustsImageWhenHighlighted = false
+            $0.addTarget(self, action: #selector(chevronIconDidTap), for: .touchUpInside)
         }
     }
 
@@ -84,5 +89,10 @@ final class DailyRecord: BaseUIView {
         }
 
         return UIImage(named: thumbnailUrl) ?? .routeeLogoBlack
+    }
+
+    @objc
+    private func chevronIconDidTap() {
+        onChevronTap?()
     }
 }
