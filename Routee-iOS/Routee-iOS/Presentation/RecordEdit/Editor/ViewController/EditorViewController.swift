@@ -57,6 +57,14 @@ final class EditorViewController: BaseUIViewController {
         navigationController?.navigationBar.isHidden = true
     }
     
+    private func pushEditCompleteViewController() {
+        let editedImage = rootView.makeEditedImage()
+        let editCompleteViewController = EditCompleteViewController(editedImage: editedImage)
+        
+        navigationController?.pushViewController(editCompleteViewController, animated: false)
+        navigationController?.navigationBar.isHidden = true
+    }
+    
     // MARK: - Actions
     
     override func setAddTarget() {
@@ -65,7 +73,7 @@ final class EditorViewController: BaseUIViewController {
         }
 
         rootView.topNavigationBar.rightButtonAction = { [weak self] in
-            self?.popViewController()
+            self?.pushEditCompleteViewController()
         }
         
         rootView.setBackgroundTapAction { [weak self] in
