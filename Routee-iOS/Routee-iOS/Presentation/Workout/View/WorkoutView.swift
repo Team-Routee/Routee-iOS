@@ -159,7 +159,7 @@ final class WorkoutView: BaseUIView {
             $0.bottom.equalTo(routeeMapView.safeAreaLayoutGuide).inset(78)
         }
     }
-        
+    
     private func updateSubviewsConstraints() {
         [moveToUserlocationButton].forEach { view in
             view.snp.updateConstraints { make in
@@ -183,7 +183,7 @@ final class WorkoutView: BaseUIView {
             $0.mapView.isNightModeEnabled = true
             $0.mapView.addCameraDelegate(delegate: self)
             $0.mapView.setLayerGroup(NMF_LAYER_GROUP_MOUNTAIN, isEnabled: true)
-
+            
             $0.mapView.logoAlign = .leftBottom
             $0.mapView.logoMargin = UIEdgeInsets(
                 top: 0,

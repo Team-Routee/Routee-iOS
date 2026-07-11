@@ -59,9 +59,9 @@ final class WorkoutPuaseView: BaseUIView {
             $0.startPoint = CGPoint(x: 0.5, y: 0.5)
             $0.endPoint = CGPoint(x: 1.0, y: 1.0)
         }
-
+        
         layer.insertSublayer(backgroundGradientLayer, at: 0)
-
+        
         recordInfoStackView.do {
             $0.axis = .vertical
             $0.spacing = 16
@@ -169,10 +169,10 @@ final class WorkoutPuaseView: BaseUIView {
             }
         }
     }
-
+    
     override func layoutSubviews() {
         super.layoutSubviews()
-
+        
         backgroundGradientLayer.frame = bounds
     }
 }
