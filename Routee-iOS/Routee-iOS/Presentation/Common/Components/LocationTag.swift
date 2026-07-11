@@ -48,10 +48,9 @@ final class LocationTag: BaseUIView {
             $0.font = .label_sb_14
             $0.textColor = .mint100
             $0.text = title
-            $0.numberOfLines = 1
         }
     }
-
+    
     override func setUI() {
         addSubviews(locationIcon, locationLabel)
     }
