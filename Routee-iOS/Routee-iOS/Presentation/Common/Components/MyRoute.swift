@@ -30,7 +30,7 @@ enum RoutePointDummyData {
     )
 }
 
-final class RouteView: BaseUIView {
+final class MyRoute: BaseUIView {
     
     // MARK: - UI Properties
     
