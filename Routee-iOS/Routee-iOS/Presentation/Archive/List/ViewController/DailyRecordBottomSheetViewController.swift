@@ -50,7 +50,7 @@ final class DailyRecordBottomSheetViewController: BaseUIViewController {
 
         rootView.configure(with: model)
         rootView.onRecordChevronTap = { [weak self] _ in
-            self?.navigateToSampleView()
+            self?.navigateToTimeLineView()
         }
         configureSheet()
     }
@@ -73,8 +73,8 @@ final class DailyRecordBottomSheetViewController: BaseUIViewController {
         sheet.prefersScrollingExpandsWhenScrolledToEdge = false
     }
 
-    private func navigateToSampleView() {
-        let sampleViewController = SampleViewController()
+    private func navigateToTimeLineView() {
+        let timeLineViewController = TimeLineViewController()
 
         guard let pushNavigationController else {
             return
@@ -82,7 +82,7 @@ final class DailyRecordBottomSheetViewController: BaseUIViewController {
 
         onPushNavigation?()
         dismiss(animated: false) {
-            pushNavigationController.pushViewController(sampleViewController, animated: true)
+            pushNavigationController.pushViewController(timeLineViewController, animated: true)
         }
     }
 }
