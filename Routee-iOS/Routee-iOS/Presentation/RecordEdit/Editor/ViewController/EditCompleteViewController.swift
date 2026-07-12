@@ -66,7 +66,7 @@ final class EditCompleteViewController: BaseUIViewController {
 
             guard status == .authorized || status == .limited else {
                 DispatchQueue.main.async {
-                    self.rootView.showToast(title: "사진 접근 권한이 필요해요")
+                    self.rootView.showToast(title: "사진 접근 권한이 없습니다. 설정으로 이동하여 권한 설정을 허용해주세요.")
                 }
                 return
             }
