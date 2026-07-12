@@ -15,6 +15,7 @@ final class RouteSticker: BaseUIView {
     // MARK: - Properties
     
     private var routeTitles = RouteStickerDummyData.routeTitles
+    private var currentColor: UIColor = .staticWhite
     
     // MARK: - UI Properties
     
@@ -25,7 +26,9 @@ final class RouteSticker: BaseUIView {
     
     override func setStyle() {
         routeIconImageView.do {
-            $0.image = UIImage(named: "ic_location_info_sm_mint_no_spacing")
+            $0.image = UIImage(named: "ic_location_info_sm_mint_no_spacing")?
+                .withRenderingMode(.alwaysTemplate)
+            $0.tintColor = currentColor
         }
         
         routeTitleStackView.do {
@@ -60,6 +63,16 @@ final class RouteSticker: BaseUIView {
         setRouteTitles(routeTitles)
     }
     
+    func updateColor(_ color: UIColor) {
+        currentColor = color
+        routeIconImageView.tintColor = color
+        
+        routeTitleStackView.arrangedSubviews.forEach {
+            guard let label = $0 as? UILabel else { return }
+            label.textColor = color
+        }
+    }
+    
     // MARK: - Private Methods
     
     private func setRouteTitles(_ routeTitles: [String]) {
@@ -77,7 +90,7 @@ final class RouteSticker: BaseUIView {
         UILabel().then {
             $0.text = text
             $0.font = .label_m_12
-            $0.textColor = .staticWhite
+            $0.textColor = currentColor
             $0.numberOfLines = 1
         }
     }
