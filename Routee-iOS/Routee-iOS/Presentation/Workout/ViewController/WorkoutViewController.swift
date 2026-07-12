@@ -15,6 +15,7 @@ enum WorkoutMode: Equatable {
     case ready
     case recording
     case paused
+    case finishing
 }
 
 final class WorkoutViewController: BaseUIViewController {
@@ -111,7 +112,7 @@ final class WorkoutViewController: BaseUIViewController {
     
     private func startRecordingRoute() {
         workoutMode = .recording
-        workoutView.playCountdown()
+        workoutView.playCountdownAnimation()
         lastRecordedLocation = nil
         routeLocations.removeAll()
         workoutView.updateRoutePath(routeLocations)
@@ -130,8 +131,13 @@ final class WorkoutViewController: BaseUIViewController {
     }
 
     private func finishRecordingRoute() {
-        workoutMode = .ready
-        lastRecordedLocation = nil
+        guard workoutMode != .finishing else { return }
+        workoutMode = .finishing
+
+        workoutView.playFinishAnimation { [weak self] in
+            self?.lastRecordedLocation = nil
+            self?.workoutMode = .ready
+        }
     }
 
     private func requestCameraAccess() {

@@ -46,12 +46,13 @@ final class WorkoutView: BaseUIView {
     var finishButton: UIButton { workoutPauseView.finishButton }
     
     private var mapView: NMFMapView { routeeMapView.mapView }
-    private let lottieAnimationView = LottieAnimationView(asset: "countdown")
+    private let countdownAnimationView = LottieAnimationView(asset: "countdown")
+    private lazy var finishAnimationView = LottieAnimationView(dotLottieAsset: "routeefinish")
 
     // MARK: - UI Setting
     
     override func setUI() {
-        addSubviews(routeeMapView, lottieAnimationView, workoutPauseView)
+        addSubviews(routeeMapView, countdownAnimationView, finishAnimationView, workoutPauseView)
         
         routeeMapView.addSubviews(
             routeeLogo,
@@ -72,8 +73,19 @@ final class WorkoutView: BaseUIView {
         applyLocationOverlayStyle()
         mapSetting()
         
-        lottieAnimationView.do {
+        countdownAnimationView.do {
             $0.backgroundColor = .static_black
+            $0.contentMode = .scaleAspectFill
+            $0.clipsToBounds = true
+            $0.loopMode = .playOnce
+            $0.isHidden = true
+        }
+
+        finishAnimationView.do {
+            $0.contentMode = .scaleAspectFill
+            $0.clipsToBounds = true
+            $0.loopMode = .playOnce
+            $0.isHidden = true
         }
 
         routeeLogo.do {
@@ -154,12 +166,6 @@ final class WorkoutView: BaseUIView {
             $0.alignment = .center
         }
 
-        lottieAnimationView.do {
-            $0.contentMode = .scaleAspectFill
-            $0.clipsToBounds = true
-            $0.isHidden = true
-        }
-
         workoutPauseView.isHidden = true
     }
     
@@ -168,7 +174,11 @@ final class WorkoutView: BaseUIView {
             $0.edges.equalToSuperview()
         }
 
-        lottieAnimationView.snp.makeConstraints {
+        countdownAnimationView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+
+        finishAnimationView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
 
@@ -256,24 +266,6 @@ final class WorkoutView: BaseUIView {
     
     // MARK: - Public Methods
     
-    func configure(for mode: WorkoutMode) {
-        let isReady = mode == .ready
-        let isRecording = mode == .recording
-
-        routeeLogo.isHidden = !isReady
-        currentLocationStackView.isHidden = !isReady
-        workoutMetric.isHidden = !isRecording
-        moveToUserlocationButton.isHidden = !isReady
-        recordButton.isHidden = !isReady
-        activityButtonStackView.isHidden = !isRecording
-        workoutPauseView.isHidden = mode != .paused
-
-        if !isRecording {
-            lottieAnimationView.stop()
-            lottieAnimationView.isHidden = true
-        }
-    }
-
     func updateRoutePath(_ locations: [NMGLatLng]) {
         guard locations.count >= 2 else {
             pathOverlay.mapView = nil
@@ -329,16 +321,46 @@ final class WorkoutView: BaseUIView {
 }
 
 extension WorkoutView {
-    func playCountdown() {
-        lottieAnimationView.alpha = 1
-        lottieAnimationView.currentProgress = 0
-        lottieAnimationView.isHidden = false
-        lottieAnimationView.play { [weak self] _ in
+    func configure(for mode: WorkoutMode) {
+        let isReady = mode == .ready
+        let isRecording = mode == .recording
+        let isPaused = mode == .paused
+
+        routeeLogo.isHidden = !isReady
+        currentLocationStackView.isHidden = !isReady
+        moveToUserlocationButton.isHidden = !isReady
+        recordButton.isHidden = !isReady
+        workoutMetric.isHidden = !isRecording
+        activityButtonStackView.isHidden = !isRecording
+        workoutPauseView.isHidden = !isPaused
+
+        if !isRecording {
+            countdownAnimationView.stop()
+            countdownAnimationView.isHidden = true
+        }
+    }
+
+    func playCountdownAnimation() {
+        countdownAnimationView.alpha = 1
+        countdownAnimationView.currentProgress = 0
+        countdownAnimationView.isHidden = false
+        countdownAnimationView.play { _ in
             UIView.animate(withDuration: 0.3) {
-                self?.lottieAnimationView.alpha = 0
+                self.countdownAnimationView.alpha = 0
             } completion: { _ in
-                self?.lottieAnimationView.isHidden = true
+                self.countdownAnimationView.isHidden = true
             }
+        }
+    }
+
+    func playFinishAnimation(completion: @escaping () -> Void) {
+        finishAnimationView.alpha = 1
+        finishAnimationView.currentProgress = 0
+        finishAnimationView.isHidden = false
+        bringSubviewToFront(finishAnimationView)
+        finishAnimationView.play { [weak self] _ in
+            self?.finishAnimationView.isHidden = true
+            completion()
         }
     }
 }
