@@ -60,8 +60,8 @@ final class StickerBox: BaseUIView {
     
     override func setLayout() {
         contentView.snp.makeConstraints {
-            $0.verticalEdges.equalToSuperview().inset(13)
-            $0.top.bottom.equalToSuperview().inset(10)
+            $0.horizontalEdges.equalToSuperview().inset(13)
+            $0.verticalEdges.equalToSuperview().inset(10)
         }
         
         borderView.snp.makeConstraints {
@@ -76,6 +76,15 @@ final class StickerBox: BaseUIView {
     }
     
     // MARK: - Public Methods
+    
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        if bounds.contains(point) {
+            return true
+        }
+        
+        return !closeButton.isHidden
+        && closeButton.frame.insetBy(dx: -8, dy: -8).contains(point)
+    }
     
     func setCloseButton(isSelected: Bool) {
         borderView.isHidden = !isSelected
