@@ -41,14 +41,13 @@ final class WorkoutView: BaseUIView {
     lazy var cameraOnButton = UIButton()
     private let activityButtonStackView = UIStackView()
     private let workoutPauseView = WorkoutPauseView()
-
     var restartButton: UIButton { workoutPauseView.restartButton }
     var finishButton: UIButton { workoutPauseView.finishButton }
     
     private var mapView: NMFMapView { routeeMapView.mapView }
     private let countdownAnimationView = LottieAnimationView(asset: "countdown")
     private lazy var finishAnimationView = LottieAnimationView(dotLottieAsset: "routeefinish")
-
+    
     // MARK: - UI Setting
     
     override func setUI() {
@@ -66,11 +65,13 @@ final class WorkoutView: BaseUIView {
         routeeMapView.layer.addSublayer(gradiantHeaderLayer)
         
         currentLocationStackView.addArrangedSubviews(currentLocationImage, currentLocationLabel)
+        
         activityButtonStackView.addArrangedSubviews(puaseButton, cameraOnButton)
     }
     
     override func setStyle() {
         applyLocationOverlayStyle()
+        
         mapSetting()
         
         countdownAnimationView.do {
@@ -80,20 +81,20 @@ final class WorkoutView: BaseUIView {
             $0.loopMode = .playOnce
             $0.isHidden = true
         }
-
+        
         finishAnimationView.do {
             $0.contentMode = .scaleAspectFill
             $0.clipsToBounds = true
             $0.loopMode = .playOnce
             $0.isHidden = true
         }
-
+        
         routeeLogo.do {
             $0.image = .routeeLogoMintMd
             $0.contentMode = .scaleAspectFit
             $0.layer.zPosition = 2
         }
-
+        
         gradiantHeaderLayer.do {
             $0.colors = [
                 UIColor.grey_900.cgColor,
@@ -104,18 +105,18 @@ final class WorkoutView: BaseUIView {
             $0.endPoint = CGPoint(x: 0, y: 1)
             $0.zPosition = 1
         }
-
+        
         currentLocationImage.do {
             $0.image = .icLocationInfoSmGradient
             $0.contentMode = .scaleAspectFit
         }
-
+        
         currentLocationLabel.do {
             $0.text = "위치 권한 허용이 필요합니다."
             $0.font = .label_m_12
             $0.textColor = .grey_50
         }
-
+        
         currentLocationStackView.do {
             $0.axis = .horizontal
             $0.alignment = .center
@@ -127,7 +128,7 @@ final class WorkoutView: BaseUIView {
             $0.isLayoutMarginsRelativeArrangement = true
             $0.layer.zPosition = 2
         }
-
+        
         moveToUserlocationButton.do {
             $0.setImage(.icInplace, for: .normal)
             $0.backgroundColor = .static_black
@@ -136,13 +137,13 @@ final class WorkoutView: BaseUIView {
             $0.isHidden = false
             $0.layer.zPosition = 2
         }
-
+        
         pathOverlay.do {
             $0.color = .mint_300
             $0.outlineWidth = 0
             $0.width = 4
         }
-
+        
         puaseButton.do {
             $0.setTitle("정지", for: .normal)
             $0.setImage(.icStop, for: .normal)
@@ -152,20 +153,20 @@ final class WorkoutView: BaseUIView {
             $0.layer.cornerRadius = 30
             $0.clipsToBounds = true
         }
-
+        
         cameraOnButton.do {
             $0.setImage(.icCameraFillBlack, for: .normal)
             $0.backgroundColor = .mint300
             $0.layer.cornerRadius = 30
             $0.clipsToBounds = true
         }
-
+        
         activityButtonStackView.do {
             $0.spacing = 12
             $0.axis = .horizontal
             $0.alignment = .center
         }
-
+        
         workoutPauseView.isHidden = true
     }
     
@@ -173,15 +174,15 @@ final class WorkoutView: BaseUIView {
         routeeMapView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-
+        
         countdownAnimationView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-
+        
         finishAnimationView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-
+        
         workoutPauseView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
@@ -216,17 +217,17 @@ final class WorkoutView: BaseUIView {
             $0.centerX.equalToSuperview()
             $0.bottom.equalTo(routeeMapView.safeAreaLayoutGuide).inset(78)
         }
-
+        
         puaseButton.snp.makeConstraints {
             $0.width.equalTo(108)
             $0.height.equalTo(60)
         }
-
+        
         cameraOnButton.snp.makeConstraints {
             $0.width.equalTo(60)
             $0.height.equalTo(60)
         }
-
+        
         activityButtonStackView.snp.makeConstraints {
             $0.bottom.equalTo(safeAreaLayoutGuide).inset(31)
             $0.centerX.equalToSuperview()
@@ -317,7 +318,7 @@ final class WorkoutView: BaseUIView {
     private func applyLocationOverlayStyle() {
         mapView.locationOverlay.icon = userLocationIcon
     }
-
+    
 }
 
 extension WorkoutView {
@@ -325,7 +326,7 @@ extension WorkoutView {
         let isReady = mode == .ready
         let isRecording = mode == .recording
         let isPaused = mode == .paused
-
+        
         routeeLogo.isHidden = !isReady
         currentLocationStackView.isHidden = !isReady
         moveToUserlocationButton.isHidden = !isReady
@@ -333,13 +334,13 @@ extension WorkoutView {
         workoutMetric.isHidden = !isRecording
         activityButtonStackView.isHidden = !isRecording
         workoutPauseView.isHidden = !isPaused
-
+        
         if !isRecording {
             countdownAnimationView.stop()
             countdownAnimationView.isHidden = true
         }
     }
-
+    
     func playCountdownAnimation() {
         countdownAnimationView.alpha = 1
         countdownAnimationView.currentProgress = 0
@@ -352,7 +353,7 @@ extension WorkoutView {
             }
         }
     }
-
+    
     func playFinishAnimation(completion: @escaping () -> Void) {
         finishAnimationView.alpha = 1
         finishAnimationView.currentProgress = 0

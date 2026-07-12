@@ -46,7 +46,7 @@ final class WorkoutTimeLineView: BaseUIView {
             scrollView,
             goToEditButton
         )
-
+        
         scrollView.addSubviews(
             titleTextField,
             workoutMetric,
@@ -54,7 +54,7 @@ final class WorkoutTimeLineView: BaseUIView {
             timeLineStackView,
             timeLineCard
         )
-
+        
         timeLineStackView.addArrangedSubviews(timeLineLabel, timeLineDateLabel)
     }
     
@@ -76,56 +76,55 @@ final class WorkoutTimeLineView: BaseUIView {
             $0.textColor = .grey200
         }
     }
-
+    
     override func setLayout() {
         backgroundGradiant.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-
+        
         navigationBar.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide)
             $0.horizontalEdges.equalToSuperview()
         }
-
+        
         scrollView.snp.makeConstraints {
             $0.top.equalTo(navigationBar.snp.bottom)
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
-
+        
         titleTextField.snp.makeConstraints {
             $0.top.equalTo(scrollView.contentLayoutGuide).offset(8)
             $0.horizontalEdges.equalTo(scrollView.contentLayoutGuide)
             $0.width.equalTo(scrollView.frameLayoutGuide)
         }
-
+        
         workoutMetric.snp.makeConstraints {
             $0.top.equalTo(titleTextField.snp.bottom).offset(8)
             $0.horizontalEdges.equalToSuperview().inset(16)
             $0.width.greaterThanOrEqualTo(343)
             $0.height.equalTo(91)
         }
-
+        
         trackMap.snp.makeConstraints {
             $0.top.equalTo(workoutMetric.snp.bottom).offset(8)
             $0.horizontalEdges.equalToSuperview().inset(16)
             $0.width.greaterThanOrEqualTo(343)
             $0.height.equalTo(481)
         }
-
+        
         timeLineStackView.snp.makeConstraints {
             $0.top.equalTo(trackMap.snp.bottom).offset(48)
             $0.horizontalEdges.equalTo(scrollView.contentLayoutGuide).inset(16)
         }
-
+        
         timeLineCard.snp.makeConstraints {
             $0.top.equalTo(timeLineStackView.snp.bottom).offset(16)
             $0.centerX.equalToSuperview()
             $0.width.equalToSuperview()
             $0.bottom.equalTo(scrollView.contentLayoutGuide).inset(134)
-
         }
-
+        
         goToEditButton.snp.makeConstraints {
             $0.bottom.equalTo(safeAreaLayoutGuide).inset(28)
             $0.centerX.equalToSuperview()

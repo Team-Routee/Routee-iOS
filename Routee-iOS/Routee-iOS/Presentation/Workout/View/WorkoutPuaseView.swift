@@ -25,7 +25,6 @@ final class WorkoutPauseView: BaseUIView {
     private let altitudeStackView = UIStackView()
     private let altitudeLabel = UILabel()
     private let altitudeDataLabel = UILabel()
-    
     private let buttonStackView = UIStackView()
     let restartButton = UIButton()
     let finishButton = UIButton()

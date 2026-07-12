@@ -9,7 +9,7 @@ import UIKit
 
 final class WorkoutTimeLineViewController: BaseUIViewController {
     let workoutTimelineView = WorkoutTimeLineView()
-
+    
     override func loadView() {
         view = workoutTimelineView
     }

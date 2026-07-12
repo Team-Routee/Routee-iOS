@@ -44,7 +44,7 @@ final class WorkoutViewController: BaseUIViewController {
         setLocationManager()
         updateUI(for: workoutMode)
     }
-
+    
     override func loadView() {
         view = workoutView
     }
@@ -56,7 +56,7 @@ final class WorkoutViewController: BaseUIViewController {
         let shouldHideTabBar = mode != .ready
         (tabBarController as? TabBarViewController)?.setCustomTabBarHidden(shouldHideTabBar)
     }
-
+    
     private func requestCurrentLocationAuthorization() {
         switch locationManager.authorizationStatus {
         case .notDetermined:
@@ -125,27 +125,27 @@ final class WorkoutViewController: BaseUIViewController {
     private func pauseRecordingRoute() {
         workoutMode = .paused
     }
-
+    
     private func resumeRecordingRoute() {
         workoutMode = .recording
     }
-
+    
     private func finishRecordingRoute() {
         guard workoutMode != .finishing else { return }
         workoutMode = .finishing
-
-        workoutView.playFinishAnimation { [weak self] in
-            self?.lastRecordedLocation = nil
-            self?.workoutMode = .ready
+        
+        workoutView.playFinishAnimation {
+            self.lastRecordedLocation = nil
+            self.workoutMode = .ready
         }
     }
-
+    
     private func requestCameraAccess() {
         guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
             showCameraUnavailableAlert()
             return
         }
-
+        
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
             presentCamera()
@@ -165,7 +165,7 @@ final class WorkoutViewController: BaseUIViewController {
             showCameraPermissionAlert()
         }
     }
-
+    
     private func presentCamera() {
         let imagePickerController = UIImagePickerController()
         imagePickerController.sourceType = .camera
@@ -174,12 +174,12 @@ final class WorkoutViewController: BaseUIViewController {
         imagePickerController.modalPresentationStyle = .fullScreen
         present(imagePickerController, animated: true)
     }
-
+    
     private func pushPhotoLocationViewController(image: UIImage) {
         let viewController = WorkoutPhotoLocationViewController(image: image)
         navigationController?.pushViewController(viewController, animated: true)
     }
-
+    
     private func showCameraUnavailableAlert() {
         let alert = UIAlertController(
             title: "카메라를 사용할 수 없어요",
@@ -189,7 +189,7 @@ final class WorkoutViewController: BaseUIViewController {
         alert.addAction(UIAlertAction(title: "확인", style: .default))
         present(alert, animated: true)
     }
-
+    
     private func showCameraPermissionAlert() {
         let alert = UIAlertController(
             title: "카메라 권한이 필요해요",
@@ -265,25 +265,25 @@ final class WorkoutViewController: BaseUIViewController {
             action: #selector(locationButtonDidTap),
             for: .touchUpInside
         )
-
+        
         workoutView.puaseButton.addTarget(
             self,
             action: #selector(didTapPauseButton),
             for: .touchUpInside
         )
-
+        
         workoutView.restartButton.addTarget(
             self,
             action: #selector(didTapRestartButton),
             for: .touchUpInside
         )
-
+        
         workoutView.finishButton.addTarget(
             self,
             action: #selector(didTapFinishButton),
             for: .touchUpInside
         )
-
+        
         workoutView.cameraOnButton.addTarget(
             self,
             action: #selector(didTapCameraButton),
@@ -295,22 +295,22 @@ final class WorkoutViewController: BaseUIViewController {
     private func didTapRecordButton() {
         startRecordingRoute()
     }
-
+    
     @objc
     private func didTapPauseButton() {
         pauseRecordingRoute()
     }
-
+    
     @objc
     private func didTapRestartButton() {
         resumeRecordingRoute()
     }
-
+    
     @objc
     private func didTapFinishButton() {
         finishRecordingRoute()
     }
-
+    
     @objc
     private func didTapCameraButton() {
         requestCameraAccess()
@@ -358,12 +358,12 @@ extension WorkoutViewController: UIImagePickerControllerDelegate, UINavigationCo
             picker.dismiss(animated: true)
             return
         }
-
+        
         picker.dismiss(animated: true) { [weak self] in
             self?.pushPhotoLocationViewController(image: image)
         }
     }
-
+    
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true)
     }
