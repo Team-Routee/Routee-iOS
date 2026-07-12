@@ -19,6 +19,7 @@ final class TimeLineView: BaseUIView {
         set { topNavigationBar.backButtonAction = newValue }
     }
 
+    private let record: DailyRecordModel?
     private let trackPoints = TrackPoint.dummyTrackPoints()
     private let timelineImages = [
         "img_location1",
@@ -34,13 +35,22 @@ final class TimeLineView: BaseUIView {
         nil,
         "창의문"
     ]
+    private var shouldShowTimelineCard: Bool {
+        guard let record else { return true }
+        return record.thumbnailUrl != nil
+    }
+    private let shouldShowMyRoute: Bool = false
 
     // MARK: - UI Properties
 
     private let topNavigationBar = TopNavigationBar()
+    private let backgroundGradientView = RouteeEllipseBackground()
     private let scrollView = UIScrollView()
     private let contentView = UIView()
-    private let titleTextField = TitleTextField(title: "숭실대 동기모임 북한산", showsEditIcon: false)
+    private lazy var titleTextField = TitleTextField(
+        title: record?.title ?? "숭실대 동기모임 북한산",
+        showsEditIcon: false
+    )
     private let workoutMetric = WorkoutMetric(distance: "15.53", time: "03:20", altitude: "2132")
     private lazy var trackMap = TrackMap(
         backgroundImage: UIImage(resource: .imgNavermapMain),
@@ -52,7 +62,19 @@ final class TimeLineView: BaseUIView {
         imageNames: timelineImages,
         locations: timelineLocations
     )
-    private let myRouteView = RouteView(mode: .read)
+    private let myRoute = MyRoute(mode: .read)
+    private let emptyStateLabel = UILabel()
+
+    // MARK: - Initializer
+
+    init(record: DailyRecordModel? = nil) {
+        self.record = record
+        super.init(frame: .zero)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     // MARK: - UI Setting
 
@@ -73,25 +95,43 @@ final class TimeLineView: BaseUIView {
         timelineDateLabel.do {
             $0.text = "2026.03.12"
             $0.font = .label_m_12
-            $0.textColor = .grey_300
+            $0.textColor = .grey_200
+        }
+        
+        emptyStateLabel.do {
+            $0.text = "기록된 루트가 없습니다"
+            $0.font = .label_m_14
+            $0.textColor = .grey_200
         }
     }
 
     override func setUI() {
-        addSubviews(topNavigationBar, scrollView)
+        addSubviews(backgroundGradientView, topNavigationBar, scrollView)
         scrollView.addSubview(contentView)
         contentView.addSubviews(
             titleTextField,
             workoutMetric,
-            trackMap,
-            timelineTitleLabel,
-            timelineDateLabel,
-            timelineCard,
-            myRouteView
+            trackMap
         )
+
+        if shouldShowTimelineCard {
+            contentView.addSubviews(timelineTitleLabel,
+                                    timelineDateLabel,
+                                    timelineCard)
+        }
+
+        if shouldShowMyRoute {
+            contentView.addSubview(myRoute)
+        } else {
+            contentView.addSubview(emptyStateLabel)
+        }
     }
 
     override func setLayout() {
+        backgroundGradientView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
         topNavigationBar.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide)
             $0.horizontalEdges.equalToSuperview()
@@ -108,8 +148,7 @@ final class TimeLineView: BaseUIView {
         }
 
         titleTextField.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(4)
-            $0.horizontalEdges.equalToSuperview()
+            $0.top.leading.equalToSuperview()
         }
 
         workoutMetric.snp.makeConstraints {
@@ -119,32 +158,51 @@ final class TimeLineView: BaseUIView {
         }
 
         trackMap.snp.makeConstraints {
-            $0.top.equalTo(workoutMetric.snp.bottom).offset(8)
+            $0.top.equalTo(workoutMetric.snp.bottom).offset(7)
             $0.horizontalEdges.equalToSuperview().inset(16)
-            $0.height.equalTo(481)
+            $0.height.equalTo(480)
         }
 
-        timelineTitleLabel.snp.makeConstraints {
-            $0.top.equalTo(trackMap.snp.bottom).offset(48)
-            $0.horizontalEdges.equalToSuperview().inset(16)
-            $0.height.equalTo(25)
+        if shouldShowTimelineCard {
+            timelineTitleLabel.snp.makeConstraints {
+                $0.top.equalTo(trackMap.snp.bottom).offset(48)
+                $0.horizontalEdges.equalToSuperview().inset(16)
+                $0.height.equalTo(25)
+            }
+
+            timelineDateLabel.snp.makeConstraints {
+                $0.top.equalTo(timelineTitleLabel.snp.bottom).offset(4)
+                $0.horizontalEdges.equalToSuperview().inset(16)
+                $0.height.equalTo(17)
+            }
+
+            timelineCard.snp.makeConstraints {
+                $0.top.equalTo(timelineDateLabel.snp.bottom).offset(16)
+                $0.horizontalEdges.equalToSuperview()
+            }
         }
 
-        timelineDateLabel.snp.makeConstraints {
-            $0.top.equalTo(timelineTitleLabel.snp.bottom).offset(4)
-            $0.horizontalEdges.equalToSuperview().inset(16)
-            $0.height.equalTo(17)
-        }
-
-        timelineCard.snp.makeConstraints {
-            $0.top.equalTo(timelineDateLabel.snp.bottom).offset(20)
-            $0.horizontalEdges.equalToSuperview()
-        }
-
-        myRouteView.snp.makeConstraints {
-            $0.top.equalTo(timelineCard.snp.bottom).offset(82)
-            $0.horizontalEdges.equalToSuperview().inset(16)
-            $0.bottom.equalToSuperview().inset(64)
+        if shouldShowMyRoute {
+            myRoute.snp.makeConstraints {
+                if shouldShowTimelineCard {
+                    $0.top.equalTo(timelineCard.snp.bottom).offset(28)
+                } else {
+                    $0.top.equalTo(trackMap.snp.bottom).offset(28)
+                }
+                $0.horizontalEdges.equalToSuperview().inset(16)
+                $0.bottom.equalToSuperview().inset(64)
+            }
+        } else {
+            emptyStateLabel.snp.makeConstraints {
+                if shouldShowTimelineCard {
+                    $0.top.equalTo(timelineCard.snp.bottom).offset(48)
+                } else {
+                    $0.top.equalTo(trackMap.snp.bottom).offset(28)
+                }
+                $0.centerX.equalToSuperview()
+                $0.height.equalTo(20)
+                $0.bottom.equalToSuperview().inset(64)
+            }
         }
     }
 }

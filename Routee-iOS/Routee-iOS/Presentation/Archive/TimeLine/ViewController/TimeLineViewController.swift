@@ -11,7 +11,18 @@ final class TimeLineViewController: BaseUIViewController {
 
     // MARK: - UI Properties
 
-    private let rootView = TimeLineView()
+    private let rootView: TimeLineView
+
+    // MARK: - Initializer
+
+    init(record: DailyRecordModel? = nil) {
+        self.rootView = TimeLineView(record: record)
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     // MARK: - Life Cycle
 
@@ -23,7 +34,7 @@ final class TimeLineViewController: BaseUIViewController {
 
     override func setView() {
         rootView.backButtonAction = { [weak self] in
-            self?.navigationController?.popViewController(animated: true)
+            self?.dismiss(animated: true)
         }
     }
 }
