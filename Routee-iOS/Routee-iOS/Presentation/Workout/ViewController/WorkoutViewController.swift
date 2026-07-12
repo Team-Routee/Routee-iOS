@@ -170,9 +170,6 @@ final class WorkoutViewController: BaseUIViewController {
 
     private func pushPhotoLocationViewController(image: UIImage) {
         let viewController = WorkoutPhotoLocationViewController(image: image)
-        viewController.onComplete = { [weak self] _ in
-            self?.resumeRecordingRoute()
-        }
         navigationController?.pushViewController(viewController, animated: true)
     }
 

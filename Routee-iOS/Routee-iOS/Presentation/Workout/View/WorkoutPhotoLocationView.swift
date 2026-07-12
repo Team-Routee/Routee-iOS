@@ -41,9 +41,14 @@ final class WorkoutPhotoLocationView: BaseUIView {
     override func setUI() {
         addSubviews(contentContainerView, completeButton)
         
-        contentContainerView.addSubviews(topNavigationBar, photoImageView, locationContainerView)
-        
-        locationContainerView.addSubviews(locationIcon, locationTextField, textLengthLabel)
+        contentContainerView.addSubviews(
+            topNavigationBar,
+            photoImageView,
+            locationContainerView,
+            textLengthLabel
+        )
+
+        locationContainerView.addSubviews(locationIcon, locationTextField)
     }
 
     override func setStyle() {
@@ -117,11 +122,10 @@ final class WorkoutPhotoLocationView: BaseUIView {
             $0.leading.equalTo(locationIcon.snp.trailing).offset(8)
             $0.trailing.equalToSuperview().inset(16)
             $0.verticalEdges.equalToSuperview()
-            $0.bottom.equalTo(keyboardLayoutGuide.snp.top).offset(-18)
         }
         
         textLengthLabel.snp.makeConstraints {
-            $0.top.equalTo(locationTextField.snp.bottom).offset(12)
+            $0.top.equalTo(locationContainerView.snp.bottom).offset(12)
             $0.trailing.equalTo(locationContainerView.snp.trailing)
         }
 
@@ -129,5 +133,24 @@ final class WorkoutPhotoLocationView: BaseUIView {
             $0.centerX.equalToSuperview()
             $0.top.equalTo(locationContainerView.snp.bottom).offset(36)
         }
+    }
+
+    // MARK: - Public Method
+
+    func updateTextLength(_ length: Int) {
+        textLengthLabel.text = "\(length)/16"
+    }
+
+    func moveContent(toKeyboardTop keyboardTop: CGFloat) {
+        contentContainerView.transform = .identity
+        layoutIfNeeded()
+
+        let labelFrame = textLengthLabel.convert(textLengthLabel.bounds, to: self)
+        let translationY = keyboardTop - labelFrame.maxY
+        contentContainerView.transform = CGAffineTransform(translationX: 0, y: min(0, translationY))
+    }
+
+    func resetContentPosition() {
+        contentContainerView.transform = .identity
     }
 }
