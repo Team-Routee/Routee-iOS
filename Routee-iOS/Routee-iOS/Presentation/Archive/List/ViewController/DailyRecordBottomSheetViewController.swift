@@ -16,22 +16,14 @@ final class DailyRecordBottomSheetViewController: BaseUIViewController {
     
     private let rootView = DailyRecordBottomSheet()
     private let model: CalendarDateModel
-    private weak var pushNavigationController: UINavigationController?
-    private let onPushNavigation: (() -> Void)?
     private var sheetHeight: CGFloat {
         DailyRecordBottomSheet.modalHeight(for: model.items.count)
     }
 
     // MARK: - Initializer
     
-    init(
-        model: CalendarDateModel,
-        pushNavigationController: UINavigationController?,
-        onPushNavigation: (() -> Void)?
-    ) {
+    init(model: CalendarDateModel) {
         self.model = model
-        self.pushNavigationController = pushNavigationController
-        self.onPushNavigation = onPushNavigation
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -49,8 +41,8 @@ final class DailyRecordBottomSheetViewController: BaseUIViewController {
         super.viewDidLoad()
 
         rootView.configure(with: model)
-        rootView.onRecordChevronTap = { [weak self] _ in
-            self?.navigateToTimeLineView()
+        rootView.onRecordChevronTap = { [weak self] record in
+            self?.navigateToTimeLineView(record: record)
         }
         configureSheet()
     }
@@ -73,16 +65,10 @@ final class DailyRecordBottomSheetViewController: BaseUIViewController {
         sheet.prefersScrollingExpandsWhenScrolledToEdge = false
     }
 
-    private func navigateToTimeLineView() {
-        let timeLineViewController = TimeLineViewController()
+    private func navigateToTimeLineView(record: DailyRecordModel) {
+        let timeLineViewController = TimeLineViewController(record: record)
+        timeLineViewController.modalPresentationStyle = .fullScreen
 
-        guard let pushNavigationController else {
-            return
-        }
-
-        onPushNavigation?()
-        dismiss(animated: false) {
-            pushNavigationController.pushViewController(timeLineViewController, animated: true)
-        }
+        present(timeLineViewController, animated: true)
     }
 }

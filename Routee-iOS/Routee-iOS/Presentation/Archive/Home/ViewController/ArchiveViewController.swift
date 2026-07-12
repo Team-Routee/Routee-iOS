@@ -95,11 +95,7 @@ final class ArchiveViewController: BaseUIViewController {
             guard let dateText = listDateText(from: day.activityDate) else { return }
 
             let listViewController = DailyRecordBottomSheetViewController(
-                model: listModel(dateText: dateText),
-                pushNavigationController: navigationController,
-                onPushNavigation: { [weak self] in
-                    self?.hideDimView(animated: false)
-                }
+                model: listModel(dateText: dateText)
             )
             listViewController.modalPresentationStyle = .pageSheet
             listViewController.presentationController?.delegate = self
