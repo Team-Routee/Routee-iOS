@@ -5,6 +5,7 @@
 //  Created by LEESANGYUP on 7/8/26.
 //
 
+import AVFoundation
 import CoreLocation
 import UIKit
 
@@ -131,6 +132,73 @@ final class WorkoutViewController: BaseUIViewController {
         workoutMode = .ready
         lastRecordedLocation = nil
     }
+
+    private func requestCameraAccess() {
+        guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
+            showCameraUnavailableAlert()
+            return
+        }
+
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            presentCamera()
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { [weak self] isGranted in
+                DispatchQueue.main.async {
+                    if isGranted {
+                        self?.presentCamera()
+                    } else {
+                        self?.showCameraPermissionAlert()
+                    }
+                }
+            }
+        case .denied, .restricted:
+            showCameraPermissionAlert()
+        @unknown default:
+            showCameraPermissionAlert()
+        }
+    }
+
+    private func presentCamera() {
+        let imagePickerController = UIImagePickerController()
+        imagePickerController.sourceType = .camera
+        imagePickerController.cameraCaptureMode = .photo
+        imagePickerController.delegate = self
+        imagePickerController.modalPresentationStyle = .fullScreen
+        present(imagePickerController, animated: true)
+    }
+
+    private func pushPhotoLocationViewController(image: UIImage) {
+        let viewController = WorkoutPhotoLocationViewController(image: image)
+        viewController.onComplete = { [weak self] _ in
+            self?.resumeRecordingRoute()
+        }
+        navigationController?.pushViewController(viewController, animated: true)
+    }
+
+    private func showCameraUnavailableAlert() {
+        let alert = UIAlertController(
+            title: "카메라를 사용할 수 없어요",
+            message: "카메라를 지원하는 기기에서 다시 시도해주세요.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        present(alert, animated: true)
+    }
+
+    private func showCameraPermissionAlert() {
+        let alert = UIAlertController(
+            title: "카메라 권한이 필요해요",
+            message: "설정에서 카메라 접근을 허용해주세요.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+        alert.addAction(UIAlertAction(title: "설정으로 이동", style: .default) { _ in
+            guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
+            UIApplication.shared.open(settingsURL)
+        })
+        present(alert, animated: true)
+    }
     
     private func updateCurrentAddress(_ location: CLLocation) {
         if let lastReverseGeocodingLocation,
@@ -211,6 +279,12 @@ final class WorkoutViewController: BaseUIViewController {
             action: #selector(didTapFinishButton),
             for: .touchUpInside
         )
+
+        workoutView.cameraOnButton.addTarget(
+            self,
+            action: #selector(didTapCameraButton),
+            for: .touchUpInside
+        )
     }
     
     @objc
@@ -231,6 +305,11 @@ final class WorkoutViewController: BaseUIViewController {
     @objc
     private func didTapFinishButton() {
         finishRecordingRoute()
+    }
+
+    @objc
+    private func didTapCameraButton() {
+        requestCameraAccess()
     }
     
     @objc
@@ -262,4 +341,26 @@ extension WorkoutViewController: CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) { }
+}
+
+// MARK: - UIImagePickerControllerDelegate
+
+extension WorkoutViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    func imagePickerController(
+        _ picker: UIImagePickerController,
+        didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]
+    ) {
+        guard let image = info[.originalImage] as? UIImage else {
+            picker.dismiss(animated: true)
+            return
+        }
+
+        picker.dismiss(animated: true) { [weak self] in
+            self?.pushPhotoLocationViewController(image: image)
+        }
+    }
+
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true)
+    }
 }
