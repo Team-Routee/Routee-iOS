@@ -27,6 +27,13 @@ final class TimeLineView: BaseUIView {
         "img_location4",
         "img_location5"
     ]
+    private let timelineLocations = [
+        "창의문",
+        "청운대",
+        "말바위",
+        nil,
+        "창의문"
+    ]
 
     // MARK: - UI Properties
 
@@ -41,7 +48,10 @@ final class TimeLineView: BaseUIView {
     )
     private let timelineTitleLabel = UILabel()
     private let timelineDateLabel = UILabel()
-    private lazy var timelineCard = TimeLineCard(imageNames: timelineImages)
+    private lazy var timelineCard = TimeLineCard(
+        imageNames: timelineImages,
+        locations: timelineLocations
+    )
     private let myRouteView = RouteView(mode: .read)
 
     // MARK: - UI Setting
