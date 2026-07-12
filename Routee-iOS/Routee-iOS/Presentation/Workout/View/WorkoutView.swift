@@ -9,6 +9,7 @@ import Combine
 import CoreLocation
 import UIKit
 
+import Lottie
 import NMapsMap
 import SnapKit
 import Then
@@ -45,12 +46,12 @@ final class WorkoutView: BaseUIView {
     var finishButton: UIButton { workoutPauseView.finishButton }
     
     private var mapView: NMFMapView { routeeMapView.mapView }
-    
+    private let lottieAnimationView = LottieAnimationView(asset: "countdown")
+
     // MARK: - UI Setting
     
     override func setUI() {
-        addSubview(routeeMapView)
-        addSubview(workoutPauseView)
+        addSubviews(routeeMapView, lottieAnimationView, workoutPauseView)
         
         routeeMapView.addSubviews(
             routeeLogo,
@@ -71,6 +72,10 @@ final class WorkoutView: BaseUIView {
         applyLocationOverlayStyle()
         mapSetting()
         
+        lottieAnimationView.do {
+            $0.backgroundColor = .static_black
+        }
+
         routeeLogo.do {
             $0.image = .routeeLogoMintMd
             $0.contentMode = .scaleAspectFit
@@ -149,11 +154,21 @@ final class WorkoutView: BaseUIView {
             $0.alignment = .center
         }
 
+        lottieAnimationView.do {
+            $0.contentMode = .scaleAspectFill
+            $0.clipsToBounds = true
+            $0.isHidden = true
+        }
+
         workoutPauseView.isHidden = true
     }
     
     override func setLayout() {
         routeeMapView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+
+        lottieAnimationView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
 
@@ -252,6 +267,11 @@ final class WorkoutView: BaseUIView {
         recordButton.isHidden = !isReady
         activityButtonStackView.isHidden = !isRecording
         workoutPauseView.isHidden = mode != .paused
+
+        if !isRecording {
+            lottieAnimationView.stop()
+            lottieAnimationView.isHidden = true
+        }
     }
 
     func updateRoutePath(_ locations: [NMGLatLng]) {
@@ -300,14 +320,26 @@ final class WorkoutView: BaseUIView {
         mapView.moveCamera(cameraUpdate)
     }
     
-    func setRecording(_ isRecording: Bool) {
-        recordButton.setTitle(isRecording ? "기록 종료" : "등산 기록", for: .normal)
-    }
-    
     // MARK: - Private Methods
     
     private func applyLocationOverlayStyle() {
         mapView.locationOverlay.icon = userLocationIcon
+    }
+
+}
+
+extension WorkoutView {
+    func playCountdown() {
+        lottieAnimationView.alpha = 1
+        lottieAnimationView.currentProgress = 0
+        lottieAnimationView.isHidden = false
+        lottieAnimationView.play { [weak self] _ in
+            UIView.animate(withDuration: 0.3) {
+                self?.lottieAnimationView.alpha = 0
+            } completion: { _ in
+                self?.lottieAnimationView.isHidden = true
+            }
+        }
     }
 }
 

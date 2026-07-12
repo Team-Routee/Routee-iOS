@@ -111,6 +111,7 @@ final class WorkoutViewController: BaseUIViewController {
     
     private func startRecordingRoute() {
         workoutMode = .recording
+        workoutView.playCountdown()
         lastRecordedLocation = nil
         routeLocations.removeAll()
         workoutView.updateRoutePath(routeLocations)
