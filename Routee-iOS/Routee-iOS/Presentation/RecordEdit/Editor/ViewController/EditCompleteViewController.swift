@@ -48,6 +48,18 @@ final class EditCompleteViewController: BaseUIViewController {
         navigationController?.popViewController(animated: false)
     }
     
+    private func popToRecordEditViewController() {
+        guard let recordEditViewController = navigationController?
+            .viewControllers
+            .first(where: { $0 is RecordEditViewController })
+        else {
+            popViewController()
+            return
+        }
+        
+        navigationController?.popToViewController(recordEditViewController, animated: false)
+    }
+    
     private func saveImageToPhotoLibrary() {
         PHPhotoLibrary.requestAuthorization(for: .addOnly) { [weak self] status in
             guard let self else { return }
@@ -90,7 +102,7 @@ final class EditCompleteViewController: BaseUIViewController {
         }
         
         rootView.topNavigationBar.rightButtonAction = { [weak self] in
-            self?.popViewController()
+            self?.popToRecordEditViewController()
         }
         
         rootView.setDownloadButtonAction { [weak self] in
