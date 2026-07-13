@@ -45,7 +45,7 @@ final class EditorView: BaseUIView {
         hideOptionViewTapGesture.cancelsTouchesInView = false
 
         backgroundOpacityView.do {
-            $0.backgroundColor = .black40
+            $0.backgroundColor = .black50
         }
 
         backgroundImageView.do {
@@ -124,6 +124,7 @@ final class EditorView: BaseUIView {
 
     func updateBackgroundImage(_ image: UIImage) {
         backgroundImageView.image = image
+        backgroundOpacityView.backgroundColor = .black40
     }
 
     func setBackgroundTapAction(_ action: @escaping () -> Void) {
