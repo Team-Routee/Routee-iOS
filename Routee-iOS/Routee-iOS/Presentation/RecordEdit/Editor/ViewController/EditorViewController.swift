@@ -12,20 +12,20 @@ import SnapKit
 import Then
 
 final class EditorViewController: BaseUIViewController {
-    
+
     // MARK: - UI Properties
-    
+
     private let rootView = EditorView()
-    
+
     // MARK: - Life Cycle
-    
+
     override func loadView() {
         view = rootView
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+
         (tabBarController as? TabBarViewController)?.setCustomTabBarHidden(true)
     }
 
@@ -34,48 +34,50 @@ final class EditorViewController: BaseUIViewController {
     private func popViewController() {
         navigationController?.popViewController(animated: false)
     }
-    
+
     private func presentImagePicker() {
         var configuration = PHPickerConfiguration()
         configuration.filter = .images
         configuration.selectionLimit = 1
-        
+
         let picker = PHPickerViewController(configuration: configuration)
         picker.delegate = self
-        
+
         present(picker, animated: true)
     }
-    
+
     private func pushImageCropViewController(with image: UIImage) {
         let imageCropViewController = ImageCropViewController(image: image)
-        
+
         imageCropViewController.onCropCompleted = { [weak self] croppedImage in
             self?.rootView.updateBackgroundImage(croppedImage)
         }
-        
+
         navigationController?.pushViewController(imageCropViewController, animated: false)
         navigationController?.navigationBar.isHidden = true
     }
-    
+
     private func pushEditCompleteViewController() {
         let editedImage = rootView.makeEditedImage()
         let editCompleteViewController = EditCompleteViewController(editedImage: editedImage)
-        
+
         navigationController?.pushViewController(editCompleteViewController, animated: false)
         navigationController?.navigationBar.isHidden = true
     }
-    
+
     // MARK: - Actions
-    
+
     override func setAddTarget() {
         rootView.topNavigationBar.backButtonAction = { [weak self] in
             self?.popViewController()
         }
 
         rootView.topNavigationBar.rightButtonAction = { [weak self] in
-            self?.pushEditCompleteViewController()
+            self?.rootView.playLottie {
+                self?.pushEditCompleteViewController()
+            }
         }
-        
+
         rootView.setBackgroundTapAction { [weak self] in
             self?.presentImagePicker()
         }
@@ -94,10 +96,10 @@ extension EditorViewController: PHPickerViewControllerDelegate {
             picker.dismiss(animated: true)
             return
         }
-        
+
         result.itemProvider.loadObject(ofClass: UIImage.self) { [weak self] object, _ in
             guard let image = object as? UIImage else { return }
-            
+
             DispatchQueue.main.async {
                 picker.dismiss(animated: true) {
                     self?.pushImageCropViewController(with: image)

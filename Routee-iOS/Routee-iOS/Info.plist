@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>UIDesignRequiresCompatibility</key>
-	<true/>
 	<key>BASE_URL</key>
 	<string>$(BASE_URL)</string>
 	<key>NAVER_MAP_BASE_URL</key>
@@ -14,6 +12,8 @@
 	<string>$(NAVER_MAP_CLIENT_SECRET)</string>
 	<key>NMFNcpKeyId</key>
 	<string>$(NAVER_MAP_CLIENT_ID)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>등산 기록에 사진을 추가하기 위해 카메라 접근이 필요합니다.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -49,5 +49,7 @@
 			</array>
 		</dict>
 	</dict>
+	<key>UIDesignRequiresCompatibility</key>
+	<true/>
 </dict>
 </plist>
