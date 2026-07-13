@@ -48,7 +48,7 @@ final class EditCompleteViewController: BaseUIViewController {
         navigationController?.popViewController(animated: false)
     }
 
-    private func popToRecordEditViewController() {
+    private func popToRecordEdit() {
         if let recordEditViewController = navigationController?
             .viewControllers
             .first(where: { $0 is RecordEditViewController }) {
@@ -111,7 +111,7 @@ final class EditCompleteViewController: BaseUIViewController {
         }
 
         rootView.topNavigationBar.rightButtonAction = { [weak self] in
-            self?.popToRecordEditViewController()
+            self?.popToRecordEdit()
         }
 
         rootView.setDownloadButtonAction { [weak self] in
