@@ -39,7 +39,8 @@ final class LottieOverlayView: BaseUIView {
         }
 
         lottieAnimationView.snp.makeConstraints {
-            $0.center.equalToSuperview()
+            $0.centerY.equalToSuperview()
+            $0.centerX.equalToSuperview().inset(5)
             $0.size.equalTo(240)
         }
     }
