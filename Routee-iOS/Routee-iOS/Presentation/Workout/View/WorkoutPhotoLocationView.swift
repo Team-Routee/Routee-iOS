@@ -97,7 +97,7 @@ final class WorkoutPhotoLocationView: BaseUIView {
         
         topNavigationBar.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide)
-            $0.horizontalEdges.equalToSuperview().inset(12)
+            $0.horizontalEdges.equalToSuperview()
         }
         
         photoImageView.snp.makeConstraints {
