@@ -26,7 +26,7 @@ final class EditorView: BaseUIView {
     let topNavigationBar = TopNavigationBar(rightTitle: "완료")
     private let backgroundOpacityView = UIView()
     private let backgroundImageView = UIImageView()
-    private let routeTimelineDrawingView = RouteDrawing()
+    private let routeTimelineDrawingView = RouteDrawer()
     private let routeSticker = RouteSticker()
     private let dataInfo = RecordInfo()
     private let recordEditTabBar = RecordEditTabBar()
