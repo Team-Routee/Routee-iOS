@@ -9,6 +9,11 @@ import UIKit
 
 final class SettingViewController: BaseUIViewController {
     
+    // MARK: - Properties
+    
+    private let viewModel = SettingViewModel()
+    private let keychain = DefaultKeychainService()
+    
     // MARK: - UI Properties
     
     private let rootView = SettingView()
@@ -26,6 +31,18 @@ final class SettingViewController: BaseUIViewController {
         UIApplication.shared.open(url)
     }
     
+    private func didTapPrivacyButton() {
+        let refreshToken = keychain.read(.refreshToken)
+        
+        Task {
+            do {
+                try await viewModel.withdraw(refreshToken: refreshToken)
+            } catch {
+                print("회원 탈퇴 실패", error)
+            }
+        }
+    }
+    
     private func logout() {
         // TODO: - 로그아웃 API 및 화면 전환 연결
     }
@@ -39,6 +56,10 @@ final class SettingViewController: BaseUIViewController {
         
         rootView.logoutButtonAction = { [weak self] in
             self?.logout()
+        }
+        
+        rootView.policyButtonAction = { [self] in
+            didTapPrivacyButton()
         }
     }
 }

@@ -62,7 +62,7 @@ final class OnboardingViewController: BaseUIViewController {
                 )
 
                 await MainActor.run {
-                    let mainVC = SampleViewController()
+                    let mainVC = TabBarViewController()
                     mainVC.modalPresentationStyle = .fullScreen
                     present(mainVC, animated: true)
                 }

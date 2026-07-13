@@ -16,6 +16,7 @@ final class SettingView: BaseUIView {
 
     var instagramButtonAction: (() -> Void)?
     var logoutButtonAction: (() -> Void)?
+    var policyButtonAction: (() -> Void)?
 
     // MARK: - UI Properties
 
@@ -128,6 +129,7 @@ final class SettingView: BaseUIView {
     private func setItemActions() {
         routeeSectionView.setAction(index: 2, target: self, action: #selector(instagramItemTapped))
         appInfoSectionView.setAction(index: 1, target: self, action: #selector(logoutItemTapped))
+        policySectionView.setAction(index: 1, target: self, action: #selector(didTapPrivacyButton))
     }
 
     // MARK: - Actions
@@ -140,5 +142,10 @@ final class SettingView: BaseUIView {
     @objc
     private func logoutItemTapped() {
         logoutButtonAction?()
+    }
+    
+    @objc
+    private func didTapPrivacyButton() {
+        policyButtonAction?()
     }
 }
