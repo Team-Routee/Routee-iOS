@@ -26,7 +26,7 @@ final class EditorView: BaseUIView {
     let topNavigationBar = TopNavigationBar(rightTitle: "완료")
     private let backgroundOpacityView = UIView()
     private let backgroundImageView = UIImageView()
-    private let routeTimelineDrawingView = RouteDrawingView()
+    private let routeTimelineDrawingView = RouteDrawing()
     private let routeSticker = RouteSticker()
     private let dataInfo = RecordInfo()
     private let recordEditTabBar = RecordEditTabBar()
@@ -235,11 +235,10 @@ final class EditorView: BaseUIView {
             .dummyTrackPoints()
             .toCanvasPoints(in: backgroundImageView.bounds.size)
 
-        guard let routeRect = routeRect(from: routePoints) else { return }
+        guard let routeRect = routeTimelineDrawingView.configureSticker(points: routePoints) else { return }
 
         let stickerHeight = routeRect.height + stickerVerticalInset * 2
 
-        routeTimelineDrawingView.configureSticker(points: routePoints)
         routeTimelineDrawingView.updateColor(selectedColor)
         routeTimelineStickerBox.frame = CGRect(
             x: backgroundImageView.frame.minX + routeRect.minX - stickerHorizontalInset,
@@ -304,23 +303,6 @@ final class EditorView: BaseUIView {
         stickerBox.layoutIfNeeded()
 
         return stickerBox.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
-    }
-
-    private func routeRect(from points: [CGPoint]) -> CGRect? {
-        guard let minX = points.map(\.x).min(),
-              let maxX = points.map(\.x).max(),
-              let minY = points.map(\.y).min(),
-              let maxY = points.map(\.y).max()
-        else {
-            return nil
-        }
-
-        return CGRect(
-            x: minX,
-            y: minY,
-            width: maxX - minX,
-            height: maxY - minY
-        )
     }
 
     // MARK: - Actions
