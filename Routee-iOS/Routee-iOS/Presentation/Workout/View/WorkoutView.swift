@@ -37,7 +37,7 @@ final class WorkoutView: BaseUIView {
     private let pathOverlay = NMFPath()
     lazy var moveToUserlocationButton = UIButton(type: .custom)
     lazy var recordButton = RouteeButton(titleText: "등산 기록", type: .enabled)
-    lazy var puaseButton = UIButton()
+    lazy var pauseButton = UIButton()
     lazy var cameraOnButton = UIButton()
     private let activityButtonStackView = UIStackView()
     private let workoutPauseView = WorkoutPauseView()
@@ -66,7 +66,7 @@ final class WorkoutView: BaseUIView {
         
         currentLocationStackView.addArrangedSubviews(currentLocationImage, currentLocationLabel)
         
-        activityButtonStackView.addArrangedSubviews(puaseButton, cameraOnButton)
+        activityButtonStackView.addArrangedSubviews(pauseButton, cameraOnButton)
     }
     
     override func setStyle() {
@@ -144,7 +144,7 @@ final class WorkoutView: BaseUIView {
             $0.width = 4
         }
         
-        puaseButton.do {
+        pauseButton.do {
             $0.setTitle("정지", for: .normal)
             $0.setImage(.icStop, for: .normal)
             $0.titleLabel?.font = .label_sb_16
@@ -218,7 +218,7 @@ final class WorkoutView: BaseUIView {
             $0.bottom.equalTo(routeeMapView.safeAreaLayoutGuide).inset(78)
         }
         
-        puaseButton.snp.makeConstraints {
+        pauseButton.snp.makeConstraints {
             $0.width.equalTo(108)
             $0.height.equalTo(60)
         }

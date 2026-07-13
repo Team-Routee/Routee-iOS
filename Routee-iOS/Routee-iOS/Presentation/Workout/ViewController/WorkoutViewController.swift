@@ -266,7 +266,7 @@ final class WorkoutViewController: BaseUIViewController {
             for: .touchUpInside
         )
         
-        workoutView.puaseButton.addTarget(
+        workoutView.pauseButton.addTarget(
             self,
             action: #selector(didTapPauseButton),
             for: .touchUpInside
