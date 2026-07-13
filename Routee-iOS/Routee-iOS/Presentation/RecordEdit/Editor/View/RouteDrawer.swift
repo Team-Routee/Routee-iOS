@@ -1,5 +1,5 @@
 //
-//  RouteDrawingView.swift
+//  RouteDrawer.swift
 //  Routee-iOS
 //
 //  Created by 김세령 on 7/12/26.
@@ -7,12 +7,11 @@
 
 import UIKit
 
-final class RouteDrawing: UIView {
+final class RouteDrawer: UIView {
 
     // MARK: - Properties
 
     private var points: [CGPoint] = []
-    private var baseCanvasSize: CGSize = .zero
     private var contentSize: CGSize = .zero
     private var routeColor: UIColor = .recapMint
 
@@ -36,14 +35,6 @@ final class RouteDrawing: UIView {
 
     // MARK: - Public Methods
 
-    func configure(points: [CGPoint], baseCanvasSize: CGSize) {
-        self.points = points
-        self.baseCanvasSize = baseCanvasSize
-        self.contentSize = baseCanvasSize
-        invalidateIntrinsicContentSize()
-        setNeedsDisplay()
-    }
-
     func configureSticker(points: [CGPoint]) -> CGRect? {
         guard let routeRect = routeRect(from: points) else { return nil }
 
@@ -58,7 +49,6 @@ final class RouteDrawing: UIView {
                 y: $0.y - routeRect.minY
             )
         }
-        self.baseCanvasSize = routeSize
         self.contentSize = routeSize
         invalidateIntrinsicContentSize()
         setNeedsDisplay()
@@ -72,19 +62,6 @@ final class RouteDrawing: UIView {
     }
 
     // MARK: - Private Methods
-
-    private func scaledPoint(_ point: CGPoint) -> CGPoint {
-        guard baseCanvasSize.width > 0,
-              baseCanvasSize.height > 0
-        else {
-            return point
-        }
-
-        return CGPoint(
-            x: point.x * bounds.width / baseCanvasSize.width,
-            y: point.y * bounds.height / baseCanvasSize.height
-        )
-    }
 
     private func routeRect(from points: [CGPoint]) -> CGRect? {
         guard let minX = points.map(\.x).min(),
@@ -107,10 +84,10 @@ final class RouteDrawing: UIView {
         guard points.count > 1 else { return }
 
         let path = UIBezierPath()
-        path.move(to: scaledPoint(points[0]))
+        path.move(to: points[0])
 
         points.dropFirst().forEach {
-            path.addLine(to: scaledPoint($0))
+            path.addLine(to: $0)
         }
 
         routeColor.setStroke()
