@@ -35,6 +35,7 @@ final class WorkoutTimeLineView: BaseUIView {
     private let timeLineLabel = UILabel()
     private let timeLineDateLabel = UILabel()
     private lazy var timeLineCard = TimeLineCard(imageNames: timelineImages)
+    private let myRoute = MyRoute(mode: .write)
     private lazy var goToEditButton = RouteeButton(titleText: "기록 편집 바로가기", type: .enabled)
     
     // MARK: - UI Setting
@@ -52,7 +53,8 @@ final class WorkoutTimeLineView: BaseUIView {
             workoutMetric,
             trackMap,
             timeLineStackView,
-            timeLineCard
+            timeLineCard,
+            myRoute
         )
         
         timeLineStackView.addArrangedSubviews(timeLineLabel, timeLineDateLabel)
@@ -122,7 +124,12 @@ final class WorkoutTimeLineView: BaseUIView {
             $0.top.equalTo(timeLineStackView.snp.bottom).offset(16)
             $0.centerX.equalToSuperview()
             $0.width.equalToSuperview()
-            $0.bottom.equalTo(scrollView.contentLayoutGuide).inset(134)
+        }
+        
+        myRoute.snp.makeConstraints {
+            $0.top.equalTo(timeLineCard.snp.bottom).offset(61)
+            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.bottom.equalTo(scrollView.contentLayoutGuide).inset(140)
         }
         
         goToEditButton.snp.makeConstraints {
