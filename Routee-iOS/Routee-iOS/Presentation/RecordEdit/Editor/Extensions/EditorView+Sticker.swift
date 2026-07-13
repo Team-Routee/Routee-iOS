@@ -32,6 +32,12 @@ extension EditorView {
 
             removeStickerBox(routeTimelineStickerBox)
         }
+
+        routeStickerBox.onDeleted = { [weak self] in
+            guard let self else { return }
+
+            removeStickerBox(routeStickerBox)
+        }
     }
 
     // MARK: - Private Methods
@@ -78,12 +84,6 @@ extension EditorView {
             width: stickerSize.width,
             height: stickerSize.height
         )
-
-        routeStickerBox.onDeleted = { [weak self] in
-            guard let self else { return }
-
-            removeStickerBox(routeStickerBox)
-        }
 
         activateStickerBox(routeStickerBox)
     }
