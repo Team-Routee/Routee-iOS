@@ -7,10 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3B84571530010C70003912FD /* CropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = 3B84571430010C70003912FD /* CropViewController */; };
+		3B84571730010C70003912FD /* TOCropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = 3B84571630010C70003912FD /* TOCropViewController */; };
 		4F324C3C2FEE587000B7B9F9 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 4F324C3B2FEE587000B7B9F9 /* NMapsMap */; };
 		4F324C412FEE6F1000B7B9F9 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4F324C402FEE6F1000B7B9F9 /* SnapKit */; };
 		4F324C442FEF454C00B7B9F9 /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = 4F324C432FEF454C00B7B9F9 /* Then */; };
 		4F324DE82FF37BF800B7B9F9 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 4F324DE72FF37BF800B7B9F9 /* Alamofire */; };
+		4F519CCF3002C49200530799 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 4F519CCE3002C49200530799 /* Lottie */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,9 +47,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F519CCF3002C49200530799 /* Lottie in Frameworks */,
 				4F324C3C2FEE587000B7B9F9 /* NMapsMap in Frameworks */,
 				4F324DE82FF37BF800B7B9F9 /* Alamofire in Frameworks */,
 				4F324C442FEF454C00B7B9F9 /* Then in Frameworks */,
+				3B84571530010C70003912FD /* CropViewController in Frameworks */,
+				3B84571730010C70003912FD /* TOCropViewController in Frameworks */,
 				4F324C412FEE6F1000B7B9F9 /* SnapKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -96,6 +102,9 @@
 				4F324C402FEE6F1000B7B9F9 /* SnapKit */,
 				4F324C432FEF454C00B7B9F9 /* Then */,
 				4F324DE72FF37BF800B7B9F9 /* Alamofire */,
+				4F519CCE3002C49200530799 /* Lottie */,
+				3B84571430010C70003912FD /* CropViewController */,
+				3B84571630010C70003912FD /* TOCropViewController */,
 			);
 			productName = "Routee-iOS";
 			productReference = 4F324B982FE931BB00B7B9F9 /* Routee-iOS.app */;
@@ -130,6 +139,8 @@
 				4F324C3F2FEE6F1000B7B9F9 /* XCRemoteSwiftPackageReference "SnapKit" */,
 				4F324C422FEF454C00B7B9F9 /* XCRemoteSwiftPackageReference "Then" */,
 				4F324DE62FF37BF800B7B9F9 /* XCRemoteSwiftPackageReference "alamofire" */,
+				4F519CCD3002C49100530799 /* XCRemoteSwiftPackageReference "lottie-ios" */,
+				3B84571330010C70003912FD /* XCRemoteSwiftPackageReference "TOCropViewController" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4F324B992FE931BB00B7B9F9 /* Products */;
@@ -200,6 +211,7 @@
 				INFOPLIST_FILE = "Routee-iOS/Info.plist";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "현재 위치를 지도에 표시하기 위해 위치 권한이 필요합니다.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "현재 위치를 지도에 표시하기 위해 위치 권한이 필요합니다.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "편집한 이미지를 사진 앱에 저장하기 위해 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -242,6 +254,7 @@
 				INFOPLIST_FILE = "Routee-iOS/Info.plist";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "현재 위치를 지도에 표시하기 위해 위치 권한이 필요합니다.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "현재 위치를 지도에 표시하기 위해 위치 권한이 필요합니다.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "편집한 이미지를 사진 앱에 저장하기 위해 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -415,6 +428,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		3B84571330010C70003912FD /* XCRemoteSwiftPackageReference "TOCropViewController" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/TimOliver/TOCropViewController.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.1.2;
+			};
+		};
 		4F324C3A2FEE587000B7B9F9 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/navermaps/SPM-NMapsMap";
@@ -447,9 +468,27 @@
 				minimumVersion = 5.12.0;
 			};
 		};
+		4F519CCD3002C49100530799 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-ios.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.6.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		3B84571430010C70003912FD /* CropViewController */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B84571330010C70003912FD /* XCRemoteSwiftPackageReference "TOCropViewController" */;
+			productName = CropViewController;
+		};
+		3B84571630010C70003912FD /* TOCropViewController */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B84571330010C70003912FD /* XCRemoteSwiftPackageReference "TOCropViewController" */;
+			productName = TOCropViewController;
+		};
 		4F324C3B2FEE587000B7B9F9 /* NMapsMap */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4F324C3A2FEE587000B7B9F9 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */;
@@ -469,6 +508,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4F324DE62FF37BF800B7B9F9 /* XCRemoteSwiftPackageReference "alamofire" */;
 			productName = Alamofire;
+		};
+		4F519CCE3002C49200530799 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4F519CCD3002C49100530799 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

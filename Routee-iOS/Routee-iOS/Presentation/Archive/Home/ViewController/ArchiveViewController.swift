@@ -7,13 +7,14 @@
 
 import UIKit
 
-final class ArchiveHomeViewController: BaseUIViewController {
+final class ArchiveViewController: BaseUIViewController {
 
     // MARK: - Properties
 
     private var year = Calendar.current.component(.year, from: Date())
     private var month = Calendar.current.component(.month, from: Date())
-    private let rootView = ArchiveHomeView()
+    private let rootView = ArchiveView()
+    private var dimView: UIView?
 
     // MARK: - Life Cycle
 
@@ -91,8 +92,61 @@ final class ArchiveHomeViewController: BaseUIViewController {
             return
 
         case .background, .badge:
-            navigationController?.pushViewController(SampleViewController(), animated: true)
+            guard let dateText = listDateText(from: day.activityDate) else { return }
+
+            let listViewController = DailyRecordBottomSheetViewController(
+                model: listModel(dateText: dateText)
+            )
+            listViewController.modalPresentationStyle = .pageSheet
+            listViewController.presentationController?.delegate = self
+            showDimView()
+            present(listViewController, animated: true)
         }
+    }
+
+    private func showDimView() {
+        guard let containerView = tabBarController?.view ?? view.window,
+              dimView == nil else { return }
+
+        let dimView = UIView(frame: containerView.bounds)
+        dimView.backgroundColor = UIColor.black.withAlphaComponent(0.7)
+        dimView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        dimView.alpha = 0
+        containerView.addSubview(dimView)
+
+        UIView.animate(withDuration: 0.2) {
+            dimView.alpha = 1
+        }
+
+        self.dimView = dimView
+    }
+
+    private func hideDimView(animated: Bool = true) {
+        guard let dimView else { return }
+
+        guard animated else {
+            dimView.removeFromSuperview()
+            self.dimView = nil
+            return
+        }
+
+        UIView.animate(withDuration: 0.2) {
+            dimView.alpha = 0
+        } completion: { _ in
+            dimView.removeFromSuperview()
+        }
+
+        self.dimView = nil
+    }
+
+    private func listDateText(from activityDate: String?) -> String? {
+        guard let activityDate else { return nil }
+
+        return activityDate.replacingOccurrences(of: "-", with: ".")
+    }
+
+    private func listModel(dateText: String) -> CalendarDateModel {
+        DailyDummyData.dummyModelsByDate[dateText] ?? .init(dateText: dateText, items: [])
     }
 
     private func monthTitle(year: Int, month: Int) -> String {
@@ -133,5 +187,18 @@ final class ArchiveHomeViewController: BaseUIViewController {
         components.day = 1
 
         return Foundation.Calendar.current.date(from: components) ?? Date()
+    }
+}
+
+    // MARK: - Extension
+
+extension ArchiveViewController: UIAdaptivePresentationControllerDelegate {
+
+    func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+        hideDimView()
+    }
+
+    func presentationControllerWillDismiss(_ presentationController: UIPresentationController) {
+        hideDimView()
     }
 }
