@@ -35,11 +35,11 @@ final class TimeLineView: BaseUIView {
         nil,
         "창의문"
     ]
-    private var shouldShowTimelineCard: Bool {
+    private var showTimelineCard: Bool {
         guard let record else { return true }
         return record.thumbnailUrl != nil
     }
-    private let shouldShowMyRoute: Bool = false
+    private let showMyRoute: Bool = true
 
     // MARK: - UI Properties
 
@@ -114,13 +114,13 @@ final class TimeLineView: BaseUIView {
             trackMap
         )
 
-        if shouldShowTimelineCard {
+        if showTimelineCard {
             contentView.addSubviews(timelineTitleLabel,
                                     timelineDateLabel,
                                     timelineCard)
         }
 
-        if shouldShowMyRoute {
+        if showMyRoute {
             contentView.addSubview(myRoute)
         } else {
             contentView.addSubview(emptyStateLabel)
@@ -163,7 +163,7 @@ final class TimeLineView: BaseUIView {
             $0.height.equalTo(480)
         }
 
-        if shouldShowTimelineCard {
+        if showTimelineCard {
             timelineTitleLabel.snp.makeConstraints {
                 $0.top.equalTo(trackMap.snp.bottom).offset(48)
                 $0.horizontalEdges.equalToSuperview().inset(16)
@@ -182,9 +182,9 @@ final class TimeLineView: BaseUIView {
             }
         }
 
-        if shouldShowMyRoute {
+        if showMyRoute {
             myRoute.snp.makeConstraints {
-                if shouldShowTimelineCard {
+                if showTimelineCard {
                     $0.top.equalTo(timelineCard.snp.bottom).offset(28)
                 } else {
                     $0.top.equalTo(trackMap.snp.bottom).offset(28)
@@ -194,7 +194,7 @@ final class TimeLineView: BaseUIView {
             }
         } else {
             emptyStateLabel.snp.makeConstraints {
-                if shouldShowTimelineCard {
+                if showTimelineCard {
                     $0.top.equalTo(timelineCard.snp.bottom).offset(48)
                 } else {
                     $0.top.equalTo(trackMap.snp.bottom).offset(28)
