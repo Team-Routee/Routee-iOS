@@ -24,7 +24,7 @@ final class SettingSectionView: UIView {
     // MARK: - UI Properties
 
     private let titleLabel = UILabel()
-    private let stackView = UIStackView()
+    private let sectionStackView = UIStackView()
 
     // MARK: - Initializer
 
@@ -54,25 +54,25 @@ final class SettingSectionView: UIView {
             $0.font = .title_sb_18
         }
 
-        stackView.do {
+        sectionStackView.do {
             $0.axis = .vertical
             $0.spacing = 12
         }
     }
 
     private func setUI() {
-        addSubview(stackView)
+        addSubview(sectionStackView)
 
-        stackView.addArrangedSubview(titleLabel)
-        stackView.setCustomSpacing(20, after: titleLabel)
+        sectionStackView.addArrangedSubview(titleLabel)
+        sectionStackView.setCustomSpacing(20, after: titleLabel)
 
         itemViews.forEach {
-            stackView.addArrangedSubview($0)
+            sectionStackView.addArrangedSubview($0)
         }
     }
 
     private func setLayout() {
-        stackView.snp.makeConstraints {
+        sectionStackView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
     }
@@ -83,7 +83,7 @@ final class SettingSectionView: UIView {
         titleLabel.text = model.title
 
         itemViews.forEach {
-            stackView.removeArrangedSubview($0)
+            sectionStackView.removeArrangedSubview($0)
             $0.removeFromSuperview()
         }
 
@@ -93,7 +93,7 @@ final class SettingSectionView: UIView {
 
         itemViews.forEach {
             $0.isUserInteractionEnabled = false
-            stackView.addArrangedSubview($0)
+            sectionStackView.addArrangedSubview($0)
         }
     }
 
