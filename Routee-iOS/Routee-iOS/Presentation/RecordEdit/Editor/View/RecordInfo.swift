@@ -99,4 +99,19 @@ final class RecordInfo: BaseUIView {
             $0.edges.equalToSuperview()
         }
     }
+    
+    // MARK: - Public Methods
+    
+    func updateColor(_ color: UIColor) {
+        [
+            distanceLabel,
+            distanceDataLabel,
+            timeLabel,
+            timeDataLabel,
+            altitudeLabel,
+            altitudeDataLabel
+        ].forEach {
+            $0.textColor = color
+        }
+    }
 }
