@@ -13,6 +13,7 @@ final class ArchiveView: BaseUIView {
 
     // MARK: - UI Properties
 
+    private let backgroundGradientView = RouteeEllipseBackground()
     private let archiveHeaderView = ArchiveHeader()
     private let profileView = Profile()
     private let monthSelector = ArchiveMonthSelector()
@@ -41,10 +42,12 @@ final class ArchiveView: BaseUIView {
 
     override func setStyle() {
         backgroundColor = .bg_primary
-    }
+        }
+
 
     override func setUI() {
         addSubviews(
+            backgroundGradientView,
             archiveHeaderView,
             profileView,
             monthSelector,
@@ -54,6 +57,9 @@ final class ArchiveView: BaseUIView {
     }
 
     override func setLayout() {
+        backgroundGradientView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
         archiveHeaderView.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide)
             $0.leading.equalTo(mountainMapView.snp.leading)
