@@ -14,29 +14,29 @@ final class EditorView: BaseUIView {
 
     // MARK: - Properties
 
-    let stickerHorizontalInset: CGFloat = 13
-    let stickerVerticalInset: CGFloat = 10
-    let stickerMovementInset: CGFloat = 12
-    var state = EditorState()
+    internal let stickerHorizontalInset: CGFloat = 13
+    internal let stickerVerticalInset: CGFloat = 10
+    internal let stickerMovementInset: CGFloat = 12
+    internal var state = EditorState()
 
-    struct EditorState {
-        var selectedColor: UIColor = .recapMint
-        var didSetRouteTimelineStickerFrame = false
+    internal struct EditorState {
+        internal var selectedColor: UIColor = .recapMint
+        internal var didSetRouteTimelineStickerFrame = false
     }
 
     // MARK: - UI Properties
 
     private let backgroundGradientView = RouteeEllipseBackground()
-    let topNavigationBar = TopNavigationBar(rightTitle: "완료")
+    internal let topNavigationBar = TopNavigationBar(rightTitle: "완료")
     private let backgroundOpacityView = UIView()
-    let backgroundImageView = UIImageView()
-    let routeTimelineDrawingView = RouteDrawer()
-    let routeSticker = RouteSticker()
-    let dataInfo = RecordInfo()
-    let recordEditTabBar = RecordEditTabBar()
+    internal let backgroundImageView = UIImageView()
+    internal let routeTimelineDrawingView = RouteDrawer()
+    internal let routeSticker = RouteSticker()
+    internal let dataInfo = RecordInfo()
+    internal let recordEditTabBar = RecordEditTabBar()
     private let lottieOverlayView = LottieOverlayView()
-    lazy var routeTimelineStickerBox = StickerBox(contentView: routeTimelineDrawingView)
-    lazy var routeStickerBox = StickerBox(contentView: routeSticker)
+    internal lazy var routeTimelineStickerBox = StickerBox(contentView: routeTimelineDrawingView)
+    internal lazy var routeStickerBox = StickerBox(contentView: routeSticker)
     private lazy var hideOptionViewTapGesture = UITapGestureRecognizer(
         target: self,
         action: #selector(handleViewTapped(_:))
