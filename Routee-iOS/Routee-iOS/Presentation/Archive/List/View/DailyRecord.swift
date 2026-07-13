@@ -41,7 +41,7 @@ final class DailyRecord: BaseUIView {
 
         chevronIcon.do {
             $0.setImage(.icChevronRightSmGrey, for: .normal)
-            $0.adjustsImageWhenHighlighted = false
+            $0.setImage(.icChevronRightSmGrey, for: .highlighted)
             $0.addTarget(self, action: #selector(chevronIconDidTap), for: .touchUpInside)
         }
     }
