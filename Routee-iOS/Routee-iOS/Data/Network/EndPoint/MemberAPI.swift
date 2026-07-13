@@ -11,7 +11,7 @@ import Alamofire
 
 enum MemberAPI {
     case register(header: HeaderType, requestDTO: RegisterRequestDTO)
-    case withdraw(header: HeaderType)
+    case withdraw(header: HeaderType, requestDTO: WithdrawRequestDTO)
 }
 
 extension MemberAPI: RouteeEndPoint {
@@ -23,7 +23,7 @@ extension MemberAPI: RouteeEndPoint {
     }
     
     var path: String {
-        switch self{
+        switch self {
         case .register:
             return "/register"
         case .withdraw:
@@ -42,7 +42,7 @@ extension MemberAPI: RouteeEndPoint {
     
     var headers: HeaderType {
         switch self {
-        case .register(let header, _), .withdraw(let header):
+        case .register(let header, _), .withdraw(let header, _):
             return header
         }
     }
@@ -62,8 +62,8 @@ extension MemberAPI: RouteeEndPoint {
         switch self {
         case .register(_, let dto):
             return dto.asParameters()
-        case .withdraw:
-            return nil
+        case .withdraw(_, let dto):
+            return dto.asParameters()
         }
     }
 }
