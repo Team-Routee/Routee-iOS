@@ -19,39 +19,14 @@ final class SettingView: BaseUIView {
 
     // MARK: - UI Properties
 
+    private let backgroundGradientView = RouteeEllipseBackground()
     private let titleLabel = UILabel()
     private let contentStackView = UIStackView()
-    private let routeeSectionView = SettingSectionView(
-        model: .init(
-            title: "루티 이용하기",
-            itemTitles: [
-                "공지사항",
-                "1:1 문의하기",
-                "루티 인스타그램 바로가기"
-            ]
-        )
-    )
+    private let routeeSectionView = SettingSectionView()
     private let routeeDividerLineView = UIView()
-    private let policySectionView = SettingSectionView(
-        model: .init(
-            title: "이용정책",
-            itemTitles: [
-                "이용약관",
-                "개인정보 처리방침",
-                "위치기반 서비스 이용약관"
-            ]
-        )
-    )
+    private let policySectionView = SettingSectionView()
     private let policyDividerLineView = UIView()
-    private let appInfoSectionView = SettingSectionView(
-        model: .init(
-            title: "앱 정보",
-            itemTitles: [
-                "버전정보",
-                "로그아웃"
-            ]
-        )
-    )
+    private let appInfoSectionView = SettingSectionView()
 
     // MARK: - UI Setting
 
@@ -66,8 +41,40 @@ final class SettingView: BaseUIView {
 
         contentStackView.do {
             $0.axis = .vertical
-            $0.spacing = 24
+            $0.spacing = 28
         }
+
+        routeeSectionView.configure(
+            model: .init(
+                title: "루티 이용하기",
+                itemTitles: [
+                    "공지사항",
+                    "1:1 문의하기",
+                    "루티 인스타그램 바로가기"
+                ]
+            )
+        )
+
+        policySectionView.configure(
+            model: .init(
+                title: "이용정책",
+                itemTitles: [
+                    "이용약관",
+                    "개인정보 처리방침",
+                    "위치기반 서비스 이용약관"
+                ]
+            )
+        )
+
+        appInfoSectionView.configure(
+            model: .init(
+                title: "앱 정보",
+                itemTitles: [
+                    "버전정보",
+                    "로그아웃"
+                ]
+            )
+        )
 
         [
             routeeDividerLineView,
@@ -78,7 +85,7 @@ final class SettingView: BaseUIView {
     }
 
     override func setUI() {
-        addSubviews(titleLabel, contentStackView)
+        addSubviews(backgroundGradientView, titleLabel, contentStackView)
 
         contentStackView.addArrangedSubviews(
             routeeSectionView,
@@ -92,6 +99,10 @@ final class SettingView: BaseUIView {
     }
 
     override func setLayout() {
+        backgroundGradientView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
         titleLabel.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide).offset(16)
             $0.leading.equalToSuperview().inset(16)

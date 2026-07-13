@@ -19,8 +19,7 @@ final class SettingSectionView: UIView {
         let itemTitles: [String]
     }
 
-    private let model: Model
-    private let itemViews: [SettingItemView]
+    private var itemViews: [SettingItemView] = []
 
     // MARK: - UI Properties
 
@@ -29,14 +28,18 @@ final class SettingSectionView: UIView {
 
     // MARK: - Initializer
 
-    init(model: Model) {
-        self.model = model
-        self.itemViews = model.itemTitles.map { SettingItemView(title: $0) }
-        super.init(frame: .zero)
+    override init(frame: CGRect) {
+        super.init(frame: frame)
 
         setStyle()
         setUI()
         setLayout()
+    }
+
+    convenience init(model: Model) {
+        self.init(frame: .zero)
+
+        configure(model: model)
     }
 
     required init?(coder: NSCoder) {
@@ -47,18 +50,13 @@ final class SettingSectionView: UIView {
 
     private func setStyle() {
         titleLabel.do {
-            $0.text = model.title
             $0.textColor = .staticWhite
             $0.font = .title_sb_18
         }
 
         stackView.do {
             $0.axis = .vertical
-            $0.spacing = 16
-        }
-
-        itemViews.forEach {
-            $0.isUserInteractionEnabled = false
+            $0.spacing = 12
         }
     }
 
@@ -80,6 +78,24 @@ final class SettingSectionView: UIView {
     }
 
     // MARK: - Public Methods
+
+    func configure(model: Model) {
+        titleLabel.text = model.title
+
+        itemViews.forEach {
+            stackView.removeArrangedSubview($0)
+            $0.removeFromSuperview()
+        }
+
+        itemViews = model.itemTitles.map {
+            SettingItemView(title: $0)
+        }
+
+        itemViews.forEach {
+            $0.isUserInteractionEnabled = false
+            stackView.addArrangedSubview($0)
+        }
+    }
 
     func setAction(index: Int, target: Any?, action: Selector) {
         guard itemViews.indices.contains(index) else { return }
