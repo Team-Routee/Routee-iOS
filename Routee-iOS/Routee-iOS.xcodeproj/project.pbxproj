@@ -14,6 +14,7 @@
 		4F324C442FEF454C00B7B9F9 /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = 4F324C432FEF454C00B7B9F9 /* Then */; };
 		4F324DE82FF37BF800B7B9F9 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 4F324DE72FF37BF800B7B9F9 /* Alamofire */; };
 		4F519CCF3002C49200530799 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 4F519CCE3002C49200530799 /* Lottie */; };
+		4F51A2713004194600530799 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 4F51A2703004194600530799 /* Kingfisher */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -51,6 +52,7 @@
 				4F324C3C2FEE587000B7B9F9 /* NMapsMap in Frameworks */,
 				4F324DE82FF37BF800B7B9F9 /* Alamofire in Frameworks */,
 				4F324C442FEF454C00B7B9F9 /* Then in Frameworks */,
+				4F51A2713004194600530799 /* Kingfisher in Frameworks */,
 				3B84571530010C70003912FD /* CropViewController in Frameworks */,
 				3B84571730010C70003912FD /* TOCropViewController in Frameworks */,
 				4F324C412FEE6F1000B7B9F9 /* SnapKit in Frameworks */,
@@ -105,6 +107,7 @@
 				4F519CCE3002C49200530799 /* Lottie */,
 				3B84571430010C70003912FD /* CropViewController */,
 				3B84571630010C70003912FD /* TOCropViewController */,
+				4F51A2703004194600530799 /* Kingfisher */,
 			);
 			productName = "Routee-iOS";
 			productReference = 4F324B982FE931BB00B7B9F9 /* Routee-iOS.app */;
@@ -141,6 +144,7 @@
 				4F324DE62FF37BF800B7B9F9 /* XCRemoteSwiftPackageReference "alamofire" */,
 				4F519CCD3002C49100530799 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 				3B84571330010C70003912FD /* XCRemoteSwiftPackageReference "TOCropViewController" */,
+				4F51A26F3004194600530799 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4F324B992FE931BB00B7B9F9 /* Products */;
@@ -200,8 +204,9 @@
 			baseConfigurationReferenceAnchor = 4F324B9A2FE931BB00B7B9F9 /* Routee-iOS */;
 			baseConfigurationReferenceRelativePath = Config.xcconfig;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = routee_icon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = "Routee-iOS/Routee-iOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -243,8 +248,9 @@
 			baseConfigurationReferenceAnchor = 4F324B9A2FE931BB00B7B9F9 /* Routee-iOS */;
 			baseConfigurationReferenceRelativePath = Config.xcconfig;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = routee_icon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = "Routee-iOS/Routee-iOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -476,6 +482,14 @@
 				minimumVersion = 4.6.1;
 			};
 		};
+		4F51A26F3004194600530799 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.10.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -513,6 +527,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4F519CCD3002C49100530799 /* XCRemoteSwiftPackageReference "lottie-ios" */;
 			productName = Lottie;
+		};
+		4F51A2703004194600530799 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4F51A26F3004194600530799 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

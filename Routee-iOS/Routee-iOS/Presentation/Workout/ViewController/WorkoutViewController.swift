@@ -5,20 +5,33 @@
 //  Created by LEESANGYUP on 7/8/26.
 //
 
+import AVFoundation
 import CoreLocation
 import UIKit
 
 import NMapsMap
+
+enum WorkoutMode: Equatable {
+    case ready
+    case recording
+    case paused
+    case finishing
+}
 
 final class WorkoutViewController: BaseUIViewController {
     
     // MARK: - Properties
     
     private let workoutView = WorkoutView()
+    private var workoutMode: WorkoutMode = .ready {
+        didSet {
+            guard oldValue != workoutMode else { return }
+            updateUI(for: workoutMode)
+        }
+    }
     private let viewModel = WorkoutViewModel()
     private let locationManager = CLLocationManager()
     private var initialLocation = false
-    private var isRecordingRoute = false
     private var lastReverseGeocodingLocation: CLLocation?
     private var lastRecordedLocation: CLLocation?
     private var routeLocations: [NMGLatLng] = []
@@ -29,6 +42,13 @@ final class WorkoutViewController: BaseUIViewController {
         super.viewDidLoad()
         
         setLocationManager()
+        updateUI(for: workoutMode)
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        if workoutMode == .finishing { workoutMode = .ready }
     }
     
     override func loadView() {
@@ -36,6 +56,12 @@ final class WorkoutViewController: BaseUIViewController {
     }
     
     // MARK: - Private Methods
+    
+    private func updateUI(for mode: WorkoutMode) {
+        workoutView.configure(for: mode)
+        let shouldHideTabBar = mode != .ready
+        (tabBarController as? TabBarViewController)?.setCustomTabBarHidden(shouldHideTabBar)
+    }
     
     private func requestCurrentLocationAuthorization() {
         switch locationManager.authorizationStatus {
@@ -78,7 +104,7 @@ final class WorkoutViewController: BaseUIViewController {
     }
     
     private func appendRouteLocationIfNeeded(_ location: CLLocation) {
-        guard isRecordingRoute else { return }
+        guard workoutMode == .recording else { return }
         
         let currentLatLng = NMGLatLng(
             lat: location.coordinate.latitude,
@@ -91,20 +117,99 @@ final class WorkoutViewController: BaseUIViewController {
     }
     
     private func startRecordingRoute() {
-        isRecordingRoute = true
+        workoutMode = .recording
+        workoutView.playCountdownAnimation()
         lastRecordedLocation = nil
         routeLocations.removeAll()
         workoutView.updateRoutePath(routeLocations)
-        workoutView.setRecording(true)
         
         if let currentLocation = locationManager.location {
             appendRouteLocationIfNeeded(currentLocation)
         }
     }
     
-    private func stopRecordingRoute() {
-        isRecordingRoute = false
-        workoutView.setRecording(false)
+    private func pauseRecordingRoute() {
+        workoutMode = .paused
+    }
+    
+    private func resumeRecordingRoute() {
+        workoutMode = .recording
+    }
+    
+    private func finishRecordingRoute() {
+        guard workoutMode != .finishing else { return }
+        workoutMode = .finishing
+        
+        workoutView.playFinishAnimation { [weak self] in
+            guard let self else { return }
+
+            lastRecordedLocation = nil
+            navigationController?.pushViewController(WorkoutTimeLineViewController(), animated: true)
+        }
+    }
+    
+    private func requestCameraAccess() {
+        guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
+            showCameraUnavailableAlert()
+            return
+        }
+        
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            presentCamera()
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { [weak self] isGranted in
+                DispatchQueue.main.async {
+                    if isGranted {
+                        self?.presentCamera()
+                    } else {
+                        self?.showCameraPermissionAlert()
+                    }
+                }
+            }
+        case .denied, .restricted:
+            showCameraPermissionAlert()
+        @unknown default:
+            showCameraPermissionAlert()
+        }
+    }
+    
+    private func presentCamera() {
+        let imagePickerController = UIImagePickerController()
+        imagePickerController.sourceType = .camera
+        imagePickerController.cameraCaptureMode = .photo
+        imagePickerController.delegate = self
+        imagePickerController.modalPresentationStyle = .fullScreen
+        present(imagePickerController, animated: true)
+    }
+    
+    private func pushPhotoLocationViewController(image: UIImage) {
+        let viewController = WorkoutPhotoLocationViewController(image: image)
+        navigationController?.pushViewController(viewController, animated: true)
+    }
+    
+    private func showCameraUnavailableAlert() {
+        let alert = UIAlertController(
+            title: "카메라를 사용할 수 없어요",
+            message: "카메라를 지원하는 기기에서 다시 시도해주세요.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        present(alert, animated: true)
+    }
+    
+    private func showCameraPermissionAlert() {
+        let alert = UIAlertController(
+            title: "카메라 권한이 필요해요",
+            message: "설정에서 카메라 접근을 허용해주세요.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+        alert.addAction(UIAlertAction(title: "설정으로 이동", style: .default) { _ in
+            guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
+            UIApplication.shared.open(settingsURL)
+        })
+        present(alert, animated: true)
     }
     
     private func updateCurrentAddress(_ location: CLLocation) {
@@ -168,15 +273,55 @@ final class WorkoutViewController: BaseUIViewController {
             action: #selector(locationButtonDidTap),
             for: .touchUpInside
         )
+        
+        workoutView.pauseButton.addTarget(
+            self,
+            action: #selector(didTapPauseButton),
+            for: .touchUpInside
+        )
+        
+        workoutView.restartButton.addTarget(
+            self,
+            action: #selector(didTapRestartButton),
+            for: .touchUpInside
+        )
+        
+        workoutView.finishButton.addTarget(
+            self,
+            action: #selector(didTapFinishButton),
+            for: .touchUpInside
+        )
+        
+        workoutView.cameraOnButton.addTarget(
+            self,
+            action: #selector(didTapCameraButton),
+            for: .touchUpInside
+        )
     }
     
     @objc
     private func didTapRecordButton() {
-        if isRecordingRoute {
-            stopRecordingRoute()
-        } else {
-            startRecordingRoute()
-        }
+        startRecordingRoute()
+    }
+    
+    @objc
+    private func didTapPauseButton() {
+        pauseRecordingRoute()
+    }
+    
+    @objc
+    private func didTapRestartButton() {
+        resumeRecordingRoute()
+    }
+    
+    @objc
+    private func didTapFinishButton() {
+        finishRecordingRoute()
+    }
+    
+    @objc
+    private func didTapCameraButton() {
+        requestCameraAccess()
     }
     
     @objc
@@ -185,7 +330,7 @@ final class WorkoutViewController: BaseUIViewController {
     }
 }
 
-// MARK: - CLLocationManagerDelegate
+// MARK: - Extensions
 
 extension WorkoutViewController: CLLocationManagerDelegate {
     private func setLocationManager() {
@@ -208,4 +353,24 @@ extension WorkoutViewController: CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) { }
+}
+
+extension WorkoutViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    func imagePickerController(
+        _ picker: UIImagePickerController,
+        didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]
+    ) {
+        guard let image = info[.originalImage] as? UIImage else {
+            picker.dismiss(animated: true)
+            return
+        }
+        
+        picker.dismiss(animated: true) { [weak self] in
+            self?.pushPhotoLocationViewController(image: image)
+        }
+    }
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true)
+    }
 }
