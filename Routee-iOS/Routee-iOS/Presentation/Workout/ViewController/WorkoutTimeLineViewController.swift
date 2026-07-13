@@ -8,9 +8,30 @@
 import UIKit
 
 final class WorkoutTimeLineViewController: BaseUIViewController {
-    let workoutTimelineView = WorkoutTimeLineView()
+    private let workoutTimelineView = WorkoutTimeLineView()
+    
+    // MARK: - Life Cycle
     
     override func loadView() {
         view = workoutTimelineView
+    
+        workoutTimelineView.backButtonAction = {
+            self.navigationController?.popToRootViewController(animated: true)
+        }
+
+        workoutTimelineView.completeButtonAction = {
+            self.navigationController?.popToRootViewController(animated: true)
+        }
+    }
+    
+    // MARK: - Actions
+    
+    override func setAddTarget() {
+        workoutTimelineView.goToEditButton.addTarget(self, action: #selector(didTapGoToEditButton), for: .touchUpInside)
+    }
+    
+    @objc
+    private func didTapGoToEditButton() {
+        self.navigationController?.pushViewController(EditorViewController(), animated: true)
     }
 }

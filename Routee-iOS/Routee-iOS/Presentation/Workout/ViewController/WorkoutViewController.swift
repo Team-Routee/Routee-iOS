@@ -44,6 +44,12 @@ final class WorkoutViewController: BaseUIViewController {
         setLocationManager()
         updateUI(for: workoutMode)
     }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        if workoutMode == .finishing { workoutMode = .ready }
+    }
     
     override func loadView() {
         view = workoutView

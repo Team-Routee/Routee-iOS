@@ -13,6 +13,16 @@ import Then
 final class WorkoutTimeLineView: BaseUIView {
     
     // MARK: - Properties
+
+    var backButtonAction: (() -> Void)? {
+        get { navigationBar.backButtonAction }
+        set { navigationBar.backButtonAction = newValue }
+    }
+
+    var completeButtonAction: (() -> Void)? {
+        get { navigationBar.rightButtonAction }
+        set { navigationBar.rightButtonAction = newValue }
+    }
     
     private let title = "2026.07.09 기록"
     private let distance = "15.53"
@@ -38,13 +48,13 @@ final class WorkoutTimeLineView: BaseUIView {
     private let navigationBar = TopNavigationBar(rightTitle: "완료")
     private lazy var titleTextField = TitleTextField(title: title, showsEditIcon: true)
     private lazy var workoutMetric = WorkoutMetric(distance: distance, time: time, altitude: altitude)
-    private lazy var trackMap = TrackMap(backgroundImage: UIImage(resource: .imgNavermapMain), trackPoints: trackPoints)
+    private lazy var trackMap = TrackMap(backgroundImage: UIImage(resource: .imgNavermapMain),trackPoints: trackPoints)
     private let timeLineStackView = UIStackView()
     private let timeLineLabel = UILabel()
     private let timeLineDateLabel = UILabel()
     private lazy var timeLineCard = TimeLineCard(imageNames: timelineImages, locations: timelineLocations)
     private let myRoute = MyRoute(mode: .write)
-    private lazy var goToEditButton = RouteeButton(titleText: "기록 편집 바로가기", type: .enabled)
+    lazy var goToEditButton = RouteeButton(titleText: "기록 편집 바로가기", type: .enabled)
     
     // MARK: - UI Setting
     
