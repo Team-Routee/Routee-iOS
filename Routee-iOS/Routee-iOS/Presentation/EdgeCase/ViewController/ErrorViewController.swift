@@ -13,18 +13,10 @@ final class ErrorViewController: BaseUIViewController {
     
     private let rootView: ErrorView
     
-    // MARK: - Properties
-    
-    private let retryAction: (() -> Void)?
-    
     // MARK: - Initializer
     
-    init(
-        errorCase: ErrorCase = .unknown,
-        retryAction: (() -> Void)? = nil
-    ) {
-        self.rootView = ErrorView(errorCase: .unknown)
-        self.retryAction = retryAction
+    init(_ errorCase: ErrorCase) {
+        self.rootView = ErrorView(errorCase: errorCase)
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -46,12 +38,6 @@ final class ErrorViewController: BaseUIViewController {
             action: #selector(toHomeButtonDidTap),
             for: .touchUpInside
         )
-        
-        rootView.retryButton.addTarget(
-            self,
-            action: #selector(retryButtonDidTap),
-            for: .touchUpInside
-        )
     }
     
     // MARK: - Private Methods
@@ -59,10 +45,5 @@ final class ErrorViewController: BaseUIViewController {
     @objc
     private func toHomeButtonDidTap() {
         navigationController?.popToRootViewController(animated: true)
-    }
-    
-    @objc
-    private func retryButtonDidTap() {
-        retryAction?()
     }
 }

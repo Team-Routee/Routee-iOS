@@ -59,7 +59,7 @@ final class ErrorView: BaseUIView {
     
     // MARK: - Initializer
     
-    init(errorCase: ErrorCase = .notFound) {
+    init(errorCase: ErrorCase) {
         self.errorCase = errorCase
         super.init(frame: .zero)
     }
