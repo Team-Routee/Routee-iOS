@@ -15,17 +15,39 @@ final class TimeLineCard: BaseUIView {
     private let imageStackView = UIStackView()
     private let pageControl = UIPageControl()
 
+    private var imageContainerViews: [UIView] = []
     private var imageViews: [UIImageView] = []
+    private var locationTags: [LocationTag] = []
     private var imageCount = 0
     
-    init(imageNames: [String]) {
-        imageViews = imageNames.map { imageName in
+    init(imageNames: [String], locations: [String?]? = nil) {
+        var imageContainerViews: [UIView] = []
+        var imageViews: [UIImageView] = []
+        var locationTags: [LocationTag] = []
+
+        imageNames.enumerated().forEach { index, imageName in
+            let imageContainerView = UIView()
             let imageView = UIImageView()
             imageView.image = UIImage(named: imageName)
             imageView.contentMode = .scaleAspectFill
             imageView.clipsToBounds = true
-            return imageView
+
+            imageContainerView.addSubview(imageView)
+            imageContainerViews.append(imageContainerView)
+            imageViews.append(imageView)
+
+            guard let locations,
+                  locations.indices.contains(index),
+                  let location = locations[index] else { return }
+
+            let locationTag = LocationTag(title: location)
+            imageContainerView.addSubview(locationTag)
+            locationTags.append(locationTag)
         }
+
+        self.imageContainerViews = imageContainerViews
+        self.imageViews = imageViews
+        self.locationTags = locationTags
         imageCount = imageNames.count
 
         super.init(frame: .zero)
@@ -64,7 +86,7 @@ final class TimeLineCard: BaseUIView {
 
         imageScrollView.addSubview(imageStackView)
 
-        imageViews.forEach { imageStackView.addArrangedSubview($0) }
+        imageContainerViews.forEach { imageStackView.addArrangedSubview($0) }
     }
 
     override func setLayout() {
@@ -82,9 +104,21 @@ final class TimeLineCard: BaseUIView {
             $0.height.equalTo(imageScrollView.frameLayoutGuide)
         }
 
-        imageViews.forEach { imageView in
-            imageView.snp.makeConstraints {
+        imageContainerViews.forEach { imageContainerView in
+            imageContainerView.snp.makeConstraints {
                 $0.width.equalTo(imageScrollView.frameLayoutGuide)
+            }
+        }
+
+        imageViews.forEach {
+            $0.snp.makeConstraints {
+                $0.edges.equalToSuperview()
+            }
+        }
+
+        locationTags.forEach {
+            $0.snp.makeConstraints {
+                $0.top.leading.equalToSuperview().inset(12)
             }
         }
 
