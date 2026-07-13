@@ -102,15 +102,16 @@ final class SettingView: BaseUIView {
         backgroundGradientView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-        
+
         titleLabel.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide).offset(16)
-            $0.leading.equalToSuperview().inset(16)
+            $0.leading.equalTo(contentStackView.snp.leading)
         }
 
         contentStackView.snp.makeConstraints {
+            $0.centerX.equalToSuperview()
             $0.top.equalTo(titleLabel.snp.bottom).offset(40)
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.width.equalTo(343)
         }
 
         [
