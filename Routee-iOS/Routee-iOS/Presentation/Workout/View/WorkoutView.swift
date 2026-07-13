@@ -255,12 +255,6 @@ final class WorkoutView: BaseUIView {
             $0.mapView.setLayerGroup(NMF_LAYER_GROUP_MOUNTAIN, isEnabled: true)
             
             $0.mapView.logoAlign = .leftBottom
-            $0.mapView.logoMargin = UIEdgeInsets(
-                top: 0,
-                left: 30,
-                bottom: 144,
-                right: 0
-            )
         }
     }
     
@@ -333,6 +327,19 @@ extension WorkoutView {
         workoutMetric.isHidden = !isRecording
         activityButtonStackView.isHidden = !isRecording
         workoutPauseView.isHidden = !isPaused
+
+        if isReady {
+            mapView.logoAlign = .leftBottom
+            mapView.logoMargin = UIEdgeInsets(
+                top: 0,
+                left: 30,
+                bottom: 144,
+                right: 0
+            )
+        } else {
+            mapView.logoAlign = .rightBottom
+            mapView.logoMargin = .zero
+        }
         
         if !isRecording {
             countdownAnimationView.stop()
