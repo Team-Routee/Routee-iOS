@@ -8,11 +8,16 @@
 import UIKit
 
 extension EditorView {
+
+    // MARK: - Actions
+
     func setColorAction() {
         recordEditTabBar.onColorSelected = { [weak self] color in
             self?.updateEditorColor(color)
         }
     }
+
+    // MARK: - Color Update
 
     func updateEditorColor(_ color: UIColor) {
         state.selectedColor = color

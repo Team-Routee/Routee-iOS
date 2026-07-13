@@ -9,7 +9,7 @@ import UIKit
 
 extension EditorView {
 
-    // MARK: - UI Setting
+    // MARK: - Actions
 
     func setStickerAction() {
         recordEditTabBar.onStickerEditingChanged = { [weak self] isEnabled in
@@ -40,7 +40,7 @@ extension EditorView {
         }
     }
 
-    // MARK: - Private Methods
+    // MARK: - Sticker Editing
 
     func setStickerEditingEnabled(_ isEnabled: Bool) {
         if !isEnabled {
@@ -88,6 +88,8 @@ extension EditorView {
         activateStickerBox(routeStickerBox)
     }
 
+    // MARK: - Sticker Layout
+
     func updateMoveBounds() {
         let movementBounds = backgroundImageView.frame.insetBy(
             dx: stickerMovementInset,
@@ -134,6 +136,8 @@ extension EditorView {
         )
     }
 
+    // MARK: - Sticker Helpers
+
     func activateStickerBox(_ stickerBox: StickerBox) {
         stickerBox.isUserInteractionEnabled = true
         stickerBox.setCloseButton(isSelected: true)
@@ -162,7 +166,7 @@ extension EditorView {
         return stickerBox.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
     }
 
-    // MARK: - Actions
+    // MARK: - Gesture Actions
 
     @objc
     func handleViewTapped(_ gesture: UITapGestureRecognizer) {
