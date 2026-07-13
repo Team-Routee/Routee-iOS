@@ -30,7 +30,7 @@ enum RoutePointDummyData {
     )
 }
 
-final class RouteView: BaseUIView {
+final class MyRoute: BaseUIView {
     
     // MARK: - UI Properties
     
@@ -86,9 +86,8 @@ final class RouteView: BaseUIView {
         
         toggleButton.do {
             $0.setImage(.icArrowDownWhite, for: .normal)
+            $0.setImage(.icArrowDownWhite, for: .highlighted)
             $0.tintColor = .static_white
-            $0.adjustsImageWhenHighlighted = false
-            $0.showsTouchWhenHighlighted = false
             $0.addTarget(self, action: #selector(toggleButtonDidTap), for: .touchUpInside)
         }
         
@@ -111,8 +110,6 @@ final class RouteView: BaseUIView {
             $0.configuration = configuration
             $0.tintColor = .static_white
             $0.backgroundColor = .bg_cta_secondary
-            $0.adjustsImageWhenHighlighted = false
-            $0.showsTouchWhenHighlighted = false
             $0.layer.borderWidth = 1
             $0.layer.borderColor = UIColor.mint300.cgColor
             $0.layer.cornerRadius = .r12
@@ -193,10 +190,12 @@ final class RouteView: BaseUIView {
             countRouteLabel.isHidden = true
             toggleButton.isHidden = !(pointCount > 3)
             UIView.performWithoutAnimation {
+                let image: UIImage = isExpanded ? .icArrowUpWhite : .icArrowDownWhite
                 toggleButton.setImage(
-                    isExpanded ? .icArrowUpWhite : .icArrowDownWhite,
+                    image,
                     for: .normal
                 )
+                toggleButton.setImage(image, for: .highlighted)
                 toggleButton.layoutIfNeeded()
             }
             addRouteButton.isHidden = true
