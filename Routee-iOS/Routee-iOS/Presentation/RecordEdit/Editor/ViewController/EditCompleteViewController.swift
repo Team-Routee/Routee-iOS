@@ -10,56 +10,65 @@ import UIKit
 import Photos
 
 final class EditCompleteViewController: BaseUIViewController {
-    
+
     // MARK: - Properties
-    
+
     private let editedImage: UIImage
-    
+
     // MARK: - UI Properties
-    
+
     private let rootView = EditCompleteView()
-    
+
     // MARK: - Initializer
-    
+
     init(editedImage: UIImage) {
         self.editedImage = editedImage
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError()
     }
-    
+
     // MARK: - Life Cycle
-    
+
     override func loadView() {
         view = rootView
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         rootView.updateImage(editedImage)
     }
-    
+
     // MARK: - Private Methods
-    
+
     private func popViewController() {
         navigationController?.popViewController(animated: false)
     }
-    
+
     private func popToRecordEditViewController() {
-        guard let recordEditViewController = navigationController?
+        if let recordEditViewController = navigationController?
             .viewControllers
-            .first(where: { $0 is RecordEditViewController })
-        else {
-            popViewController()
+            .first(where: { $0 is RecordEditViewController }) {
+            navigationController?.popToViewController(recordEditViewController, animated: false)
             return
         }
-        
-        navigationController?.popToViewController(recordEditViewController, animated: false)
+
+        guard let tabBarController = tabBarController as? TabBarViewController,
+              let viewControllers = tabBarController.viewControllers,
+              let recordEditNavigationController = viewControllers[1] as? UINavigationController
+        else {
+            navigationController?.popViewController(animated: false)
+            return
+        }
+
+        tabBarController.selectTab(index: 1)
+        recordEditNavigationController.popToRootViewController(animated: false)
+        navigationController?.popToRootViewController(animated: false)
     }
-    
+
     private func saveImageToPhotoLibrary() {
         PHPhotoLibrary.requestAuthorization(for: .addOnly) { [weak self] status in
             guard let self else { return }
@@ -84,7 +93,7 @@ final class EditCompleteViewController: BaseUIViewController {
             }
         }
     }
-    
+
     private func exportImage() {
         let activityViewController = UIActivityViewController(
             activityItems: [editedImage],
@@ -93,22 +102,22 @@ final class EditCompleteViewController: BaseUIViewController {
 
         present(activityViewController, animated: true)
     }
-    
+
     // MARK: - Actions
-    
+
     override func setAddTarget() {
         rootView.topNavigationBar.backButtonAction = { [weak self] in
             self?.popViewController()
         }
-        
+
         rootView.topNavigationBar.rightButtonAction = { [weak self] in
             self?.popToRecordEditViewController()
         }
-        
+
         rootView.setDownloadButtonAction { [weak self] in
             self?.saveImageToPhotoLibrary()
         }
-        
+
         rootView.setExportButtonAction { [weak self] in
             self?.exportImage()
         }
