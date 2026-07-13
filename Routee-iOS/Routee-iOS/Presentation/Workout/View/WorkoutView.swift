@@ -224,8 +224,7 @@ final class WorkoutView: BaseUIView {
         }
         
         cameraOnButton.snp.makeConstraints {
-            $0.width.equalTo(60)
-            $0.height.equalTo(60)
+            $0.size.equalTo(60)
         }
         
         activityButtonStackView.snp.makeConstraints {
