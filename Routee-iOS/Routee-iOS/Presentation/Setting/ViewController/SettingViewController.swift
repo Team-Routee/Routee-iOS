@@ -22,7 +22,7 @@ final class SettingViewController: BaseUIViewController {
     // MARK: - Private Methods
     
     private func openInstagram() {
-        guard let url = URL(string: "https://www.instagram.com/") else { return }
+        guard let url = URL(string: "https://www.instagram.com/routee_official/?hl=ko") else { return }
         UIApplication.shared.open(url)
     }
     
