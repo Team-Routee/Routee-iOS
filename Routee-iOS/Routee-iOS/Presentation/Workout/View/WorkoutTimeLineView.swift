@@ -22,6 +22,14 @@ final class WorkoutTimeLineView: BaseUIView {
     var timelineImages: [String] = [
         "img_location1", "img_location2", "img_location3", "img_location4", "img_location5", "img_location6"
     ]
+    private let timelineLocations = [
+        "창의문",
+        "청운대",
+        "말바위",
+        nil,
+        "창의문",
+        "창의문"
+    ]
     
     // MARK: - UI Properties
     
@@ -34,7 +42,7 @@ final class WorkoutTimeLineView: BaseUIView {
     private let timeLineStackView = UIStackView()
     private let timeLineLabel = UILabel()
     private let timeLineDateLabel = UILabel()
-    private lazy var timeLineCard = TimeLineCard(imageNames: timelineImages)
+    private lazy var timeLineCard = TimeLineCard(imageNames: timelineImages, locations: timelineLocations)
     private let myRoute = MyRoute(mode: .write)
     private lazy var goToEditButton = RouteeButton(titleText: "기록 편집 바로가기", type: .enabled)
     
