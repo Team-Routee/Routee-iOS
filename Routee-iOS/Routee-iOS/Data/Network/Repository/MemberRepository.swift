@@ -9,15 +9,19 @@ import Foundation
 
 protocol MemberRepository {
     func register(nickname: String, identityToken: String, provider: LoginPlatform) async throws
-    func withdraw(refreshToken: String) async throws
+    func withdraw() async throws
 }
 
 struct DefaultMemberRepository: MemberRepository {
     private let service: NetworkService
-    private let keychainService = DefaultKeychainService()
+    private let keychainService: KeychainService
 
-    init(service: NetworkService = DefaultNetworkService()) {
+    init(
+        service: NetworkService = DefaultNetworkService(),
+        keychainService: KeychainService = DefaultKeychainService()
+    ) {
         self.service = service
+        self.keychainService = keychainService
     }
     
     func register(nickname: String, identityToken: String, provider: LoginPlatform) async throws {
@@ -32,12 +36,22 @@ struct DefaultMemberRepository: MemberRepository {
             requestDTO: dto
         )
         
-        let response: EmptyResponse = try await service.request(endPoint, decodingType: EmptyResponse.self)
+        try await service.requestEmpty(endPoint)
     }
     
-    func withdraw(refreshToken: String) async throws {
+    func withdraw() async throws {
+        let accessToken = keychainService.read(.accessToken)
         let refreshToken = keychainService.read(.refreshToken)
-        let endPoint = MemberAPI.withdraw(header: .basic)
-        let response: EmptyResponse = try await service.request(endPoint, decodingType: EmptyResponse.self)
+
+        guard !accessToken.isEmpty, !refreshToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let requestDTO = WithdrawRequestDTO(refreshToken: refreshToken)
+        let endPoint = MemberAPI.withdraw(
+            header: .withAuth(accessToken: accessToken),
+            requestDTO: requestDTO
+        )
+        try await service.requestEmpty(endPoint)
     }
 }
