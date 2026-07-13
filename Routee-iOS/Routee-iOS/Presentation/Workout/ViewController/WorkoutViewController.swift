@@ -322,7 +322,7 @@ final class WorkoutViewController: BaseUIViewController {
     }
 }
 
-// MARK: - CLLocationManagerDelegate
+// MARK: - Extensions
 
 extension WorkoutViewController: CLLocationManagerDelegate {
     private func setLocationManager() {
@@ -346,8 +346,6 @@ extension WorkoutViewController: CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) { }
 }
-
-// MARK: - UIImagePickerControllerDelegate
 
 extension WorkoutViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerController(
