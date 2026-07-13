@@ -14,7 +14,7 @@ final class RecordEditView: BaseUIView {
     
     // MARK: - UI Properties
     
-    private let backgroundImageView = RouteeEllipseBackground()
+    private let backgroundGradientView = RouteeEllipseBackground()
     private let titleLabel = UILabel()
     private let monthSelector = MonthSelector()
     private let emptyDataStackView = UIStackView()
@@ -82,7 +82,7 @@ final class RecordEditView: BaseUIView {
     
     override func setUI() {
         addSubviews(
-            backgroundImageView,
+            backgroundGradientView,
             titleLabel,
             monthSelector,
             workoutRecordCollectionView,
@@ -96,7 +96,7 @@ final class RecordEditView: BaseUIView {
     }
     
     override func setLayout() {
-        backgroundImageView.snp.makeConstraints {
+        backgroundGradientView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
         

@@ -65,7 +65,7 @@ final class TabBarViewController: UITabBarController {
         let workout = UINavigationController(rootViewController: WorkoutViewController())
         let recordEdit = UINavigationController(rootViewController: RecordEditViewController())
         let archive = UINavigationController(rootViewController: ArchiveViewController())
-        let setting = UINavigationController(rootViewController: SampleViewController())
+        let setting = UINavigationController(rootViewController: SettingViewController())
         
         [workout, recordEdit, archive, setting].forEach {
             $0.navigationBar.isHidden = true
