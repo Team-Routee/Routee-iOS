@@ -22,7 +22,7 @@ final class SettingViewModel {
         )
     }
     
-    func withdraw(refreshToken: String) async throws {
-        try await memberRepository.withdraw(refreshToken: refreshToken)
+    func withdraw() async throws {
+        try await memberRepository.withdraw()
     }
 }

@@ -75,6 +75,7 @@ extension LoginViewController: ASAuthorizationControllerDelegate {
             print("사용자 ID: \(userIdentifier)")
             print("전체 이름: \(fullName?.givenName ?? "") \(fullName?.familyName ?? "")")
             print("이메일: \(email ?? "")")
+            print("idToken: \(identityToken)")
             
             let onboardingViewController = OnboardingViewController()
             delegate = onboardingViewController

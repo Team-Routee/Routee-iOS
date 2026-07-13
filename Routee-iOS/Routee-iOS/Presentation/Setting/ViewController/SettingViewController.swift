@@ -12,7 +12,6 @@ final class SettingViewController: BaseUIViewController {
     // MARK: - Properties
     
     private let viewModel = SettingViewModel()
-    private let keychain = DefaultKeychainService()
     
     // MARK: - UI Properties
     
@@ -32,11 +31,9 @@ final class SettingViewController: BaseUIViewController {
     }
     
     private func didTapPrivacyButton() {
-        let refreshToken = keychain.read(.refreshToken)
-        
         Task {
             do {
-                try await viewModel.withdraw(refreshToken: refreshToken)
+                try await viewModel.withdraw()
             } catch {
                 print("회원 탈퇴 실패", error)
             }
@@ -58,8 +55,8 @@ final class SettingViewController: BaseUIViewController {
             self?.logout()
         }
         
-        rootView.policyButtonAction = { [self] in
-            didTapPrivacyButton()
+        rootView.policyButtonAction = { [weak self] in
+            self?.didTapPrivacyButton()
         }
     }
 }
