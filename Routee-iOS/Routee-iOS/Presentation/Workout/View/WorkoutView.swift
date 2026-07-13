@@ -358,8 +358,10 @@ extension WorkoutView {
         finishAnimationView.currentProgress = 0
         finishAnimationView.isHidden = false
         bringSubviewToFront(finishAnimationView)
-        finishAnimationView.play { [weak self] _ in
-            self?.finishAnimationView.isHidden = true
+        finishAnimationView.play { [weak self] isFinished in
+            guard let self, isFinished else { return }
+
+            finishAnimationView.isHidden = true
             completion()
         }
     }

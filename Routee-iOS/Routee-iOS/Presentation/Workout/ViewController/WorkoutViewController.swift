@@ -134,9 +134,11 @@ final class WorkoutViewController: BaseUIViewController {
         guard workoutMode != .finishing else { return }
         workoutMode = .finishing
         
-        workoutView.playFinishAnimation {
-            self.lastRecordedLocation = nil
-            self.workoutMode = .ready
+        workoutView.playFinishAnimation { [weak self] in
+            guard let self else { return }
+
+            lastRecordedLocation = nil
+            navigationController?.pushViewController(WorkoutTimeLineViewController(), animated: true)
         }
     }
     
