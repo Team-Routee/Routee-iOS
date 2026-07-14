@@ -20,6 +20,13 @@ final class ArchiveViewController: BaseUIViewController {
     private var joinDate: String?
     private var archiveTask: Task<Void, Never>?
     private var profileTask: Task<Void, Never>?
+    private let joinedDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.calendar = Foundation.Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
 
     // MARK: - Life Cycle
 
@@ -247,12 +254,7 @@ final class ArchiveViewController: BaseUIViewController {
     }
 
     private func monthStart(from joinedDate: String) -> Date {
-        let formatter = DateFormatter()
-        formatter.calendar = Foundation.Calendar(identifier: .gregorian)
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyy-MM-dd"
-
-        let date = formatter.date(from: joinedDate) ?? Date()
+        let date = joinedDateFormatter.date(from: joinedDate) ?? Date()
         return monthStart(from: date)
     }
 
@@ -271,7 +273,7 @@ final class ArchiveViewController: BaseUIViewController {
     }
 }
 
-    // MARK: - Extension
+// MARK: - Extension
 
 extension ArchiveViewController: UIAdaptivePresentationControllerDelegate {
 

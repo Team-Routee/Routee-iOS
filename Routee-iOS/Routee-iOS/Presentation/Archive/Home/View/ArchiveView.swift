@@ -42,8 +42,7 @@ final class ArchiveView: BaseUIView {
 
     override func setStyle() {
         backgroundColor = .bg_primary
-        }
-
+    }
 
     override func setUI() {
         addSubviews(

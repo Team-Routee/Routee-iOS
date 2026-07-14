@@ -1,5 +1,5 @@
 //
-//  ArchiveHomeViewModel.swift
+//  ArchiveViewModel.swift
 //  Routee-iOS
 //
 

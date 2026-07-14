@@ -22,7 +22,7 @@ final class ArchiveCalendarCell: UICollectionViewCell {
     private let dayLabel = UILabel()
     private let badgeBackgroundImageView = UIImageView()
 
-    // MARK: - Initialize
+    // MARK: - Initializer
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -146,7 +146,7 @@ final class ArchiveCalendarCell: UICollectionViewCell {
             thumbnailImageView.isHidden = false
             dayLabel.text = nil
         } else {
-            backgroundImageView.image = UIImage(named: "calendar_bg")
+            backgroundImageView.image = .calendarBg
             backgroundImageView.isHidden = false
         }
     }
@@ -158,7 +158,7 @@ final class ArchiveCalendarCell: UICollectionViewCell {
             thumbnailImageView.isHidden = false
             dayLabel.text = nil
         } else {
-            backgroundImageView.image = UIImage(named: "calendar_bg2")
+            backgroundImageView.image = .calendarBg
             backgroundImageView.isHidden = false
         }
     }

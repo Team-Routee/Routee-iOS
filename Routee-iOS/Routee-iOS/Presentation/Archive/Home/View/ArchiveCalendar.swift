@@ -144,7 +144,7 @@ final class ArchiveCalendar: BaseUIView {
     }
 }
 
-// MARK: - Extensions
+// MARK: - Extension
 
 extension ArchiveCalendar: UICollectionViewDataSource {
 
