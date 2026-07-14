@@ -34,6 +34,13 @@ final class SettingViewController: BaseUIViewController {
         Task {
             do {
                 try await viewModel.withdraw()
+                
+                await MainActor.run {
+                    NotificationCenter.default.post(
+                        name: .navigateLoginViewController,
+                        object: nil
+                    )
+                }
             } catch {
                 print("회원 탈퇴 실패", error)
             }

@@ -23,6 +23,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window.rootViewController = navigationViewController
         self.window = window
         window.makeKeyAndVisible()
+        
+        addNotificationObserver()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -53,6 +55,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // to restore the scene back to its current state.
     }
 
+    private func addNotificationObserver() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(navigateLoginViewController),
+            name: .navigateLoginViewController,
+            object: nil
+        )
+    }
+    
+    @objc private func navigateLoginViewController() {
+        let loginViewController = LoginViewController()
+        let navigationController = UINavigationController(
+            rootViewController: loginViewController
+        )
+        navigationController.navigationBar.isHidden = true
+        window?.rootViewController = navigationController
+    }
 
 }
 
