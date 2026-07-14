@@ -1,13 +1,13 @@
 //
-//  RecordModel.swift
+//  ActivitySummaryModel.swift
 //  Routee-iOS
 //
 
 import Foundation
 
-struct RecordModel {
+struct ActivitySummaryModel {
     let activityDate: String
     let totalDurationMinutes: Int
     let activityCount: Int
-    let coverImageName: String?
+    let coverImageUrl: String?
 }
