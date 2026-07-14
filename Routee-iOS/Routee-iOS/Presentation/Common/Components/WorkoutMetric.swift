@@ -47,6 +47,10 @@ final class WorkoutMetric: BaseUIView {
     func updateTime(_ time: String) {
         timeDataLabel.text = time
     }
+
+    func updateMaximumAltitude(_ altitude: String) {
+        highestAltitudeDataLabel.text = altitude
+    }
     
     override func setUI() {
         distanceStackView.addArrangedSubviews(distanceLabel, distanceDataLabel)

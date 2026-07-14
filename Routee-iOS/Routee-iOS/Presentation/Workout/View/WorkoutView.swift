@@ -5,7 +5,6 @@
 //  Created by LEESANGYUP on 7/8/26.
 //
 
-import Combine
 import CoreLocation
 import UIKit
 
@@ -20,7 +19,7 @@ final class WorkoutView: BaseUIView {
     
     var distance = "0.00"
     var time = "00:00"
-    var altitude = "2312"
+    var altitude = "--"
     
     // MARK: - UI Properties
     
@@ -281,6 +280,10 @@ final class WorkoutView: BaseUIView {
         let minutes = (totalSeconds % 3_600) / 60
         let formattedTime = String(format: "%02d:%02d", hours, minutes)
         workoutMetric.updateTime(formattedTime)
+    }
+
+    func updateMaximumAltitude(_ altitudeInMeters: CLLocationDistance?) {
+        workoutMetric.updateMaximumAltitude(altitudeInMeters.map { String(Int($0.rounded())) } ?? "--")
     }
     
     func updateCurrentLocationAddress(_ address: String) {

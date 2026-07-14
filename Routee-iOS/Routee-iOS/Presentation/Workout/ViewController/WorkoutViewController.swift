@@ -333,9 +333,8 @@ final class WorkoutViewController: BaseUIViewController {
 
 private extension WorkoutViewController {
     func bindViewModel() {
-        viewModel.elapsedTimeDidChange = { [weak self] elapsedTime in
-            self?.workoutView.updateElapsedTime(elapsedTime)
-        }
+        viewModel.elapsedTimeDidChange = { [weak self] in self?.workoutView.updateElapsedTime($0) }
+        viewModel.maximumAltitudeDidChange = { [weak self] in self?.workoutView.updateMaximumAltitude($0) }
     }
 
     func updateElapsedTimeTracking(from oldMode: WorkoutMode, to newMode: WorkoutMode) {

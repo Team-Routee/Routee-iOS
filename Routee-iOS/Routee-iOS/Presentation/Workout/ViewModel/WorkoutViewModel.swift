@@ -10,9 +10,11 @@ import Foundation
 
 final class WorkoutViewModel {
     var elapsedTimeDidChange: ((TimeInterval) -> Void)?
+    var maximumAltitudeDidChange: ((CLLocationDistance?) -> Void)?
     var elapsedTimeInSeconds: Int {
         max(0, Int(currentElapsedTime))
     }
+    private(set) var maximumAltitudeInMeters: CLLocationDistance?
 
     private let reverseGeocodingRepository: ReverseGeocodingRepository
     private var lastReverseGeocodingLocation: CLLocation?
@@ -33,6 +35,8 @@ final class WorkoutViewModel {
     func startDistanceTracking() -> CLLocationDistance {
         lastRecordedLocation = nil
         totalDistance = 0
+        maximumAltitudeInMeters = nil
+        maximumAltitudeDidChange?(nil)
         return totalDistance
     }
 
@@ -67,6 +71,8 @@ final class WorkoutViewModel {
     }
 
     func recordDistance(at location: CLLocation) -> CLLocationDistance? {
+        recordMaximumAltitude(at: location)
+
         guard location.horizontalAccuracy >= 0,
               location.horizontalAccuracy <= 30,
               abs(location.timestamp.timeIntervalSinceNow) <= 10 else {
@@ -80,6 +86,18 @@ final class WorkoutViewModel {
 
         lastRecordedLocation = location
         return totalDistance
+    }
+
+    private func recordMaximumAltitude(at location: CLLocation) {
+        guard location.verticalAccuracy > 0,
+              location.verticalAccuracy <= 30,
+              abs(location.timestamp.timeIntervalSinceNow) <= 10,
+              maximumAltitudeInMeters.map({ location.altitude > $0 }) ?? true else {
+            return
+        }
+
+        maximumAltitudeInMeters = location.altitude
+        maximumAltitudeDidChange?(location.altitude)
     }
 
     private func startElapsedTimeTimer() {
