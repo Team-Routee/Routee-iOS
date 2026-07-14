@@ -18,6 +18,7 @@ enum RouteeError: LocalizedError, Equatable {
     case configError
     case forbidden
     case notFound
+    case unauthorized
     case networkError(statusCode: Int, message: String)
     
     var errorDescription: String? {
@@ -42,6 +43,8 @@ enum RouteeError: LocalizedError, Equatable {
             return "접근 권한 없음"
         case .notFound:
             return "요청한 페이지를 찾을 수 없음"
+        case .unauthorized:
+            return "인증이 만료되었습니다"
         case .networkError(let code, let message):
             return "네트워크 연결을 확인하세요(Code: \(code), Message: \(message))"
         }

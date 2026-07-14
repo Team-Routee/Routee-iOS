@@ -13,3 +13,9 @@ struct BaseResponse<T: Decodable & Sendable>: Decodable, Sendable {
     let message: String
     let data: T?
 }
+
+struct EmptyResponse: Decodable, Sendable {
+    let status: Int
+    let code: String
+    let message: String
+}

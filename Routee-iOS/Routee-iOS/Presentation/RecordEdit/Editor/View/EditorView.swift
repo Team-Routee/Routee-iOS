@@ -17,8 +17,12 @@ final class EditorView: BaseUIView {
     private let stickerHorizontalInset: CGFloat = 13
     private let stickerVerticalInset: CGFloat = 10
     private let stickerMovementInset: CGFloat = 12
-    private var didSetRouteTimelineStickerFrame = false
-    private var selectedColor: UIColor = .recapMint
+    private var state = EditorState()
+
+    private struct EditorState {
+        var selectedColor: UIColor = .recapMint
+        var didSetRouteTimelineStickerFrame = false
+    }
 
     // MARK: - UI Properties
 
@@ -42,14 +46,13 @@ final class EditorView: BaseUIView {
 
     override func setStyle() {
         backgroundColor = .bgPrimary
-        hideOptionViewTapGesture.cancelsTouchesInView = false
 
         backgroundOpacityView.do {
-            $0.backgroundColor = .black40
+            $0.backgroundColor = .black50
         }
 
         backgroundImageView.do {
-            $0.image = UIImage(resource: .imgNavermapMain)
+            $0.image = .imgNavermapMain
             $0.contentMode = .scaleAspectFill
             $0.clipsToBounds = true
         }
@@ -66,11 +69,6 @@ final class EditorView: BaseUIView {
             recordEditTabBar,
             lottieOverlayView
         )
-
-        addGestureRecognizer(hideOptionViewTapGesture)
-        setColorAction()
-        setStickerAction()
-        setInitialRouteTimelineSticker()
     }
 
     override func setLayout() {
@@ -116,18 +114,23 @@ final class EditorView: BaseUIView {
     override func layoutSubviews() {
         super.layoutSubviews()
 
-        updateStickerMovementBounds()
-        setRouteTimelineStickerFrame()
+        updateMoveBounds()
+        setTimelineFrame()
     }
 
     // MARK: - Public Methods
 
     func updateBackgroundImage(_ image: UIImage) {
         backgroundImageView.image = image
+        backgroundOpacityView.backgroundColor = .black40
     }
 
     func setBackgroundTapAction(_ action: @escaping () -> Void) {
         recordEditTabBar.onBackgroundTap = action
+    }
+
+    func playLottie(completion: @escaping () -> Void) {
+        lottieOverlayView.play(completion: completion)
     }
 
     func makeEditedImage() -> UIImage {
@@ -147,11 +150,28 @@ final class EditorView: BaseUIView {
         }
     }
 
-    func playLottie(completion: @escaping () -> Void) {
-        lottieOverlayView.play(completion: completion)
+    func setGesture() {
+        hideOptionViewTapGesture.cancelsTouchesInView = false
+        addGestureRecognizer(hideOptionViewTapGesture)
     }
 
-    // MARK: - Private Methods
+    func setInitialState() {
+        deactivateStickerBox(routeTimelineStickerBox)
+    }
+
+    // MARK: - Actions
+
+    func setAddTarget() {
+        setColorAction()
+        setStickerAction()
+        setStickerDeleteAction()
+    }
+
+    private func setColorAction() {
+        recordEditTabBar.onColorSelected = { [weak self] color in
+            self?.updateEditorColor(color)
+        }
+    }
 
     private func setStickerAction() {
         recordEditTabBar.onStickerEditingChanged = { [weak self] isEnabled in
@@ -161,48 +181,110 @@ final class EditorView: BaseUIView {
         recordEditTabBar.onStickerSelected = { [weak self] stickerType in
             switch stickerType {
             case .photoTimeline:
-                self?.selectRouteTimelineSticker()
+                self?.selectTimelineSticker()
             case .route:
                 self?.showRouteSticker()
             }
         }
     }
 
-    private func setColorAction() {
-        recordEditTabBar.onColorSelected = { [weak self] color in
-            self?.updateEditorColor(color)
+    private func setStickerDeleteAction() {
+        routeTimelineStickerBox.onDeleted = { [weak self] in
+            guard let self else { return }
+
+            removeStickerBox(routeTimelineStickerBox)
+        }
+
+        routeStickerBox.onDeleted = { [weak self] in
+            guard let self else { return }
+
+            removeStickerBox(routeStickerBox)
         }
     }
 
+    @objc
+    private func handleViewTapped(_ gesture: UITapGestureRecognizer) {
+        let point = gesture.location(in: recordEditTabBar)
+        let routeTimelineStickerPoint = gesture.location(in: routeTimelineStickerBox)
+        let routeStickerPoint = gesture.location(in: routeStickerBox)
+
+        guard !recordEditTabBar.containsInteractivePoint(point) else { return }
+
+        if routeTimelineStickerBox.superview != nil,
+           routeTimelineStickerBox.isSelected,
+           !routeTimelineStickerBox.bounds.contains(routeTimelineStickerPoint) {
+            deactivateStickerBox(routeTimelineStickerBox)
+        }
+
+        if routeStickerBox.superview != nil,
+           routeStickerBox.isSelected,
+           !routeStickerBox.bounds.contains(routeStickerPoint) {
+            deactivateStickerBox(routeStickerBox)
+        }
+
+        recordEditTabBar.hideOptionView()
+    }
+
+    // MARK: - Color Update
+
     private func updateEditorColor(_ color: UIColor) {
-        selectedColor = color
+        state.selectedColor = color
         dataInfo.updateColor(color)
         routeTimelineDrawingView.updateColor(color)
         routeSticker.updateColor(color)
     }
 
+    // MARK: - Sticker Editing
+
     private func setStickerEditingEnabled(_ isEnabled: Bool) {
         if !isEnabled {
-            routeTimelineStickerBox.setCloseButton(isSelected: false)
-            routeTimelineStickerBox.isUserInteractionEnabled = false
-            routeStickerBox.setCloseButton(isSelected: false)
-            routeStickerBox.isUserInteractionEnabled = false
+            deactivateStickerBox(routeTimelineStickerBox)
+            deactivateStickerBox(routeStickerBox)
             return
         }
 
+        routeTimelineStickerBox.isUserInteractionEnabled = routeTimelineStickerBox.superview != nil
         routeStickerBox.isUserInteractionEnabled = routeStickerBox.superview != nil
     }
 
-    private func setInitialRouteTimelineSticker() {
-        routeTimelineStickerBox.setCloseButton(isSelected: false)
-        routeTimelineStickerBox.isUserInteractionEnabled = false
+    private func selectTimelineSticker() {
+        removeStickerBox(routeStickerBox)
 
-        routeTimelineStickerBox.onDeleted = { [weak self] in
-            self?.routeTimelineStickerBox.removeFromSuperview()
+        if routeTimelineStickerBox.superview == nil {
+            addSubview(routeTimelineStickerBox)
+            updateTimelineFrame()
         }
+
+        activateStickerBox(routeTimelineStickerBox)
     }
 
-    private func updateStickerMovementBounds() {
+    private func showRouteSticker() {
+        removeStickerBox(routeTimelineStickerBox)
+
+        guard routeStickerBox.superview == nil else {
+            activateStickerBox(routeStickerBox)
+            return
+        }
+
+        addSubview(routeStickerBox)
+        layoutIfNeeded()
+        routeSticker.updateColor(state.selectedColor)
+
+        let stickerSize = stickerBoxSize(for: routeStickerBox)
+
+        routeStickerBox.frame = CGRect(
+            x: dataInfo.frame.minX - 8,
+            y: dataInfo.frame.maxY + 11,
+            width: stickerSize.width,
+            height: stickerSize.height
+        )
+
+        activateStickerBox(routeStickerBox)
+    }
+
+    // MARK: - Sticker Layout
+
+    private func updateMoveBounds() {
         let movementBounds = backgroundImageView.frame.insetBy(
             dx: stickerMovementInset,
             dy: stickerMovementInset
@@ -212,19 +294,19 @@ final class EditorView: BaseUIView {
         routeStickerBox.movementBounds = movementBounds
     }
 
-    private func setRouteTimelineStickerFrame() {
-        guard !didSetRouteTimelineStickerFrame,
+    private func setTimelineFrame() {
+        guard !state.didSetRouteTimelineStickerFrame,
               backgroundImageView.bounds.width > 0,
               backgroundImageView.bounds.height > 0
         else {
             return
         }
 
-        updateRouteTimelineStickerFrame()
-        didSetRouteTimelineStickerFrame = true
+        updateTimelineFrame()
+        state.didSetRouteTimelineStickerFrame = true
     }
 
-    private func updateRouteTimelineStickerFrame() {
+    private func updateTimelineFrame() {
         guard backgroundImageView.bounds.width > 0,
               backgroundImageView.bounds.height > 0
         else {
@@ -239,7 +321,7 @@ final class EditorView: BaseUIView {
 
         let stickerHeight = routeRect.height + stickerVerticalInset * 2
 
-        routeTimelineDrawingView.updateColor(selectedColor)
+        routeTimelineDrawingView.updateColor(state.selectedColor)
         routeTimelineStickerBox.frame = CGRect(
             x: backgroundImageView.frame.minX + routeRect.minX - stickerHorizontalInset,
             y: backgroundImageView.frame.maxY - stickerHeight,
@@ -248,52 +330,25 @@ final class EditorView: BaseUIView {
         )
     }
 
-    private func selectRouteTimelineSticker() {
-        routeStickerBox.removeFromSuperview()
+    // MARK: - Sticker Helpers
 
-        if routeTimelineStickerBox.superview == nil {
-            addSubview(routeTimelineStickerBox)
-            updateRouteTimelineStickerFrame()
-        }
-
-        routeTimelineStickerBox.isUserInteractionEnabled = true
-        routeTimelineStickerBox.setCloseButton(isSelected: true)
-        bringSubviewToFront(routeTimelineStickerBox)
-        bringSubviewToFront(topNavigationBar)
-        bringSubviewToFront(recordEditTabBar)
+    private func activateStickerBox(_ stickerBox: StickerBox) {
+        stickerBox.isUserInteractionEnabled = true
+        stickerBox.setCloseButton(isSelected: true)
+        bringSubviewToFront(stickerBox)
+        bringControlsFront()
     }
 
-    private func showRouteSticker() {
-        routeTimelineStickerBox.removeFromSuperview()
+    private func deactivateStickerBox(_ stickerBox: StickerBox) {
+        stickerBox.setCloseButton(isSelected: false)
+        stickerBox.isUserInteractionEnabled = false
+    }
 
-        guard routeStickerBox.superview == nil else {
-            routeStickerBox.isUserInteractionEnabled = true
-            routeStickerBox.setCloseButton(isSelected: true)
-            bringSubviewToFront(routeStickerBox)
-            bringSubviewToFront(topNavigationBar)
-            bringSubviewToFront(recordEditTabBar)
-            return
-        }
+    private func removeStickerBox(_ stickerBox: StickerBox) {
+        stickerBox.removeFromSuperview()
+    }
 
-        addSubview(routeStickerBox)
-        layoutIfNeeded()
-        routeSticker.updateColor(selectedColor)
-        let stickerSize = stickerBoxSize(for: routeStickerBox)
-
-        routeStickerBox.frame = CGRect(
-            x: dataInfo.frame.minX - 8,
-            y: dataInfo.frame.maxY + 11,
-            width: stickerSize.width,
-            height: stickerSize.height
-        )
-
-        routeStickerBox.isUserInteractionEnabled = true
-        routeStickerBox.setCloseButton(isSelected: true)
-
-        routeStickerBox.onDeleted = { [weak self] in
-            self?.routeStickerBox.removeFromSuperview()
-        }
-
+    private func bringControlsFront() {
         bringSubviewToFront(topNavigationBar)
         bringSubviewToFront(recordEditTabBar)
     }
@@ -305,29 +360,4 @@ final class EditorView: BaseUIView {
         return stickerBox.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
     }
 
-    // MARK: - Actions
-
-    @objc
-    private func handleViewTapped(_ gesture: UITapGestureRecognizer) {
-        let point = gesture.location(in: recordEditTabBar)
-        let routeTimelineStickerPoint = gesture.location(in: routeTimelineStickerBox)
-        let routeStickerPoint = gesture.location(in: routeStickerBox)
-
-        guard !recordEditTabBar.containsInteractivePoint(point) else { return }
-
-        if routeTimelineStickerBox.superview != nil,
-           routeTimelineStickerBox.isSelected,
-           !routeTimelineStickerBox.bounds.contains(routeTimelineStickerPoint) {
-            routeTimelineStickerBox.setCloseButton(isSelected: false)
-            routeTimelineStickerBox.isUserInteractionEnabled = false
-        }
-
-        if routeStickerBox.superview != nil,
-           routeStickerBox.isSelected,
-           !routeStickerBox.bounds.contains(routeStickerPoint) {
-            routeStickerBox.setCloseButton(isSelected: false)
-        }
-
-        recordEditTabBar.hideOptionView()
-    }
 }

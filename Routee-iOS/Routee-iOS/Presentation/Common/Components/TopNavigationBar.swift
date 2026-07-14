@@ -78,16 +78,8 @@ final class TopNavigationBar: BaseUIView {
     // MARK: - Private Methods
 
     private func setActions() {
-        backButton.addTarget(
-            self,
-            action: #selector(didTapBackButton),
-            for: .touchUpInside
-        )
-        rightButton.addTarget(
-            self,
-            action: #selector(didTapRightButton),
-            for: .touchUpInside
-        )
+        backButton.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
+        rightButton.addTarget(self, action: #selector(didTapRightButton), for: .touchUpInside)
     }
     
     // MARK: - Actions
