@@ -14,16 +14,19 @@ final class ArchiveViewController: BaseUIViewController {
     private var year = Calendar.current.component(.year, from: Date())
     private var month = Calendar.current.component(.month, from: Date())
     private let rootView = ArchiveView()
-    private let viewModel = ArchiveHomeViewModel()
+    private let viewModel = ArchiveViewModel()
+    private let profileViewModel = ProfileViewModel()
     private var dimView: UIView?
+    private var joinDate: String?
     private var archiveTask: Task<Void, Never>?
+    private var profileTask: Task<Void, Never>?
 
     // MARK: - Life Cycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        rootView.configureProfile(with: ArchiveHomeDummyData.profile)
+        loadProfile()
         loadArchive()
     }
 
@@ -35,11 +38,7 @@ final class ArchiveViewController: BaseUIViewController {
         let requestedYear = year
         let requestedMonth = month
 
-        rootView.configureMonthSelector(
-            title: monthTitle(year: requestedYear, month: requestedMonth),
-            canMoveToPreviousMonth: canMoveToPreviousMonth(year: requestedYear, month: requestedMonth),
-            canMoveToNextMonth: canMoveToNextMonth(year: requestedYear, month: requestedMonth)
-        )
+        configureMonthSelector(year: requestedYear, month: requestedMonth)
 
         archiveTask?.cancel()
         archiveTask = Task { [weak self] in
@@ -75,6 +74,27 @@ final class ArchiveViewController: BaseUIViewController {
                     year: requestedYear,
                     month: requestedMonth
                 )
+            }
+        }
+    }
+
+    private func loadProfile() {
+        profileTask?.cancel()
+        profileTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                let profile = try await profileViewModel.fetchProfile()
+
+                guard !Task.isCancelled else { return }
+
+                joinDate = profile.joinDate
+                rootView.configureProfile(with: profile)
+                configureMonthSelector(year: year, month: month)
+            } catch {
+                guard !Task.isCancelled else { return }
+
+                RouteeLogger.error(error)
             }
         }
     }
@@ -208,8 +228,18 @@ final class ArchiveViewController: BaseUIViewController {
         "\(year)년 \(month)월"
     }
 
+    private func configureMonthSelector(year: Int, month: Int) {
+        rootView.configureMonthSelector(
+            title: monthTitle(year: year, month: month),
+            canMoveToPreviousMonth: canMoveToPreviousMonth(year: year, month: month),
+            canMoveToNextMonth: canMoveToNextMonth(year: year, month: month)
+        )
+    }
+
     private func canMoveToPreviousMonth(year: Int, month: Int) -> Bool {
-        monthStart(year: year, month: month) > monthStart(from: ArchiveHomeDummyData.profile.joinedDate)
+        guard let joinDate else { return false }
+
+        return monthStart(year: year, month: month) > monthStart(from: joinDate)
     }
 
     private func canMoveToNextMonth(year: Int, month: Int) -> Bool {

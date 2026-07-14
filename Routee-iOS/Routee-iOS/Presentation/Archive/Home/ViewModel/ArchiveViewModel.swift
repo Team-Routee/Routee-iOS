@@ -6,7 +6,7 @@
 import Foundation
 
 @MainActor
-final class ArchiveHomeViewModel {
+final class ArchiveViewModel {
 
     // MARK: - Properties
 
@@ -22,7 +22,7 @@ final class ArchiveHomeViewModel {
     // MARK: - Public Methods
 
     func fetchArchive(year: Int, month: Int) async throws -> [ArchiveModel] {
-        try await archiveRepository.archive(year: year, month: month).toModel()
+        try await archiveRepository.getArchive(year: year, month: month).toModel()
     }
 
     func makeMountainMapLevels(from durationMinutes: [Int]) -> [Int] {
