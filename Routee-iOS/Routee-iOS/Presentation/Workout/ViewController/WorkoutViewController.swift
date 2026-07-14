@@ -336,6 +336,8 @@ extension WorkoutViewController: CLLocationManagerDelegate {
     private func setLocationManager() {
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.distanceFilter = 3
+        locationManager.activityType = .fitness
         requestCurrentLocationAuthorization()
     }
     

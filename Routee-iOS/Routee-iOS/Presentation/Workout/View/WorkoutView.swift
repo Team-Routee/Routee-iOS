@@ -329,6 +329,7 @@ extension WorkoutView {
         workoutPauseView.isHidden = !isPaused
 
         if isReady {
+            pathOverlay.mapView = nil
             mapView.logoAlign = .leftBottom
             mapView.logoMargin = UIEdgeInsets(
                 top: 0,
