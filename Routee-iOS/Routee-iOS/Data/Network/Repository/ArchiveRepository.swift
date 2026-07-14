@@ -56,7 +56,10 @@ struct DefaultArchiveRepository: ArchiveRepository {
 
         let requestDTO = ActivityListRequestDTO(date: date)
         let endpoint = ArchiveAPI.getActivityList(
-            header: .withAuth(accessToken: accessToken),
+            header: .withAuthTimeZone(
+                accessToken: accessToken,
+                timeZone: TimeZone.current.identifier
+            ),
             requestDTO: requestDTO
         )
 
