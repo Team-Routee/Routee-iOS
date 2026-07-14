@@ -68,6 +68,10 @@ final class EditorViewController: BaseUIViewController {
     // MARK: - Actions
 
     override func setAddTarget() {
+        rootView.setGesture()
+        rootView.setAddTarget()
+        rootView.setInitialState()
+
         rootView.topNavigationBar.backButtonAction = { [weak self] in
             self?.popViewController()
         }
