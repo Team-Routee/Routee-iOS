@@ -185,7 +185,7 @@ final class TimeLineView: BaseUIView {
         if showMyRoute {
             myRoute.snp.makeConstraints {
                 if showTimelineCard {
-                    $0.top.equalTo(timelineCard.snp.bottom).offset(28)
+                    $0.top.equalTo(timelineCard.snp.bottom).offset(82)
                 } else {
                     $0.top.equalTo(trackMap.snp.bottom).offset(28)
                 }

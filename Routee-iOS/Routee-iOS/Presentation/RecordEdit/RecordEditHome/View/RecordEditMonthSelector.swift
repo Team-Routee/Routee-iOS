@@ -62,7 +62,6 @@ final class MonthSelector: BaseUIView {
         
         rightButton.do {
             $0.setImage(UIImage(named: "ic_chevron_right_sm_white"), for: .normal)
-            $0.setImage(UIImage(named: "ic_chevron_right_sm_grey"), for: .disabled)
         }
     }
     

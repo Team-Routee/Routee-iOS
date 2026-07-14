@@ -10,12 +10,12 @@ import UIKit
 import SnapKit
 import Then
 
-final class SettingItemView: UIControl {
+final class SettingItemView: UIView {
 
     // MARK: - UI Properties
 
     private let titleLabel = UILabel()
-    private let chevronImageView = UIImageView()
+    private let chevronButton = UIButton()
 
     // MARK: - Initializer
 
@@ -40,14 +40,16 @@ final class SettingItemView: UIControl {
             $0.font = .label_m_14
         }
 
-        chevronImageView.do {
-            $0.image = UIImage(named: "ic_chevron_right_sm_white")
-            $0.contentMode = .scaleAspectFit
+        chevronButton.do {
+            $0.setImage(UIImage(named: "ic_chevron_right_sm_white"), for: .normal)
+            $0.setImage(UIImage(named: "ic_chevron_right_sm_grey"), for: .highlighted)
+            $0.imageView?.contentMode = .scaleAspectFit
+            $0.isUserInteractionEnabled = false
         }
     }
 
     private func setUI() {
-        addSubviews(titleLabel, chevronImageView)
+        addSubviews(titleLabel, chevronButton)
     }
 
     private func setLayout() {
@@ -56,9 +58,16 @@ final class SettingItemView: UIControl {
             $0.verticalEdges.equalToSuperview()
         }
 
-        chevronImageView.snp.makeConstraints {
+        chevronButton.snp.makeConstraints {
             $0.trailing.centerY.equalToSuperview()
             $0.size.equalTo(24)
         }
+    }
+
+    // MARK: - Public Methods
+
+    func setChevronAction(target: Any?, action: Selector) {
+        chevronButton.isUserInteractionEnabled = true
+        chevronButton.addTarget(target, action: action, for: .touchUpInside)
     }
 }
