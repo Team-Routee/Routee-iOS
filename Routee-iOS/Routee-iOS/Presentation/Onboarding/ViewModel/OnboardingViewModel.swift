@@ -9,20 +9,30 @@ import Foundation
 
 final class OnboardingViewModel {
     private let authRepository: AuthRepository
+    private let memberRepository: MemberRepository
 
-    init(authRepository: AuthRepository = DefaultAuthRepository()) {
+    init(
+        authRepository: AuthRepository = DefaultAuthRepository(),
+        memberRepository: MemberRepository = DefaultMemberRepository()
+    ) {
         self.authRepository = authRepository
+        self.memberRepository = memberRepository
     }
 
-    func appleLogin(
+    func registerAndLogin(
         platform: LoginPlatform,
         identityToken: String,
         nickname: String
     ) async throws {
-        try await authRepository.appleLogin(
-            platform: platform,
+        try await memberRepository.register(
+            nickname: nickname,
             identityToken: identityToken,
-            nickname: nickname
+            provider: platform
+        )
+
+        try await authRepository.login(
+            platform: platform,
+            identityToken: identityToken
         )
     }
 }

@@ -9,6 +9,10 @@ import UIKit
 
 final class SettingViewController: BaseUIViewController {
     
+    // MARK: - Properties
+    
+    private let viewModel = SettingViewModel()
+    
     // MARK: - UI Properties
     
     private let rootView = SettingView()
@@ -26,6 +30,23 @@ final class SettingViewController: BaseUIViewController {
         UIApplication.shared.open(url)
     }
     
+    private func didTapPrivacyButton() {
+        Task {
+            do {
+                try await viewModel.withdraw()
+                
+                await MainActor.run {
+                    NotificationCenter.default.post(
+                        name: .navigateLoginViewController,
+                        object: nil
+                    )
+                }
+            } catch {
+                print("회원 탈퇴 실패", error)
+            }
+        }
+    }
+    
     private func logout() {
         // TODO: - 로그아웃 API 및 화면 전환 연결
     }
@@ -39,6 +60,10 @@ final class SettingViewController: BaseUIViewController {
         
         rootView.logoutButtonAction = { [weak self] in
             self?.logout()
+        }
+        
+        rootView.policyButtonAction = { [weak self] in
+            self?.didTapPrivacyButton()
         }
     }
 }

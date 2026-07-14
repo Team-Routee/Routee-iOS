@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol KeychainService {
+protocol KeychainService: Sendable {
     func create(_ key: KeyType, token: String)
     func read(_ key: KeyType) -> String
     func delete(_ key: KeyType)

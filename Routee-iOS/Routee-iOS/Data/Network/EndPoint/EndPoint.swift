@@ -49,7 +49,7 @@ extension EndPoint {
 
 enum HeaderType {
     case basic
-    case withAuth
+    case withAuth(accessToken: String)
     case appleLoginHeader(identityToken: String, authorizationCode: String)
     case refresh(accessToken: String)
     case naverMaps
@@ -58,10 +58,10 @@ enum HeaderType {
         switch self {
         case .basic:
             return ["Content-Type": "application/json"]
-        case .withAuth:
+        case .withAuth(let accessToken):
             return [
                 "Content-Type": "application/json",
-                "X-Requires-Auth": "true"
+                "Authorization": "Bearer \(accessToken)"
             ]
         case .appleLoginHeader(let identityToken, let authorizationCode):
             return [

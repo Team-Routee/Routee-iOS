@@ -10,6 +10,17 @@ import UIKit
 final class OnboardingViewController: BaseUIViewController {
     private var identityToken: String?
     
+    init(identityToken: String?) {
+        self.identityToken = identityToken
+        
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @MainActor
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     let viewModel = OnboardingViewModel()
     let nicknameSettingView = OnboardingView()
     
@@ -55,26 +66,20 @@ final class OnboardingViewController: BaseUIViewController {
         
         Task {
             do {
-                try await viewModel.appleLogin(
+                try await viewModel.registerAndLogin(
                     platform: .APPLE,
                     identityToken: identityToken,
                     nickname: nickname
                 )
 
                 await MainActor.run {
-                    let mainVC = SampleViewController()
-                    mainVC.modalPresentationStyle = .fullScreen
-                    present(mainVC, animated: true)
+                    let viewController = TabBarViewController()
+                    viewController.modalPresentationStyle = .fullScreen
+                    present(viewController, animated: true)
                 }
             } catch {
                 print("서버 로그인 실패", error)
             }
         }
-    }
-}
-
-extension OnboardingViewController: LoginViewControllerDelegate {
-    func bindToken(_ idToken: String) {
-        identityToken = idToken
     }
 }
