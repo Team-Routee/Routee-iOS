@@ -18,7 +18,7 @@ final class WorkoutView: BaseUIView {
     
     // MARK: - Properties
     
-    var distance = "15.52"
+    var distance = "0.00"
     var time = "00:00"
     var altitude = "2312"
     
@@ -268,6 +268,11 @@ final class WorkoutView: BaseUIView {
         
         pathOverlay.path = NMGLineString(points: locations)
         pathOverlay.mapView = mapView
+    }
+
+    func updateDistance(_ distanceInMeters: CLLocationDistance) {
+        let distanceInKilometers = distanceInMeters / 1_000
+        workoutMetric.updateDistance(String(format: "%.2f", distanceInKilometers))
     }
     
     func updateCurrentLocationAddress(_ address: String) {

@@ -33,7 +33,6 @@ final class WorkoutViewController: BaseUIViewController {
     private let locationManager = CLLocationManager()
     private var initialLocation = false
     private var lastReverseGeocodingLocation: CLLocation?
-    private var lastRecordedLocation: CLLocation?
     private var routeLocations: [NMGLatLng] = []
     
     // MARK: - Life Cycle
@@ -104,22 +103,23 @@ final class WorkoutViewController: BaseUIViewController {
     }
     
     private func appendRouteLocationIfNeeded(_ location: CLLocation) {
-        guard workoutMode == .recording else { return }
+        guard workoutMode == .recording,
+              let totalDistance = viewModel.recordDistance(at: location) else { return }
         
         let currentLatLng = NMGLatLng(
             lat: location.coordinate.latitude,
             lng: location.coordinate.longitude
         )
         
-        lastRecordedLocation = location
         routeLocations.append(currentLatLng)
         workoutView.updateRoutePath(routeLocations)
+        workoutView.updateDistance(totalDistance)
     }
     
     private func startRecordingRoute() {
         workoutMode = .recording
         workoutView.playCountdownAnimation()
-        lastRecordedLocation = nil
+        workoutView.updateDistance(viewModel.startDistanceTracking())
         routeLocations.removeAll()
         workoutView.updateRoutePath(routeLocations)
         
@@ -130,6 +130,7 @@ final class WorkoutViewController: BaseUIViewController {
     
     private func pauseRecordingRoute() {
         workoutMode = .paused
+        viewModel.pauseDistanceTracking()
     }
     
     private func resumeRecordingRoute() {
@@ -143,7 +144,6 @@ final class WorkoutViewController: BaseUIViewController {
         workoutView.playFinishAnimation { [weak self] in
             guard let self else { return }
 
-            lastRecordedLocation = nil
             navigationController?.pushViewController(WorkoutTimeLineViewController(), animated: true)
         }
     }

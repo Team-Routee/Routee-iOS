@@ -39,6 +39,10 @@ final class WorkoutMetric: BaseUIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
+    func updateDistance(_ distance: String) {
+        distanceDataLabel.text = distance
+    }
     
     override func setUI() {
         distanceStackView.addArrangedSubviews(distanceLabel, distanceDataLabel)
