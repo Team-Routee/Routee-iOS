@@ -73,9 +73,9 @@ final class OnboardingViewController: BaseUIViewController {
                 )
 
                 await MainActor.run {
-                    let mainVC = TabBarViewController()
-                    mainVC.modalPresentationStyle = .fullScreen
-                    present(mainVC, animated: true)
+                    let viewController = TabBarViewController()
+                    viewController.modalPresentationStyle = .fullScreen
+                    present(viewController, animated: true)
                 }
             } catch {
                 print("서버 로그인 실패", error)

@@ -41,7 +41,7 @@ final class LoginViewController: BaseUIViewController {
     
     private func goToRegister(identityToken: String) {
         let viewController = OnboardingViewController(identityToken: identityToken)
-        navigationController?.pushViewController(viewController, animated: true)
+        navigationController?.setViewControllers([viewController], animated: true)
     }
     
     private func goToMainService() {
