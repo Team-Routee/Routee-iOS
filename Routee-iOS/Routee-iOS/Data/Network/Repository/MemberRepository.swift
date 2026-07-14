@@ -56,6 +56,6 @@ struct DefaultMemberRepository: MemberRepository {
         
         KeyType.allCases.forEach {
                 keychainService.delete($0)
-            }
+        }
     }
 }
