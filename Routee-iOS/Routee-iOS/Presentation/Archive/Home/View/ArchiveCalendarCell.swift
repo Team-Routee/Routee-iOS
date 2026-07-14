@@ -102,7 +102,7 @@ final class ArchiveCalendarCell: UICollectionViewCell {
 
     // MARK: - Public Methods
 
-    func configure(with date: DayCellModel) {
+    func configure(with date: CalendarCellModel) {
         resetCell()
 
         switch date.content {
@@ -117,10 +117,10 @@ final class ArchiveCalendarCell: UICollectionViewCell {
         case .none:
             return
 
-        case .background:
+        case .single:
             configureSingleActivity(imageName: date.coverImageName)
 
-        case .badge(let count):
+        case .multiple(let count):
             configureMultipleActivity(imageName: date.coverImageName)
             badgeBackgroundImageView.image = UIImage(named: "\(count)")
             badgeBackgroundImageView.isHidden = false

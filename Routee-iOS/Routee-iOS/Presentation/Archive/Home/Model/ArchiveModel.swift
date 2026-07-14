@@ -1,11 +1,11 @@
 //
-//  ActivitySummaryModel.swift
+//  ArchiveModel.swift
 //  Routee-iOS
 //
 
 import Foundation
 
-struct ActivitySummaryModel {
+struct ArchiveModel {
     let activityDate: String
     let totalDurationMinutes: Int
     let activityCount: Int
