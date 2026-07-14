@@ -56,7 +56,7 @@ final class SettingSectionView: UIView {
 
         sectionStackView.do {
             $0.axis = .vertical
-            $0.spacing = 12
+            $0.spacing = 18
         }
     }
 
@@ -92,7 +92,6 @@ final class SettingSectionView: UIView {
         }
 
         itemViews.forEach {
-            $0.isUserInteractionEnabled = false
             sectionStackView.addArrangedSubview($0)
         }
     }
@@ -100,7 +99,6 @@ final class SettingSectionView: UIView {
     func setAction(index: Int, target: Any?, action: Selector) {
         guard itemViews.indices.contains(index) else { return }
 
-        itemViews[index].isUserInteractionEnabled = true
-        itemViews[index].addTarget(target, action: action, for: .touchUpInside)
+        itemViews[index].setChevronAction(target: target, action: action)
     }
 }

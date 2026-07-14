@@ -46,7 +46,7 @@ final class EditorViewController: BaseUIViewController {
         present(picker, animated: true)
     }
 
-    private func pushImageCropViewController(with image: UIImage) {
+    private func pushCropView(with image: UIImage) {
         let imageCropViewController = ImageCropViewController(image: image)
 
         imageCropViewController.onCropCompleted = { [weak self] croppedImage in
@@ -57,7 +57,7 @@ final class EditorViewController: BaseUIViewController {
         navigationController?.navigationBar.isHidden = true
     }
 
-    private func pushEditCompleteViewController() {
+    private func pushCompleteView() {
         let editedImage = rootView.makeEditedImage()
         let editCompleteViewController = EditCompleteViewController(editedImage: editedImage)
 
@@ -68,13 +68,17 @@ final class EditorViewController: BaseUIViewController {
     // MARK: - Actions
 
     override func setAddTarget() {
+        rootView.setGesture()
+        rootView.setAddTarget()
+        rootView.setInitialState()
+
         rootView.topNavigationBar.backButtonAction = { [weak self] in
             self?.popViewController()
         }
 
         rootView.topNavigationBar.rightButtonAction = { [weak self] in
             self?.rootView.playLottie {
-                self?.pushEditCompleteViewController()
+                self?.pushCompleteView()
             }
         }
 
@@ -102,7 +106,7 @@ extension EditorViewController: PHPickerViewControllerDelegate {
 
             DispatchQueue.main.async {
                 picker.dismiss(animated: true) {
-                    self?.pushImageCropViewController(with: image)
+                    self?.pushCropView(with: image)
                 }
             }
         }
