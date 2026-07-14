@@ -8,7 +8,7 @@
 import Foundation
 
 protocol ArchiveRepository {
-    func archive(year: Int, month: Int) async throws -> ArchiveResponseDTO
+    func getArchive(year: Int, month: Int) async throws -> ActivitySummaryResponseDTO
 }
 
 struct DefaultArchiveRepository: ArchiveRepository {
@@ -23,26 +23,26 @@ struct DefaultArchiveRepository: ArchiveRepository {
         self.keychainService = keychainService
     }
     
-    func archive(year: Int, month: Int) async throws -> ArchiveResponseDTO {
+    func getArchive(year: Int, month: Int) async throws -> ActivitySummaryResponseDTO {
         let accessToken = keychainService.read(.accessToken)
 
         guard !accessToken.isEmpty else {
             throw RouteeError.noData
         }
 
-        let requestDTO = ArchiveRequestDTO(
+        let requestDTO = ActivitySummaryRequestDTO(
             year: year,
             month: month
         )
         
-        let endpoint = ArchiveAPI.archive(
+        let endpoint = ArchiveAPI.getArchive(
             header: .withAuth(accessToken: accessToken),
             requestDTO: requestDTO
         )
         
         return try await service.request(
             endpoint,
-            decodingType: ArchiveResponseDTO.self
+            decodingType: ActivitySummaryResponseDTO.self
         )
     }
 }
