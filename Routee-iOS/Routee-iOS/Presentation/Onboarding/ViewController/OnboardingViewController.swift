@@ -8,10 +8,17 @@
 import UIKit
 
 final class OnboardingViewController: BaseUIViewController {
-    private var identityToken: String
+    private var identityToken: String?
     
-    init(identityToken: String) {
+    init(identityToken: String?) {
         self.identityToken = identityToken
+        
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @MainActor
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     let viewModel = OnboardingViewModel()
