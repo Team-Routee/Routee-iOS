@@ -8,7 +8,11 @@
 import UIKit
 
 final class OnboardingViewController: BaseUIViewController {
-    private var identityToken: String?
+    private var identityToken: String
+    
+    init(identityToken: String) {
+        self.identityToken = identityToken
+    }
     
     let viewModel = OnboardingViewModel()
     let nicknameSettingView = OnboardingView()
@@ -55,7 +59,7 @@ final class OnboardingViewController: BaseUIViewController {
         
         Task {
             do {
-                try await viewModel.appleLogin(
+                try await viewModel.registerAndLogin(
                     platform: .APPLE,
                     identityToken: identityToken,
                     nickname: nickname
@@ -70,11 +74,5 @@ final class OnboardingViewController: BaseUIViewController {
                 print("서버 로그인 실패", error)
             }
         }
-    }
-}
-
-extension OnboardingViewController: LoginViewControllerDelegate {
-    func bindToken(_ idToken: String) {
-        identityToken = idToken
     }
 }
