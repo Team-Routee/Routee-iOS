@@ -9,6 +9,7 @@ import Foundation
 
 protocol ArchiveRepository {
     func getArchive(year: Int, month: Int) async throws -> ActivitySummaryResponseDTO
+    func getActivityList(date: String) async throws -> ActivityListResponseDTO
 }
 
 struct DefaultArchiveRepository: ArchiveRepository {
@@ -43,6 +44,25 @@ struct DefaultArchiveRepository: ArchiveRepository {
         return try await service.request(
             endpoint,
             decodingType: ActivitySummaryResponseDTO.self
+        )
+    }
+
+    func getActivityList(date: String) async throws -> ActivityListResponseDTO {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let requestDTO = ActivityListRequestDTO(date: date)
+        let endpoint = ArchiveAPI.getActivityList(
+            header: .withAuth(accessToken: accessToken),
+            requestDTO: requestDTO
+        )
+
+        return try await service.request(
+            endpoint,
+            decodingType: ActivityListResponseDTO.self
         )
     }
 }
