@@ -19,3 +19,16 @@ struct ActivitySummaryResponseDTO: Decodable, Sendable {
         let coverImageUrl: String?
     }
 }
+
+extension ActivitySummaryResponseDTO {
+    func toModel() -> [ActivitySummaryModel] {
+        result.map {
+            ActivitySummaryModel(
+                activityDate: $0.activityDate,
+                totalDurationMinutes: $0.totalDurationMinutes,
+                activityCount: $0.activityCount,
+                coverImageUrl: $0.coverImageUrl
+            )
+        }
+    }
+}
