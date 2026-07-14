@@ -22,7 +22,7 @@ final class WorkoutViewController: BaseUIViewController {
     
     // MARK: - Properties
     
-    private let workoutView = WorkoutView()
+    let workoutView = WorkoutView()
     private var workoutMode: WorkoutMode = .ready {
         didSet {
             guard oldValue != workoutMode else { return }
@@ -30,11 +30,10 @@ final class WorkoutViewController: BaseUIViewController {
             updateElapsedTimeTracking(from: oldValue, to: workoutMode)
         }
     }
-    private let viewModel = WorkoutViewModel()
+    let viewModel = WorkoutViewModel()
     private let locationManager = CLLocationManager()
     private var initialLocation = false
     private var lastReverseGeocodingLocation: CLLocation?
-    private var routeLocations: [NMGLatLng] = []
     
     // MARK: - Life Cycle
     
@@ -107,13 +106,7 @@ final class WorkoutViewController: BaseUIViewController {
         guard workoutMode == .recording,
               let totalDistance = viewModel.recordDistance(at: location) else { return }
         
-        let currentLatLng = NMGLatLng(
-            lat: location.coordinate.latitude,
-            lng: location.coordinate.longitude
-        )
-        
-        routeLocations.append(currentLatLng)
-        workoutView.updateRoutePath(routeLocations)
+        workoutView.updateRoutePath(viewModel.routePoints.map(\.latLng))
         workoutView.updateDistance(totalDistance)
     }
     
@@ -121,8 +114,7 @@ final class WorkoutViewController: BaseUIViewController {
         workoutMode = .recording
         workoutView.playCountdownAnimation()
         workoutView.updateDistance(viewModel.startDistanceTracking())
-        routeLocations.removeAll()
-        workoutView.updateRoutePath(routeLocations)
+        workoutView.updateRoutePath(viewModel.routePoints.map(\.latLng))
         
         if let currentLocation = locationManager.location {
             appendRouteLocationIfNeeded(currentLocation)
@@ -182,11 +174,6 @@ final class WorkoutViewController: BaseUIViewController {
         imagePickerController.delegate = self
         imagePickerController.modalPresentationStyle = .fullScreen
         present(imagePickerController, animated: true)
-    }
-    
-    private func pushPhotoLocationViewController(image: UIImage) {
-        let viewController = WorkoutPhotoLocationViewController(image: image)
-        navigationController?.pushViewController(viewController, animated: true)
     }
     
     private func showCameraUnavailableAlert() {
@@ -378,22 +365,43 @@ extension WorkoutViewController: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) { }
 }
 
+// MARK: - Extensions
+
 extension WorkoutViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerController(
         _ picker: UIImagePickerController,
         didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]
     ) {
-        guard let image = info[.originalImage] as? UIImage else {
+        guard let image = info[.originalImage] as? UIImage,
+              let pointIndex = viewModel.routePoints.last?.pointIndex else {
             picker.dismiss(animated: true)
             return
         }
-        
+
+        let photoRecord = WorkoutPhotoRecord(image: image, pointIndex: pointIndex)
         picker.dismiss(animated: true) { [weak self] in
-            self?.pushPhotoLocationViewController(image: image)
+            self?.pushPhotoLocationViewController(photoRecord: photoRecord)
         }
     }
-    
+
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true)
+    }
+
+    private func pushPhotoLocationViewController(photoRecord: WorkoutPhotoRecord) {
+        let viewController = WorkoutPhotoLocationViewController(image: photoRecord.image) { [weak self] in
+            self?.savePhotoRecord(photoRecord)
+        }
+        navigationController?.pushViewController(viewController, animated: true)
+    }
+
+    private func savePhotoRecord(_ photoRecord: WorkoutPhotoRecord) {
+        guard viewModel.routePoints.indices.contains(photoRecord.pointIndex) else { return }
+
+        let routePoint = viewModel.routePoints[photoRecord.pointIndex]
+        guard routePoint.pointIndex == photoRecord.pointIndex else { return }
+
+        viewModel.savePhotoRecord(photoRecord)
+        workoutView.addPhotoMarker(photoRecord, at: routePoint.coordinate)
     }
 }

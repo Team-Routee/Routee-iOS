@@ -15,6 +15,8 @@ final class WorkoutViewModel {
         max(0, Int(currentElapsedTime))
     }
     private(set) var maximumAltitudeInMeters: CLLocationDistance?
+    private(set) var routePoints: [WorkoutRoutePoint] = []
+    private(set) var photoRecords: [WorkoutPhotoRecord] = []
 
     private let reverseGeocodingRepository: ReverseGeocodingRepository
     private var lastReverseGeocodingLocation: CLLocation?
@@ -36,6 +38,8 @@ final class WorkoutViewModel {
         lastRecordedLocation = nil
         totalDistance = 0
         maximumAltitudeInMeters = nil
+        routePoints.removeAll()
+        photoRecords.removeAll()
         maximumAltitudeDidChange?(nil)
         return totalDistance
     }
@@ -84,8 +88,17 @@ final class WorkoutViewModel {
             totalDistance += location.distance(from: lastRecordedLocation)
         }
 
+        let routePoint = WorkoutRoutePoint(
+            pointIndex: routePoints.count,
+            coordinate: location.coordinate
+        )
+        routePoints.append(routePoint)
         lastRecordedLocation = location
         return totalDistance
+    }
+
+    func savePhotoRecord(_ photoRecord: WorkoutPhotoRecord) {
+        photoRecords.append(photoRecord)
     }
 
     private func recordMaximumAltitude(at location: CLLocation) {

@@ -14,13 +14,11 @@ import SnapKit
 import Then
 
 final class WorkoutView: BaseUIView {
-    
     // MARK: - Properties
     
     var distance = "0.00"
     var time = "00:00"
-    var altitude = "--"
-    
+    var altitude = "0"
     // MARK: - UI Properties
     
     private let routeeMapView = NMFNaverMapView()
@@ -34,6 +32,7 @@ final class WorkoutView: BaseUIView {
         image: UIImage.icNow.resized(to: CGSize(width: 42, height: 42))
     )
     private let pathOverlay = NMFPath()
+    var photoMarkers: [NMFMarker] = []
     lazy var moveToUserlocationButton = UIButton(type: .custom)
     lazy var recordButton = RouteeButton(titleText: "등산 기록", type: .enabled)
     lazy var pauseButton = UIButton()
@@ -43,7 +42,7 @@ final class WorkoutView: BaseUIView {
     var restartButton: UIButton { workoutPauseView.restartButton }
     var finishButton: UIButton { workoutPauseView.finishButton }
     
-    private var mapView: NMFMapView { routeeMapView.mapView }
+    var mapView: NMFMapView { routeeMapView.mapView }
     private let countdownAnimationView = LottieAnimationView(asset: "countdown")
     private lazy var finishAnimationView = LottieAnimationView(dotLottieAsset: "routeefinish")
     
@@ -283,7 +282,7 @@ final class WorkoutView: BaseUIView {
     }
 
     func updateMaximumAltitude(_ altitudeInMeters: CLLocationDistance?) {
-        workoutMetric.updateMaximumAltitude(altitudeInMeters.map { String(Int($0.rounded())) } ?? "--")
+        workoutMetric.updateMaximumAltitude(altitudeInMeters.map { String(Int($0.rounded())) } ?? "0")
     }
     
     func updateCurrentLocationAddress(_ address: String) {
@@ -346,6 +345,7 @@ extension WorkoutView {
 
         if isReady {
             pathOverlay.mapView = nil
+            removePhotoMarkers()
             mapView.logoAlign = .leftBottom
             mapView.logoMargin = UIEdgeInsets(
                 top: 0,
@@ -388,6 +388,27 @@ extension WorkoutView {
             finishAnimationView.isHidden = true
             completion()
         }
+    }
+    
+    func addPhotoMarker(_ photoRecord: WorkoutPhotoRecord, at coordinate: CLLocationCoordinate2D) {
+        let markerSize = CGSize(width: 42, height: 42)
+        let thumbnailImage = photoRecord.image
+            .resized(to: markerSize)
+            .thumbnailImage(borderWidth: 3, borderColor: .mint300, cornerRadius: 12)
+        let marker = NMFMarker()
+        marker.tag = UInt(photoRecord.pointIndex)
+        marker.position = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
+        marker.iconImage = NMFOverlayImage(image: thumbnailImage)
+        marker.width = markerSize.width
+        marker.height = markerSize.height
+        marker.anchor = CGPoint(x: 0.5, y: 0.5)
+        marker.mapView = mapView
+        photoMarkers.append(marker)
+    }
+
+    func removePhotoMarkers() {
+        photoMarkers.forEach { $0.mapView = nil }
+        photoMarkers.removeAll()
     }
 }
 
