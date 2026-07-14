@@ -27,6 +27,7 @@ final class WorkoutViewController: BaseUIViewController {
         didSet {
             guard oldValue != workoutMode else { return }
             updateUI(for: workoutMode)
+            updateElapsedTimeTracking(from: oldValue, to: workoutMode)
         }
     }
     private let viewModel = WorkoutViewModel()
@@ -39,7 +40,8 @@ final class WorkoutViewController: BaseUIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
+        bindViewModel()
         setLocationManager()
         updateUI(for: workoutMode)
     }
@@ -58,8 +60,7 @@ final class WorkoutViewController: BaseUIViewController {
     
     private func updateUI(for mode: WorkoutMode) {
         workoutView.configure(for: mode)
-        let shouldHideTabBar = mode != .ready
-        (tabBarController as? TabBarViewController)?.setCustomTabBarHidden(shouldHideTabBar)
+        (tabBarController as? TabBarViewController)?.setCustomTabBarHidden(mode != .ready)
     }
     
     private func requestCurrentLocationAuthorization() {
@@ -327,6 +328,27 @@ final class WorkoutViewController: BaseUIViewController {
     @objc
     func locationButtonDidTap() {
         workoutView.focusOnUserDirection()
+    }
+}
+
+private extension WorkoutViewController {
+    func bindViewModel() {
+        viewModel.elapsedTimeDidChange = { [weak self] elapsedTime in
+            self?.workoutView.updateElapsedTime(elapsedTime)
+        }
+    }
+
+    func updateElapsedTimeTracking(from oldMode: WorkoutMode, to newMode: WorkoutMode) {
+        switch (oldMode, newMode) {
+        case (.ready, .recording):
+            viewModel.startElapsedTimeTracking()
+        case (.paused, .recording):
+            viewModel.resumeElapsedTimeTracking()
+        case (_, .paused), (_, .finishing):
+            viewModel.pauseElapsedTimeTracking()
+        default:
+            break
+        }
     }
 }
 

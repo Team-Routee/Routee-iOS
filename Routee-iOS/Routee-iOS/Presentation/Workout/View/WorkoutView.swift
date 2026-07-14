@@ -274,6 +274,14 @@ final class WorkoutView: BaseUIView {
         let distanceInKilometers = distanceInMeters / 1_000
         workoutMetric.updateDistance(String(format: "%.2f", distanceInKilometers))
     }
+
+    func updateElapsedTime(_ elapsedTime: TimeInterval) {
+        let totalSeconds = max(0, Int(elapsedTime))
+        let hours = totalSeconds / 3_600
+        let minutes = (totalSeconds % 3_600) / 60
+        let formattedTime = String(format: "%02d:%02d", hours, minutes)
+        workoutMetric.updateTime(formattedTime)
+    }
     
     func updateCurrentLocationAddress(_ address: String) {
         currentLocationLabel.text = address

@@ -43,6 +43,10 @@ final class WorkoutMetric: BaseUIView {
     func updateDistance(_ distance: String) {
         distanceDataLabel.text = distance
     }
+
+    func updateTime(_ time: String) {
+        timeDataLabel.text = time
+    }
     
     override func setUI() {
         distanceStackView.addArrangedSubviews(distanceLabel, distanceDataLabel)
@@ -94,6 +98,11 @@ final class WorkoutMetric: BaseUIView {
         
         timeLabel.do {
             $0.text = "시간"
+        }
+
+        timeDataLabel.do {
+            $0.adjustsFontSizeToFitWidth = true
+            $0.minimumScaleFactor = 0.7
         }
         
         highestAltitudeLabel.do {
