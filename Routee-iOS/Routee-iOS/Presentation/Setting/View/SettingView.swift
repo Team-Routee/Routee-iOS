@@ -17,6 +17,8 @@ final class SettingView: BaseUIView {
     var instagramButtonAction: (() -> Void)?
     var logoutButtonAction: (() -> Void)?
     var policyButtonAction: (() -> Void)?
+    private var privacyButtonTapCount = 0
+    private let requiredPrivacyButtonTapCount = 10
 
     // MARK: - UI Properties
 
@@ -146,6 +148,11 @@ final class SettingView: BaseUIView {
     
     @objc
     private func didTapPrivacyButton() {
+        privacyButtonTapCount += 1
+
+        guard privacyButtonTapCount >= requiredPrivacyButtonTapCount else { return }
+
+        privacyButtonTapCount = 0
         policyButtonAction?()
     }
 }
