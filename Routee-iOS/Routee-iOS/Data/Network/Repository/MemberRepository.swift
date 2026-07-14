@@ -53,5 +53,9 @@ struct DefaultMemberRepository: MemberRepository {
             requestDTO: requestDTO
         )
         try await service.requestEmpty(endPoint)
+        
+        KeyType.allCases.forEach {
+                keychainService.delete($0)
+            }
     }
 }
