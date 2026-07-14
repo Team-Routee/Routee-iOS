@@ -20,6 +20,7 @@ final class ArchiveViewController: BaseUIViewController {
     private var joinDate: String?
     private var archiveTask: Task<Void, Never>?
     private var profileTask: Task<Void, Never>?
+    private var activityListTask: Task<Void, Never>?
     private let joinedDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.calendar = Foundation.Calendar(identifier: .gregorian)
@@ -174,16 +175,37 @@ final class ArchiveViewController: BaseUIViewController {
             return
 
         case .single, .multiple:
-            guard let dateText = listDateText(from: day.activityDate) else { return }
+            guard let activityDate = day.activityDate else { return }
 
-            let listViewController = DailyRecordBottomSheetViewController(
-                model: listModel(dateText: dateText)
-            )
-            listViewController.modalPresentationStyle = .pageSheet
-            listViewController.presentationController?.delegate = self
-            showDimView()
-            present(listViewController, animated: true)
+            loadActivityList(date: activityDate)
         }
+    }
+
+    private func loadActivityList(date: String) {
+        activityListTask?.cancel()
+        activityListTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                let model = try await viewModel.fetchActivityList(date: date)
+
+                guard !Task.isCancelled else { return }
+
+                presentActivityListBottomSheet(model: model)
+            } catch {
+                guard !Task.isCancelled else { return }
+
+                RouteeLogger.error(error)
+            }
+        }
+    }
+
+    private func presentActivityListBottomSheet(model: ActivityListDateModel) {
+        let listViewController = ActivityListBottomSheetViewController(model: model)
+        listViewController.modalPresentationStyle = .pageSheet
+        listViewController.presentationController?.delegate = self
+        showDimView()
+        present(listViewController, animated: true)
     }
 
     private func showDimView() {
@@ -219,16 +241,6 @@ final class ArchiveViewController: BaseUIViewController {
         }
 
         self.dimView = nil
-    }
-
-    private func listDateText(from activityDate: String?) -> String? {
-        guard let activityDate else { return nil }
-
-        return activityDate.replacingOccurrences(of: "-", with: ".")
-    }
-
-    private func listModel(dateText: String) -> CalendarDateModel {
-        DailyDummyData.dummyModelsByDate[dateText] ?? .init(dateText: dateText, items: [])
     }
 
     private func monthTitle(year: Int, month: Int) -> String {

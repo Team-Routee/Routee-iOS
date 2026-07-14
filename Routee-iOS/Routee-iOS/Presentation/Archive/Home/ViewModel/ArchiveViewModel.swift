@@ -25,6 +25,10 @@ final class ArchiveViewModel {
         try await archiveRepository.getArchive(year: year, month: month).toModel()
     }
 
+    func fetchActivityList(date: String) async throws -> ActivityListDateModel {
+        try await archiveRepository.getActivityList(date: date).toModel()
+    }
+
     func makeMountainMapLevels(from durationMinutes: [Int]) -> [Int] {
         let levels = durationMinutes
             .prefix(mountainMapItemCount)
