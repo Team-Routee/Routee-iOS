@@ -7,9 +7,9 @@
 import Foundation
 
 struct ProfileModel {
-    let userName: String
-    let streakNumber: Int
-    let pointNumber: Int
-    let profileImageName: String
-    let joinedDate: String
+    let nickname: String
+    let profileImageUrl: String?
+    let joinDate: String
+    let daysSinceJoining: Int
+    let totalActivityCount: Int
 }
