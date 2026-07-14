@@ -158,7 +158,7 @@ final class ArchiveCalendarCell: UICollectionViewCell {
             thumbnailImageView.isHidden = false
             dayLabel.text = nil
         } else {
-            backgroundImageView.image = .calendarBg
+            backgroundImageView.image = .calendarBg2
             backgroundImageView.isHidden = false
         }
     }
