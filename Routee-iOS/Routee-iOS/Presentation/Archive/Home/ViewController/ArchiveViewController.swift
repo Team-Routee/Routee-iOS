@@ -14,34 +14,89 @@ final class ArchiveViewController: BaseUIViewController {
     private var year = Calendar.current.component(.year, from: Date())
     private var month = Calendar.current.component(.month, from: Date())
     private let rootView = ArchiveView()
+    private let viewModel = ArchiveHomeViewModel()
     private var dimView: UIView?
+    private var archiveTask: Task<Void, Never>?
 
     // MARK: - Life Cycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        loadDummyData()
+        rootView.configureProfile(with: ArchiveHomeDummyData.profile)
+        loadArchive()
     }
 
     override func setView() {
         view = rootView
     }
 
-    private func loadDummyData() {
-        rootView.configureProfile(with: ArchiveHomeDummyData.profile)
+    private func loadArchive() {
+        let requestedYear = year
+        let requestedMonth = month
+
         rootView.configureMonthSelector(
-            title: monthTitle(year: year, month: month),
-            canMoveToPreviousMonth: canMoveToPreviousMonth(year: year, month: month),
-            canMoveToNextMonth: canMoveToNextMonth(year: year, month: month)
+            title: monthTitle(year: requestedYear, month: requestedMonth),
+            canMoveToPreviousMonth: canMoveToPreviousMonth(year: requestedYear, month: requestedMonth),
+            canMoveToNextMonth: canMoveToNextMonth(year: requestedYear, month: requestedMonth)
         )
-        rootView.configureMountainMap(durationMinutes: ArchiveHomeDummyData.dummyMountainDurationMinutes)
+
+        archiveTask?.cancel()
+        archiveTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                let records = try await viewModel.fetchArchive(
+                    year: requestedYear,
+                    month: requestedMonth
+                )
+
+                guard
+                    !Task.isCancelled,
+                    year == requestedYear,
+                    month == requestedMonth
+                else { return }
+
+                applyArchive(
+                    records,
+                    year: requestedYear,
+                    month: requestedMonth
+                )
+            } catch {
+                guard
+                    !Task.isCancelled,
+                    year == requestedYear,
+                    month == requestedMonth
+                else { return }
+
+                RouteeLogger.error(error)
+                applyArchive(
+                    [],
+                    year: requestedYear,
+                    month: requestedMonth
+                )
+            }
+        }
+    }
+
+    private func applyArchive(
+        _ records: [ArchiveModel],
+        year: Int,
+        month: Int
+    ) {
+        let durationMinutes = viewModel.makeDurationMinutes(
+            year: year,
+            month: month,
+            records: records
+        )
+        rootView.configureMountainMap(
+            levels: viewModel.makeMountainMapLevels(from: durationMinutes)
+        )
         rootView.configureCalendar(
-            days: ArchiveCalendar.makeDays(
+            days: viewModel.makeCalendarDays(
                 year: year,
                 month: month,
-                records: ArchiveHomeDummyData
-                    .dummyCalendarRecordsByMonth[monthKey(year: year, month: month)] ?? []
+                records: records
             )
         )
     }
@@ -70,7 +125,7 @@ final class ArchiveViewController: BaseUIViewController {
             month -= 1
         }
 
-        loadDummyData()
+        loadArchive()
     }
 
     private func moveToNextMonth() {
@@ -83,15 +138,15 @@ final class ArchiveViewController: BaseUIViewController {
             month += 1
         }
 
-        loadDummyData()
+        loadArchive()
     }
 
-    private func route(to day: DayCellModel) {
+    private func route(to day: CalendarCellModel) {
         switch day.recordState {
         case .none:
             return
 
-        case .background, .badge:
+        case .single, .multiple:
             guard let dateText = listDateText(from: day.activityDate) else { return }
 
             let listViewController = DailyRecordBottomSheetViewController(
@@ -151,10 +206,6 @@ final class ArchiveViewController: BaseUIViewController {
 
     private func monthTitle(year: Int, month: Int) -> String {
         "\(year)년 \(month)월"
-    }
-
-    private func monthKey(year: Int, month: Int) -> String {
-        String(format: "%04d-%02d", year, month)
     }
 
     private func canMoveToPreviousMonth(year: Int, month: Int) -> Bool {

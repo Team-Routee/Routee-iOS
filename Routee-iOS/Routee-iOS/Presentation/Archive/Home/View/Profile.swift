@@ -105,7 +105,8 @@ final class Profile: BaseUIView {
             $0.leading.equalTo(profileImageView.snp.trailing).offset(14)
         }
         nameLabel.snp.makeConstraints {
-            $0.top.leading.equalToSuperview().inset(10)
+            $0.top.equalToSuperview().inset(10)
+            $0.leading.equalToSuperview()
             $0.width.equalTo(136)
             $0.height.equalTo(25)
         }
