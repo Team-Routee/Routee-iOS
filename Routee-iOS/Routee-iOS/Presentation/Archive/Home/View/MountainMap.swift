@@ -112,35 +112,6 @@ final class MountainMap: BaseUIView {
         )
         collectionView.reloadData()
     }
-
-    func makeLevels(from durationMinutes: [Int]) -> [Int] {
-        let levels = durationMinutes
-            .prefix(itemCount)
-            .map { mountainLevel(durationMinutes: $0) }
-
-        guard levels.count < itemCount else {
-            return levels
-        }
-
-        return levels + Array(repeating: 0, count: itemCount - levels.count)
-    }
-
-    // MARK: - Private Methods
-
-    private func mountainLevel(durationMinutes: Int) -> Int {
-        switch durationMinutes {
-        case ...0:
-            return 0
-        case 1...60:
-            return 1
-        case 61...120:
-            return 2
-        case 121...180:
-            return 3
-        default:
-            return 4
-        }
-    }
 }
 
 // MARK: - Extension

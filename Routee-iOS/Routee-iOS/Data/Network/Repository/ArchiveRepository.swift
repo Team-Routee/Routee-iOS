@@ -8,30 +8,41 @@
 import Foundation
 
 protocol ArchiveRepository {
-    func activitySummary(year: Int, month: Int) async throws -> ActivitySummaryResponseDTO
+    func archive(year: Int, month: Int) async throws -> ArchiveResponseDTO
 }
 
 struct DefaultArchiveRepository: ArchiveRepository {
     private let service: NetworkService
-    
-    init(service: NetworkService = DefaultNetworkService()) {
+    private let keychainService: KeychainService
+
+    init(
+        service: NetworkService = DefaultNetworkService(),
+        keychainService: KeychainService = DefaultKeychainService()
+    ) {
         self.service = service
+        self.keychainService = keychainService
     }
     
-    func activitySummary(year: Int, month: Int) async throws -> ActivitySummaryResponseDTO {
-        let requestDTO = ActivitySummaryRequestDTO(
+    func archive(year: Int, month: Int) async throws -> ArchiveResponseDTO {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let requestDTO = ArchiveRequestDTO(
             year: year,
             month: month
         )
         
-        let endpoint = ArchiveAPI.activitySummary(
-            header: .withAuth,
+        let endpoint = ArchiveAPI.archive(
+            header: .withAuth(accessToken: accessToken),
             requestDTO: requestDTO
         )
         
         return try await service.request(
             endpoint,
-            decodingType: ActivitySummaryResponseDTO.self
+            decodingType: ArchiveResponseDTO.self
         )
     }
 }

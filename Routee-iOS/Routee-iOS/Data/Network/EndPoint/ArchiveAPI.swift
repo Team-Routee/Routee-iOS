@@ -10,48 +10,48 @@ import Foundation
 import Alamofire
 
 enum ArchiveAPI {
-    case activitySummary(header: HeaderType, requestDTO: ActivitySummaryRequestDTO)
+    case archive(header: HeaderType, requestDTO: ArchiveRequestDTO)
 }
 
 extension ArchiveAPI: RouteeEndPoint {
     var basePath: String {
         switch self {
-        case .activitySummary:
+        case .archive:
             "/api/v1/archive"
         }
     }
     
     var path: String {
         switch self {
-        case .activitySummary:
+        case .archive:
             return "/activity-summary"
         }
     }
     
     var method: Alamofire.HTTPMethod {
         switch self {
-        case .activitySummary:
+        case .archive:
             return .get
         }
     }
     
     var headers: HeaderType {
         switch self {
-        case .activitySummary(let header, _):
+        case .archive(let header, _):
             return header
         }
     }
     
     var parameterEncoding: any Alamofire.ParameterEncoding {
         switch self {
-        case .activitySummary:
+        case .archive:
             return URLEncoding.default
         }
     }
     
     var queryParameters: [String: String]? {
         switch self {
-        case .activitySummary(_, let requestDTO):
+        case .archive(_, let requestDTO):
             [
                 "year": "\(requestDTO.year)",
                 "month": "\(requestDTO.month)"
@@ -61,7 +61,7 @@ extension ArchiveAPI: RouteeEndPoint {
     
     var bodyParameters: Alamofire.Parameters? {
         switch self {
-        case .activitySummary:
+        case .archive:
             nil
         }
     }
