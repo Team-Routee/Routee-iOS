@@ -25,13 +25,29 @@ protocol NetworkService {
 }
 
 final class DefaultNetworkService: NetworkService {
+    private static let authorizedSession: Session = {
+        let keychainService = DefaultKeychainService()
+        let interceptor = AuthInterceptor(
+            tokenService: DefaultTokenService(keychainService: keychainService),
+            keychainService: keychainService
+        )
+        return Session(interceptor: interceptor)
+    }()
+
+    private static func session(for endPoint: EndPoint) -> Session {
+        if case .withAuth = endPoint.headers {
+            return authorizedSession
+        }
+        return AF
+    }
+
     func request<T: Decodable & Sendable>(
         _ endPoint: EndPoint,
         decodingType: T.Type
     ) async throws -> T {
         Self.requestLogger(endPoint)
         return try await withCheckedThrowingContinuation { continuation in
-            AF.request(
+            Self.session(for: endPoint).request(
                 endPoint.requestURL,
                 method: endPoint.method,
                 parameters: endPoint.bodyParameters,
@@ -73,7 +89,7 @@ final class DefaultNetworkService: NetworkService {
     func requestEmpty(_ endPoint: EndPoint) async throws {
         Self.requestLogger(endPoint)
         return try await withCheckedThrowingContinuation { continuation in
-            AF.request(
+            Self.session(for: endPoint).request(
                 endPoint.requestURL,
                 method: endPoint.method,
                 parameters: endPoint.bodyParameters,
@@ -114,7 +130,7 @@ final class DefaultNetworkService: NetworkService {
     ) async throws -> T {
         Self.requestLogger(endPoint)
         return try await withCheckedThrowingContinuation { continuation in
-            AF.request(
+            Self.session(for: endPoint).request(
                 endPoint.requestURL,
                 method: endPoint.method,
                 parameters: endPoint.bodyParameters,
@@ -201,6 +217,8 @@ final class DefaultNetworkService: NetworkService {
         
         if statusCode == 404 {
             error = RouteeError.notFound
+        } else if statusCode == 401 {
+            error = RouteeError.unauthorized
         } else if statusCode == 403 {
             error = RouteeError.forbidden
         } else if statusCode == 400 {
