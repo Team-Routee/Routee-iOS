@@ -16,6 +16,9 @@ final class SettingView: BaseUIView {
 
     var instagramButtonAction: (() -> Void)?
     var logoutButtonAction: (() -> Void)?
+    var policyButtonAction: (() -> Void)?
+    private var privacyButtonTapCount = 0
+    private let requiredPrivacyButtonTapCount = 10
 
     // MARK: - UI Properties
 
@@ -102,15 +105,16 @@ final class SettingView: BaseUIView {
         backgroundGradientView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-        
+
         titleLabel.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide).offset(16)
-            $0.leading.equalToSuperview().inset(16)
+            $0.leading.equalTo(contentStackView.snp.leading)
         }
 
         contentStackView.snp.makeConstraints {
+            $0.centerX.equalToSuperview()
             $0.top.equalTo(titleLabel.snp.bottom).offset(40)
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.width.equalTo(343)
         }
 
         [
@@ -128,6 +132,7 @@ final class SettingView: BaseUIView {
     private func setItemActions() {
         routeeSectionView.setAction(index: 2, target: self, action: #selector(instagramItemTapped))
         appInfoSectionView.setAction(index: 1, target: self, action: #selector(logoutItemTapped))
+        policySectionView.setAction(index: 1, target: self, action: #selector(didTapPrivacyButton))
     }
 
     // MARK: - Actions
@@ -140,5 +145,15 @@ final class SettingView: BaseUIView {
     @objc
     private func logoutItemTapped() {
         logoutButtonAction?()
+    }
+    
+    @objc
+    private func didTapPrivacyButton() {
+        privacyButtonTapCount += 1
+
+        guard privacyButtonTapCount >= requiredPrivacyButtonTapCount else { return }
+
+        privacyButtonTapCount = 0
+        policyButtonAction?()
     }
 }

@@ -116,7 +116,7 @@ final class EditCompleteView: BaseUIView {
         
         toastMessageView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.bottom.equalTo(safeAreaLayoutGuide).inset(160)
+            $0.bottom.equalTo(backgroundImageView.snp.bottom).offset(-15)
             $0.width.equalTo(toastWidth)
             $0.height.equalTo(37)
         }

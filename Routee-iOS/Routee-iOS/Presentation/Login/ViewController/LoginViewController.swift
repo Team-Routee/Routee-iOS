@@ -8,23 +8,51 @@
 import AuthenticationServices
 import UIKit
 
-protocol LoginViewControllerDelegate: AnyObject {
-    func bindToken(_ idToken: String)
-}
-
 final class LoginViewController: BaseUIViewController {
-    let rootView = LoginView()
-    weak var delegate: LoginViewControllerDelegate?
+    
+    // MARK: - Properties
+    
+    private let viewModel = LoginViewModel()
+    private let rootView = LoginView()
     
     override func loadView() {
         view = rootView
     }
     
+    // MARK: - Private Methods
+    
+    private func login(identityToken: String) {
+        Task { [weak self] in
+            guard let self else { return }
+            
+            do {
+                try await viewModel.login(
+                    platform: .APPLE,
+                    identityToken: identityToken
+                )
+                goToMainService()
+            } catch RouteeError.notFound {
+                goToRegister(identityToken: identityToken)
+            } catch {
+                print("서버 로그인 실패", error)
+            }
+        }
+    }
+    
+    private func goToRegister(identityToken: String) {
+        let viewController = OnboardingViewController(identityToken: identityToken)
+        navigationController?.setViewControllers([viewController], animated: true)
+    }
+    
+    private func goToMainService() {
+        guard let window = view.window else { return }
+        window.rootViewController = TabBarViewController()
+    }
+    
+    // MARK: - Actions
+    
     override func setAddTarget() {
-        rootView.signInButton.addTarget(self,
-                                        action: #selector(didTapSignIn),
-                                        for: .touchUpInside
-        )
+        rootView.signInButton.addTarget(self, action: #selector(didTapSignIn), for: .touchUpInside)
     }
     
     @objc
@@ -40,8 +68,9 @@ final class LoginViewController: BaseUIViewController {
     }
 }
 
+// MARK: - Extension
+
 extension LoginViewController: ASAuthorizationControllerPresentationContextProviding {
-    // 인증창을 보여주기 위한 메서드 (인증창을 보여 줄 화면을 설정
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
         self.view.window ?? UIWindow()
     }
@@ -70,17 +99,13 @@ extension LoginViewController: ASAuthorizationControllerDelegate {
                 print("Token 변환 실패")
                 return
             }
-                        
+            
             print("Apple ID 로그인에 성공하였습니다.")
             print("사용자 ID: \(userIdentifier)")
             print("전체 이름: \(fullName?.givenName ?? "") \(fullName?.familyName ?? "")")
             print("이메일: \(email ?? "")")
             
-            let onboardingViewController = OnboardingViewController()
-            delegate = onboardingViewController
-            delegate?.bindToken(identityToken)
-            onboardingViewController.modalPresentationStyle = .fullScreen
-            present(onboardingViewController, animated: true)
+            login(identityToken: identityToken)
             
         case let passwordCredential as ASPasswordCredential:
             let userIdentifier = passwordCredential.user
