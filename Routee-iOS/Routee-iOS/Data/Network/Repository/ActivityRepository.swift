@@ -5,8 +5,11 @@
 //  Created by 김세령 on 7/15/26.
 //
 
+import Foundation
+
 protocol ActivityRepository {
     func getActivityRoute(activityId: Int64) async throws -> ActivityEditorModel
+    func getActivityStatistics(activityId: Int64) async throws -> ActivityStatisticsModel
 }
 
 struct DefaultActivityRepository: ActivityRepository {
@@ -37,6 +40,29 @@ struct DefaultActivityRepository: ActivityRepository {
         let response = try await service.request(
             endPoint,
             decodingType: ActivityRouteResponseDTO.self
+        )
+
+        return response.toModel()
+    }
+
+    func getActivityStatistics(activityId: Int64) async throws -> ActivityStatisticsModel {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let endPoint = ActivityAPI.activityStatistics(
+            header: .withAuthTimeZone(
+                accessToken: accessToken,
+                timeZone: TimeZone.current.identifier
+            ),
+            activityId: activityId
+        )
+
+        let response = try await service.request(
+            endPoint,
+            decodingType: ActivityStatisticsResponseDTO.self
         )
 
         return response.toModel()
