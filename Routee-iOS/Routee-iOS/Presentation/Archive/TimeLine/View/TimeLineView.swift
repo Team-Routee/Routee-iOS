@@ -51,10 +51,7 @@ final class TimeLineView: BaseUIView {
         showsEditIcon: false
     )
     private let workoutMetric = WorkoutMetric(distance: "15.53", time: "03:20", altitude: "2132")
-    private lazy var trackMap = TrackMap(
-        backgroundImage: UIImage(resource: .imgNavermapMain),
-        trackPoints: []
-    )
+    private let trackMap = TimeLineTrackMap()
     private let timelineTitleLabel = UILabel()
     private let timelineDateLabel = UILabel()
     private lazy var timelineCard = TimeLineCard(
@@ -94,6 +91,10 @@ final class TimeLineView: BaseUIView {
             imageUrls: model.imageUrls,
             locations: model.locations
         )
+    }
+
+    func configureCourseList(with model: CourseListModel) {
+        myRoute.configure(mode: .read, routePoint: model.routePoint)
     }
 
     // MARK: - UI Setting

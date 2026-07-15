@@ -41,6 +41,10 @@ final class TimeLineViewModel {
         try await activityRepository.getActivityTimelineList(activityId: activityId)
     }
 
+    func fetchCourseList(activityId: Int64) async throws -> CourseListModel {
+        try await activityRepository.getActivityCourseList(activityId: activityId)
+    }
+
     // MARK: - Private Methods
 
     private func makeMetricViewModel(
