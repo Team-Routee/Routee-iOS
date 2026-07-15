@@ -7,6 +7,7 @@
 
 protocol ActivityRepository {
     func getActivityRoute(activityId: Int64) async throws -> ActivityEditorModel
+    func getRecordEditResource(activityId: Int64) async throws -> RecordEditResourceModel
 }
 
 struct DefaultActivityRepository: ActivityRepository {
@@ -37,6 +38,26 @@ struct DefaultActivityRepository: ActivityRepository {
         let response = try await service.request(
             endPoint,
             decodingType: ActivityRouteResponseDTO.self
+        )
+
+        return response.toModel()
+    }
+
+    func getRecordEditResource(activityId: Int64) async throws -> RecordEditResourceModel {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let endPoint = ActivityAPI.recordEditResource(
+            header: .withAuth(accessToken: accessToken),
+            activityId: activityId
+        )
+
+        let response = try await service.request(
+            endPoint,
+            decodingType: RecordEditResourceResponseDTO.self
         )
 
         return response.toModel()
