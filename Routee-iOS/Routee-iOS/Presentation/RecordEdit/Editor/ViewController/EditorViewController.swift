@@ -16,7 +16,8 @@ final class EditorViewController: BaseUIViewController {
     // MARK: - Properties
 
     private let viewModel = EditorViewModel()
-    private let activityId: Int64
+    private let recordEditResourceViewModel = RecordEditResourceViewModel()
+    private let activityId: Int64?
 
     // MARK: - UI Properties
 
@@ -24,7 +25,7 @@ final class EditorViewController: BaseUIViewController {
 
     // MARK: - Initializer
 
-    init(activityId: Int64 = 1) {
+    init(activityId: Int64 = 865326084924289775) {
         self.activityId = activityId
         super.init(nibName: nil, bundle: nil)
     }
@@ -42,7 +43,10 @@ final class EditorViewController: BaseUIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        guard activityId != nil else { return }
+
         loadActivityEditorData()
+        loadRecordEditResourceData()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -55,7 +59,8 @@ final class EditorViewController: BaseUIViewController {
 
     private func loadActivityEditorData() {
         Task { [weak self] in
-            guard let self else { return }
+            guard let self,
+                  let activityId else { return }
 
             do {
                 try await viewModel.fetchActivityEditorData(activityId: activityId)
@@ -63,6 +68,24 @@ final class EditorViewController: BaseUIViewController {
                 guard let activityEditorModel = viewModel.activityEditorModel else { return }
 
                     rootView.configure(with: activityEditorModel)
+
+            } catch {
+                RouteeLogger.error(error)
+            }
+        }
+    }
+
+    private func loadRecordEditResourceData() {
+        Task { [weak self] in
+            guard let self,
+                  let activityId else { return }
+
+            do {
+                try await recordEditResourceViewModel.fetchRecordEditResourceData(activityId: activityId)
+
+                guard let recordEditResourceModel = recordEditResourceViewModel.recordEditResourceModel else { return }
+
+                rootView.configure(with: recordEditResourceModel)
 
             } catch {
                 RouteeLogger.error(error)
