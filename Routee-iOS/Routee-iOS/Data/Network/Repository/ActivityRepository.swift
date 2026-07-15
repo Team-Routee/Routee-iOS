@@ -6,7 +6,7 @@
 //
 
 protocol ActivityRepository {
-    func getActivityRoute(activityId: Int64) async throws -> ActivityEditorModel
+    func getActivityRoute(activityId: Int64) async throws -> ActivityRouteResponseDTO
 }
 
 struct DefaultActivityRepository: ActivityRepository {
@@ -22,7 +22,7 @@ struct DefaultActivityRepository: ActivityRepository {
         self.keychainService = keychainService
     }
 
-    func getActivityRoute(activityId: Int64) async throws -> ActivityEditorModel {
+    func getActivityRoute(activityId: Int64) async throws -> ActivityRouteResponseDTO {
         let accessToken = keychainService.read(.accessToken)
 
         guard !accessToken.isEmpty else {
@@ -34,11 +34,9 @@ struct DefaultActivityRepository: ActivityRepository {
             activityId: activityId
         )
 
-        let responseDTO = try await service.request(
+        return try await service.request(
             endPoint,
             decodingType: ActivityRouteResponseDTO.self
         )
-
-        return responseDTO.toEditorModel()
     }
 }

@@ -24,6 +24,8 @@ final class EditorViewModel {
     // MARK: - Public Methods
 
     func fetchActivityEditorData(activityId: Int64) async throws {
-        activityEditorModel = try await activityRepository.getActivityRoute(activityId: activityId)
+        activityEditorModel = try await activityRepository
+            .getActivityRoute(activityId: activityId)
+            .toEditorModel()
     }
 }
