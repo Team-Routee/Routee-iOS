@@ -87,6 +87,15 @@ final class TimeLineView: BaseUIView {
         trackMap.updateTrackPoints(trackPoints)
     }
 
+    func configureTimeLineList(with model: TimeLineListModel) {
+        guard showTimelineCard else { return }
+
+        timelineCard.configure(
+            imageUrls: model.imageUrls,
+            locations: model.locations
+        )
+    }
+
     // MARK: - UI Setting
 
     override func setStyle() {

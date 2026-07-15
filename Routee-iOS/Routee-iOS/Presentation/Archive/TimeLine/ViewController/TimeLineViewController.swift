@@ -19,6 +19,7 @@ final class TimeLineViewController: BaseUIViewController {
     private let viewModel = TimeLineViewModel()
     private var activityStatisticsTask: Task<Void, Never>?
     private var activityRouteTask: Task<Void, Never>?
+    private var timeLineListTask: Task<Void, Never>?
 
     // MARK: - Initializer
 
@@ -47,6 +48,7 @@ final class TimeLineViewController: BaseUIViewController {
 
         loadActivityStatistics()
         loadActivityRoute()
+        loadTimeLineList()
     }
 
     // MARK: - Private Methods
@@ -85,6 +87,27 @@ final class TimeLineViewController: BaseUIViewController {
                 guard !Task.isCancelled else { return }
 
                 rootView.configureTrackMap(trackPoints: trackPoints)
+            } catch {
+                guard !Task.isCancelled else { return }
+
+                RouteeLogger.error(error)
+            }
+        }
+    }
+
+    private func loadTimeLineList() {
+        guard let activityId = record?.activityId else { return }
+
+        timeLineListTask?.cancel()
+        timeLineListTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                let model = try await viewModel.fetchTimeLineList(activityId: activityId)
+
+                guard !Task.isCancelled else { return }
+
+                rootView.configureTimeLineList(with: model)
             } catch {
                 guard !Task.isCancelled else { return }
 
