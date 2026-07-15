@@ -11,13 +11,14 @@ import Alamofire
 
 enum ActivityAPI {
     case activityRoute(header: HeaderType, activityId: Int64)
+    case createActivity(header: HeaderType, requestDTO: ActivityCreateRequestDTO)
 }
 
 extension ActivityAPI: RouteeEndPoint {
 
     var basePath: String {
         switch self {
-        case .activityRoute:
+        case .activityRoute, .createActivity:
             return "/api/v1/activity"
         }
     }
@@ -26,6 +27,8 @@ extension ActivityAPI: RouteeEndPoint {
         switch self {
         case .activityRoute(_, let activityId):
             return "/\(activityId)/track"
+        case .createActivity:
+            return ""
         }
     }
 
@@ -33,12 +36,14 @@ extension ActivityAPI: RouteeEndPoint {
         switch self {
         case .activityRoute:
             return .get
+        case .createActivity:
+            return .post
         }
     }
 
     var headers: HeaderType {
         switch self {
-        case .activityRoute(let header, _):
+        case .activityRoute(let header, _), .createActivity(let header, _):
             return header
         }
     }
@@ -47,12 +52,14 @@ extension ActivityAPI: RouteeEndPoint {
         switch self {
         case .activityRoute:
             return URLEncoding.default
+        case .createActivity:
+            return JSONEncoding.default
         }
     }
 
     var queryParameters: [String: String]? {
         switch self {
-        case .activityRoute:
+        case .activityRoute, .createActivity:
             return nil
         }
     }
@@ -61,6 +68,8 @@ extension ActivityAPI: RouteeEndPoint {
         switch self {
         case .activityRoute:
             return nil
+        case .createActivity(_, let requestDTO):
+            return requestDTO.asParameters()
         }
     }
 }
