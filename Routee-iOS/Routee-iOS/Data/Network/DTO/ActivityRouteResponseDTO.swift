@@ -29,7 +29,7 @@ struct TimelineMarker: Decodable, Sendable {
 }
 
 extension ActivityRouteResponseDTO {
-    func toEditorModel() -> ActivityEditorModel {
+    func toModel() -> ActivityEditorModel {
         ActivityEditorModel(
             activityId: activityId,
             trackPoints: trackPoints.map { $0.toModel() },
