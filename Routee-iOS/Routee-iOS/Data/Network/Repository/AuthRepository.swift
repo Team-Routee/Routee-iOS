@@ -8,7 +8,7 @@
 import Foundation
 
 protocol AuthRepository {
-    func login(platform: LoginPlatform, identityToken: String) async throws
+    func login(platform: LoginPlatform, identityToken: String, appleUserID: String) async throws
 }
 
 struct DefaultAuthRepository: AuthRepository {
@@ -19,7 +19,7 @@ struct DefaultAuthRepository: AuthRepository {
         self.service = service
     }
     
-    func login(platform: LoginPlatform, identityToken: String) async throws {
+    func login(platform: LoginPlatform, identityToken: String, appleUserID: String) async throws {
         let dto = LoginRequestDTO(
             provider: platform.mixpanelKey,
             idToken: identityToken
@@ -37,5 +37,6 @@ struct DefaultAuthRepository: AuthRepository {
         
         keychainService.create(.accessToken, token: response.accessToken)
         keychainService.create(.refreshToken, token: response.refreshToken)
+        keychainService.create(.appleUserID, token: appleUserID)
     }
 }

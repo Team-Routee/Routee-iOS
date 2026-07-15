@@ -10,9 +10,11 @@ import UIKit
 final class WorkoutPhotoLocationViewController: BaseUIViewController {
     
     private let rootView: WorkoutPhotoLocationView
+    private let onComplete: () -> Void
     
-    init(image: UIImage) {
+    init(image: UIImage, onComplete: @escaping () -> Void) {
         rootView = WorkoutPhotoLocationView(image: image)
+        self.onComplete = onComplete
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -68,6 +70,7 @@ final class WorkoutPhotoLocationViewController: BaseUIViewController {
     
     @objc
     private func didTapCompleteButton() {
+        onComplete()
         navigationController?.popViewController(animated: true)
     }
     

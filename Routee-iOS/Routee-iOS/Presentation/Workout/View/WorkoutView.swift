@@ -5,7 +5,6 @@
 //  Created by LEESANGYUP on 7/8/26.
 //
 
-import Combine
 import CoreLocation
 import UIKit
 
@@ -15,13 +14,11 @@ import SnapKit
 import Then
 
 final class WorkoutView: BaseUIView {
-    
     // MARK: - Properties
     
-    var distance = "15.52"
+    var distance = "0.00"
     var time = "00:00"
-    var altitude = "2312"
-    
+    var altitude = "0"
     // MARK: - UI Properties
     
     private let routeeMapView = NMFNaverMapView()
@@ -35,6 +32,7 @@ final class WorkoutView: BaseUIView {
         image: UIImage.icNow.resized(to: CGSize(width: 42, height: 42))
     )
     private let pathOverlay = NMFPath()
+    var photoMarkers: [NMFMarker] = []
     lazy var moveToUserlocationButton = UIButton(type: .custom)
     lazy var recordButton = RouteeButton(titleText: "등산 기록", type: .enabled)
     lazy var pauseButton = UIButton()
@@ -44,7 +42,7 @@ final class WorkoutView: BaseUIView {
     var restartButton: UIButton { workoutPauseView.restartButton }
     var finishButton: UIButton { workoutPauseView.finishButton }
     
-    private var mapView: NMFMapView { routeeMapView.mapView }
+    var mapView: NMFMapView { routeeMapView.mapView }
     private let countdownAnimationView = LottieAnimationView(asset: "countdown")
     private lazy var finishAnimationView = LottieAnimationView(dotLottieAsset: "routeefinish")
     
@@ -269,6 +267,23 @@ final class WorkoutView: BaseUIView {
         pathOverlay.path = NMGLineString(points: locations)
         pathOverlay.mapView = mapView
     }
+
+    func updateDistance(_ distanceInMeters: CLLocationDistance) {
+        let distanceInKilometers = distanceInMeters / 1_000
+        workoutMetric.updateDistance(String(format: "%.2f", distanceInKilometers))
+    }
+
+    func updateElapsedTime(_ elapsedTime: TimeInterval) {
+        let totalSeconds = max(0, Int(elapsedTime))
+        let hours = totalSeconds / 3_600
+        let minutes = (totalSeconds % 3_600) / 60
+        let formattedTime = String(format: "%02d:%02d", hours, minutes)
+        workoutMetric.updateTime(formattedTime)
+    }
+
+    func updateMaximumAltitude(_ altitudeInMeters: CLLocationDistance?) {
+        workoutMetric.updateMaximumAltitude(altitudeInMeters.map { String(Int($0.rounded())) } ?? "0")
+    }
     
     func updateCurrentLocationAddress(_ address: String) {
         currentLocationLabel.text = address
@@ -329,6 +344,8 @@ extension WorkoutView {
         workoutPauseView.isHidden = !isPaused
 
         if isReady {
+            pathOverlay.mapView = nil
+            removePhotoMarkers()
             mapView.logoAlign = .leftBottom
             mapView.logoMargin = UIEdgeInsets(
                 top: 0,
@@ -371,6 +388,38 @@ extension WorkoutView {
             finishAnimationView.isHidden = true
             completion()
         }
+    }
+    
+    func addPhotoMarker(_ photoRecord: WorkoutPhotoRecord, at coordinate: CLLocationCoordinate2D) {
+        let markerSize = CGSize(width: 42, height: 42)
+        let sourceImage = photoRecord.image
+        let pointIndex = photoRecord.pointIndex
+
+        Task {
+            [weak self] in
+            let thumbnailImage = await Task.detached(priority: .userInitiated) {
+                sourceImage
+                    .resized(to: markerSize)
+                    .thumbnailImage(borderWidth: 3, borderColor: .mint300, cornerRadius: 12)
+            }.value
+
+            guard let self else { return }
+
+            let marker = NMFMarker()
+            marker.tag = UInt(pointIndex)
+            marker.position = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
+            marker.iconImage = NMFOverlayImage(image: thumbnailImage)
+            marker.width = markerSize.width
+            marker.height = markerSize.height
+            marker.anchor = CGPoint(x: 0.5, y: 0.5)
+            marker.mapView = mapView
+            photoMarkers.append(marker)
+        }
+    }
+
+    func removePhotoMarkers() {
+        photoMarkers.forEach { $0.mapView = nil }
+        photoMarkers.removeAll()
     }
 }
 

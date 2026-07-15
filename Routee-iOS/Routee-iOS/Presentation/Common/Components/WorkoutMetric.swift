@@ -39,6 +39,18 @@ final class WorkoutMetric: BaseUIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
+    func updateDistance(_ distance: String) {
+        distanceDataLabel.text = distance
+    }
+
+    func updateTime(_ time: String) {
+        timeDataLabel.text = time
+    }
+
+    func updateMaximumAltitude(_ altitude: String) {
+        highestAltitudeDataLabel.text = altitude
+    }
     
     override func setUI() {
         distanceStackView.addArrangedSubviews(distanceLabel, distanceDataLabel)
@@ -90,6 +102,11 @@ final class WorkoutMetric: BaseUIView {
         
         timeLabel.do {
             $0.text = "시간"
+        }
+
+        timeDataLabel.do {
+            $0.adjustsFontSizeToFitWidth = true
+            $0.minimumScaleFactor = 0.7
         }
         
         highestAltitudeLabel.do {
