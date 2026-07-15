@@ -35,7 +35,7 @@ final class LoginViewController: BaseUIViewController {
             } catch RouteeError.notFound {
                 goToRegister(identityToken: identityToken, appleUserID: appleUserID)
             } catch {
-                print("서버 로그인 실패", error)
+                RouteeLogger.error(error)
             }
         }
     }
