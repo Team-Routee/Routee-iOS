@@ -13,6 +13,7 @@ final class ArchiveView: BaseUIView {
 
     // MARK: - UI Properties
 
+    private let backgroundGradientView = RouteeEllipseBackground()
     private let archiveHeaderView = ArchiveHeader()
     private let profileView = Profile()
     private let monthSelector = ArchiveMonthSelector()
@@ -31,7 +32,7 @@ final class ArchiveView: BaseUIView {
         }
     }
 
-    var onSelectDay: ((DayCellModel) -> Void)? {
+    var onSelectDay: ((CalendarCellModel) -> Void)? {
         didSet {
             calendarView.onSelectDay = onSelectDay
         }
@@ -45,6 +46,7 @@ final class ArchiveView: BaseUIView {
 
     override func setUI() {
         addSubviews(
+            backgroundGradientView,
             archiveHeaderView,
             profileView,
             monthSelector,
@@ -54,6 +56,10 @@ final class ArchiveView: BaseUIView {
     }
 
     override func setLayout() {
+        backgroundGradientView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
         archiveHeaderView.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide)
             $0.leading.equalTo(mountainMapView.snp.leading)
@@ -107,11 +113,11 @@ final class ArchiveView: BaseUIView {
         )
     }
 
-    func configureMountainMap(durationMinutes: [Int]) {
-        mountainMapView.configure(levels: mountainMapView.makeLevels(from: durationMinutes))
+    func configureMountainMap(levels: [Int]) {
+        mountainMapView.configure(levels: levels)
     }
 
-    func configureCalendar(days: [DayCellModel]) {
+    func configureCalendar(days: [CalendarCellModel]) {
         calendarView.configure(days: days)
     }
 }

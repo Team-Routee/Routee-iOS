@@ -7,17 +7,12 @@
 
 import UIKit
 
+import Kingfisher
 import SnapKit
 import Then
 
 final class Profile: BaseUIView {
-    
-    // MARK: - Properties
 
-    private var userName = ""
-    private var streakNumber = ""
-    private var pointNumber = ""
-    
     // MARK: - Initializer
 
     override init(frame: CGRect) {
@@ -54,7 +49,7 @@ final class Profile: BaseUIView {
         }
         
         nameLabel.do {
-            $0.text = userName
+            $0.text = "관악산 날다람쥐"
             $0.textColor = .static_white
             $0.font = .label_sb_18
         }
@@ -65,7 +60,7 @@ final class Profile: BaseUIView {
         }
         
         streakLabel.do {
-            $0.text = "\(streakNumber)일 연속"
+            $0.text = "8일째 함께하는 중"
             $0.textColor = .mint_300
             $0.font = .label_m_14
         }
@@ -83,7 +78,7 @@ final class Profile: BaseUIView {
         }
         
         pointLabel.do {
-            $0.text = "\(pointNumber)"
+            $0.text = "25"
             $0.textColor = .staticWhite
             $0.font = .label_r_12
         }
@@ -105,7 +100,8 @@ final class Profile: BaseUIView {
             $0.leading.equalTo(profileImageView.snp.trailing).offset(14)
         }
         nameLabel.snp.makeConstraints {
-            $0.top.leading.equalToSuperview().inset(10)
+            $0.top.equalToSuperview().inset(10)
+            $0.leading.equalToSuperview()
             $0.width.equalTo(136)
             $0.height.equalTo(25)
         }
@@ -139,15 +135,23 @@ final class Profile: BaseUIView {
             $0.height.equalTo(28)
         }
     }
-    // MARK: - public Methods
-    func configure(with model: ProfileModel) {
-        userName = model.userName
-        streakNumber = "\(model.streakNumber)"
-        pointNumber = "\(model.pointNumber)"
 
-        profileImageView.image = UIImage(named: model.profileImageName) ?? .profileImgDefault
-        nameLabel.text = userName
-        streakLabel.text = "\(streakNumber)일째 루티와 함께하는 중"
-        pointLabel.text = pointNumber
+    // MARK: - Public Methods
+
+    func configure(with model: ProfileModel) {
+        configureProfileImage(with: model.profileImageUrl)
+
+        nameLabel.text = model.nickname
+        streakLabel.text = "\(model.daysSinceJoining)일째 함께하는 중"
+        pointLabel.text = "\(model.totalActivityCount)"
+    }
+
+    // MARK: - Private Methods
+
+    private func configureProfileImage(with imageUrl: String?) {
+        guard let imageUrl,
+              let url = URL(string: imageUrl) else { return }
+
+        profileImageView.kf.setImage(with: url)
     }
 }

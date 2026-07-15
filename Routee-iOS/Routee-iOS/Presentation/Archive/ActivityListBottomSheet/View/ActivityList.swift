@@ -1,19 +1,20 @@
 //
-//  DailyRecord.swift
+//  ActivityList.swift
 //  Routee-iOS
 //
 
 import UIKit
 
+import Kingfisher
 import SnapKit
 import Then
 
-final class DailyRecord: BaseUIView {
+final class ActivityList: BaseUIView {
 
     // MARK: - UI Properties
     
     private let thumbnailImageView = UIImageView()
-    private let recordListLabel = UILabel()
+    private let titleLabel = UILabel()
     private let chevronIcon = UIButton(type: .custom)
 
     // MARK: - Properties
@@ -33,7 +34,7 @@ final class DailyRecord: BaseUIView {
             $0.clipsToBounds = true
         }
 
-        recordListLabel.do {
+        titleLabel.do {
             $0.textColor = .static_white
             $0.font = .label_m_14
             $0.numberOfLines = 1
@@ -47,7 +48,7 @@ final class DailyRecord: BaseUIView {
     }
 
     override func setUI() {
-        addSubviews(thumbnailImageView, recordListLabel, chevronIcon)
+        addSubviews(thumbnailImageView, titleLabel, chevronIcon)
     }
 
     override func setLayout() {
@@ -61,7 +62,7 @@ final class DailyRecord: BaseUIView {
             $0.size.equalTo(42)
         }
 
-        recordListLabel.snp.makeConstraints {
+        titleLabel.snp.makeConstraints {
             $0.leading.equalTo(thumbnailImageView.snp.trailing).offset(12)
             $0.centerY.equalToSuperview()
             $0.trailing.lessThanOrEqualTo(chevronIcon.snp.leading).offset(-12)
@@ -76,19 +77,23 @@ final class DailyRecord: BaseUIView {
     
     // MARK: - Public Methods
     
-    func configure(with model: DailyRecordModel) {
-        recordListLabel.text = model.title
-        thumbnailImageView.image = thumbnailImage(thumbnailUrl: model.thumbnailUrl)
+    func configure(with viewModel: ActivityListRowViewModel) {
+        titleLabel.text = viewModel.title
+        configureThumbnailImage(with: viewModel.thumbnailURL)
     }
 
     // MARK: - Private Methods
     
-    private func thumbnailImage(thumbnailUrl: String?) -> UIImage {
-        guard let thumbnailUrl else {
-            return .routeeLogoBlack
+    private func configureThumbnailImage(with url: URL?) {
+        guard let url else {
+            thumbnailImageView.image = .routeeLogoBlack
+            return
         }
 
-        return UIImage(named: thumbnailUrl) ?? .routeeLogoBlack
+        thumbnailImageView.kf.setImage(
+            with: url,
+            placeholder: UIImage.routeeLogoBlack
+        )
     }
 
     @objc

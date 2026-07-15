@@ -22,6 +22,8 @@ final class EditorView: BaseUIView {
     private struct EditorState {
         var selectedColor: UIColor = .recapMint
         var didSetRouteTimelineStickerFrame = false
+        var trackPoints: [TrackPoint] = TrackPoint.dummyTrackPoints()
+        var pointIndices: [Int] = []
     }
 
     // MARK: - UI Properties
@@ -123,6 +125,13 @@ final class EditorView: BaseUIView {
     func updateBackgroundImage(_ image: UIImage) {
         backgroundImageView.image = image
         backgroundOpacityView.backgroundColor = .black40
+    }
+
+    func configure(with model: ActivityEditorModel) {
+        state.trackPoints = model.trackPoints
+        state.pointIndices = model.pointIndices
+        state.didSetRouteTimelineStickerFrame = false
+        setTimelineFrame()
     }
 
     func setBackgroundTapAction(_ action: @escaping () -> Void) {
@@ -313,9 +322,7 @@ final class EditorView: BaseUIView {
             return
         }
 
-        let routePoints = TrackPoint
-            .dummyTrackPoints()
-            .toCanvasPoints(in: backgroundImageView.bounds.size)
+        let routePoints = state.trackPoints.toCanvasPoints(in: backgroundImageView.bounds.size)
 
         guard let routeRect = routeTimelineDrawingView.configureSticker(points: routePoints) else { return }
 
