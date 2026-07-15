@@ -59,6 +59,7 @@ final class ArchiveView: BaseUIView {
         backgroundGradientView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
+        
         archiveHeaderView.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide)
             $0.leading.equalTo(mountainMapView.snp.leading)
