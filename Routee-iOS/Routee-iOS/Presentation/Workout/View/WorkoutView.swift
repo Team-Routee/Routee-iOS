@@ -392,18 +392,29 @@ extension WorkoutView {
     
     func addPhotoMarker(_ photoRecord: WorkoutPhotoRecord, at coordinate: CLLocationCoordinate2D) {
         let markerSize = CGSize(width: 42, height: 42)
-        let thumbnailImage = photoRecord.image
-            .resized(to: markerSize)
-            .thumbnailImage(borderWidth: 3, borderColor: .mint300, cornerRadius: 12)
-        let marker = NMFMarker()
-        marker.tag = UInt(photoRecord.pointIndex)
-        marker.position = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
-        marker.iconImage = NMFOverlayImage(image: thumbnailImage)
-        marker.width = markerSize.width
-        marker.height = markerSize.height
-        marker.anchor = CGPoint(x: 0.5, y: 0.5)
-        marker.mapView = mapView
-        photoMarkers.append(marker)
+        let sourceImage = photoRecord.image
+        let pointIndex = photoRecord.pointIndex
+
+        Task {
+            [weak self] in
+            let thumbnailImage = await Task.detached(priority: .userInitiated) {
+                sourceImage
+                    .resized(to: markerSize)
+                    .thumbnailImage(borderWidth: 3, borderColor: .mint300, cornerRadius: 12)
+            }.value
+
+            guard let self else { return }
+
+            let marker = NMFMarker()
+            marker.tag = UInt(pointIndex)
+            marker.position = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
+            marker.iconImage = NMFOverlayImage(image: thumbnailImage)
+            marker.width = markerSize.width
+            marker.height = markerSize.height
+            marker.anchor = CGPoint(x: 0.5, y: 0.5)
+            marker.mapView = mapView
+            photoMarkers.append(marker)
+        }
     }
 
     func removePhotoMarkers() {
