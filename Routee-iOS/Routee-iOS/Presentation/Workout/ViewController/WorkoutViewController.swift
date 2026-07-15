@@ -110,17 +110,6 @@ final class WorkoutViewController: BaseUIViewController {
         workoutView.updateDistance(totalDistance)
     }
     
-    private func startRecordingRoute() {
-        workoutMode = .recording
-        workoutView.playCountdownAnimation()
-        workoutView.updateDistance(viewModel.startDistanceTracking())
-        workoutView.updateRoutePath(viewModel.routePoints.map(\.latLng))
-        
-        if let currentLocation = locationManager.location {
-            appendRouteLocationIfNeeded(currentLocation)
-        }
-    }
-    
     private func pauseRecordingRoute() {
         workoutMode = .paused
         viewModel.pauseDistanceTracking()
@@ -298,7 +287,6 @@ final class WorkoutViewController: BaseUIViewController {
     
     @objc
     private func didTapRecordButton() {
-        startRecordingRoute()
         startRecording()
     }
     
@@ -329,23 +317,34 @@ final class WorkoutViewController: BaseUIViewController {
     
     // MARK: - Network
     
-    func startRecording() {
-            let startedAt = currentStartedAt()
-            workoutView.recordButton.isEnabled = false
+    private func startRecording() {
+        guard workoutMode == .ready, workoutView.recordButton.isEnabled else { return }
 
-            Task {
-                do {
-                    let activity = try await viewModel.startRecording(
-                        activityType: "HIKING",
-                        startedAt: startedAt
-                    )
-                    RouteeLogger.debug("운동 기록 시작 완료 (activityId: \(activity.activityId))")
-                    startRecordingRoute()
-                } catch {
-                    RouteeLogger.error(error)
+        let startedAt = currentStartedAt()
+        workoutView.recordButton.isEnabled = false
+
+        Task {
+            do {
+                let activity = try await viewModel.startRecording(
+                    activityType: "HIKING",
+                    startedAt: startedAt
+                )
+
+                RouteeLogger.debug("운동 기록 시작 완료 (activityId: \(activity.activityId))")
+                workoutMode = .recording
+                workoutView.playCountdownAnimation()
+                workoutView.updateDistance(viewModel.startDistanceTracking())
+                workoutView.updateRoutePath(viewModel.routePoints.map(\.latLng))
+
+                if let currentLocation = locationManager.location {
+                    appendRouteLocationIfNeeded(currentLocation)
                 }
+            } catch {
+                workoutView.recordButton.isEnabled = true
+                RouteeLogger.error(error)
             }
         }
+    }
 }
 
 extension WorkoutViewController {

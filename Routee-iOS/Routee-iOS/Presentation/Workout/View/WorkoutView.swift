@@ -339,6 +339,7 @@ extension WorkoutView {
         currentLocationStackView.isHidden = !isReady
         moveToUserlocationButton.isHidden = !isReady
         recordButton.isHidden = !isReady
+        recordButton.isEnabled = isReady
         workoutMetric.isHidden = !isRecording
         activityButtonStackView.isHidden = !isRecording
         workoutPauseView.isHidden = !isPaused
