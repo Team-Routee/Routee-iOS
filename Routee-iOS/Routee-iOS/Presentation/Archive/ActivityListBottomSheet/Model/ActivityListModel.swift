@@ -6,7 +6,7 @@
 import Foundation
 
 struct ActivityListModel {
-    let activityId: Int
+    let activityId: Int64
     let title: String
     let thumbnailUrl: String?
 }

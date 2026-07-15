@@ -10,7 +10,7 @@ struct ActivityListResponseDTO: Decodable, Sendable {
     let activities: [Activity]
 
     struct Activity: Decodable, Sendable {
-        let activityId: Int
+        let activityId: Int64
         let title: String
         let thumbnailUrl: String?
     }
