@@ -9,18 +9,18 @@ import Foundation
 
 struct ActivityRouteResponseDTO: Decodable, Sendable {
     let activityId: Int64
-    let trackPoints: [TrackPointDTO]
-    let timelineMarkers: [TimelineMarkerDTO]
+    let trackPoints: [TrackPoints]
+    let timelineMarkers: [TimelineMarker]
 }
 
-struct TrackPointDTO: Decodable, Sendable {
+struct TrackPoints: Decodable, Sendable {
     let latitude: Double
     let longitude: Double
     let elevation: Double
     let pointIndex: Int
 }
 
-struct TimelineMarkerDTO: Decodable, Sendable {
+struct TimelineMarker: Decodable, Sendable {
     let timelineId: Int64
     let thumbnailUrl: String
     let latitude: Double
@@ -38,7 +38,7 @@ extension ActivityRouteResponseDTO {
     }
 }
 
-extension TrackPointDTO {
+extension TrackPoints {
     func toModel() -> TrackPoint {
         TrackPoint(
             latitude: latitude,
