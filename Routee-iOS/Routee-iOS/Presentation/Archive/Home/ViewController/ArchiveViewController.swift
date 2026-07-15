@@ -14,34 +14,117 @@ final class ArchiveViewController: BaseUIViewController {
     private var year = Calendar.current.component(.year, from: Date())
     private var month = Calendar.current.component(.month, from: Date())
     private let rootView = ArchiveView()
+    private let viewModel = ArchiveViewModel()
+    private let profileViewModel = ProfileViewModel()
     private var dimView: UIView?
+    private var joinDate: String?
+    private var archiveTask: Task<Void, Never>?
+    private var profileTask: Task<Void, Never>?
+    private var activityListTask: Task<Void, Never>?
+    private let joinedDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.calendar = Foundation.Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
 
     // MARK: - Life Cycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        loadDummyData()
+        loadProfile()
+        loadArchive()
     }
 
     override func setView() {
         view = rootView
     }
 
-    private func loadDummyData() {
-        rootView.configureProfile(with: ArchiveHomeDummyData.profile)
-        rootView.configureMonthSelector(
-            title: monthTitle(year: year, month: month),
-            canMoveToPreviousMonth: canMoveToPreviousMonth(year: year, month: month),
-            canMoveToNextMonth: canMoveToNextMonth(year: year, month: month)
+    private func loadArchive() {
+        let requestedYear = year
+        let requestedMonth = month
+
+        configureMonthSelector(year: requestedYear, month: requestedMonth)
+
+        archiveTask?.cancel()
+        archiveTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                let records = try await viewModel.fetchArchive(
+                    year: requestedYear,
+                    month: requestedMonth
+                )
+
+                guard
+                    !Task.isCancelled,
+                    year == requestedYear,
+                    month == requestedMonth
+                else { return }
+
+                applyArchive(
+                    records,
+                    year: requestedYear,
+                    month: requestedMonth
+                )
+            } catch {
+                guard
+                    !Task.isCancelled,
+                    year == requestedYear,
+                    month == requestedMonth
+                else { return }
+
+                RouteeLogger.error(error)
+                applyArchive(
+                    [],
+                    year: requestedYear,
+                    month: requestedMonth
+                )
+            }
+        }
+    }
+
+    private func loadProfile() {
+        profileTask?.cancel()
+        profileTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                let profile = try await profileViewModel.fetchProfile()
+
+                guard !Task.isCancelled else { return }
+
+                joinDate = profile.joinDate
+                rootView.configureProfile(with: profile)
+                configureMonthSelector(year: year, month: month)
+            } catch {
+                guard !Task.isCancelled else { return }
+
+                RouteeLogger.error(error)
+            }
+        }
+    }
+
+    private func applyArchive(
+        _ records: [ArchiveModel],
+        year: Int,
+        month: Int
+    ) {
+        let durationMinutes = viewModel.makeDurationMinutes(
+            year: year,
+            month: month,
+            records: records
         )
-        rootView.configureMountainMap(durationMinutes: ArchiveHomeDummyData.dummyMountainDurationMinutes)
+        rootView.configureMountainMap(
+            levels: viewModel.makeMountainMapLevels(from: durationMinutes)
+        )
         rootView.configureCalendar(
-            days: ArchiveCalendar.makeDays(
+            days: viewModel.makeCalendarDays(
                 year: year,
                 month: month,
-                records: ArchiveHomeDummyData
-                    .dummyCalendarRecordsByMonth[monthKey(year: year, month: month)] ?? []
+                records: records
             )
         )
     }
@@ -70,7 +153,7 @@ final class ArchiveViewController: BaseUIViewController {
             month -= 1
         }
 
-        loadDummyData()
+        loadArchive()
     }
 
     private func moveToNextMonth() {
@@ -83,25 +166,46 @@ final class ArchiveViewController: BaseUIViewController {
             month += 1
         }
 
-        loadDummyData()
+        loadArchive()
     }
 
-    private func route(to day: DayCellModel) {
+    private func route(to day: CalendarCellModel) {
         switch day.recordState {
         case .none:
             return
 
-        case .background, .badge:
-            guard let dateText = listDateText(from: day.activityDate) else { return }
+        case .single, .multiple:
+            guard let activityDate = day.activityDate else { return }
 
-            let listViewController = DailyRecordBottomSheetViewController(
-                model: listModel(dateText: dateText)
-            )
-            listViewController.modalPresentationStyle = .pageSheet
-            listViewController.presentationController?.delegate = self
-            showDimView()
-            present(listViewController, animated: true)
+            loadActivityList(date: activityDate)
         }
+    }
+
+    private func loadActivityList(date: String) {
+        activityListTask?.cancel()
+        activityListTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                let model = try await viewModel.fetchActivityList(date: date)
+
+                guard !Task.isCancelled else { return }
+
+                presentActivityListBottomSheet(model: model)
+            } catch {
+                guard !Task.isCancelled else { return }
+
+                RouteeLogger.error(error)
+            }
+        }
+    }
+
+    private func presentActivityListBottomSheet(model: ActivityListDateModel) {
+        let listViewController = ActivityListBottomSheetViewController(model: model)
+        listViewController.modalPresentationStyle = .pageSheet
+        listViewController.presentationController?.delegate = self
+        showDimView()
+        present(listViewController, animated: true)
     }
 
     private func showDimView() {
@@ -139,26 +243,22 @@ final class ArchiveViewController: BaseUIViewController {
         self.dimView = nil
     }
 
-    private func listDateText(from activityDate: String?) -> String? {
-        guard let activityDate else { return nil }
-
-        return activityDate.replacingOccurrences(of: "-", with: ".")
-    }
-
-    private func listModel(dateText: String) -> CalendarDateModel {
-        DailyDummyData.dummyModelsByDate[dateText] ?? .init(dateText: dateText, items: [])
-    }
-
     private func monthTitle(year: Int, month: Int) -> String {
         "\(year)년 \(month)월"
     }
 
-    private func monthKey(year: Int, month: Int) -> String {
-        String(format: "%04d-%02d", year, month)
+    private func configureMonthSelector(year: Int, month: Int) {
+        rootView.configureMonthSelector(
+            title: monthTitle(year: year, month: month),
+            canMoveToPreviousMonth: canMoveToPreviousMonth(year: year, month: month),
+            canMoveToNextMonth: canMoveToNextMonth(year: year, month: month)
+        )
     }
 
     private func canMoveToPreviousMonth(year: Int, month: Int) -> Bool {
-        monthStart(year: year, month: month) > monthStart(from: ArchiveHomeDummyData.profile.joinedDate)
+        guard let joinDate else { return false }
+
+        return monthStart(year: year, month: month) > monthStart(from: joinDate)
     }
 
     private func canMoveToNextMonth(year: Int, month: Int) -> Bool {
@@ -166,12 +266,7 @@ final class ArchiveViewController: BaseUIViewController {
     }
 
     private func monthStart(from joinedDate: String) -> Date {
-        let formatter = DateFormatter()
-        formatter.calendar = Foundation.Calendar(identifier: .gregorian)
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyy-MM-dd"
-
-        let date = formatter.date(from: joinedDate) ?? Date()
+        let date = joinedDateFormatter.date(from: joinedDate) ?? Date()
         return monthStart(from: date)
     }
 
@@ -190,7 +285,7 @@ final class ArchiveViewController: BaseUIViewController {
     }
 }
 
-    // MARK: - Extension
+// MARK: - Extension
 
 extension ArchiveViewController: UIAdaptivePresentationControllerDelegate {
 

@@ -1,5 +1,5 @@
 //
-//  DailyRecordBottomSheet.swift
+//  ActivityListBottomSheet.swift
 //  Routee-iOS
 //
 //  Created by 초긍정행운의포춘쿠키 on 7/7/26.
@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class DailyRecordBottomSheet: BaseUIView {
+final class ActivityListBottomSheet: BaseUIView {
     
     // MARK: - UI Properties
     
@@ -22,7 +22,7 @@ final class DailyRecordBottomSheet: BaseUIView {
 
     // MARK: - Properties
 
-    var onRecordChevronTap: ((DailyRecordModel) -> Void)?
+    var onRecordChevronTap: ((Int) -> Void)?
     
     // MARK: - UI Setting
     
@@ -96,30 +96,25 @@ final class DailyRecordBottomSheet: BaseUIView {
     
     // MARK: - Public Methods
     
-    func configure(with model: CalendarDateModel) {
-        dateLabel.text = model.dateText
+    func configure(with viewModel: ActivityListViewModel) {
+        dateLabel.text = viewModel.dateText
         
         recordStackView.arrangedSubviews.forEach {
             recordStackView.removeArrangedSubview($0)
             $0.removeFromSuperview()
         }
         
-        model.items.forEach { item in
-            let itemView = DailyRecord()
-            itemView.configure(with: item)
+        viewModel.rows.enumerated().forEach { index, row in
+            let itemView = ActivityList()
+            itemView.configure(with: row)
             itemView.onChevronTap = { [weak self] in
-                self?.onRecordChevronTap?(item)
+                self?.onRecordChevronTap?(index)
             }
             recordStackView.addArrangedSubview(itemView)
         }
         
-        let shouldScroll = model.items.count > 3
-        scrollView.isScrollEnabled = shouldScroll
+        scrollView.isScrollEnabled = viewModel.isScrollEnabled
         scrollView.bounces = false
         scrollView.alwaysBounceVertical = false
-    }
-
-    static func modalHeight(for itemCount: Int) -> CGFloat {
-        itemCount <= 2 ? 247 : 344
     }
 }

@@ -10,6 +10,7 @@ import Foundation
 protocol MemberRepository {
     func register(nickname: String, identityToken: String, provider: LoginPlatform) async throws
     func withdraw() async throws
+    func getProfile() async throws -> ProfileModel
 }
 
 struct DefaultMemberRepository: MemberRepository {
@@ -55,7 +56,29 @@ struct DefaultMemberRepository: MemberRepository {
         try await service.requestEmpty(endPoint)
         
         KeyType.allCases.forEach {
-                keychainService.delete($0)
-            }
+            keychainService.delete($0)
+        }
+    }
+
+    func getProfile() async throws -> ProfileModel {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let endPoint = MemberAPI.getProfile(
+            header: .withAuthTimeZone(
+                accessToken: accessToken,
+                timeZone: TimeZone.current.identifier
+            )
+        )
+
+        let response = try await service.request(
+            endPoint,
+            decodingType: ProfileResponseDTO.self
+        )
+
+        return response.toModel()
     }
 }
