@@ -1,13 +1,11 @@
 //
-//  DayCellModel.swift
+//  CalendarCellModel.swift
 //  Routee-iOS
 //
-//  Created by 초긍정행운의포춘쿠키 on 7/6/26.
-//
 
-import UIKit
+import Foundation
 
-struct DayCellModel {
+struct CalendarCellModel {
 
     enum Content {
         case empty
@@ -16,8 +14,8 @@ struct DayCellModel {
 
     enum RecordState {
         case none
-        case background
-        case badge(Int)
+        case single
+        case multiple(Int)
     }
 
     let content: Content
@@ -26,15 +24,15 @@ struct DayCellModel {
     let activityDate: String?
 }
 
-extension DayCellModel.RecordState {
+extension CalendarCellModel.RecordState {
 
     init(activityCount: Int) {
         if activityCount == 0 {
             self = .none
         } else if activityCount == 1 {
-            self = .background
+            self = .single
         } else {
-            self = .badge(min(activityCount, 9))
+            self = .multiple(min(activityCount, 9))
         }
     }
 }

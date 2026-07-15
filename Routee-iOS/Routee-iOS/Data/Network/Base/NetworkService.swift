@@ -35,10 +35,12 @@ final class DefaultNetworkService: NetworkService {
     }()
 
     private static func session(for endPoint: EndPoint) -> Session {
-        if case .withAuth = endPoint.headers {
+        switch endPoint.headers {
+        case .withAuth, .withAuthTimeZone:
             return authorizedSession
+        default:
+            return AF
         }
-        return AF
     }
 
     func request<T: Decodable & Sendable>(

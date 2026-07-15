@@ -15,7 +15,7 @@ final class TimeLineViewController: BaseUIViewController {
 
     // MARK: - Initializer
 
-    init(record: DailyRecordModel? = nil) {
+    init(record: ActivityListModel? = nil) {
         self.rootView = TimeLineView(record: record)
         super.init(nibName: nil, bundle: nil)
     }

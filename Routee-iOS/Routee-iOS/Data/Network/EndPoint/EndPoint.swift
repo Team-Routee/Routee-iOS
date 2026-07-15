@@ -50,6 +50,7 @@ extension EndPoint {
 enum HeaderType {
     case basic
     case withAuth(accessToken: String)
+    case withAuthTimeZone(accessToken: String, timeZone: String)
     case appleLoginHeader(identityToken: String, authorizationCode: String)
     case refresh(accessToken: String)
     case naverMaps
@@ -62,6 +63,12 @@ enum HeaderType {
             return [
                 "Content-Type": "application/json",
                 "Authorization": "Bearer \(accessToken)"
+            ]
+        case .withAuthTimeZone(let accessToken, let timeZone):
+            return [
+                "Content-Type": "application/json",
+                "Authorization": "Bearer \(accessToken)",
+                "Time-Zone": timeZone
             ]
         case .appleLoginHeader(let identityToken, let authorizationCode):
             return [

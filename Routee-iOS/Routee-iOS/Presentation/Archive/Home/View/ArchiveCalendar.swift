@@ -14,9 +14,9 @@ final class ArchiveCalendar: BaseUIView {
 
     // MARK: - Properties
 
-    var onSelectDay: ((DayCellModel) -> Void)?
+    var onSelectDay: ((CalendarCellModel) -> Void)?
 
-    private var days: [DayCellModel] = []
+    private var days: [CalendarCellModel] = []
 
     private let weekDayArray = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
@@ -106,50 +106,13 @@ final class ArchiveCalendar: BaseUIView {
 
     // MARK: - Public Methods
 
-    func configure(days: [DayCellModel]) {
+    func configure(days: [CalendarCellModel]) {
         self.days = days
         collectionView.reloadData()
     }
-
-    static func makeDays(
-        year: Int,
-        month: Int,
-        records: [RecordModel]
-    ) -> [DayCellModel] {
-        let recordsByDay = Dictionary(
-            uniqueKeysWithValues: records.compactMap { record -> (Int, RecordModel)? in
-                guard let dayValue = day(from: record.activityDate) else { return nil }
-                return (dayValue, record)
-            }
-        )
-
-        var days = Array(
-            repeating: DayCellModel(
-                content: .empty,
-                recordState: .none,
-                coverImageName: nil,
-                activityDate: nil
-            ),
-            count: leadingEmptyCount(year: year, month: month)
-        )
-
-        for dayValue in 1...numberOfDays(year: year, month: month) {
-            let record = recordsByDay[dayValue]
-            days.append(
-                DayCellModel(
-                    content: .day(dayValue),
-                    recordState: .init(activityCount: record?.activityCount ?? 0),
-                    coverImageName: record?.coverImageName,
-                    activityDate: record?.activityDate
-                )
-            )
-        }
-
-        return days
-    }
 }
 
-// MARK: - Extensions
+// MARK: - Extension
 
 extension ArchiveCalendar: UICollectionViewDataSource {
 
@@ -193,7 +156,7 @@ extension ArchiveCalendar: UICollectionViewDelegateFlowLayout {
             case .none:
                 return false
 
-            case .background, .badge:
+            case .single, .multiple:
                 return true
             }
         }
@@ -210,36 +173,5 @@ extension ArchiveCalendar: UICollectionViewDelegateFlowLayout {
         let spacingCount: CGFloat = 7 - 1
 
         return max(0, (availableSpacing / spacingCount) - 0.1)
-    }
-}
-
-private extension ArchiveCalendar {
-    static func day(from activityDate: String) -> Int? {
-        Int(activityDate.split(separator: "-").last ?? "")
-    }
-
-    static func leadingEmptyCount(year: Int, month: Int) -> Int {
-        var components = DateComponents()
-        components.year = year
-        components.month = month
-        components.day = 1
-
-        guard let date = Foundation.Calendar.current.date(from: components) else { return 0 }
-
-        let weekday = Foundation.Calendar.current.component(.weekday, from: date)
-        return (weekday + 5) % 7
-    }
-
-    static func numberOfDays(year: Int, month: Int) -> Int {
-        var components = DateComponents()
-        components.year = year
-        components.month = month
-
-        guard
-            let date = Foundation.Calendar.current.date(from: components),
-            let range = Foundation.Calendar.current.range(of: .day, in: .month, for: date)
-        else { return 30 }
-
-        return range.count
     }
 }

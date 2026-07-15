@@ -19,7 +19,7 @@ final class TimeLineView: BaseUIView {
         set { topNavigationBar.backButtonAction = newValue }
     }
 
-    private let record: DailyRecordModel?
+    private let record: ActivityListModel?
     private let trackPoints = TrackPoint.dummyTrackPoints()
     private let timelineImages = [
         "img_location1",
@@ -67,7 +67,7 @@ final class TimeLineView: BaseUIView {
 
     // MARK: - Initializer
 
-    init(record: DailyRecordModel? = nil) {
+    init(record: ActivityListModel? = nil) {
         self.record = record
         super.init(frame: .zero)
     }
