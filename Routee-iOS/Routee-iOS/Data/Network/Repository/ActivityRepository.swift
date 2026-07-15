@@ -11,6 +11,7 @@ protocol ActivityRepository {
     func getActivityRoute(activityId: Int64) async throws -> ActivityEditorModel
     func createActivity(activityType: String, startedAt: String) async throws -> WorkoutRecordStartModel
     func timeLinePresignedURL(activityId: Int64, fileName: String) async throws -> ImagePresignedURLModel
+    func uploadTimeLineImage(presignedURL: String, imageData: Data) async throws
 }
 
 struct DefaultActivityRepository: ActivityRepository {

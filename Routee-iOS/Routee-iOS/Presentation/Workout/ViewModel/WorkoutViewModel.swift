@@ -6,7 +6,7 @@
 //
 
 import CoreLocation
-import Foundation
+import UIKit
 
 final class WorkoutViewModel {
     var elapsedTimeDidChange: ((TimeInterval) -> Void)?
@@ -17,6 +17,7 @@ final class WorkoutViewModel {
     private(set) var maximumAltitudeInMeters: CLLocationDistance?
     private(set) var routePoints: [WorkoutRoutePoint] = []
     private(set) var photoRecords: [WorkoutPhotoRecord] = []
+    private(set) var activityId: Int64?
     
     private let reverseGeocodingRepository: ReverseGeocodingRepository
     private let activityRepository: ActivityRepository
@@ -102,8 +103,10 @@ final class WorkoutViewModel {
         return totalDistance
     }
     
-    func savePhotoRecord(_ photoRecord: WorkoutPhotoRecord) {
+    @discardableResult
+    func savePhotoRecord(_ photoRecord: WorkoutPhotoRecord) -> Int {
         photoRecords.append(photoRecord)
+        return photoRecords.count - 1
     }
     
     private func recordMaximumAltitude(at location: CLLocation) {
@@ -156,11 +159,40 @@ final class WorkoutViewModel {
     }
     
     func startRecording(activityType: String, startedAt: String) async throws -> WorkoutRecordStartModel {
-            let activity = try await activityRepository.createActivity(
-                activityType: activityType,
-                startedAt: startedAt
-            )
-        
+        let activity = try await activityRepository.createActivity(
+            activityType: activityType,
+            startedAt: startedAt
+        )
+
+        activityId = activity.activityId
         return activity
+    }
+
+    func uploadPhoto(at index: Int) async throws {
+        guard let activityId,
+              photoRecords.indices.contains(index) else {
+            throw RouteeError.noData
         }
+
+        let image = photoRecords[index].image
+        let imageData = await Task.detached(priority: .userInitiated) {
+            image.jpegData(compressionQuality: 0.8)
+        }.value
+
+        guard let imageData else {
+            throw RouteeError.noData
+        }
+
+        let fileName = "\(UUID().uuidString).jpg"
+        let presigned = try await activityRepository.timeLinePresignedURL(
+            activityId: activityId,
+            fileName: fileName
+        )
+        try await activityRepository.uploadTimeLineImage(
+            presignedURL: presigned.presignedURL,
+            imageData: imageData
+        )
+
+        photoRecords[index].objectKey = presigned.objectKey
+    }
 }

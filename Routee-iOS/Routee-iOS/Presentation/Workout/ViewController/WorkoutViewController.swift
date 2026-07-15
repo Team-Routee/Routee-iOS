@@ -430,7 +430,15 @@ extension WorkoutViewController: UIImagePickerControllerDelegate, UINavigationCo
         let routePoint = viewModel.routePoints[photoRecord.pointIndex]
         guard routePoint.pointIndex == photoRecord.pointIndex else { return }
 
-        viewModel.savePhotoRecord(photoRecord)
+        let photoIndex = viewModel.savePhotoRecord(photoRecord)
         workoutView.addPhotoMarker(photoRecord, at: routePoint.coordinate)
+
+        Task {
+            do {
+                try await viewModel.uploadPhoto(at: photoIndex)
+            } catch {
+                RouteeLogger.error(error)
+            }
+        }
     }
 }
