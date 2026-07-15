@@ -49,8 +49,8 @@ extension TrackPoints {
 }
 
 extension TimelineMarker {
-    func toModel() -> ActivityRouteMarkerModel {
-        ActivityRouteMarkerModel(
+    func toModel() -> TimeLineMarkerModel {
+        TimeLineMarkerModel(
             timelineId: timelineId,
             thumbnailUrl: thumbnailUrl,
             latitude: latitude,

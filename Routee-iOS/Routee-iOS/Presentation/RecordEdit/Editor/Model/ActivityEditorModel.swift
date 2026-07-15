@@ -11,5 +11,5 @@ struct ActivityEditorModel {
     let activityId: Int64
     let trackPoints: [TrackPoint]
     let pointIndices: [Int]
-    let timelineMarkers: [ActivityRouteMarkerModel]
+    let timelineMarkers: [TimeLineMarkerModel]
 }

@@ -7,6 +7,7 @@
 
 import UIKit
 
+import Kingfisher
 import NMapsMap
 import SnapKit
 import Then
@@ -16,17 +17,24 @@ final class TimeLineTrackMap: BaseUIView {
     // MARK: - Properties
 
     private var trackPoints: [TrackPoint]
+    private var markers: [TimeLineMarkerModel]
     private var shouldUpdateCamera = true
+    private var shouldUpdatePhotoMarkers = true
 
     // MARK: - UI Properties
 
     private let naverMapView = NMFNaverMapView()
     private let pathOverlay = NMFPath()
+    private var photoMarkers: [NMFMarker] = []
 
     // MARK: - Initializer
 
-    init(trackPoints: [TrackPoint] = []) {
+    init(
+        trackPoints: [TrackPoint] = [],
+        markers: [TimeLineMarkerModel] = []
+    ) {
         self.trackPoints = trackPoints
+        self.markers = markers
         super.init(frame: .zero)
     }
 
@@ -44,9 +52,14 @@ final class TimeLineTrackMap: BaseUIView {
 
     // MARK: - Public Methods
 
-    func updateTrackPoints(_ trackPoints: [TrackPoint]) {
+    func updateRoute(
+        trackPoints: [TrackPoint],
+        markers: [TimeLineMarkerModel]
+    ) {
         self.trackPoints = trackPoints
+        self.markers = markers
         shouldUpdateCamera = true
+        shouldUpdatePhotoMarkers = true
         setNeedsLayout()
     }
 
@@ -100,7 +113,72 @@ final class TimeLineTrackMap: BaseUIView {
         pathOverlay.path = NMGLineString(points: locations)
         pathOverlay.mapView = naverMapView.mapView
 
+        updatePhotoMarkers()
         updateCameraIfNeeded(locations)
+    }
+
+    private func updatePhotoMarkers() {
+        guard shouldUpdatePhotoMarkers else { return }
+
+        shouldUpdatePhotoMarkers = false
+        removePhotoMarkers()
+
+        markers.forEach { marker in
+            guard let coordinate = coordinate(for: marker),
+                  let url = URL(string: marker.thumbnailUrl) else { return }
+
+            addPhotoMarker(marker, imageURL: url, at: coordinate)
+        }
+    }
+
+    private func coordinate(for marker: TimeLineMarkerModel) -> NMGLatLng? {
+        NMGLatLng(lat: marker.latitude, lng: marker.longitude)
+    }
+
+    private func addPhotoMarker(
+        _ markerModel: TimeLineMarkerModel,
+        imageURL: URL,
+        at coordinate: NMGLatLng
+    ) {
+        let markerSize = CGSize(width: 42, height: 42)
+        let pointIndex = markerModel.pointIndex
+        let latitude = coordinate.lat
+        let longitude = coordinate.lng
+
+        guard pointIndex >= 0 else { return }
+
+        KingfisherManager.shared.retrieveImage(with: imageURL) { result in
+            guard case .success(let value) = result else { return }
+
+            let sourceImage = value.image
+
+            Task { [weak self] in
+                let thumbnailImage = await Task.detached(priority: .userInitiated) {
+                    sourceImage
+                        .resized(to: markerSize)
+                        .thumbnailImage(borderWidth: 3, borderColor: .mint300, cornerRadius: 12)
+                }.value
+
+                await MainActor.run { [weak self] in
+                    guard let self else { return }
+
+                    let marker = NMFMarker()
+                    marker.tag = UInt(pointIndex)
+                    marker.position = NMGLatLng(lat: latitude, lng: longitude)
+                    marker.iconImage = NMFOverlayImage(image: thumbnailImage)
+                    marker.width = markerSize.width
+                    marker.height = markerSize.height
+                    marker.anchor = CGPoint(x: 0.5, y: 0.5)
+                    marker.mapView = naverMapView.mapView
+                    photoMarkers.append(marker)
+                }
+            }
+        }
+    }
+
+    private func removePhotoMarkers() {
+        photoMarkers.forEach { $0.mapView = nil }
+        photoMarkers.removeAll()
     }
 
     private func updateCameraIfNeeded(_ locations: [NMGLatLng]) {

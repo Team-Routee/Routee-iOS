@@ -84,11 +84,11 @@ final class TimeLineViewController: BaseUIViewController {
             guard let self else { return }
 
             do {
-                let trackPoints = try await viewModel.fetchActivityRoute(activityId: activityId)
+                let model = try await viewModel.fetchActivityRoute(activityId: activityId)
 
                 guard !Task.isCancelled else { return }
 
-                rootView.configureTrackMap(trackPoints: trackPoints)
+                rootView.configureTrackMap(with: model)
             } catch {
                 guard !Task.isCancelled else { return }
 

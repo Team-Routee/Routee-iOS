@@ -15,8 +15,8 @@ struct ActivityStatisticsResponseDTO: Decodable, Sendable {
 }
 
 extension ActivityStatisticsResponseDTO {
-    func toModel() -> ActivityStatisticsModel {
-        ActivityStatisticsModel(
+    func toModel() -> TimeLineMetricModel {
+        TimeLineMetricModel(
             activityId: activityId,
             title: title,
             activityDate: activityDate,

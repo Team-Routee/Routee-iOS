@@ -1,5 +1,5 @@
 //
-//  CourseListModel.swift
+//  TimeLineCourseModel.swift
 //  Routee-iOS
 //
 //  Created by 초긍정행운의포춘쿠키 on 7/15/26.
@@ -7,18 +7,18 @@
 
 import Foundation
 
-struct CourseListModel {
+struct TimeLineCourseModel {
     let activityId: Int64
-    let courses: [CourseModel]
+    let courses: [TimeLineCourseItemModel]
 }
 
-struct CourseModel {
+struct TimeLineCourseItemModel {
     let routeId: Int64
     let name: String
     let sequence: Int
 }
 
-extension CourseListModel {
+extension TimeLineCourseModel {
     var routePoint: RoutePointModel {
         RoutePointModel(
             points: courses

@@ -20,20 +20,6 @@ final class TimeLineView: BaseUIView {
     }
 
     private let record: ActivityListModel?
-    private let timelineImages = [
-        "img_location1",
-        "img_location2",
-        "img_location3",
-        "img_location4",
-        "img_location5"
-    ]
-    private let timelineLocations = [
-        "창의문",
-        "청운대",
-        "말바위",
-        nil,
-        "창의문"
-    ]
     private var showTimelineCard: Bool {
         guard let record else { return true }
         return record.thumbnailUrl != nil
@@ -54,10 +40,7 @@ final class TimeLineView: BaseUIView {
     private let trackMap = TimeLineTrackMap()
     private let timelineTitleLabel = UILabel()
     private let timelineDateLabel = UILabel()
-    private lazy var timelineCard = TimeLineCard(
-        imageNames: timelineImages,
-        locations: timelineLocations
-    )
+    private let timelineCard = TimeLineCard(imageNames: [])
     private let myRoute = MyRoute(mode: .read)
     private let emptyStateLabel = UILabel()
 
@@ -74,14 +57,17 @@ final class TimeLineView: BaseUIView {
 
     // MARK: - Public Methods
 
-    func configureMetric(with viewModel: ActivityStatisticsMetricViewModel) {
+    func configureMetric(with viewModel: TimeLineMetricViewModel) {
         workoutMetric.updateDistance(viewModel.distance)
         workoutMetric.updateTime(viewModel.time)
         workoutMetric.updateMaximumAltitude(viewModel.altitude)
     }
 
-    func configureTrackMap(trackPoints: [TrackPoint]) {
-        trackMap.updateTrackPoints(trackPoints)
+    func configureTrackMap(with model: ActivityEditorModel) {
+        trackMap.updateRoute(
+            trackPoints: model.trackPoints,
+            markers: model.timelineMarkers
+        )
     }
 
     func configureTimeLineList(with model: TimeLineListModel) {
@@ -93,7 +79,7 @@ final class TimeLineView: BaseUIView {
         )
     }
 
-    func configureCourseList(with model: CourseListModel) {
+    func configureCourseList(with model: TimeLineCourseModel) {
         myRoute.configure(mode: .read, routePoint: model.routePoint)
     }
 

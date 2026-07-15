@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ActivityStatisticsMetricViewModel {
+struct TimeLineMetricViewModel {
     let distance: String
     let time: String
     let altitude: String
@@ -27,30 +27,29 @@ final class TimeLineViewModel {
 
     // MARK: - Public Methods
 
-    func fetchActivityStatistics(activityId: Int64) async throws -> ActivityStatisticsMetricViewModel {
+    func fetchActivityStatistics(activityId: Int64) async throws -> TimeLineMetricViewModel {
         let model = try await activityRepository.getActivityStatistics(activityId: activityId)
         return makeMetricViewModel(from: model)
     }
 
-    func fetchActivityRoute(activityId: Int64) async throws -> [TrackPoint] {
-        let model = try await activityRepository.getActivityRoute(activityId: activityId)
-        return model.trackPoints
+    func fetchActivityRoute(activityId: Int64) async throws -> ActivityEditorModel {
+        try await activityRepository.getActivityRoute(activityId: activityId)
     }
 
     func fetchTimeLineList(activityId: Int64) async throws -> TimeLineListModel {
         try await activityRepository.getActivityTimelineList(activityId: activityId)
     }
 
-    func fetchCourseList(activityId: Int64) async throws -> CourseListModel {
+    func fetchCourseList(activityId: Int64) async throws -> TimeLineCourseModel {
         try await activityRepository.getActivityCourseList(activityId: activityId)
     }
 
     // MARK: - Private Methods
 
     private func makeMetricViewModel(
-        from model: ActivityStatisticsModel
-    ) -> ActivityStatisticsMetricViewModel {
-        ActivityStatisticsMetricViewModel(
+        from model: TimeLineMetricModel
+    ) -> TimeLineMetricViewModel {
+        TimeLineMetricViewModel(
             distance: formattedDistance(meter: model.distanceMeter),
             time: formattedDuration(seconds: model.durationSec),
             altitude: "\(model.maxElevationMeter)"
