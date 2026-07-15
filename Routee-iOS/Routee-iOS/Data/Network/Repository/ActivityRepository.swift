@@ -10,6 +10,7 @@ import Foundation
 protocol ActivityRepository {
     func getActivityRoute(activityId: Int64) async throws -> ActivityEditorModel
     func getActivityStatistics(activityId: Int64) async throws -> ActivityStatisticsModel
+    func getActivityTimelineList(activityId: Int64) async throws -> TimeLineListModel
 }
 
 struct DefaultActivityRepository: ActivityRepository {
@@ -63,6 +64,26 @@ struct DefaultActivityRepository: ActivityRepository {
         let response = try await service.request(
             endPoint,
             decodingType: ActivityStatisticsResponseDTO.self
+        )
+
+        return response.toModel()
+    }
+
+    func getActivityTimelineList(activityId: Int64) async throws -> TimeLineListModel {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let endPoint = ActivityAPI.activityTimelineList(
+            header: .withAuth(accessToken: accessToken),
+            activityId: activityId
+        )
+
+        let response = try await service.request(
+            endPoint,
+            decodingType: ActivityTimelineListResponseDTO.self
         )
 
         return response.toModel()
