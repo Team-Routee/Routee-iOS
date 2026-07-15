@@ -10,6 +10,7 @@ import Foundation
 protocol ActivityRepository {
     func getActivityRoute(activityId: Int64) async throws -> ActivityEditorModel
     func createActivity(activityType: String, startedAt: String) async throws -> WorkoutRecordStartModel
+    func timeLinePresignedURL(activityId: Int64, fileName: String) async throws -> ImagePresignedURLModel
 }
 
 struct DefaultActivityRepository: ActivityRepository {
@@ -62,4 +63,23 @@ struct DefaultActivityRepository: ActivityRepository {
             let response = try await service.request(endpoint, decodingType: ActivityCreateResponseDTO.self)
             return response.toWorkoutRecordStartModel()
         }
+    
+    func timeLinePresignedURL(activityId: Int64, fileName: String) async throws -> ImagePresignedURLModel {
+        let accessToken = keychainService.read(.accessToken)
+
+        let dto = TimeLinePresignedURLRequestDTO(fileName: fileName)
+
+        let endpoint = ActivityAPI.timeLinePresignedURL(
+            header: .withAuth(accessToken: accessToken),
+            activityId: activityId,
+            requestDTO: dto
+        )
+
+        let response = try await service.request(endpoint, decodingType: TimeLinePresignedURLResponseDTO.self)
+        return response.toImagePresignedURLModel()
+    }
+
+    func uploadTimeLineImage(presignedURL: String, imageData: Data) async throws {
+        try await service.uploadData(imageData, to: presignedURL, contentType: "image/jpeg")
+    }
 }
