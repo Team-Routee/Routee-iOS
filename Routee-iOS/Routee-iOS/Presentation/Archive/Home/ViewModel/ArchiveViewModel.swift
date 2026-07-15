@@ -22,11 +22,11 @@ final class ArchiveViewModel {
     // MARK: - Public Methods
 
     func fetchArchive(year: Int, month: Int) async throws -> [ArchiveModel] {
-        try await archiveRepository.getArchive(year: year, month: month).toModel()
+        try await archiveRepository.getArchive(year: year, month: month)
     }
 
     func fetchActivityList(date: String) async throws -> ActivityListDateModel {
-        try await archiveRepository.getActivityList(date: date).toModel()
+        try await archiveRepository.getActivityList(date: date)
     }
 
     func makeMountainMapLevels(from durationMinutes: [Int]) -> [Int] {
