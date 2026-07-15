@@ -13,14 +13,36 @@ import Then
 
 final class EditorViewController: BaseUIViewController {
 
+    // MARK: - Properties
+
+    private let viewModel = EditorViewModel()
+    private let activityId: Int64
+
     // MARK: - UI Properties
 
     private let rootView = EditorView()
+
+    // MARK: - Initializer
+
+    init(activityId: Int64 = 864831286962897700) {
+        self.activityId = activityId
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError()
+    }
 
     // MARK: - Life Cycle
 
     override func loadView() {
         view = rootView
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        fetchActivityEditorData()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -30,6 +52,24 @@ final class EditorViewController: BaseUIViewController {
     }
 
     // MARK: - Private Methods
+
+    private func fetchActivityEditorData() {
+        Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                try await viewModel.fetchActivityEditorData(activityId: activityId)
+
+                guard let activityEditorModel = viewModel.activityEditorModel else { return }
+
+                await MainActor.run {
+                    rootView.configure(with: activityEditorModel)
+                }
+            } catch {
+                print(error)
+            }
+        }
+    }
 
     private func popViewController() {
         navigationController?.popViewController(animated: false)
