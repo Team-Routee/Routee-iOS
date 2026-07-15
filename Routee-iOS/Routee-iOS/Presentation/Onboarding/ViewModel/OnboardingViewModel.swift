@@ -22,6 +22,7 @@ final class OnboardingViewModel {
     func registerAndLogin(
         platform: LoginPlatform,
         identityToken: String,
+        appleUserID: String,
         nickname: String
     ) async throws {
         try await memberRepository.register(
@@ -32,7 +33,8 @@ final class OnboardingViewModel {
 
         try await authRepository.login(
             platform: platform,
-            identityToken: identityToken
+            identityToken: identityToken,
+            appleUserID: appleUserID
         )
     }
 }

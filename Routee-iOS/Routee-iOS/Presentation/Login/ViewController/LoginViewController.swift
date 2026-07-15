@@ -21,26 +21,30 @@ final class LoginViewController: BaseUIViewController {
     
     // MARK: - Private Methods
     
-    private func login(identityToken: String) {
+    private func login(identityToken: String, appleUserID: String) {
         Task { [weak self] in
             guard let self else { return }
-            
+
             do {
                 try await viewModel.login(
                     platform: .APPLE,
-                    identityToken: identityToken
+                    identityToken: identityToken,
+                    appleUserID: appleUserID
                 )
                 goToMainService()
             } catch RouteeError.notFound {
-                goToRegister(identityToken: identityToken)
+                goToRegister(identityToken: identityToken, appleUserID: appleUserID)
             } catch {
-                print("서버 로그인 실패", error)
+                RouteeLogger.error(error)
             }
         }
     }
-    
-    private func goToRegister(identityToken: String) {
-        let viewController = OnboardingViewController(identityToken: identityToken)
+
+    private func goToRegister(identityToken: String, appleUserID: String) {
+        let viewController = OnboardingViewController(
+            identityToken: identityToken,
+            appleUserID: appleUserID
+        )
         navigationController?.setViewControllers([viewController], animated: true)
     }
     
@@ -105,7 +109,7 @@ extension LoginViewController: ASAuthorizationControllerDelegate {
             print("전체 이름: \(fullName?.givenName ?? "") \(fullName?.familyName ?? "")")
             print("이메일: \(email ?? "")")
             
-            login(identityToken: identityToken)
+            login(identityToken: identityToken, appleUserID: userIdentifier)
             
         case let passwordCredential as ASPasswordCredential:
             let userIdentifier = passwordCredential.user

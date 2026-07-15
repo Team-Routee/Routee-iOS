@@ -48,7 +48,7 @@ final class WorkoutTimeLineView: BaseUIView {
     private let navigationBar = TopNavigationBar(rightTitle: "완료")
     private lazy var titleTextField = TitleTextField(title: title, showsEditIcon: true)
     private lazy var workoutMetric = WorkoutMetric(distance: distance, time: time, altitude: altitude)
-    private lazy var trackMap = TrackMap(backgroundImage: UIImage(resource: .imgNavermapMain),trackPoints: trackPoints)
+    private lazy var trackMap = TrackMap(backgroundImage: UIImage(resource: .imgNavermapMain), trackPoints: trackPoints)
     private let timeLineStackView = UIStackView()
     private let timeLineLabel = UILabel()
     private let timeLineDateLabel = UILabel()

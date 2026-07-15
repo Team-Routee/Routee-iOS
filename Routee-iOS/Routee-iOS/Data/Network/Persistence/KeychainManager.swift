@@ -11,6 +11,7 @@ import Security
 enum KeyType: String, CaseIterable {
     case accessToken
     case refreshToken
+    case appleUserID
 }
 
 enum KeyChainManager {

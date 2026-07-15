@@ -8,8 +8,8 @@
 import Foundation
 
 protocol ArchiveRepository {
-    func getArchive(year: Int, month: Int) async throws -> ActivitySummaryResponseDTO
-    func getActivityList(date: String) async throws -> ActivityListResponseDTO
+    func getArchive(year: Int, month: Int) async throws -> [ArchiveModel]
+    func getActivityList(date: String) async throws -> ActivityListDateModel
 }
 
 struct DefaultArchiveRepository: ArchiveRepository {
@@ -24,7 +24,7 @@ struct DefaultArchiveRepository: ArchiveRepository {
         self.keychainService = keychainService
     }
     
-    func getArchive(year: Int, month: Int) async throws -> ActivitySummaryResponseDTO {
+    func getArchive(year: Int, month: Int) async throws -> [ArchiveModel] {
         let accessToken = keychainService.read(.accessToken)
 
         guard !accessToken.isEmpty else {
@@ -41,13 +41,15 @@ struct DefaultArchiveRepository: ArchiveRepository {
             requestDTO: requestDTO
         )
         
-        return try await service.request(
+        let response = try await service.request(
             endpoint,
             decodingType: ActivitySummaryResponseDTO.self
         )
+
+        return response.toModel()
     }
 
-    func getActivityList(date: String) async throws -> ActivityListResponseDTO {
+    func getActivityList(date: String) async throws -> ActivityListDateModel {
         let accessToken = keychainService.read(.accessToken)
 
         guard !accessToken.isEmpty else {
@@ -63,9 +65,11 @@ struct DefaultArchiveRepository: ArchiveRepository {
             requestDTO: requestDTO
         )
 
-        return try await service.request(
+        let response = try await service.request(
             endpoint,
             decodingType: ActivityListResponseDTO.self
         )
+
+        return response.toModel()
     }
 }

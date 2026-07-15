@@ -9,10 +9,12 @@ import UIKit
 
 final class OnboardingViewController: BaseUIViewController {
     private var identityToken: String?
-    
-    init(identityToken: String?) {
+    private var appleUserID: String?
+
+    init(identityToken: String?, appleUserID: String?) {
         self.identityToken = identityToken
-        
+        self.appleUserID = appleUserID
+
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -53,7 +55,7 @@ final class OnboardingViewController: BaseUIViewController {
     
     @objc
     private func didTapStartButton() {
-        guard let identityToken else {
+        guard let identityToken, let appleUserID else {
             print("idToken이 없습니다.")
             return
         }
@@ -69,6 +71,7 @@ final class OnboardingViewController: BaseUIViewController {
                 try await viewModel.registerAndLogin(
                     platform: .APPLE,
                     identityToken: identityToken,
+                    appleUserID: appleUserID,
                     nickname: nickname
                 )
 
