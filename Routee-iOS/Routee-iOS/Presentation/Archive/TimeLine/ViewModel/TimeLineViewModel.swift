@@ -37,6 +37,10 @@ final class TimeLineViewModel {
         return model.trackPoints
     }
 
+    func fetchTimeLineList(activityId: Int64) async throws -> TimeLineListModel {
+        try await activityRepository.getActivityTimelineList(activityId: activityId)
+    }
+
     // MARK: - Private Methods
 
     private func makeMetricViewModel(
