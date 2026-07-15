@@ -17,8 +17,9 @@ final class WorkoutViewModel {
     private(set) var maximumAltitudeInMeters: CLLocationDistance?
     private(set) var routePoints: [WorkoutRoutePoint] = []
     private(set) var photoRecords: [WorkoutPhotoRecord] = []
-
+    
     private let reverseGeocodingRepository: ReverseGeocodingRepository
+    private let activityRepository: ActivityRepository
     private var lastReverseGeocodingLocation: CLLocation?
     private var lastRecordedLocation: CLLocation?
     private var totalDistance: CLLocationDistance = 0
@@ -26,14 +27,18 @@ final class WorkoutViewModel {
     private var accumulatedElapsedTime: TimeInterval = 0
     private var elapsedTimeSegmentStartedAt: Date?
     
-    init(reverseGeocodingRepository: ReverseGeocodingRepository = DefaultReverseGeocodingRepository()) {
+    init(
+        reverseGeocodingRepository: ReverseGeocodingRepository = DefaultReverseGeocodingRepository(),
+        activityRepository: ActivityRepository = DefaultActivityRepository()
+    ) {
         self.reverseGeocodingRepository = reverseGeocodingRepository
+        self.activityRepository = activityRepository
     }
-
+    
     deinit {
         elapsedTimeTimer?.invalidate()
     }
-
+    
     func startDistanceTracking() -> CLLocationDistance {
         lastRecordedLocation = nil
         totalDistance = 0
@@ -43,11 +48,11 @@ final class WorkoutViewModel {
         maximumAltitudeDidChange?(nil)
         return totalDistance
     }
-
+    
     func pauseDistanceTracking() {
         lastRecordedLocation = nil
     }
-
+    
     func startElapsedTimeTracking() {
         elapsedTimeTimer?.invalidate()
         accumulatedElapsedTime = 0
@@ -55,39 +60,39 @@ final class WorkoutViewModel {
         publishElapsedTime()
         startElapsedTimeTimer()
     }
-
+    
     func pauseElapsedTimeTracking() {
         guard let elapsedTimeSegmentStartedAt else { return }
-
+        
         accumulatedElapsedTime += Date().timeIntervalSince(elapsedTimeSegmentStartedAt)
         self.elapsedTimeSegmentStartedAt = nil
         elapsedTimeTimer?.invalidate()
         elapsedTimeTimer = nil
         publishElapsedTime()
     }
-
+    
     func resumeElapsedTimeTracking() {
         guard elapsedTimeSegmentStartedAt == nil else { return }
-
+        
         elapsedTimeSegmentStartedAt = Date()
         publishElapsedTime()
         startElapsedTimeTimer()
     }
-
+    
     func recordDistance(at location: CLLocation) -> CLLocationDistance? {
         recordMaximumAltitude(at: location)
-
+        
         guard location.horizontalAccuracy >= 0,
               location.horizontalAccuracy <= 30,
               abs(location.timestamp.timeIntervalSinceNow) <= 10 else {
             return nil
         }
-
+        
         if let lastRecordedLocation {
             guard location.timestamp > lastRecordedLocation.timestamp else { return nil }
             totalDistance += location.distance(from: lastRecordedLocation)
         }
-
+        
         let routePoint = WorkoutRoutePoint(
             pointIndex: routePoints.count,
             coordinate: location.coordinate
@@ -96,11 +101,11 @@ final class WorkoutViewModel {
         lastRecordedLocation = location
         return totalDistance
     }
-
+    
     func savePhotoRecord(_ photoRecord: WorkoutPhotoRecord) {
         photoRecords.append(photoRecord)
     }
-
+    
     private func recordMaximumAltitude(at location: CLLocation) {
         guard location.verticalAccuracy > 0,
               location.verticalAccuracy <= 30,
@@ -108,11 +113,11 @@ final class WorkoutViewModel {
               maximumAltitudeInMeters.map({ location.altitude > $0 }) ?? true else {
             return
         }
-
+        
         maximumAltitudeInMeters = location.altitude
         maximumAltitudeDidChange?(location.altitude)
     }
-
+    
     private func startElapsedTimeTimer() {
         elapsedTimeTimer?.invalidate()
         let timer = Timer(timeInterval: 1, repeats: true) { [weak self] _ in
@@ -121,17 +126,19 @@ final class WorkoutViewModel {
         elapsedTimeTimer = timer
         RunLoop.main.add(timer, forMode: .common)
     }
-
+    
     private func publishElapsedTime() {
         elapsedTimeDidChange?(currentElapsedTime)
     }
-
+    
     private var currentElapsedTime: TimeInterval {
         let activeSegmentElapsedTime = elapsedTimeSegmentStartedAt.map {
             Date().timeIntervalSince($0)
         } ?? 0
         return accumulatedElapsedTime + activeSegmentElapsedTime
     }
+    
+    // MARK: - Network
     
     func currentAddress(for location: CLLocation) async throws -> String? {
         if let lastReverseGeocodingLocation,
@@ -147,4 +154,13 @@ final class WorkoutViewModel {
         lastReverseGeocodingLocation = location
         return address
     }
+    
+    func startRecording(activityType: String, startedAt: String) async throws -> WorkoutRecordStartModel {
+            let activity = try await activityRepository.createActivity(
+                activityType: activityType,
+                startedAt: startedAt
+            )
+        
+        return activity
+        }
 }

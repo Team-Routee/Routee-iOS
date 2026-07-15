@@ -247,6 +247,15 @@ final class WorkoutViewController: BaseUIViewController {
         return self
     }
     
+    private func currentStartedAt() -> String {
+            let formatter = DateFormatter()
+            formatter.calendar = Calendar(identifier: .gregorian)
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            formatter.timeZone = .current
+            formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+            return formatter.string(from: Date())
+        }
+    
     // MARK: - Actions
     
     override func setAddTarget() {
@@ -290,6 +299,7 @@ final class WorkoutViewController: BaseUIViewController {
     @objc
     private func didTapRecordButton() {
         startRecordingRoute()
+        startRecording()
     }
     
     @objc
@@ -316,6 +326,26 @@ final class WorkoutViewController: BaseUIViewController {
     func locationButtonDidTap() {
         workoutView.focusOnUserDirection()
     }
+    
+    // MARK: - Network
+    
+    func startRecording() {
+            let startedAt = currentStartedAt()
+            workoutView.recordButton.isEnabled = false
+
+            Task {
+                do {
+                    let activity = try await viewModel.startRecording(
+                        activityType: "HIKING",
+                        startedAt: startedAt
+                    )
+                    RouteeLogger.debug("운동 기록 시작 완료 (activityId: \(activity.activityId))")
+                    startRecordingRoute()
+                } catch {
+                    RouteeLogger.error(error)
+                }
+            }
+        }
 }
 
 extension WorkoutViewController {
