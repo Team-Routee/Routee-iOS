@@ -20,7 +20,6 @@ final class TimeLineView: BaseUIView {
     }
 
     private let record: ActivityListModel?
-    private let trackPoints = TrackPoint.dummyTrackPoints()
     private let timelineImages = [
         "img_location1",
         "img_location2",
@@ -54,7 +53,7 @@ final class TimeLineView: BaseUIView {
     private let workoutMetric = WorkoutMetric(distance: "15.53", time: "03:20", altitude: "2132")
     private lazy var trackMap = TrackMap(
         backgroundImage: UIImage(resource: .imgNavermapMain),
-        trackPoints: trackPoints
+        trackPoints: []
     )
     private let timelineTitleLabel = UILabel()
     private let timelineDateLabel = UILabel()
@@ -74,6 +73,18 @@ final class TimeLineView: BaseUIView {
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    // MARK: - Public Methods
+
+    func configureMetric(with viewModel: ActivityStatisticsMetricViewModel) {
+        workoutMetric.updateDistance(viewModel.distance)
+        workoutMetric.updateTime(viewModel.time)
+        workoutMetric.updateMaximumAltitude(viewModel.altitude)
+    }
+
+    func configureTrackMap(trackPoints: [TrackPoint]) {
+        trackMap.updateTrackPoints(trackPoints)
     }
 
     // MARK: - UI Setting

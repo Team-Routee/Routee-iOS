@@ -13,9 +13,17 @@ final class TimeLineViewController: BaseUIViewController {
 
     private let rootView: TimeLineView
 
+    // MARK: - Properties
+
+    private let record: ActivityListModel?
+    private let viewModel = TimeLineViewModel()
+    private var activityStatisticsTask: Task<Void, Never>?
+    private var activityRouteTask: Task<Void, Never>?
+
     // MARK: - Initializer
 
     init(record: ActivityListModel? = nil) {
+        self.record = record
         self.rootView = TimeLineView(record: record)
         super.init(nibName: nil, bundle: nil)
     }
@@ -35,6 +43,53 @@ final class TimeLineViewController: BaseUIViewController {
     override func setView() {
         rootView.backButtonAction = { [weak self] in
             self?.dismiss(animated: true)
+        }
+
+        loadActivityStatistics()
+        loadActivityRoute()
+    }
+
+    // MARK: - Private Methods
+
+    private func loadActivityStatistics() {
+        guard let activityId = record?.activityId else { return }
+
+        activityStatisticsTask?.cancel()
+        activityStatisticsTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                let metric = try await viewModel.fetchActivityStatistics(activityId: activityId)
+
+                guard !Task.isCancelled else { return }
+
+                rootView.configureMetric(with: metric)
+            } catch {
+                guard !Task.isCancelled else { return }
+
+                RouteeLogger.error(error)
+            }
+        }
+    }
+
+    private func loadActivityRoute() {
+        guard let activityId = record?.activityId else { return }
+
+        activityRouteTask?.cancel()
+        activityRouteTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                let trackPoints = try await viewModel.fetchActivityRoute(activityId: activityId)
+
+                guard !Task.isCancelled else { return }
+
+                rootView.configureTrackMap(trackPoints: trackPoints)
+            } catch {
+                guard !Task.isCancelled else { return }
+
+                RouteeLogger.error(error)
+            }
         }
     }
 }
