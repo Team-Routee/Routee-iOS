@@ -33,7 +33,8 @@ extension ActivityRouteResponseDTO {
         ActivityEditorModel(
             activityId: activityId,
             trackPoints: trackPoints.map { $0.toModel() },
-            pointIndices: timelineMarkers.map(\.pointIndex)
+            pointIndices: timelineMarkers.map(\.pointIndex),
+            timelineMarkers: timelineMarkers.map { $0.toModel() }
         )
     }
 }
@@ -43,6 +44,18 @@ extension TrackPoints {
         TrackPoint(
             latitude: latitude,
             longitude: longitude
+        )
+    }
+}
+
+extension TimelineMarker {
+    func toModel() -> ActivityRouteMarkerModel {
+        ActivityRouteMarkerModel(
+            timelineId: timelineId,
+            thumbnailUrl: thumbnailUrl,
+            latitude: latitude,
+            longitude: longitude,
+            pointIndex: pointIndex
         )
     }
 }
