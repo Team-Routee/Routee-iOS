@@ -11,6 +11,7 @@ protocol ActivityRepository {
     func getActivityRoute(activityId: Int64) async throws -> ActivityEditorModel
     func getActivityStatistics(activityId: Int64) async throws -> ActivityStatisticsModel
     func getActivityTimelineList(activityId: Int64) async throws -> TimeLineListModel
+    func getActivityCourseList(activityId: Int64) async throws -> CourseListModel
 }
 
 struct DefaultActivityRepository: ActivityRepository {
@@ -84,6 +85,26 @@ struct DefaultActivityRepository: ActivityRepository {
         let response = try await service.request(
             endPoint,
             decodingType: ActivityTimelineListResponseDTO.self
+        )
+
+        return response.toModel()
+    }
+
+    func getActivityCourseList(activityId: Int64) async throws -> CourseListModel {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let endPoint = ActivityAPI.activityCourseList(
+            header: .withAuth(accessToken: accessToken),
+            activityId: activityId
+        )
+
+        let response = try await service.request(
+            endPoint,
+            decodingType: ActivityCourseListResponseDTO.self
         )
 
         return response.toModel()
