@@ -27,3 +27,22 @@ struct TimelineMarkerDTO: Decodable, Sendable {
     let longitude: Double
     let pointIndex: Int
 }
+
+extension ActivityRouteResponseDTO {
+    func toEditorModel() -> ActivityEditorModel {
+        ActivityEditorModel(
+            activityId: activityId,
+            trackPoints: trackPoints.map { $0.toModel() },
+            pointIndices: timelineMarkers.map(\.pointIndex)
+        )
+    }
+}
+
+extension TrackPointDTO {
+    func toModel() -> TrackPoint {
+        TrackPoint(
+            latitude: latitude,
+            longitude: longitude
+        )
+    }
+}

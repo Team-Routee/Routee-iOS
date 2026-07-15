@@ -24,7 +24,7 @@ final class EditorViewController: BaseUIViewController {
 
     // MARK: - Initializer
 
-    init(activityId: Int64 = 864831286962897700) {
+    init(activityId: Int64) {
         self.activityId = activityId
         super.init(nibName: nil, bundle: nil)
     }
@@ -42,7 +42,7 @@ final class EditorViewController: BaseUIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        fetchActivityEditorData()
+        loadActivityEditorData()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -53,7 +53,7 @@ final class EditorViewController: BaseUIViewController {
 
     // MARK: - Private Methods
 
-    private func fetchActivityEditorData() {
+    private func loadActivityEditorData() {
         Task { [weak self] in
             guard let self else { return }
 
@@ -62,11 +62,10 @@ final class EditorViewController: BaseUIViewController {
 
                 guard let activityEditorModel = viewModel.activityEditorModel else { return }
 
-                await MainActor.run {
                     rootView.configure(with: activityEditorModel)
-                }
+
             } catch {
-                print(error)
+                RouteeLogger.error(error)
             }
         }
     }
