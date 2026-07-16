@@ -17,6 +17,7 @@ enum ActivityAPI {
     case backgroundMapPresignedURL(header: HeaderType, activityId: Int64, requestDTO: BackgroundMapPresignedURLRequestDTO)
     case finishActivity(header: HeaderType, activityId: Int64, requestDTO: FinishActivityRequestDTO)
     case changeActivityStatus(header: HeaderType, activityId: Int64, requestDTO: ChangeActivityStatusRequestDTO)
+    case createCourseList(header: HeaderType, activityId: Int64, requestDTO: CreateCourseListRequestDTO)
 }
 
 extension ActivityAPI: RouteeEndPoint {
@@ -29,7 +30,8 @@ extension ActivityAPI: RouteeEndPoint {
                 .createTimeLine,
                 .backgroundMapPresignedURL,
                 .finishActivity,
-                .changeActivityStatus:
+                .changeActivityStatus,
+                .createCourseList:
             return "/api/v1/activity"
         }
     }
@@ -50,6 +52,8 @@ extension ActivityAPI: RouteeEndPoint {
             return "/\(activityId)"
         case .changeActivityStatus(_, let activityId, _):
             return "/\(activityId)/status"
+        case .createCourseList(_, let activityId, _):
+            return "/\(activityId)/route"
         }
     }
     
@@ -57,7 +61,7 @@ extension ActivityAPI: RouteeEndPoint {
         switch self {
         case .activityRoute:
             return .get
-        case .createActivity, .timeLinePresignedURL, .createTimeLine, .backgroundMapPresignedURL:
+        case .createActivity, .timeLinePresignedURL, .createTimeLine, .backgroundMapPresignedURL, .createCourseList:
             return .post
         case .finishActivity:
             return .put
@@ -74,7 +78,8 @@ extension ActivityAPI: RouteeEndPoint {
                 .createTimeLine(let header, _, _),
                 .backgroundMapPresignedURL(let header, _, _),
                 .finishActivity(let header, _, _),
-                .changeActivityStatus(let header, _, _):
+                .changeActivityStatus(let header, _, _),
+                .createCourseList(let header, _, _):
             return header
         }
     }
@@ -83,7 +88,7 @@ extension ActivityAPI: RouteeEndPoint {
         switch self {
         case .activityRoute:
             return URLEncoding.default
-        case .createActivity, .timeLinePresignedURL, .createTimeLine, .backgroundMapPresignedURL, .finishActivity, .changeActivityStatus:
+        case .createActivity, .timeLinePresignedURL, .createTimeLine, .backgroundMapPresignedURL, .finishActivity, .changeActivityStatus, .createCourseList:
             return JSONEncoding.default
         }
     }
@@ -96,7 +101,8 @@ extension ActivityAPI: RouteeEndPoint {
                 .createTimeLine,
                 .backgroundMapPresignedURL,
                 .finishActivity,
-                .changeActivityStatus:
+                .changeActivityStatus,
+                .createCourseList:
             return nil
         }
     }
@@ -116,6 +122,8 @@ extension ActivityAPI: RouteeEndPoint {
         case .finishActivity(_, _, let requestDTO):
             return requestDTO.asParameters()
         case .changeActivityStatus(_, _, let requestDTO):
+            return requestDTO.asParameters()
+        case .createCourseList(_, _, let requestDTO):
             return requestDTO.asParameters()
         }
     }
