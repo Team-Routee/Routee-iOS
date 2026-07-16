@@ -59,10 +59,15 @@ final class WorkoutTimeLineView: BaseUIView {
         self.timelineLocations = photoRecords.map(\.locationTitle)
 
         super.init(frame: .zero)
+        observeKeyboardNotifications()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK: - UI Properties
@@ -197,5 +202,65 @@ final class WorkoutTimeLineView: BaseUIView {
             $0.bottom.equalTo(safeAreaLayoutGuide).inset(28)
             $0.centerX.equalToSuperview()
         }
+    }
+
+    // MARK: - Keyboard
+
+    private func observeKeyboardNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
+    }
+
+    @objc
+    private func keyboardWillShow(_ notification: Notification) {
+        guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {
+            return
+        }
+
+        let keyboardFrameInView = convert(keyboardFrame, from: nil)
+        let bottomInset = max(0, bounds.maxY - keyboardFrameInView.minY) + 24
+
+        updateScrollViewBottomInset(bottomInset, notification: notification)
+        scrollToCurrentFirstResponder()
+    }
+
+    @objc
+    private func keyboardWillHide(_ notification: Notification) {
+        updateScrollViewBottomInset(0, notification: notification)
+    }
+
+    private func updateScrollViewBottomInset(_ bottomInset: CGFloat, notification: Notification) {
+        let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval ?? 0
+
+        UIView.animate(withDuration: duration) {
+            self.scrollView.contentInset.bottom = bottomInset
+            self.scrollView.verticalScrollIndicatorInsets.bottom = bottomInset
+        }
+    }
+
+    private func scrollToCurrentFirstResponder() {
+        guard let firstResponder = findFirstResponder(in: self) else { return }
+
+        let targetRect = firstResponder.convert(firstResponder.bounds, to: scrollView)
+        scrollView.scrollRectToVisible(targetRect.insetBy(dx: 0, dy: -24), animated: true)
+    }
+
+    private func findFirstResponder(in view: UIView) -> UIView? {
+        if view.isFirstResponder {
+            return view
+        }
+
+        return view.subviews.compactMap { findFirstResponder(in: $0) }.first
     }
 }
