@@ -153,7 +153,11 @@ final class MyRoute: BaseUIView {
     }
     
     // MARK: - Public Methods
-    
+
+    var currentPoints: [String] {
+        routePoint.points
+    }
+
     func configure(mode: RouteViewMode, routePoint: RoutePointModel) {
         self.mode = mode
         self.routePoint = routePoint

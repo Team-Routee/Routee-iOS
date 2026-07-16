@@ -14,14 +14,13 @@ final class WorkoutTimeLineView: BaseUIView {
     
     // MARK: - Properties
 
-    var backButtonAction: (() -> Void)? {
-        get { navigationBar.backButtonAction }
-        set { navigationBar.backButtonAction = newValue }
-    }
-
     var completeButtonAction: (() -> Void)? {
         get { navigationBar.rightButtonAction }
         set { navigationBar.rightButtonAction = newValue }
+    }
+
+    var routePointTitles: [String] {
+        myRoute.currentPoints
     }
     
     private let title: String
@@ -30,6 +29,7 @@ final class WorkoutTimeLineView: BaseUIView {
     private let altitude: String
     private let backgroundMapImage: UIImage?
     private let trackPoints: [TrackPoint]
+    private let photoRecords: [WorkoutPhotoRecord]
     private let timelineImages: [UIImage]
     private let timelineLocations: [String?]
 
@@ -42,8 +42,7 @@ final class WorkoutTimeLineView: BaseUIView {
         maxAltitudeInMeters: Double?,
         backgroundMapImage: UIImage?,
         trackPoints: [TrackPoint],
-        timelineImages: [UIImage],
-        timelineLocations: [String?]
+        photoRecords: [WorkoutPhotoRecord]
     ) {
         self.title = title
         self.distance = String(format: "%.2f", distanceInMeters / 1_000)
@@ -55,8 +54,9 @@ final class WorkoutTimeLineView: BaseUIView {
         self.altitude = maxAltitudeInMeters.map { String(Int($0.rounded())) } ?? "0"
         self.backgroundMapImage = backgroundMapImage
         self.trackPoints = trackPoints
-        self.timelineImages = timelineImages
-        self.timelineLocations = timelineLocations
+        self.photoRecords = photoRecords
+        self.timelineImages = photoRecords.map(\.image)
+        self.timelineLocations = photoRecords.map(\.locationTitle)
 
         super.init(frame: .zero)
     }
@@ -74,7 +74,8 @@ final class WorkoutTimeLineView: BaseUIView {
     private lazy var workoutMetric = WorkoutMetric(distance: distance, time: time, altitude: altitude)
     private lazy var trackMap = TrackMap(
         backgroundImage: backgroundMapImage ?? UIImage(resource: .imgNavermapMain),
-        trackPoints: trackPoints
+        trackPoints: trackPoints,
+        photos: photoRecords.map { TrackMap.Photo(image: $0.image, pointIndex: $0.pointIndex) }
     )
     private let timeLineStackView = UIStackView()
     private let timeLineLabel = UILabel()
@@ -106,6 +107,15 @@ final class WorkoutTimeLineView: BaseUIView {
     }
     
     override func setStyle() {
+        navigationBar.setBackButtonEnabled(false)
+        timeLineStackView.isHidden = timelineImages.isEmpty
+        timeLineCard.isHidden = timelineImages.isEmpty
+
+        let routeTitles = timelineLocations
+            .compactMap { $0 }
+            .filter { !$0.isEmpty }
+        myRoute.configure(mode: .write, routePoint: RoutePointModel(points: routeTitles))
+
         timeLineStackView.do {
             $0.axis = .vertical
             $0.spacing = 4
@@ -174,7 +184,11 @@ final class WorkoutTimeLineView: BaseUIView {
         }
         
         myRoute.snp.makeConstraints {
-            $0.top.equalTo(timeLineCard.snp.bottom).offset(61)
+            if timelineImages.isEmpty {
+                $0.top.equalTo(trackMap.snp.bottom).offset(48)
+            } else {
+                $0.top.equalTo(timeLineCard.snp.bottom).offset(61)
+            }
             $0.horizontalEdges.equalToSuperview().inset(16)
             $0.bottom.equalTo(scrollView.contentLayoutGuide).inset(140)
         }

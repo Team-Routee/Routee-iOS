@@ -9,18 +9,28 @@ import UIKit
 
 final class WorkoutTimeLineViewController: BaseUIViewController {
     private let workoutTimelineView: WorkoutTimeLineView
+    private let activityId: Int64?
+    private let activityRepository: ActivityRepository
+    private let finishRecording: () async throws -> Void
+    private var hasRequestedFinish = false
 
     // MARK: - Initializer
 
     init(
+        activityId: Int64?,
         title: String,
         distanceInMeters: Double,
         durationInSeconds: Int,
         maxAltitudeInMeters: Double?,
         backgroundMapImage: UIImage?,
         trackPoints: [TrackPoint],
-        photoRecords: [WorkoutPhotoRecord]
+        photoRecords: [WorkoutPhotoRecord],
+        finishRecording: @escaping () async throws -> Void,
+        activityRepository: ActivityRepository = DefaultActivityRepository()
     ) {
+        self.activityId = activityId
+        self.activityRepository = activityRepository
+        self.finishRecording = finishRecording
         workoutTimelineView = WorkoutTimeLineView(
             title: title,
             distanceInMeters: distanceInMeters,
@@ -28,8 +38,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
             maxAltitudeInMeters: maxAltitudeInMeters,
             backgroundMapImage: backgroundMapImage,
             trackPoints: trackPoints,
-            timelineImages: photoRecords.map(\.image),
-            timelineLocations: photoRecords.map(\.locationTitle)
+            photoRecords: photoRecords
         )
         super.init(nibName: nil, bundle: nil)
     }
@@ -43,13 +52,52 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     override func loadView() {
         view = workoutTimelineView
 
-        workoutTimelineView.backButtonAction = { [weak self] in
-            self?.navigationController?.popToRootViewController(animated: true)
+        workoutTimelineView.completeButtonAction = { [weak self] in
+            self?.completeTimeLine()
+        }
+    }
+
+    // MARK: - Network
+
+    private func completeTimeLine() {
+        Task {
+            do {
+                try await uploadCourseList()
+            } catch {
+                RouteeLogger.error(error)
+            }
+            await finishRecordingIfNeeded()
+            navigationController?.popToRootViewController(animated: true)
+        }
+    }
+
+    private func finishRecordingIfNeeded() async {
+        guard !hasRequestedFinish else { return }
+        hasRequestedFinish = true
+
+        do {
+            try await finishRecording()
+        } catch {
+            RouteeLogger.error(error)
+        }
+    }
+
+    private func uploadCourseList() async throws {
+        guard let activityId else { return }
+
+        let titles = workoutTimelineView.routePointTitles
+            .filter { !$0.isEmpty }
+
+        guard !titles.isEmpty else { return }
+
+        let routes = titles.enumerated().map { index, title in
+            RouteData(routeId: 0, name: title, sequence: index + 1)
         }
 
-        workoutTimelineView.completeButtonAction = { [weak self] in
-            self?.navigationController?.popToRootViewController(animated: true)
-        }
+        _ = try await activityRepository.createCourseList(
+            activityId: activityId,
+            requestDTO: CreateCourseListRequestDTO(routes: routes)
+        )
     }
 
     // MARK: - Actions
@@ -60,6 +108,12 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
 
     @objc
     private func didTapGoToEditButton() {
-        self.navigationController?.pushViewController(EditorViewController(), animated: true)
+        Task {
+            await finishRecordingIfNeeded()
+            navigationController?.pushViewController(
+                EditorViewController(activityId: activityId),
+                animated: true
+            )
+        }
     }
 }

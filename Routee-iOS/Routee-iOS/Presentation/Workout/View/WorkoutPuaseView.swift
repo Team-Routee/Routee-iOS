@@ -89,7 +89,7 @@ final class WorkoutPauseView: BaseUIView {
         }
         
         distanceDataLabel.do {
-            $0.text = "15.5km"
+            $0.text = "0.00km"
         }
         
         timeLabel.do {
@@ -97,7 +97,7 @@ final class WorkoutPauseView: BaseUIView {
         }
         
         timeDataLabel.do {
-            $0.text = "03h 03m"
+            $0.text = "00h 00m"
         }
         
         altitudeLabel.do {
@@ -105,7 +105,7 @@ final class WorkoutPauseView: BaseUIView {
         }
         
         altitudeDataLabel.do {
-            $0.text = "2132m"
+            $0.text = "0m"
         }
         
         restartButton.do {
@@ -171,7 +171,27 @@ final class WorkoutPauseView: BaseUIView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        
+
         backgroundGradientLayer.frame = bounds
+    }
+
+    // MARK: - Public Methods
+
+    func setFinishButtonEnabled(_ isEnabled: Bool) {
+        finishButton.isEnabled = isEnabled
+        finishButton.isUserInteractionEnabled = isEnabled
+        finishButton.alpha = isEnabled ? 1 : 0.4
+    }
+
+    func updateDistance(_ distanceInKilometers: String) {
+        distanceDataLabel.text = "\(distanceInKilometers)km"
+    }
+
+    func updateTime(_ time: String) {
+        timeDataLabel.text = time
+    }
+
+    func updateAltitude(_ altitudeInMeters: String) {
+        altitudeDataLabel.text = "\(altitudeInMeters)m"
     }
 }

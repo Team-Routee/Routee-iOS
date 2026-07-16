@@ -20,6 +20,8 @@ protocol ActivityRepository {
     func createTimeLine(activityId: Int64, requestDTO: CreateTimeLineRequestDTO) async throws
     func backgroundMapPresignedURL(activityId: Int64, requestDTO: BackgroundMapPresignedURLRequestDTO) async throws -> ImagePresignedURLModel
     func finishActivity(activityId: Int64, requestModel: WorkoutRecordFinishModel) async throws
+    func changeActivityStatus(activityId: Int64, requestDTO: ChangeActivityStatusRequestDTO) async throws -> ChangeActivityStatusResponseDTO
+    func createCourseList(activityId: Int64, requestDTO: CreateCourseListRequestDTO) async throws -> CourseListModel
 }
 
 struct DefaultActivityRepository: ActivityRepository {
@@ -260,5 +262,39 @@ struct DefaultActivityRepository: ActivityRepository {
         )
         
         return try await service.requestEmpty(endpoint)
+    }
+    
+    func changeActivityStatus(activityId: Int64, requestDTO: ChangeActivityStatusRequestDTO) async throws -> ChangeActivityStatusResponseDTO {
+        let accessToken = keychainService.read(.accessToken)
+        
+        guard !accessToken.isEmpty else {
+            throw RouteeError.forbidden
+        }
+                
+        let endpoint = ActivityAPI.changeActivityStatus(
+            header: .withAuth(accessToken: accessToken),
+            activityId: activityId,
+            requestDTO: requestDTO
+        )
+        
+        let response = try await service.request(endpoint, decodingType: ChangeActivityStatusResponseDTO.self)
+        return response
+    }
+    
+    func createCourseList(activityId: Int64, requestDTO: CreateCourseListRequestDTO) async throws -> CourseListModel {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.forbidden
+        }
+
+        let endpoint = ActivityAPI.createCourseList(
+            header: .withAuth(accessToken: accessToken),
+            activityId: activityId,
+            requestDTO: requestDTO
+        )
+
+        let response = try await service.request(endpoint, decodingType: CreateCourseListResponseDTO.self)
+        return response.toModel()
     }
 }

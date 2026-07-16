@@ -12,18 +12,28 @@ import Then
 
 final class TrackMap: BaseUIView {
 
+    struct Photo {
+        let image: UIImage
+        let pointIndex: Int
+    }
+
     private let backgroundImage: UIImage?
     private var trackPoints: [TrackPoint]
-    
+    private let photos: [Photo]
+    private let markerSize = CGSize(width: 42, height: 42)
+
     private let backgroundImageView = UIImageView()
     private let routeLayer = CAShapeLayer()
+    private var photoMarkerViews: [(imageView: UIImageView, pointIndex: Int)] = []
 
     init(
         backgroundImage: UIImage?,
-        trackPoints: [TrackPoint]
+        trackPoints: [TrackPoint],
+        photos: [Photo] = []
     ) {
         self.backgroundImage = backgroundImage
         self.trackPoints = trackPoints
+        self.photos = photos
 
         super.init(frame: .zero)
     }
@@ -35,7 +45,17 @@ final class TrackMap: BaseUIView {
     override func layoutSubviews() {
         super.layoutSubviews()
 
-        drawRoute()
+        let canvasSize = backgroundImageView.bounds.size
+
+        guard canvasSize.width > 0,
+              canvasSize.height > 0
+        else {
+            return
+        }
+
+        let canvasPoints = trackPoints.toCanvasPoints(in: canvasSize)
+        drawRoute(with: canvasPoints)
+        layoutPhotoMarkers(with: canvasPoints)
     }
 
     func updateTrackPoints(_ trackPoints: [TrackPoint]) {
@@ -62,6 +82,8 @@ final class TrackMap: BaseUIView {
         addSubview(backgroundImageView)
 
         backgroundImageView.layer.addSublayer(routeLayer)
+
+        addPhotoMarkerViews()
     }
 
     override func setLayout() {
@@ -70,17 +92,7 @@ final class TrackMap: BaseUIView {
         }
     }
 
-    private func drawRoute() {
-        let canvasSize = backgroundImageView.bounds.size
-
-        guard canvasSize.width > 0,
-              canvasSize.height > 0
-        else {
-            return
-        }
-
-        let canvasPoints = trackPoints.toCanvasPoints(in: canvasSize)
-
+    private func drawRoute(with canvasPoints: [CGPoint]) {
         guard let firstPoint = canvasPoints.first else {
             routeLayer.path = nil
             return
@@ -95,5 +107,48 @@ final class TrackMap: BaseUIView {
 
         routeLayer.frame = backgroundImageView.bounds
         routeLayer.path = path.cgPath
+    }
+
+    private func addPhotoMarkerViews() {
+        photos.forEach { photo in
+            let imageView = UIImageView()
+            imageView.isHidden = true
+            backgroundImageView.addSubview(imageView)
+            photoMarkerViews.append((imageView, photo.pointIndex))
+            setThumbnail(photo.image, on: imageView)
+        }
+    }
+
+    private func setThumbnail(_ sourceImage: UIImage, on imageView: UIImageView) {
+        let size = markerSize
+
+        Task { [weak imageView] in
+            let thumbnail = await Task.detached(priority: .userInitiated) {
+                sourceImage
+                    .resized(to: size)
+                    .thumbnailImage(borderWidth: 3, borderColor: .mint300, cornerRadius: 12)
+            }.value
+
+            imageView?.image = thumbnail
+        }
+    }
+
+    private func layoutPhotoMarkers(with canvasPoints: [CGPoint]) {
+        photoMarkerViews.forEach { imageView, pointIndex in
+            let index = pointIndex - 1
+
+            guard canvasPoints.indices.contains(index) else {
+                imageView.isHidden = true
+                return
+            }
+
+            imageView.isHidden = false
+            imageView.frame = CGRect(
+                x: canvasPoints[index].x - markerSize.width / 2,
+                y: canvasPoints[index].y - markerSize.height / 2,
+                width: markerSize.width,
+                height: markerSize.height
+            )
+        }
     }
 }

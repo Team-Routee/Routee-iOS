@@ -48,7 +48,20 @@ final class SettingViewController: BaseUIViewController {
     }
     
     private func logout() {
-        // TODO: - 로그아웃 API 및 화면 전환 연결
+        Task {
+            do {
+                try await viewModel.logout()
+
+                await MainActor.run {
+                    NotificationCenter.default.post(
+                        name: .navigateLoginViewController,
+                        object: nil
+                    )
+                }
+            } catch {
+                RouteeLogger.error(error)
+            }
+        }
     }
     
     // MARK: - Actions
