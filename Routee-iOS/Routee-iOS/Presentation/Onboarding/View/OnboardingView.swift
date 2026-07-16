@@ -17,7 +17,7 @@ final class OnboardingView: BaseUIView {
     private let backgroundImageView = RouteeEllipseBackground()
     private let settingGuideLabel = UILabel()
     private let nicknameTextField = RouteeTextField()
-    let startButton = RouteeButton(titleText: "시작하기", type: .enabled)
+    let startButton = RouteeButton(titleText: "시작하기", type: .disabled)
     
     var nickname: String {
         nicknameTextField.text ?? ""
@@ -40,6 +40,12 @@ final class OnboardingView: BaseUIView {
             nicknameTextField,
             startButton
         )
+
+        nicknameTextField.addTarget(
+            self,
+            action: #selector(nicknameDidChange),
+            for: .editingChanged
+        )
     }
     
     override func setStyle() {
@@ -57,7 +63,7 @@ final class OnboardingView: BaseUIView {
         
         settingGuideLabel.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide).inset(156)
-            $0.horizontalEdges.equalToSuperview().offset(69)
+            $0.centerX.equalToSuperview()
         }
         
         nicknameTextField.snp.makeConstraints {
@@ -69,5 +75,11 @@ final class OnboardingView: BaseUIView {
             $0.bottom.equalTo(safeAreaLayoutGuide).inset(59)
             $0.horizontalEdges.equalToSuperview().inset(16)
         }
+    }
+
+    @objc
+    private func nicknameDidChange() {
+        let nickname = nicknameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        startButton.updateType(nickname.isEmpty ? .disabled : .enabled)
     }
 }
