@@ -309,11 +309,12 @@ final class WorkoutViewController: BaseUIViewController {
             for: .touchUpInside
         )
         
-        workoutView.finishButton.addTarget(
-            self,
-            action: #selector(didTapFinishButton),
-            for: .touchUpInside
+        let finishLongPressGesture = UILongPressGestureRecognizer(
+            target: self,
+            action: #selector(didLongPressFinishButton(_:))
         )
+        finishLongPressGesture.minimumPressDuration = 1.5
+        workoutView.finishButton.addGestureRecognizer(finishLongPressGesture)
         
         workoutView.cameraOnButton.addTarget(
             self,
@@ -338,7 +339,9 @@ final class WorkoutViewController: BaseUIViewController {
     }
     
     @objc
-    private func didTapFinishButton() {
+    private func didLongPressFinishButton(_ gesture: UILongPressGestureRecognizer) {
+        guard gesture.state == .began else { return }
+
         finishRecordingRoute()
     }
     
