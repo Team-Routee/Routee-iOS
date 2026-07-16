@@ -18,6 +18,7 @@ final class WorkoutViewModel {
     private(set) var routePoints: [WorkoutRoutePoint] = []
     private(set) var photoRecords: [WorkoutPhotoRecord] = []
     private(set) var activityId: Int64?
+    private(set) var backgroundMapObjectKey: String?
     
     private let reverseGeocodingRepository: ReverseGeocodingRepository
     private let activityRepository: ActivityRepository
@@ -206,6 +207,32 @@ final class WorkoutViewModel {
         photoRecords[index].objectKey = presigned.objectKey
 
         try await createTimeLine(for: photoRecords[index], objectKey: presigned.objectKey, title: title)
+    }
+
+    func uploadBackgroundMap(image: UIImage) async throws {
+        guard let activityId else {
+            throw RouteeError.noData
+        }
+
+        let imageData = await Task.detached(priority: .userInitiated) {
+            image.jpegData(compressionQuality: 0.8)
+        }.value
+
+        guard let imageData else {
+            throw RouteeError.noData
+        }
+
+        let fileName = "\(UUID().uuidString).jpg"
+        let presigned = try await activityRepository.backgroundMapPresignedURL(
+            activityId: activityId,
+            requestDTO: BackgroundMapPresignedURLRequestDTO(fileName: fileName)
+        )
+        try await activityRepository.uploadTimeLineImage(
+            presignedURL: presigned.presignedURL,
+            imageData: imageData
+        )
+
+        backgroundMapObjectKey = presigned.objectKey
     }
 
     private func createTimeLine(for photoRecord: WorkoutPhotoRecord, objectKey: String, title: String) async throws {

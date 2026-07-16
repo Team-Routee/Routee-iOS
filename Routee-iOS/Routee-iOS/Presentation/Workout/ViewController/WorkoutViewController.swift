@@ -122,11 +122,26 @@ final class WorkoutViewController: BaseUIViewController {
     private func finishRecordingRoute() {
         guard workoutMode != .finishing else { return }
         workoutMode = .finishing
-        
+
+        let backgroundMapTask = Task {
+            guard let mapImage = await workoutView.captureBackgroundMapImage(
+                fitting: viewModel.routePoints.map(\.latLng)
+            ) else { return }
+
+            do {
+                try await viewModel.uploadBackgroundMap(image: mapImage)
+            } catch {
+                RouteeLogger.error(error)
+            }
+        }
+
         workoutView.playFinishAnimation { [weak self] in
             guard let self else { return }
 
-            navigationController?.pushViewController(WorkoutTimeLineViewController(), animated: true)
+            Task {
+                await backgroundMapTask.value
+                self.navigationController?.pushViewController(WorkoutTimeLineViewController(), animated: true)
+            }
         }
     }
     

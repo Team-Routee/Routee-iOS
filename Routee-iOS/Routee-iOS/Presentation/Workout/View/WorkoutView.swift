@@ -320,6 +320,25 @@ final class WorkoutView: BaseUIView {
         cameraUpdate.animation = .easeIn
         mapView.moveCamera(cameraUpdate)
     }
+
+    func captureBackgroundMapImage(fitting coordinates: [NMGLatLng]) async -> UIImage? {
+        guard !coordinates.isEmpty else { return nil }
+
+        hideLocationOverlay()
+        pathOverlay.mapView = nil
+        removePhotoMarkers()
+
+        let bounds = NMGLatLngBounds(latLngs: coordinates)
+        await mapView.moveCamera(NMFCameraUpdate(fit: bounds, padding: 48))
+
+        try? await Task.sleep(for: .milliseconds(800))
+
+        return await withCheckedContinuation { continuation in
+            routeeMapView.takeSnapShot { image in
+                continuation.resume(returning: image)
+            }
+        }
+    }
     
     // MARK: - Private Methods
     
@@ -335,6 +354,7 @@ extension WorkoutView {
         let isRecording = mode == .recording
         let isPaused = mode == .paused
         
+        gradiantHeaderLayer.isHidden = mode == .finishing
         routeeLogo.isHidden = !isReady
         currentLocationStackView.isHidden = !isReady
         moveToUserlocationButton.isHidden = !isReady
