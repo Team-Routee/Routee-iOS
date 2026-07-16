@@ -113,10 +113,12 @@ final class WorkoutViewController: BaseUIViewController {
     private func pauseRecordingRoute() {
         workoutMode = .paused
         viewModel.pauseDistanceTracking()
+        changeActivityStatus(to: "ACTIVITY_PAUSED")
     }
-    
+
     private func resumeRecordingRoute() {
         workoutMode = .recording
+        changeActivityStatus(to: "ACTIVITY_IN_PROGRESS")
     }
     
     private func finishRecordingRoute() {
@@ -348,7 +350,17 @@ final class WorkoutViewController: BaseUIViewController {
     }
     
     // MARK: - Network
-    
+
+    private func changeActivityStatus(to status: String) {
+        Task {
+            do {
+                try await viewModel.changeActivityStatus(status)
+            } catch {
+                RouteeLogger.error(error)
+            }
+        }
+    }
+
     private func startRecording() {
         guard workoutMode == .ready, workoutView.recordButton.isEnabled else { return }
 

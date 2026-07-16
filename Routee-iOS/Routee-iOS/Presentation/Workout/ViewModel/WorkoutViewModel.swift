@@ -183,6 +183,17 @@ final class WorkoutViewModel {
         return activity
     }
 
+    func changeActivityStatus(_ status: String) async throws {
+        guard let activityId else {
+            throw RouteeError.noData
+        }
+
+        _ = try await activityRepository.changeActivityStatus(
+            activityId: activityId,
+            requestDTO: ChangeActivityStatusRequestDTO(status: status)
+        )
+    }
+
     func finishRecording() async throws {
         guard let activityId,
               let backgroundMapObjectKey,
