@@ -270,19 +270,23 @@ final class WorkoutView: BaseUIView {
 
     func updateDistance(_ distanceInMeters: CLLocationDistance) {
         let distanceInKilometers = distanceInMeters / 1_000
-        workoutMetric.updateDistance(String(format: "%.2f", distanceInKilometers))
+        let formattedDistance = String(format: "%.2f", distanceInKilometers)
+        workoutMetric.updateDistance(formattedDistance)
+        workoutPauseView.updateDistance(formattedDistance)
     }
 
     func updateElapsedTime(_ elapsedTime: TimeInterval) {
         let totalSeconds = max(0, Int(elapsedTime))
         let hours = totalSeconds / 3_600
         let minutes = (totalSeconds % 3_600) / 60
-        let formattedTime = String(format: "%02d:%02d", hours, minutes)
-        workoutMetric.updateTime(formattedTime)
+        workoutMetric.updateTime(String(format: "%02d:%02d", hours, minutes))
+        workoutPauseView.updateTime(String(format: "%02dh %02dm", hours, minutes))
     }
 
     func updateMaximumAltitude(_ altitudeInMeters: CLLocationDistance?) {
-        workoutMetric.updateMaximumAltitude(altitudeInMeters.map { String(Int($0.rounded())) } ?? "0")
+        let formattedAltitude = altitudeInMeters.map { String(Int($0.rounded())) } ?? "0"
+        workoutMetric.updateMaximumAltitude(formattedAltitude)
+        workoutPauseView.updateAltitude(formattedAltitude)
     }
     
     func updateCurrentLocationAddress(_ address: String) {
