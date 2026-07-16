@@ -50,6 +50,7 @@ final class WorkoutRecordCell: UICollectionViewCell {
         
         editButtonAction = nil
         workoutRecordThumbnail.configure(imageNames: [])
+        workoutRecordThumbnail.configure(imageURLs: [])
     }
     
     // MARK: - UI Setting
@@ -102,6 +103,15 @@ final class WorkoutRecordCell: UICollectionViewCell {
         titleLabel.text = workout.title
         dateLabel.text = formatter.string(from: workout.date)
         workoutRecordThumbnail.configure(imageNames: workout.imageNames)
+        workoutRecordThumbnail.editButtonAction = { [weak self] in
+            self?.editButtonAction?()
+        }
+    }
+
+    func configure(with workout: WorkoutListModel) {
+        titleLabel.text = workout.title
+        dateLabel.text = workout.activityDate.replacingOccurrences(of: "-", with: ".") + "."
+        workoutRecordThumbnail.configure(imageURLs: workout.timelineImageUrls)
         workoutRecordThumbnail.editButtonAction = { [weak self] in
             self?.editButtonAction?()
         }

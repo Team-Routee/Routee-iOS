@@ -7,6 +7,7 @@
 
 import UIKit
 
+import Kingfisher
 import SnapKit
 import Then
 
@@ -154,6 +155,62 @@ final class TimeLineCard: BaseUIView {
             context.cgContext.fillEllipse(in: CGRect(x: 0, y: 0, width: diameter, height: diameter))
         }
         return image.withRenderingMode(.alwaysTemplate)
+    }
+
+    func configure(imageUrls: [String], locations: [String?]? = nil) {
+        imageViews.forEach { $0.kf.cancelDownloadTask() }
+        imageStackView.arrangedSubviews.forEach {
+            imageStackView.removeArrangedSubview($0)
+            $0.removeFromSuperview()
+        }
+
+        imageContainerViews.removeAll()
+        imageViews.removeAll()
+        locationTags.removeAll()
+        imageCount = imageUrls.count
+
+        imageUrls.enumerated().forEach { index, imageUrl in
+            let imageContainerView = UIView()
+            let imageView = UIImageView()
+            imageView.contentMode = .scaleAspectFill
+            imageView.clipsToBounds = true
+
+            if let url = URL(string: imageUrl) {
+                imageView.kf.setImage(
+                    with: url,
+                    placeholder: UIImage(named: "img_location1")
+                )
+            }
+
+            imageContainerView.addSubview(imageView)
+            imageStackView.addArrangedSubview(imageContainerView)
+            imageContainerViews.append(imageContainerView)
+            imageViews.append(imageView)
+
+            imageContainerView.snp.makeConstraints {
+                $0.width.equalTo(imageScrollView.frameLayoutGuide)
+            }
+
+            imageView.snp.makeConstraints {
+                $0.edges.equalToSuperview()
+            }
+
+            guard let locations,
+                  locations.indices.contains(index),
+                  let location = locations[index] else { return }
+
+            let locationTag = LocationTag(title: location)
+            imageContainerView.addSubview(locationTag)
+            locationTags.append(locationTag)
+
+            locationTag.snp.makeConstraints {
+                $0.top.leading.equalToSuperview().inset(12)
+            }
+        }
+
+        pageControl.numberOfPages = min(imageCount, 5)
+        pageControl.currentPage = 0
+        imageScrollView.setContentOffset(.zero, animated: false)
     }
 }
 

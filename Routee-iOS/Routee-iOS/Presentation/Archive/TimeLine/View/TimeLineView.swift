@@ -20,21 +20,6 @@ final class TimeLineView: BaseUIView {
     }
 
     private let record: ActivityListModel?
-    private let trackPoints = TrackPoint.dummyTrackPoints()
-    private let timelineImages = [
-        "img_location1",
-        "img_location2",
-        "img_location3",
-        "img_location4",
-        "img_location5"
-    ]
-    private let timelineLocations = [
-        "창의문",
-        "청운대",
-        "말바위",
-        nil,
-        "창의문"
-    ]
     private var showTimelineCard: Bool {
         guard let record else { return true }
         return record.thumbnailUrl != nil
@@ -52,16 +37,10 @@ final class TimeLineView: BaseUIView {
         showsEditIcon: false
     )
     private let workoutMetric = WorkoutMetric(distance: "15.53", time: "03:20", altitude: "2132")
-    private lazy var trackMap = TrackMap(
-        backgroundImage: UIImage(resource: .imgNavermapMain),
-        trackPoints: trackPoints
-    )
+    private let trackMap = TimeLineTrackMap()
     private let timelineTitleLabel = UILabel()
     private let timelineDateLabel = UILabel()
-    private lazy var timelineCard = TimeLineCard(
-        imageNames: timelineImages,
-        locations: timelineLocations
-    )
+    private let timelineCard = TimeLineCard(imageNames: [])
     private let myRoute = MyRoute(mode: .read)
     private let emptyStateLabel = UILabel()
 
@@ -74,6 +53,34 @@ final class TimeLineView: BaseUIView {
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    // MARK: - Public Methods
+
+    func configureMetric(with viewModel: TimeLineMetricViewModel) {
+        workoutMetric.updateDistance(viewModel.distance)
+        workoutMetric.updateTime(viewModel.time)
+        workoutMetric.updateMaximumAltitude(viewModel.altitude)
+    }
+
+    func configureTrackMap(with model: ActivityEditorModel) {
+        trackMap.updateRoute(
+            trackPoints: model.trackPoints,
+            markers: model.timelineMarkers
+        )
+    }
+
+    func configureTimeLineList(with model: TimeLineData) {
+        guard showTimelineCard else { return }
+
+        timelineCard.configure(
+            imageUrls: model.imageUrls,
+            locations: model.locations
+        )
+    }
+
+    func configureCourseList(with model: CourseData) {
+        myRoute.configure(mode: .read, routePoint: model.routePoint)
     }
 
     // MARK: - UI Setting
