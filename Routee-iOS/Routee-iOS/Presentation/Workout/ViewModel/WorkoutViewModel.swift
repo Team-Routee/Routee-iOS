@@ -96,7 +96,8 @@ final class WorkoutViewModel {
         
         let routePoint = WorkoutRoutePoint(
             pointIndex: routePoints.count,
-            coordinate: location.coordinate
+            coordinate: location.coordinate,
+            altitude: location.altitude
         )
         routePoints.append(routePoint)
         lastRecordedLocation = location
@@ -194,5 +195,42 @@ final class WorkoutViewModel {
         )
 
         photoRecords[index].objectKey = presigned.objectKey
+
+        try await createTimeLine(for: photoRecords[index], objectKey: presigned.objectKey)
     }
+
+    private func createTimeLine(for photoRecord: WorkoutPhotoRecord, objectKey: String) async throws {
+        guard let activityId,
+              routePoints.indices.contains(photoRecord.pointIndex) else {
+            throw RouteeError.noData
+        }
+
+        let routePoint = routePoints[photoRecord.pointIndex]
+        let timeLine = TimeLineRecordModel(
+            title: "",
+            imageObjectKey: objectKey,
+            createdAt: Self.timeLineDateFormatter.string(from: photoRecord.createdAt),
+            trackPointIndex: photoRecord.pointIndex,
+            locations: [
+                TimeLineRecordModel.Location(
+                    latitude: routePoint.coordinate.latitude,
+                    longitude: routePoint.coordinate.longitude,
+                    elevation: Int(routePoint.altitude),
+                    pointIndex: routePoint.pointIndex
+                )
+            ],
+            status: "ACTIVE"
+        )
+
+        try await activityRepository.createTimeLine(activityId: activityId, timeLine: timeLine)
+    }
+
+    private static let timeLineDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = .current
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        return formatter
+    }()
 }
