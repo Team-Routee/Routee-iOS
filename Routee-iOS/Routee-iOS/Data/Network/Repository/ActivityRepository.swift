@@ -12,6 +12,7 @@ protocol ActivityRepository {
     func createActivity(activityType: String, startedAt: String) async throws -> WorkoutRecordStartModel
     func timeLinePresignedURL(activityId: Int64, fileName: String) async throws -> ImagePresignedURLModel
     func uploadTimeLineImage(presignedURL: String, imageData: Data) async throws
+    func createTimeLine(activityId: Int64, timeLine: TimeLineRecordModel) async throws
 }
 
 struct DefaultActivityRepository: ActivityRepository {
@@ -51,6 +52,10 @@ struct DefaultActivityRepository: ActivityRepository {
         async throws -> WorkoutRecordStartModel {
             let accessToken = keychainService.read(.accessToken)
             
+            guard !accessToken.isEmpty else {
+                throw RouteeError.forbidden
+            }
+            
             let dto = ActivityCreateRequestDTO(activityType: activityType, startedAt: startedAt)
             
             let endpoint = ActivityAPI.createActivity(
@@ -67,6 +72,10 @@ struct DefaultActivityRepository: ActivityRepository {
     
     func timeLinePresignedURL(activityId: Int64, fileName: String) async throws -> ImagePresignedURLModel {
         let accessToken = keychainService.read(.accessToken)
+        
+        guard !accessToken.isEmpty else {
+            throw RouteeError.forbidden
+        }
 
         let dto = TimeLinePresignedURLRequestDTO(fileName: fileName)
 
@@ -82,5 +91,23 @@ struct DefaultActivityRepository: ActivityRepository {
 
     func uploadTimeLineImage(presignedURL: String, imageData: Data) async throws {
         try await service.presignedURLUploadData(imageData, to: presignedURL, contentType: "image/jpeg")
+    }
+    
+    func createTimeLine(activityId: Int64, timeLine: TimeLineRecordModel) async throws {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.forbidden
+        }
+
+        let dto = CreateTimeLineRequestDTO(model: timeLine)
+
+        let endpoint = ActivityAPI.createTimeLine(
+            header: .withAuthTimeZone(accessToken: accessToken, timeZone: TimeZone.current.identifier),
+            activityId: activityId,
+            requestDTO: dto
+        )
+
+        try await service.requestEmpty(endpoint)
     }
 }
