@@ -50,6 +50,7 @@ final class MyRouteRow: BaseUIView {
             $0.borderStyle = .none
             $0.clearButtonMode = .never
             $0.returnKeyType = .done
+            $0.delegate = self
             $0.attributedPlaceholder = NSAttributedString(
                 string: "지점을 입력해주세요",
                 attributes: [.foregroundColor: UIColor.grey_300]
@@ -133,5 +134,13 @@ final class MyRouteRow: BaseUIView {
     @objc
     private func removeButtonDidTap() {
         onRemoveTap?()
+    }
+}
+
+extension MyRouteRow: UITextFieldDelegate {
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 }
