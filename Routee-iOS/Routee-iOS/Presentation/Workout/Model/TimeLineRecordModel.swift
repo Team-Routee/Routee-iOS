@@ -12,7 +12,7 @@ struct TimeLineRecordModel {
     let imageObjectKey: String
     let createdAt: String
     let trackPointIndex: Int
-    let locations: [Location]
+    let location: Location
     let status: String
 
     struct Location {
@@ -30,14 +30,12 @@ extension TimeLineRecordModel {
             timelineImageObjectKey: imageObjectKey,
             createdAt: createdAt,
             trackPointIndex: trackPointIndex,
-            location: locations.map {
-                LocationData(
-                    latitude: $0.latitude,
-                    longitude: $0.longitude,
-                    elevation: $0.elevation,
-                    pointIndex: $0.pointIndex
-                )
-            },
+            location: LocationData(
+                latitude: location.latitude,
+                longitude: location.longitude,
+                elevation: location.elevation,
+                pointIndex: location.pointIndex
+            ),
             status: status
         )
     }

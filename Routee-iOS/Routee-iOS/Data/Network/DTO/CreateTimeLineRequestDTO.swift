@@ -12,7 +12,7 @@ struct CreateTimeLineRequestDTO: Encodable {
     let timelineImageObjectKey: String
     let createdAt: String
     let trackPointIndex: Int
-    let location: [LocationData]
+    let location: LocationData
     let status: String
 }
 

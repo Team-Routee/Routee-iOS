@@ -95,7 +95,7 @@ final class WorkoutViewModel {
         }
         
         let routePoint = WorkoutRoutePoint(
-            pointIndex: routePoints.count,
+            pointIndex: routePoints.count + 1,
             coordinate: location.coordinate,
             altitude: location.altitude
         )
@@ -108,6 +108,15 @@ final class WorkoutViewModel {
     func savePhotoRecord(_ photoRecord: WorkoutPhotoRecord) -> Int {
         photoRecords.append(photoRecord)
         return photoRecords.count - 1
+    }
+
+    func routePoint(matching pointIndex: Int) -> WorkoutRoutePoint? {
+        let arrayIndex = pointIndex - 1
+        guard routePoints.indices.contains(arrayIndex),
+              routePoints[arrayIndex].pointIndex == pointIndex else {
+            return nil
+        }
+        return routePoints[arrayIndex]
     }
     
     private func recordMaximumAltitude(at location: CLLocation) {
@@ -201,25 +210,21 @@ final class WorkoutViewModel {
 
     private func createTimeLine(for photoRecord: WorkoutPhotoRecord, objectKey: String, title: String) async throws {
         guard let activityId,
-              routePoints.indices.contains(photoRecord.pointIndex) else {
+              let routePoint = routePoint(matching: photoRecord.pointIndex) else {
             throw RouteeError.noData
         }
-
-        let routePoint = routePoints[photoRecord.pointIndex]
         let timeLine = TimeLineRecordModel(
             title: title,
             imageObjectKey: objectKey,
             createdAt: Self.timeLineDateFormatter.string(from: photoRecord.createdAt),
             trackPointIndex: photoRecord.pointIndex,
-            locations: [
-                TimeLineRecordModel.Location(
-                    latitude: routePoint.coordinate.latitude,
-                    longitude: routePoint.coordinate.longitude,
-                    elevation: Int(routePoint.altitude),
-                    pointIndex: routePoint.pointIndex
-                )
-            ],
-            status: "ACTIVE"
+            location: TimeLineRecordModel.Location(
+                latitude: routePoint.coordinate.latitude,
+                longitude: routePoint.coordinate.longitude,
+                elevation: Int(routePoint.altitude),
+                pointIndex: routePoint.pointIndex
+            ),
+            status: "SUCCESSFUL_CREATED"
         )
 
         try await activityRepository.createTimeLine(activityId: activityId, requestDTO: timeLine.toDTO())
