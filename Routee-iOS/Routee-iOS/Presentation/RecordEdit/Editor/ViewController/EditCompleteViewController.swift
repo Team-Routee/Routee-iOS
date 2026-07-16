@@ -48,25 +48,18 @@ final class EditCompleteViewController: BaseUIViewController {
         navigationController?.popViewController(animated: false)
     }
 
-    private func popToRecordEdit() {
-        if let recordEditViewController = navigationController?
-            .viewControllers
-            .first(where: { $0 is RecordEditViewController }) {
-            navigationController?.popToViewController(recordEditViewController, animated: false)
-            return
-        }
-
+    private func navigateToWorkout() {
         guard let tabBarController = tabBarController as? TabBarViewController,
               let viewControllers = tabBarController.viewControllers,
-              let recordEditNavigationController = viewControllers[1] as? UINavigationController
+              let workoutNavigationController = viewControllers.first as? UINavigationController
         else {
-            navigationController?.popViewController(animated: false)
+            navigationController?.popToRootViewController(animated: false)
             return
         }
 
-        tabBarController.selectTab(index: 1)
-        recordEditNavigationController.popToRootViewController(animated: false)
         navigationController?.popToRootViewController(animated: false)
+        workoutNavigationController.popToRootViewController(animated: false)
+        tabBarController.selectTab(index: 0)
     }
 
     private func saveImageToPhotoLibrary() {
@@ -111,7 +104,7 @@ final class EditCompleteViewController: BaseUIViewController {
         }
 
         rootView.topNavigationBar.rightButtonAction = { [weak self] in
-            self?.popToRecordEdit()
+            self?.navigateToWorkout()
         }
 
         rootView.setDownloadButtonAction { [weak self] in
