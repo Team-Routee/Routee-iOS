@@ -195,7 +195,7 @@ final class WorkoutViewModel {
         )
     }
 
-    func finishRecording() async throws {
+    func finishRecording(title: String) async throws {
         guard let activityId,
               let backgroundMapImageURL,
               let coverImageObjectKey,
@@ -204,7 +204,7 @@ final class WorkoutViewModel {
         }
 
         let finishModel = WorkoutRecordFinishModel(
-            title: activityTitle ?? "",
+            title: title,
             distance: Int(totalDistance),
             durationSec: elapsedTimeInSeconds,
             maxAltitude: Int(maximumAltitudeInMeters ?? 0),

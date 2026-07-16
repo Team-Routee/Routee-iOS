@@ -160,8 +160,8 @@ final class WorkoutViewController: BaseUIViewController {
                 TrackPoint(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude)
             },
             photoRecords: viewModel.photoRecords,
-            finishRecording: { [viewModel] in
-                try await viewModel.finishRecording()
+            finishRecording: { [viewModel] title in
+                try await viewModel.finishRecording(title: title)
             }
         )
         navigationController?.pushViewController(viewController, animated: true)

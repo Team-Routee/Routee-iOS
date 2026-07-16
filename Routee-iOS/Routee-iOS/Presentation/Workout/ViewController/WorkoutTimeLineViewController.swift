@@ -11,7 +11,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     private let workoutTimelineView: WorkoutTimeLineView
     private let activityId: Int64?
     private let activityRepository: ActivityRepository
-    private let finishRecording: () async throws -> Void
+    private let finishRecording: (String) async throws -> Void
     private var hasRequestedFinish = false
 
     // MARK: - Initializer
@@ -25,7 +25,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
         backgroundMapImage: UIImage?,
         trackPoints: [TrackPoint],
         photoRecords: [WorkoutPhotoRecord],
-        finishRecording: @escaping () async throws -> Void,
+        finishRecording: @escaping (String) async throws -> Void,
         activityRepository: ActivityRepository = DefaultActivityRepository()
     ) {
         self.activityId = activityId
@@ -76,7 +76,8 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
         hasRequestedFinish = true
 
         do {
-            try await finishRecording()
+            workoutTimelineView.endEditing(true)
+            try await finishRecording(workoutTimelineView.activityTitle)
         } catch {
             RouteeLogger.error(error)
         }

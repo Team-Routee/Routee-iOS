@@ -22,6 +22,10 @@ final class WorkoutTimeLineView: BaseUIView {
     var routePointTitles: [String] {
         myRoute.currentPoints
     }
+
+    var activityTitle: String {
+        titleTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+    }
     
     private let title: String
     private let distance: String
