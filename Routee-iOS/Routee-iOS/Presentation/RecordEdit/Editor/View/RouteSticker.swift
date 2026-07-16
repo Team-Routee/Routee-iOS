@@ -5,16 +5,15 @@
 //  Created by 김세령 on 7/11/26.
 //
 
-import UIKit
-
 import SnapKit
 import Then
+import UIKit
 
 final class RouteSticker: BaseUIView {
     
     // MARK: - Properties
     
-    private var routeTitles = RouteStickerDummyData.routeTitles
+    private var routeTitles: [String] = []
     private var currentColor: UIColor = .staticWhite
     
     // MARK: - UI Properties

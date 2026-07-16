@@ -6,10 +6,9 @@
 //
 
 import PhotosUI
-import UIKit
-
 import SnapKit
 import Then
+import UIKit
 
 final class EditorViewController: BaseUIViewController {
 

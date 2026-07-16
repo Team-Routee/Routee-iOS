@@ -5,10 +5,9 @@
 //  Created by 김세령 on 7/9/26.
 //
 
-import UIKit
-
 import SnapKit
 import Then
+import UIKit
 
 final class StickerSelector: BaseUIView {
 
