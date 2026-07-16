@@ -132,6 +132,7 @@ final class WorkoutViewController: BaseUIViewController {
 
             do {
                 try await viewModel.uploadBackgroundMap(image: mapImage)
+                try await viewModel.uploadCourseList()
                 try await viewModel.finishRecording()
             } catch {
                 RouteeLogger.error(error)

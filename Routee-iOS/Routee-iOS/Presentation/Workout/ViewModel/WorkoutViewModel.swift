@@ -222,6 +222,27 @@ final class WorkoutViewModel {
         try await activityRepository.finishActivity(activityId: activityId, requestModel: finishModel)
     }
 
+    func uploadCourseList() async throws {
+        guard let activityId else {
+            throw RouteeError.noData
+        }
+
+        let locationTitles = photoRecords
+            .compactMap(\.locationTitle)
+            .filter { !$0.isEmpty }
+
+        guard !locationTitles.isEmpty else { return }
+
+        let routes = locationTitles.enumerated().map { index, title in
+            RouteData(routeId: 0, name: title, sequence: index + 1)
+        }
+
+        _ = try await activityRepository.createCourseList(
+            activityId: activityId,
+            requestDTO: CreateCourseListRequestDTO(routes: routes)
+        )
+    }
+
     func uploadPhoto(at index: Int) async throws {
         guard let activityId,
               photoRecords.indices.contains(index) else {
