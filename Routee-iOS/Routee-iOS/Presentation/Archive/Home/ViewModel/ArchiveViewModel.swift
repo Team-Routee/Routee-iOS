@@ -64,7 +64,7 @@ final class ArchiveViewModel {
             repeating: CalendarCellModel(
                 content: .empty,
                 recordState: .none,
-                coverImageName: nil,
+                coverImageUrl: nil,
                 activityDate: nil
             ),
             count: Self.leadingEmptyCount(year: year, month: month)
@@ -76,7 +76,7 @@ final class ArchiveViewModel {
                 CalendarCellModel(
                     content: .day(dayValue),
                     recordState: .init(activityCount: record?.activityCount ?? 0),
-                    coverImageName: record?.coverImageUrl,
+                    coverImageUrl: record?.coverImageUrl,
                     activityDate: record?.activityDate
                 )
             )

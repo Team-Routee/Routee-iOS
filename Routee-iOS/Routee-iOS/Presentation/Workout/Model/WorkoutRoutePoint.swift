@@ -12,6 +12,7 @@ import NMapsMap
 struct WorkoutRoutePoint {
     let pointIndex: Int
     let coordinate: CLLocationCoordinate2D
+    let altitude: CLLocationDistance
 
     var latLng: NMGLatLng {
         NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)

@@ -16,6 +16,10 @@ final class ActivityList: BaseUIView {
     private let thumbnailImageView = UIImageView()
     private let titleLabel = UILabel()
     private let chevronIcon = UIButton(type: .custom)
+    private lazy var tapGestureRecognizer = UITapGestureRecognizer(
+        target: self,
+        action: #selector(activityListDidTap)
+    )
 
     // MARK: - Properties
 
@@ -27,6 +31,8 @@ final class ActivityList: BaseUIView {
         backgroundColor = .white_10
         layer.cornerRadius = .r12
         layer.masksToBounds = true
+        isUserInteractionEnabled = true
+        addGestureRecognizer(tapGestureRecognizer)
 
         thumbnailImageView.do {
             $0.contentMode = .scaleAspectFill
@@ -43,7 +49,7 @@ final class ActivityList: BaseUIView {
         chevronIcon.do {
             $0.setImage(.icChevronRightSmGrey, for: .normal)
             $0.setImage(.icChevronRightSmGrey, for: .highlighted)
-            $0.addTarget(self, action: #selector(chevronIconDidTap), for: .touchUpInside)
+            $0.isUserInteractionEnabled = false
         }
     }
 
@@ -96,7 +102,7 @@ final class ActivityList: BaseUIView {
     }
 
     @objc
-    private func chevronIconDidTap() {
+    private func activityListDidTap() {
         onChevronTap?()
     }
 }

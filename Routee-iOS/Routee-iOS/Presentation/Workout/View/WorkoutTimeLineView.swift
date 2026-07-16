@@ -24,22 +24,46 @@ final class WorkoutTimeLineView: BaseUIView {
         set { navigationBar.rightButtonAction = newValue }
     }
     
-    private let title = "2026.07.09 기록"
-    private let distance = "15.53"
-    private let time = "03:20"
-    private let altitude = "2132"
-    var trackPoints: [TrackPoint] = TrackPoint.dummyTrackPoints()
-    var timelineImages: [String] = [
-        "img_location1", "img_location2", "img_location3", "img_location4", "img_location5", "img_location6"
-    ]
-    private let timelineLocations = [
-        "창의문",
-        "청운대",
-        "말바위",
-        nil,
-        "창의문",
-        "창의문"
-    ]
+    private let title: String
+    private let distance: String
+    private let time: String
+    private let altitude: String
+    private let backgroundMapImage: UIImage?
+    private let trackPoints: [TrackPoint]
+    private let timelineImages: [UIImage]
+    private let timelineLocations: [String?]
+
+    // MARK: - Initializer
+
+    init(
+        title: String,
+        distanceInMeters: Double,
+        durationInSeconds: Int,
+        maxAltitudeInMeters: Double?,
+        backgroundMapImage: UIImage?,
+        trackPoints: [TrackPoint],
+        timelineImages: [UIImage],
+        timelineLocations: [String?]
+    ) {
+        self.title = title
+        self.distance = String(format: "%.2f", distanceInMeters / 1_000)
+
+        let hours = durationInSeconds / 3_600
+        let minutes = (durationInSeconds % 3_600) / 60
+        self.time = String(format: "%02d:%02d", hours, minutes)
+
+        self.altitude = maxAltitudeInMeters.map { String(Int($0.rounded())) } ?? "0"
+        self.backgroundMapImage = backgroundMapImage
+        self.trackPoints = trackPoints
+        self.timelineImages = timelineImages
+        self.timelineLocations = timelineLocations
+
+        super.init(frame: .zero)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: - UI Properties
     
@@ -48,11 +72,14 @@ final class WorkoutTimeLineView: BaseUIView {
     private let navigationBar = TopNavigationBar(rightTitle: "완료")
     private lazy var titleTextField = TitleTextField(title: title, showsEditIcon: true)
     private lazy var workoutMetric = WorkoutMetric(distance: distance, time: time, altitude: altitude)
-    private lazy var trackMap = TrackMap(backgroundImage: UIImage(resource: .imgNavermapMain), trackPoints: trackPoints)
+    private lazy var trackMap = TrackMap(
+        backgroundImage: backgroundMapImage ?? UIImage(resource: .imgNavermapMain),
+        trackPoints: trackPoints
+    )
     private let timeLineStackView = UIStackView()
     private let timeLineLabel = UILabel()
     private let timeLineDateLabel = UILabel()
-    private lazy var timeLineCard = TimeLineCard(imageNames: timelineImages, locations: timelineLocations)
+    private lazy var timeLineCard = TimeLineCard(images: timelineImages, locations: timelineLocations)
     private let myRoute = MyRoute(mode: .write)
     lazy var goToEditButton = RouteeButton(titleText: "기록 편집 바로가기", type: .enabled)
     
@@ -91,7 +118,9 @@ final class WorkoutTimeLineView: BaseUIView {
         }
         
         timeLineDateLabel.do {
-            $0.text = "2026.07.11"
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy.MM.dd"
+            $0.text = formatter.string(from: Date())
             $0.font = .label_m_12
             $0.textColor = .grey200
         }

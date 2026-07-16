@@ -6,6 +6,7 @@
 //
 import UIKit
 
+import Kingfisher
 import SnapKit
 import Then
 
@@ -118,10 +119,10 @@ final class ArchiveCalendarCell: UICollectionViewCell {
             return
 
         case .single:
-            configureSingleActivity(imageName: date.coverImageName)
+            configureSingleActivity(imageUrl: date.coverImageUrl)
 
         case .multiple(let count):
-            configureMultipleActivity(imageName: date.coverImageName)
+            configureMultipleActivity(imageUrl: date.coverImageUrl)
             badgeBackgroundImageView.image = UIImage(named: "\(count)")
             badgeBackgroundImageView.isHidden = false
         }
@@ -130,6 +131,7 @@ final class ArchiveCalendarCell: UICollectionViewCell {
     // MARK: - Private Methods
 
     private func resetCell() {
+        thumbnailImageView.kf.cancelDownloadTask()
         backgroundImageView.isHidden = true
         thumbnailImageView.isHidden = true
         thumbnailImageView.image = nil
@@ -139,11 +141,8 @@ final class ArchiveCalendarCell: UICollectionViewCell {
         dayLabel.textColor = .static_white
     }
 
-    private func configureSingleActivity(imageName: String?) {
-        if let imageName,
-           let image = UIImage(named: imageName) {
-            thumbnailImageView.image = image
-            thumbnailImageView.isHidden = false
+    private func configureSingleActivity(imageUrl: String?) {
+        if configureThumbnailImage(imageUrl: imageUrl) {
             dayLabel.text = nil
         } else {
             backgroundImageView.image = .calendarBg
@@ -151,15 +150,21 @@ final class ArchiveCalendarCell: UICollectionViewCell {
         }
     }
 
-    private func configureMultipleActivity(imageName: String?) {
-        if let imageName,
-           let image = UIImage(named: imageName) {
-            thumbnailImageView.image = image
-            thumbnailImageView.isHidden = false
+    private func configureMultipleActivity(imageUrl: String?) {
+        if configureThumbnailImage(imageUrl: imageUrl) {
             dayLabel.text = nil
         } else {
             backgroundImageView.image = .calendarBg2
             backgroundImageView.isHidden = false
         }
+    }
+
+    private func configureThumbnailImage(imageUrl: String?) -> Bool {
+        guard let imageUrl,
+              let url = URL(string: imageUrl) else { return false }
+
+        thumbnailImageView.kf.setImage(with: url)
+        thumbnailImageView.isHidden = false
+        return true
     }
 }
