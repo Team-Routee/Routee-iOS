@@ -6,10 +6,9 @@
 //
 
 import PhotosUI
-import UIKit
-
 import SnapKit
 import Then
+import UIKit
 
 final class EditorViewController: BaseUIViewController {
 
@@ -25,7 +24,7 @@ final class EditorViewController: BaseUIViewController {
 
     // MARK: - Initializer
 
-    init(activityId: Int64?) {
+    init(activityId: Int64? = nil) {
         self.activityId = activityId
         super.init(nibName: nil, bundle: nil)
     }
