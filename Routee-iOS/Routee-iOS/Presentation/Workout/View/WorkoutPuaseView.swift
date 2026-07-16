@@ -177,6 +177,12 @@ final class WorkoutPauseView: BaseUIView {
 
     // MARK: - Public Methods
 
+    func setFinishButtonEnabled(_ isEnabled: Bool) {
+        finishButton.isEnabled = isEnabled
+        finishButton.isUserInteractionEnabled = isEnabled
+        finishButton.alpha = isEnabled ? 1 : 0.4
+    }
+
     func updateDistance(_ distanceInKilometers: String) {
         distanceDataLabel.text = "\(distanceInKilometers)km"
     }

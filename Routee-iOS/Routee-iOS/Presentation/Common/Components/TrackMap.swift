@@ -18,7 +18,7 @@ final class TrackMap: BaseUIView {
     }
 
     private let backgroundImage: UIImage?
-    private let trackPoints: [TrackPoint]
+    private var trackPoints: [TrackPoint]
     private let photos: [Photo]
     private let markerSize = CGSize(width: 42, height: 42)
 
@@ -58,6 +58,11 @@ final class TrackMap: BaseUIView {
         layoutPhotoMarkers(with: canvasPoints)
     }
 
+    func updateTrackPoints(_ trackPoints: [TrackPoint]) {
+        self.trackPoints = trackPoints
+        setNeedsLayout()
+    }
+
     override func setStyle() {
         backgroundImageView.do {
             $0.image = backgroundImage
@@ -89,6 +94,7 @@ final class TrackMap: BaseUIView {
 
     private func drawRoute(with canvasPoints: [CGPoint]) {
         guard let firstPoint = canvasPoints.first else {
+            routeLayer.path = nil
             return
         }
 

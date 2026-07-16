@@ -20,7 +20,7 @@ struct CalendarCellModel {
 
     let content: Content
     let recordState: RecordState
-    let coverImageName: String?
+    let coverImageUrl: String?
     let activityDate: String?
 }
 

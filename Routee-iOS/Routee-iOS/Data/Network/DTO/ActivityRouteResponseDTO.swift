@@ -10,7 +10,7 @@ import Foundation
 struct ActivityRouteResponseDTO: Decodable, Sendable {
     let activityId: Int64
     let trackPoints: [TrackPoints]
-    let timelineMarkers: [TimelineMarker]
+    let timelineMarkers: [TimelineMarkerData]
 }
 
 struct TrackPoints: Decodable, Sendable {
@@ -20,7 +20,7 @@ struct TrackPoints: Decodable, Sendable {
     let pointIndex: Int
 }
 
-struct TimelineMarker: Decodable, Sendable {
+struct TimelineMarkerData: Decodable, Sendable {
     let timelineId: Int64
     let thumbnailUrl: String
     let latitude: Double
@@ -33,7 +33,7 @@ extension ActivityRouteResponseDTO {
         ActivityEditorModel(
             activityId: activityId,
             trackPoints: trackPoints.map { $0.toModel() },
-            pointIndices: timelineMarkers.map(\.pointIndex)
+            timelineMarkers: timelineMarkers.map { $0.toModel() }
         )
     }
 }
@@ -43,6 +43,18 @@ extension TrackPoints {
         TrackPoint(
             latitude: latitude,
             longitude: longitude
+        )
+    }
+}
+
+extension TimelineMarkerData {
+    func toModel() -> TimelineMarkerModel {
+        TimelineMarkerModel(
+            timelineId: timelineId,
+            thumbnailUrl: thumbnailUrl,
+            latitude: latitude,
+            longitude: longitude,
+            pointIndex: pointIndex
         )
     }
 }

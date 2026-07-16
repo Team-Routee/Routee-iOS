@@ -110,7 +110,10 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     private func didTapGoToEditButton() {
         Task {
             await finishRecordingIfNeeded()
-            navigationController?.pushViewController(EditorViewController(), animated: true)
+            navigationController?.pushViewController(
+                EditorViewController(activityId: activityId),
+                animated: true
+            )
         }
     }
 }

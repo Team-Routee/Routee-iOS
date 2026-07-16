@@ -14,9 +14,33 @@ struct TrackPoint {
 
 extension Array where Element == TrackPoint {
     func toCanvasPoints(in canvasSize: CGSize, padding: CGFloat = 60) -> [CGPoint] {
-        guard count >= 2 else {
+        guard let converter = canvasPointConverter(in: canvasSize, padding: padding)
+        else {
             return []
         }
+
+        return map { converter($0.latitude, $0.longitude) }
+    }
+
+    func toCanvasPoint(
+        latitude: Double,
+        longitude: Double,
+        in canvasSize: CGSize,
+        padding: CGFloat = 60
+    ) -> CGPoint? {
+        guard let converter = canvasPointConverter(in: canvasSize, padding: padding)
+        else {
+            return nil
+        }
+
+        return converter(latitude, longitude)
+    }
+
+    private func canvasPointConverter(
+        in canvasSize: CGSize,
+        padding: CGFloat
+    ) -> ((Double, Double) -> CGPoint)? {
+        guard count >= 2 else { return nil }
 
         let latitudes = map(\.latitude)
         let longitudes = map(\.longitude)
@@ -26,15 +50,14 @@ extension Array where Element == TrackPoint {
               let minLongitude = longitudes.min(),
               let maxLongitude = longitudes.max()
         else {
-            return []
+            return nil
         }
 
         let latitudeRange = maxLatitude - minLatitude
         let longitudeRange = maxLongitude - minLongitude
 
-        guard latitudeRange > 0, longitudeRange > 0
-        else {
-            return []
+        guard latitudeRange > 0, longitudeRange > 0 else {
+            return nil
         }
 
         let drawableWidth = canvasSize.width - padding * 2
@@ -51,12 +74,11 @@ extension Array where Element == TrackPoint {
         let offsetX = (canvasSize.width - routeWidth) / 2
         let offsetY = (canvasSize.height - routeHeight) / 2
 
-        return map { point in
-            let xPoint = CGFloat(point.longitude - minLongitude) * scale + offsetX
-
-            let yPoint = CGFloat(maxLatitude - point.latitude) * scale + offsetY
-
-            return CGPoint(x: xPoint, y: yPoint)
+        return { latitude, longitude in
+            CGPoint(
+                x: CGFloat(longitude - minLongitude) * scale + offsetX,
+                y: CGFloat(maxLatitude - latitude) * scale + offsetY
+            )
         }
     }
 }

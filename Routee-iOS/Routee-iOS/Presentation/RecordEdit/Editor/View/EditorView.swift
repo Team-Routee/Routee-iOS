@@ -7,6 +7,7 @@
 
 import UIKit
 
+import Kingfisher
 import SnapKit
 import Then
 
@@ -23,7 +24,7 @@ final class EditorView: BaseUIView {
         var selectedColor: UIColor = .recapMint
         var didSetRouteTimelineStickerFrame = false
         var trackPoints: [TrackPoint] = TrackPoint.dummyTrackPoints()
-        var pointIndices: [Int] = []
+        var timelineMarkers: [TimelineMarkerModel] = []
     }
 
     // MARK: - UI Properties
@@ -129,9 +130,19 @@ final class EditorView: BaseUIView {
 
     func configure(with model: ActivityEditorModel) {
         state.trackPoints = model.trackPoints
-        state.pointIndices = model.pointIndices
+        state.timelineMarkers = model.timelineMarkers
         state.didSetRouteTimelineStickerFrame = false
         setTimelineFrame()
+    }
+
+    func configure(with model: RecordEditResourceModel) {
+        dataInfo.configure(
+            distance: model.distance,
+            durationSec: model.durationSec,
+            maxElevation: model.maxElevation
+        )
+        routeSticker.configure(with: model.routes.sorted { $0.sequence < $1.sequence }.map(\.name))
+        configureBackgroundImage(with: model.mapImageURL)
     }
 
     func setBackgroundTapAction(_ action: @escaping () -> Void) {
@@ -324,7 +335,27 @@ final class EditorView: BaseUIView {
 
         let routePoints = state.trackPoints.toCanvasPoints(in: backgroundImageView.bounds.size)
 
-        guard let routeRect = routeTimelineDrawingView.configureSticker(points: routePoints) else { return }
+        let markers = state.timelineMarkers.compactMap { marker -> RouteTimelineMarker? in
+            guard let point = state.trackPoints.toCanvasPoint(
+                latitude: marker.latitude,
+                longitude: marker.longitude,
+                in: backgroundImageView.bounds.size
+            ) else {
+                return nil
+            }
+
+            return RouteTimelineMarker(
+                thumbnailUrl: marker.thumbnailUrl,
+                point: point
+            )
+        }
+
+        guard let routeRect = routeTimelineDrawingView.configureSticker(
+            points: routePoints,
+            markers: markers
+        ) else {
+            return
+        }
 
         let stickerHeight = routeRect.height + stickerVerticalInset * 2
 
@@ -365,6 +396,18 @@ final class EditorView: BaseUIView {
         stickerBox.layoutIfNeeded()
 
         return stickerBox.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
+    }
+
+    private func configureBackgroundImage(with imageURL: String) {
+        guard let url = URL(string: imageURL) else {
+            backgroundImageView.image = .imgNavermapMain
+            return
+        }
+
+        backgroundImageView.kf.setImage(
+            with: url,
+            placeholder: UIImage.imgNavermapMain
+        )
     }
 
 }

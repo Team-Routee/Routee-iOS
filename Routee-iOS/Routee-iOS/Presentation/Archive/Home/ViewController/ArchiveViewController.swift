@@ -191,13 +191,32 @@ final class ArchiveViewController: BaseUIViewController {
 
                 guard !Task.isCancelled else { return }
 
-                presentActivityListBottomSheet(model: model)
+                routeToActivityList(model)
             } catch {
                 guard !Task.isCancelled else { return }
 
                 RouteeLogger.error(error)
             }
         }
+    }
+
+    private func routeToActivityList(_ model: ActivityListDateModel) {
+        switch model.items.count {
+        case 0:
+            return
+        case 1:
+            guard let record = model.items.first else { return }
+            presentTimeLineViewController(record: record)
+        default:
+            presentActivityListBottomSheet(model: model)
+        }
+    }
+
+    private func presentTimeLineViewController(record: ActivityListModel) {
+        let timeLineViewController = TimeLineViewController(record: record)
+        timeLineViewController.modalPresentationStyle = .fullScreen
+
+        present(timeLineViewController, animated: true)
     }
 
     private func presentActivityListBottomSheet(model: ActivityListDateModel) {
