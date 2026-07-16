@@ -16,22 +16,24 @@ enum ActivityAPI {
     case createTimeLine(header: HeaderType, activityId: Int64, requestDTO: CreateTimeLineRequestDTO)
     case backgroundMapPresignedURL(header: HeaderType, activityId: Int64, requestDTO: BackgroundMapPresignedURLRequestDTO)
     case finishActivity(header: HeaderType, activityId: Int64, requestDTO: FinishActivityRequestDTO)
+    case changeActivityStatus(header: HeaderType, activityId: Int64, requestDTO: ChangeActivityStatusRequestDTO)
 }
 
 extension ActivityAPI: RouteeEndPoint {
-
+    
     var basePath: String {
         switch self {
         case .activityRoute,
-             .createActivity,
-             .timeLinePresignedURL,
-             .createTimeLine,
-             .backgroundMapPresignedURL,
-                .finishActivity:
+                .createActivity,
+                .timeLinePresignedURL,
+                .createTimeLine,
+                .backgroundMapPresignedURL,
+                .finishActivity,
+                .changeActivityStatus:
             return "/api/v1/activity"
         }
     }
-
+    
     var path: String {
         switch self {
         case .activityRoute(_, let activityId):
@@ -46,9 +48,11 @@ extension ActivityAPI: RouteeEndPoint {
             return "/\(activityId)/map-image-url"
         case .finishActivity(_, let activityId, _):
             return "/\(activityId)"
+        case .changeActivityStatus(_, let activityId, _):
+            return "/\(activityId)/status"
         }
     }
-
+    
     var method: Alamofire.HTTPMethod {
         switch self {
         case .activityRoute:
@@ -57,42 +61,46 @@ extension ActivityAPI: RouteeEndPoint {
             return .post
         case .finishActivity:
             return .put
+        case .changeActivityStatus:
+            return .patch
         }
     }
-
+    
     var headers: HeaderType {
         switch self {
         case .activityRoute(let header, _),
-             .createActivity(let header, _),
-             .timeLinePresignedURL(let header, _, _),
-             .createTimeLine(let header, _, _),
-             .backgroundMapPresignedURL(let header, _, _),
-             .finishActivity(let header, _, _):
+                .createActivity(let header, _),
+                .timeLinePresignedURL(let header, _, _),
+                .createTimeLine(let header, _, _),
+                .backgroundMapPresignedURL(let header, _, _),
+                .finishActivity(let header, _, _),
+                .changeActivityStatus(let header, _, _):
             return header
         }
     }
-
+    
     var parameterEncoding: any Alamofire.ParameterEncoding {
         switch self {
         case .activityRoute:
             return URLEncoding.default
-        case .createActivity, .timeLinePresignedURL, .createTimeLine, .backgroundMapPresignedURL, .finishActivity:
+        case .createActivity, .timeLinePresignedURL, .createTimeLine, .backgroundMapPresignedURL, .finishActivity, .changeActivityStatus:
             return JSONEncoding.default
         }
     }
-
+    
     var queryParameters: [String: String]? {
         switch self {
         case .activityRoute,
-             .createActivity,
-             .timeLinePresignedURL,
-             .createTimeLine,
-             .backgroundMapPresignedURL,
-             .finishActivity:
+                .createActivity,
+                .timeLinePresignedURL,
+                .createTimeLine,
+                .backgroundMapPresignedURL,
+                .finishActivity,
+                .changeActivityStatus:
             return nil
         }
     }
-
+    
     var bodyParameters: Alamofire.Parameters? {
         switch self {
         case .activityRoute:
@@ -106,6 +114,8 @@ extension ActivityAPI: RouteeEndPoint {
         case .backgroundMapPresignedURL(_, _, let requestDTO):
             return requestDTO.asParameters()
         case .finishActivity(_, _, let requestDTO):
+            return requestDTO.asParameters()
+        case .changeActivityStatus(_, _, let requestDTO):
             return requestDTO.asParameters()
         }
     }
