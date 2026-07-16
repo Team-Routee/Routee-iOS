@@ -18,6 +18,7 @@ final class WorkoutViewModel {
     private(set) var routePoints: [WorkoutRoutePoint] = []
     private(set) var photoRecords: [WorkoutPhotoRecord] = []
     private(set) var activityId: Int64?
+    private(set) var activityTitle: String?
     private(set) var backgroundMapObjectKey: String?
     
     private let reverseGeocodingRepository: ReverseGeocodingRepository
@@ -176,7 +177,36 @@ final class WorkoutViewModel {
         )
 
         activityId = activity.activityId
+        activityTitle = activity.title
         return activity
+    }
+
+    func finishRecording() async throws {
+        guard let activityId,
+              let backgroundMapObjectKey,
+              !routePoints.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let finishModel = WorkoutRecordFinishModel(
+            title: activityTitle ?? "",
+            distance: Int(totalDistance),
+            durationSec: elapsedTimeInSeconds,
+            maxAltitude: Int(maximumAltitudeInMeters ?? 0),
+            mapImageUrl: backgroundMapObjectKey,
+            coverImageObjectKey: "",
+            tracks: routePoints.map {
+                WorkoutRecordFinishModel.Track(
+                    latitude: $0.coordinate.latitude,
+                    longitude: $0.coordinate.longitude,
+                    elevation: Int($0.altitude),
+                    pointIndex: $0.pointIndex
+                )
+            },
+            endedAt: Self.timeLineDateFormatter.string(from: Date())
+        )
+
+        try await activityRepository.finishActivity(activityId: activityId, requestModel: finishModel)
     }
 
     func uploadPhoto(at index: Int, title: String) async throws {
