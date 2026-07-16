@@ -132,8 +132,6 @@ final class WorkoutViewController: BaseUIViewController {
 
             do {
                 try await viewModel.uploadBackgroundMap(image: mapImage)
-                try await viewModel.uploadCourseList()
-                try await viewModel.finishRecording()
             } catch {
                 RouteeLogger.error(error)
             }
@@ -152,6 +150,7 @@ final class WorkoutViewController: BaseUIViewController {
 
     private func pushWorkoutTimeLineViewController(backgroundMapImage: UIImage?) {
         let viewController = WorkoutTimeLineViewController(
+            activityId: viewModel.activityId,
             title: viewModel.activityTitle ?? "",
             distanceInMeters: viewModel.totalDistance,
             durationInSeconds: viewModel.elapsedTimeInSeconds,
@@ -160,7 +159,10 @@ final class WorkoutViewController: BaseUIViewController {
             trackPoints: viewModel.routePoints.map {
                 TrackPoint(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude)
             },
-            photoRecords: viewModel.photoRecords
+            photoRecords: viewModel.photoRecords,
+            finishRecording: { [viewModel] in
+                try await viewModel.finishRecording()
+            }
         )
         navigationController?.pushViewController(viewController, animated: true)
     }

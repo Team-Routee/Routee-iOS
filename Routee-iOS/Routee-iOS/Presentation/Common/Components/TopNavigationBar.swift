@@ -75,6 +75,12 @@ final class TopNavigationBar: BaseUIView {
         }
     }
     
+    // MARK: - Public Methods
+
+    func setBackButtonEnabled(_ isEnabled: Bool) {
+        backButton.isEnabled = isEnabled
+    }
+
     // MARK: - Private Methods
 
     private func setActions() {
