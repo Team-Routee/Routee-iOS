@@ -13,7 +13,7 @@ import Then
 final class TrackMap: BaseUIView {
 
     private let backgroundImage: UIImage?
-    private let trackPoints: [TrackPoint]
+    private var trackPoints: [TrackPoint]
     
     private let backgroundImageView = UIImageView()
     private let routeLayer = CAShapeLayer()
@@ -36,6 +36,11 @@ final class TrackMap: BaseUIView {
         super.layoutSubviews()
 
         drawRoute()
+    }
+
+    func updateTrackPoints(_ trackPoints: [TrackPoint]) {
+        self.trackPoints = trackPoints
+        setNeedsLayout()
     }
 
     override func setStyle() {
@@ -77,6 +82,7 @@ final class TrackMap: BaseUIView {
         let canvasPoints = trackPoints.toCanvasPoints(in: canvasSize)
 
         guard let firstPoint = canvasPoints.first else {
+            routeLayer.path = nil
             return
         }
 

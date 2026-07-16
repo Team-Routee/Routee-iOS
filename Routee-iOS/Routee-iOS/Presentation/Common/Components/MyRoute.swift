@@ -19,17 +19,6 @@ struct RoutePointModel {
     let points: [String]
 }
 
-enum RoutePointDummyData {
-    static let routePoints = RoutePointModel(
-        points: [
-            "창의문",
-            "청운대",
-            "말바위",
-            "이승희"
-        ]
-    )
-}
-
 final class MyRoute: BaseUIView {
     
     // MARK: - UI Properties
@@ -181,7 +170,7 @@ final class MyRoute: BaseUIView {
     }
     
     private static func defaultRoutePoint() -> RoutePointModel {
-        RoutePointDummyData.routePoints
+        RoutePointModel(points: [])
     }
     
     private func configureHeader(pointCount: Int) {

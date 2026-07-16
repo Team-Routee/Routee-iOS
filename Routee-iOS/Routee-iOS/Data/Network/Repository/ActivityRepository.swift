@@ -11,6 +11,9 @@ protocol ActivityRepository {
     func getActivityRoute(activityId: Int64) async throws -> ActivityEditorModel
     func getRecordEditResource(activityId: Int64) async throws -> RecordEditResourceModel
     func getWorkoutList(year: Int, month: Int) async throws -> [WorkoutListModel]
+    func getActivityStatistics(activityId: Int64) async throws -> TimeLineMetricModel
+    func getActivityTimelineList(activityId: Int64) async throws -> TimeLineData
+    func getActivityCourseList(activityId: Int64) async throws -> CourseData
 }
 
 struct DefaultActivityRepository: ActivityRepository {
@@ -89,6 +92,69 @@ struct DefaultActivityRepository: ActivityRepository {
         let response = try await service.request(
             endPoint,
             decodingType: WorkoutListResponseDTO.self
+        )
+
+        return response.toModel()
+    }
+
+    func getActivityStatistics(activityId: Int64) async throws -> TimeLineMetricModel {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let endPoint = ActivityAPI.activityStatistics(
+            header: .withAuthTimeZone(
+                accessToken: accessToken,
+                timeZone: TimeZone.current.identifier
+            ),
+            activityId: activityId
+        )
+
+        let response = try await service.request(
+            endPoint,
+            decodingType: ActivityStatisticsResponseDTO.self
+        )
+
+        return response.toModel()
+    }
+
+    func getActivityTimelineList(activityId: Int64) async throws -> TimeLineData {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let endPoint = ActivityAPI.activityTimelineList(
+            header: .withAuth(accessToken: accessToken),
+            activityId: activityId
+        )
+
+        let response = try await service.request(
+            endPoint,
+            decodingType: ActivityTimelineListResponseDTO.self
+        )
+
+        return response.toModel()
+    }
+
+    func getActivityCourseList(activityId: Int64) async throws -> CourseData {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let endPoint = ActivityAPI.activityCourseList(
+            header: .withAuth(accessToken: accessToken),
+            activityId: activityId
+        )
+
+        let response = try await service.request(
+            endPoint,
+            decodingType: ActivityCourseListResponseDTO.self
         )
 
         return response.toModel()
