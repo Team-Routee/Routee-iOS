@@ -25,7 +25,7 @@ final class EditorViewController: BaseUIViewController {
 
     // MARK: - Initializer
 
-    init(activityId: Int64 = 865326084924289775) {
+    init(activityId: Int64?) {
         self.activityId = activityId
         super.init(nibName: nil, bundle: nil)
     }
