@@ -15,6 +15,7 @@ enum ActivityAPI {
     case timeLinePresignedURL(header: HeaderType, activityId: Int64, requestDTO: TimeLinePresignedURLRequestDTO)
     case createTimeLine(header: HeaderType, activityId: Int64, requestDTO: CreateTimeLineRequestDTO)
     case backgroundMapPresignedURL(header: HeaderType, activityId: Int64, requestDTO: BackgroundMapPresignedURLRequestDTO)
+    case finishActivity(header: HeaderType, activityId: Int64, requestDTO: FinishActivityRequestDTO)
 }
 
 extension ActivityAPI: RouteeEndPoint {
@@ -25,7 +26,8 @@ extension ActivityAPI: RouteeEndPoint {
              .createActivity,
              .timeLinePresignedURL,
              .createTimeLine,
-             .backgroundMapPresignedURL:
+             .backgroundMapPresignedURL,
+                .finishActivity:
             return "/api/v1/activity"
         }
     }
@@ -42,6 +44,8 @@ extension ActivityAPI: RouteeEndPoint {
             return "/\(activityId)/timeline"
         case .backgroundMapPresignedURL(_, let activityId, _):
             return "/\(activityId)/map-image-url"
+        case .finishActivity(_, let activityId, _):
+            return "/\(activityId)"
         }
     }
 
@@ -51,6 +55,8 @@ extension ActivityAPI: RouteeEndPoint {
             return .get
         case .createActivity, .timeLinePresignedURL, .createTimeLine, .backgroundMapPresignedURL:
             return .post
+        case .finishActivity:
+            return .put
         }
     }
 
@@ -60,7 +66,8 @@ extension ActivityAPI: RouteeEndPoint {
              .createActivity(let header, _),
              .timeLinePresignedURL(let header, _, _),
              .createTimeLine(let header, _, _),
-             .backgroundMapPresignedURL(let header, _, _):
+             .backgroundMapPresignedURL(let header, _, _),
+             .finishActivity(let header, _, _):
             return header
         }
     }
@@ -69,14 +76,19 @@ extension ActivityAPI: RouteeEndPoint {
         switch self {
         case .activityRoute:
             return URLEncoding.default
-        case .createActivity, .timeLinePresignedURL, .createTimeLine, .backgroundMapPresignedURL:
+        case .createActivity, .timeLinePresignedURL, .createTimeLine, .backgroundMapPresignedURL, .finishActivity:
             return JSONEncoding.default
         }
     }
 
     var queryParameters: [String: String]? {
         switch self {
-        case .activityRoute, .createActivity, .timeLinePresignedURL, .createTimeLine, .backgroundMapPresignedURL:
+        case .activityRoute,
+             .createActivity,
+             .timeLinePresignedURL,
+             .createTimeLine,
+             .backgroundMapPresignedURL,
+             .finishActivity:
             return nil
         }
     }
@@ -92,6 +104,8 @@ extension ActivityAPI: RouteeEndPoint {
         case .createTimeLine(_, _, let requestDTO):
             return requestDTO.asParameters()
         case .backgroundMapPresignedURL(_, _, let requestDTO):
+            return requestDTO.asParameters()
+        case .finishActivity(_, _, let requestDTO):
             return requestDTO.asParameters()
         }
     }

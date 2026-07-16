@@ -14,6 +14,7 @@ protocol ActivityRepository {
     func uploadTimeLineImage(presignedURL: String, imageData: Data) async throws
     func createTimeLine(activityId: Int64, requestDTO: CreateTimeLineRequestDTO) async throws
     func backgroundMapPresignedURL(activityId: Int64, requestDTO: BackgroundMapPresignedURLRequestDTO) async throws -> ImagePresignedURLModel
+    func finishActivity(activityId: Int64, requestModel: WorkoutRecordFinishModel) async throws
 }
 
 struct DefaultActivityRepository: ActivityRepository {
@@ -118,9 +119,7 @@ struct DefaultActivityRepository: ActivityRepository {
         guard !accessToken.isEmpty else {
             throw RouteeError.forbidden
         }
-        
-        let dto = requestDTO
-        
+                
         let endpoint = ActivityAPI.backgroundMapPresignedURL(
             header: .withAuth(accessToken: accessToken),
             activityId: activityId,
@@ -129,5 +128,21 @@ struct DefaultActivityRepository: ActivityRepository {
         
         let response = try await service.request(endpoint, decodingType: BackgroundMapPresignedURLResponseDTO.self)
         return response.toImagePresignedURLModel()
+    }
+    
+    func finishActivity(activityId: Int64, requestModel: WorkoutRecordFinishModel) async throws {
+        let accessToken = keychainService.read(.accessToken)
+        
+        guard !accessToken.isEmpty else {
+            throw RouteeError.forbidden
+        }
+        
+        let endpoint = ActivityAPI.finishActivity(
+            header: .withAuthTimeZone(accessToken: accessToken, timeZone: TimeZone.current.identifier),
+            activityId: activityId,
+            requestDTO: requestModel.toDTO()
+        )
+        
+        return try await service.requestEmpty(endpoint)
     }
 }
