@@ -110,17 +110,6 @@ final class WorkoutViewController: BaseUIViewController {
         workoutView.updateDistance(totalDistance)
     }
     
-    private func startRecordingRoute() {
-        workoutMode = .recording
-        workoutView.playCountdownAnimation()
-        workoutView.updateDistance(viewModel.startDistanceTracking())
-        workoutView.updateRoutePath(viewModel.routePoints.map(\.latLng))
-        
-        if let currentLocation = locationManager.location {
-            appendRouteLocationIfNeeded(currentLocation)
-        }
-    }
-    
     private func pauseRecordingRoute() {
         workoutMode = .paused
         viewModel.pauseDistanceTracking()
@@ -133,12 +122,44 @@ final class WorkoutViewController: BaseUIViewController {
     private func finishRecordingRoute() {
         guard workoutMode != .finishing else { return }
         workoutMode = .finishing
-        
+
+        let backgroundMapTask = Task { () -> UIImage? in
+            guard let mapImage = await workoutView.captureBackgroundMapImage(
+                fitting: viewModel.routePoints.map(\.latLng)
+            ) else { return nil }
+
+            do {
+                try await viewModel.uploadBackgroundMap(image: mapImage)
+                try await viewModel.finishRecording()
+            } catch {
+                RouteeLogger.error(error)
+            }
+            return mapImage
+        }
+
         workoutView.playFinishAnimation { [weak self] in
             guard let self else { return }
 
-            navigationController?.pushViewController(WorkoutTimeLineViewController(), animated: true)
+            Task {
+                let mapImage = await backgroundMapTask.value
+                self.pushWorkoutTimeLineViewController(backgroundMapImage: mapImage)
+            }
         }
+    }
+
+    private func pushWorkoutTimeLineViewController(backgroundMapImage: UIImage?) {
+        let viewController = WorkoutTimeLineViewController(
+            title: viewModel.activityTitle ?? "",
+            distanceInMeters: viewModel.totalDistance,
+            durationInSeconds: viewModel.elapsedTimeInSeconds,
+            maxAltitudeInMeters: viewModel.maximumAltitudeInMeters,
+            backgroundMapImage: backgroundMapImage,
+            trackPoints: viewModel.routePoints.map {
+                TrackPoint(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude)
+            },
+            photoRecords: viewModel.photoRecords
+        )
+        navigationController?.pushViewController(viewController, animated: true)
     }
     
     private func requestCameraAccess() {
@@ -247,6 +268,15 @@ final class WorkoutViewController: BaseUIViewController {
         return self
     }
     
+    private func currentStartedAt() -> String {
+            let formatter = DateFormatter()
+            formatter.calendar = Calendar(identifier: .gregorian)
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            formatter.timeZone = .current
+            formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+            return formatter.string(from: Date())
+        }
+    
     // MARK: - Actions
     
     override func setAddTarget() {
@@ -289,7 +319,7 @@ final class WorkoutViewController: BaseUIViewController {
     
     @objc
     private func didTapRecordButton() {
-        startRecordingRoute()
+        startRecording()
     }
     
     @objc
@@ -315,6 +345,37 @@ final class WorkoutViewController: BaseUIViewController {
     @objc
     func locationButtonDidTap() {
         workoutView.focusOnUserDirection()
+    }
+    
+    // MARK: - Network
+    
+    private func startRecording() {
+        guard workoutMode == .ready, workoutView.recordButton.isEnabled else { return }
+
+        let startedAt = currentStartedAt()
+        workoutView.recordButton.isEnabled = false
+
+        Task {
+            do {
+                let activity = try await viewModel.startRecording(
+                    activityType: "HIKING",
+                    startedAt: startedAt
+                )
+
+                RouteeLogger.debug("운동 기록 시작 완료 (activityId: \(activity.activityId))")
+                workoutMode = .recording
+                workoutView.playCountdownAnimation()
+                workoutView.updateDistance(viewModel.startDistanceTracking())
+                workoutView.updateRoutePath(viewModel.routePoints.map(\.latLng))
+
+                if let currentLocation = locationManager.location {
+                    appendRouteLocationIfNeeded(currentLocation)
+                }
+            } catch {
+                workoutView.recordButton.isEnabled = true
+                RouteeLogger.error(error)
+            }
+        }
     }
 }
 
@@ -389,19 +450,24 @@ extension WorkoutViewController: UIImagePickerControllerDelegate, UINavigationCo
     }
 
     private func pushPhotoLocationViewController(photoRecord: WorkoutPhotoRecord) {
-        let viewController = WorkoutPhotoLocationViewController(image: photoRecord.image) { [weak self] in
-            self?.savePhotoRecord(photoRecord)
+        let viewController = WorkoutPhotoLocationViewController(image: photoRecord.image) { [weak self] title in
+            self?.savePhotoRecord(photoRecord, title: title)
         }
         navigationController?.pushViewController(viewController, animated: true)
     }
 
-    private func savePhotoRecord(_ photoRecord: WorkoutPhotoRecord) {
-        guard viewModel.routePoints.indices.contains(photoRecord.pointIndex) else { return }
+    private func savePhotoRecord(_ photoRecord: WorkoutPhotoRecord, title: String) {
+        guard let routePoint = viewModel.routePoint(matching: photoRecord.pointIndex) else { return }
 
-        let routePoint = viewModel.routePoints[photoRecord.pointIndex]
-        guard routePoint.pointIndex == photoRecord.pointIndex else { return }
-
-        viewModel.savePhotoRecord(photoRecord)
+        let photoIndex = viewModel.savePhotoRecord(photoRecord, title: title)
         workoutView.addPhotoMarker(photoRecord, at: routePoint.coordinate)
+
+        Task {
+            do {
+                try await viewModel.uploadPhoto(at: photoIndex)
+            } catch {
+                RouteeLogger.error(error)
+            }
+        }
     }
 }

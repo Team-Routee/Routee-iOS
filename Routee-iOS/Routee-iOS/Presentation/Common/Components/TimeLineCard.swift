@@ -21,15 +21,15 @@ final class TimeLineCard: BaseUIView {
     private var locationTags: [LocationTag] = []
     private var imageCount = 0
     
-    init(imageNames: [String], locations: [String?]? = nil) {
+    init(images: [UIImage?], locations: [String?]? = nil) {
         var imageContainerViews: [UIView] = []
         var imageViews: [UIImageView] = []
         var locationTags: [LocationTag] = []
 
-        imageNames.enumerated().forEach { index, imageName in
+        images.enumerated().forEach { index, image in
             let imageContainerView = UIView()
             let imageView = UIImageView()
-            imageView.image = UIImage(named: imageName)
+            imageView.image = image
             imageView.contentMode = .scaleAspectFill
             imageView.clipsToBounds = true
 
@@ -49,9 +49,13 @@ final class TimeLineCard: BaseUIView {
         self.imageContainerViews = imageContainerViews
         self.imageViews = imageViews
         self.locationTags = locationTags
-        imageCount = imageNames.count
+        imageCount = images.count
 
         super.init(frame: .zero)
+    }
+
+    convenience init(imageNames: [String], locations: [String?]? = nil) {
+        self.init(images: imageNames.map { UIImage(named: $0) }, locations: locations)
     }
     
     required init?(coder: NSCoder) {

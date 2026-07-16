@@ -11,17 +11,13 @@ import Foundation
 import Alamofire
 
 protocol NetworkService {
-    func request<T: Decodable & Sendable>(
-        _ endPoint: EndPoint,
-        decodingType: T.Type
-    ) async throws -> T
-
+    func request<T: Decodable & Sendable>(_ endPoint: EndPoint, decodingType: T.Type) async throws -> T
+    
     func requestEmpty(_ endPoint: EndPoint) async throws
     
-    func requestPlain<T: Decodable & Sendable>(
-        _ endPoint: EndPoint,
-        decodingType: T.Type
-    ) async throws -> T
+    func requestPlain<T: Decodable & Sendable>(_ endPoint: EndPoint, decodingType: T.Type) async throws -> T
+    
+    func presignedURLUploadData(_ data: Data, to urlString: String, contentType: String) async throws
 }
 
 final class DefaultNetworkService: NetworkService {
@@ -33,7 +29,7 @@ final class DefaultNetworkService: NetworkService {
         )
         return Session(interceptor: interceptor)
     }()
-
+    
     private static func session(for endPoint: EndPoint) -> Session {
         switch endPoint.headers {
         case .withAuth, .withAuthTimeZone:
@@ -42,11 +38,8 @@ final class DefaultNetworkService: NetworkService {
             return AF
         }
     }
-
-    func request<T: Decodable & Sendable>(
-        _ endPoint: EndPoint,
-        decodingType: T.Type
-    ) async throws -> T {
+    
+    func request<T: Decodable & Sendable>(_ endPoint: EndPoint, decodingType: T.Type) async throws -> T {
         Self.requestLogger(endPoint)
         return try await withCheckedThrowingContinuation { continuation in
             Self.session(for: endPoint).request(
@@ -87,7 +80,7 @@ final class DefaultNetworkService: NetworkService {
             }
         }
     }
-
+    
     func requestEmpty(_ endPoint: EndPoint) async throws {
         Self.requestLogger(endPoint)
         return try await withCheckedThrowingContinuation { continuation in
@@ -102,7 +95,7 @@ final class DefaultNetworkService: NetworkService {
             .responseDecodable(of: EmptyResponse.self) { response in
                 Self.responseLogger(response)
                 Self.rawResponseLogger(response.data)
-
+                
                 switch response.result {
                 case .success(let response):
                     RouteeLogger.data("Response Code: \(response.code)")
@@ -126,10 +119,7 @@ final class DefaultNetworkService: NetworkService {
         }
     }
     
-    func requestPlain<T: Decodable & Sendable>(
-        _ endPoint: EndPoint,
-        decodingType: T.Type
-    ) async throws -> T {
+    func requestPlain<T: Decodable & Sendable>(_ endPoint: EndPoint, decodingType: T.Type) async throws -> T {
         Self.requestLogger(endPoint)
         return try await withCheckedThrowingContinuation { continuation in
             Self.session(for: endPoint).request(
@@ -152,7 +142,43 @@ final class DefaultNetworkService: NetworkService {
                     if let statusCode = response.response?.statusCode {
                         let error = Self.handleError(statusCode, error.localizedDescription)
                         RouteeLogger.error(error)
-
+                        
+                        continuation.resume(throwing: error)
+                    } else {
+                        RouteeLogger.error(error)
+                        continuation.resume(throwing: error)
+                    }
+                }
+            }
+        }
+    }
+    
+    func presignedURLUploadData(_ data: Data, to urlString: String, contentType: String) async throws {
+        guard let url = URL(string: urlString) else {
+            throw RouteeError.URLError
+        }
+        
+        RouteeLogger.network("[Upload Start]")
+        RouteeLogger.network("Host: \(url.host() ?? "nil"), Size: \(data.count) bytes")
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            AF.upload(
+                data,
+                to: url,
+                method: .put,
+                headers: ["Content-Type": contentType]
+            )
+            .validate()
+            .response { response in
+                RouteeLogger.network("Upload StatusCode: \(response.response?.statusCode ?? 0)")
+                
+                switch response.result {
+                case .success:
+                    continuation.resume(returning: ())
+                case .failure(let error):
+                    if let statusCode = response.response?.statusCode {
+                        let error = Self.handleError(statusCode, error.localizedDescription)
+                        RouteeLogger.error(error)
                         continuation.resume(throwing: error)
                     } else {
                         RouteeLogger.error(error)
@@ -182,10 +208,10 @@ final class DefaultNetworkService: NetworkService {
             return (header.name, shouldMask ? "********" : header.value)
         })
     }
-
+    
     private static func maskedParameters(_ parameters: Parameters?) -> Parameters? {
         guard let parameters else { return nil }
-
+        
         return parameters.reduce(into: Parameters()) { result, item in
             let key = item.key.lowercased()
             let shouldMask = key.contains("token") || key.contains("code")
