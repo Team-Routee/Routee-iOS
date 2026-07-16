@@ -15,8 +15,8 @@ final class RecordEditViewController: BaseUIViewController {
     // MARK: - Properties
 
     var onMonthChanged: ((Date) -> Void)?
-    private let allRecords = WorkoutDummyData.dummyWorkoutRecords
-    private var records: [WorkoutRecordModel] = []
+    private let viewModel = RecordEditViewModel()
+    private var records: [WorkoutListModel] = []
 
     // MARK: - UI Properties
 
@@ -33,7 +33,7 @@ final class RecordEditViewController: BaseUIViewController {
 
         setCollectionView()
         setMonthSelector()
-        updateRecords(for: Date())
+        fetchRecords(for: Date())
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -56,19 +56,36 @@ final class RecordEditViewController: BaseUIViewController {
 
     private func setMonthSelector() {
         rootView.setMonthChangedHandler { [weak self] date in
-            self?.updateRecords(for: date)
+            self?.fetchRecords(for: date)
         }
     }
 
-    private func updateRecords(for month: Date) {
-        records = allRecords.filter { $0.date.isSameMonth(as: month) }
-        rootView.updateView(isEmpty: records.isEmpty)
-        rootView.workoutRecordCollectionView.reloadData()
-        rootView.scrollToTop()
+    private func fetchRecords(for month: Date) {
+        Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                let components = Calendar.current.dateComponents([.year, .month], from: month)
+                guard let year = components.year,
+                      let month = components.month else { return }
+
+                try await viewModel.fetchWorkoutList(
+                    year: year,
+                    month: month
+                )
+
+                records = viewModel.records
+                rootView.updateView(isEmpty: records.isEmpty)
+                rootView.workoutRecordCollectionView.reloadData()
+                rootView.scrollToTop()
+            } catch {
+                RouteeLogger.error(error)
+            }
+        }
     }
 
-    private func pushEditorViewController() {
-        let editorViewController = EditorViewController()
+    private func pushEditorViewController(activityId: Int64) {
+        let editorViewController = EditorViewController(activityId: activityId)
         navigationController?.pushViewController(editorViewController, animated: false)
     }
 }
@@ -80,7 +97,7 @@ extension RecordEditViewController: UICollectionViewDelegate {
         _ collectionView: UICollectionView,
         didSelectItemAt indexPath: IndexPath
     ) {
-        pushEditorViewController()
+        pushEditorViewController(activityId: records[indexPath.item].activityId)
     }
 }
 
@@ -103,9 +120,11 @@ extension RecordEditViewController: UICollectionViewDataSource {
             return UICollectionViewCell()
         }
 
-        cell.configure(with: records[indexPath.item])
+        let record = records[indexPath.item]
+
+        cell.configure(with: record)
         cell.editButtonAction = { [weak self] in
-            self?.pushEditorViewController()
+            self?.pushEditorViewController(activityId: record.activityId)
         }
 
         return cell
