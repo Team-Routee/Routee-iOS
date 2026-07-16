@@ -169,7 +169,7 @@ final class WorkoutViewModel {
         return activity
     }
 
-    func uploadPhoto(at index: Int) async throws {
+    func uploadPhoto(at index: Int, title: String) async throws {
         guard let activityId,
               photoRecords.indices.contains(index) else {
             throw RouteeError.noData
@@ -196,10 +196,10 @@ final class WorkoutViewModel {
 
         photoRecords[index].objectKey = presigned.objectKey
 
-        try await createTimeLine(for: photoRecords[index], objectKey: presigned.objectKey)
+        try await createTimeLine(for: photoRecords[index], objectKey: presigned.objectKey, title: title)
     }
 
-    private func createTimeLine(for photoRecord: WorkoutPhotoRecord, objectKey: String) async throws {
+    private func createTimeLine(for photoRecord: WorkoutPhotoRecord, objectKey: String, title: String) async throws {
         guard let activityId,
               routePoints.indices.contains(photoRecord.pointIndex) else {
             throw RouteeError.noData
@@ -207,7 +207,7 @@ final class WorkoutViewModel {
 
         let routePoint = routePoints[photoRecord.pointIndex]
         let timeLine = TimeLineRecordModel(
-            title: "",
+            title: title,
             imageObjectKey: objectKey,
             createdAt: Self.timeLineDateFormatter.string(from: photoRecord.createdAt),
             trackPointIndex: photoRecord.pointIndex,
@@ -222,7 +222,7 @@ final class WorkoutViewModel {
             status: "ACTIVE"
         )
 
-        try await activityRepository.createTimeLine(activityId: activityId, timeLine: timeLine)
+        try await activityRepository.createTimeLine(activityId: activityId, requestDTO: timeLine.toDTO())
     }
 
     private static let timeLineDateFormatter: DateFormatter = {

@@ -418,13 +418,13 @@ extension WorkoutViewController: UIImagePickerControllerDelegate, UINavigationCo
     }
 
     private func pushPhotoLocationViewController(photoRecord: WorkoutPhotoRecord) {
-        let viewController = WorkoutPhotoLocationViewController(image: photoRecord.image) { [weak self] in
-            self?.savePhotoRecord(photoRecord)
+        let viewController = WorkoutPhotoLocationViewController(image: photoRecord.image) { [weak self] title in
+            self?.savePhotoRecord(photoRecord, title: title)
         }
         navigationController?.pushViewController(viewController, animated: true)
     }
 
-    private func savePhotoRecord(_ photoRecord: WorkoutPhotoRecord) {
+    private func savePhotoRecord(_ photoRecord: WorkoutPhotoRecord, title: String) {
         guard viewModel.routePoints.indices.contains(photoRecord.pointIndex) else { return }
 
         let routePoint = viewModel.routePoints[photoRecord.pointIndex]
@@ -435,7 +435,7 @@ extension WorkoutViewController: UIImagePickerControllerDelegate, UINavigationCo
 
         Task {
             do {
-                try await viewModel.uploadPhoto(at: photoIndex)
+                try await viewModel.uploadPhoto(at: photoIndex, title: title)
             } catch {
                 RouteeLogger.error(error)
             }
