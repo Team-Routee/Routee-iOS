@@ -28,7 +28,7 @@ final class ActivityList: BaseUIView {
     // MARK: - UI Setting
     
     override func setStyle() {
-        backgroundColor = .white_10
+        backgroundColor = .white10
         layer.cornerRadius = .r12
         layer.masksToBounds = true
         isUserInteractionEnabled = true
@@ -47,8 +47,8 @@ final class ActivityList: BaseUIView {
         }
 
         chevronIcon.do {
-            $0.setImage(.icChevronRightSmGrey, for: .normal)
-            $0.setImage(.icChevronRightSmGrey, for: .highlighted)
+            $0.setImage(.icChevronRightSmWhite, for: .normal)
+            $0.setImage(.icChevronRightSmWhite, for: .highlighted)
             $0.isUserInteractionEnabled = false
         }
     }
