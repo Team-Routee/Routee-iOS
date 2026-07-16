@@ -42,8 +42,7 @@ extension TrackPoints {
     func toModel() -> TrackPoint {
         TrackPoint(
             latitude: latitude,
-            longitude: longitude,
-            pointIndex: pointIndex
+            longitude: longitude
         )
     }
 }

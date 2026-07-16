@@ -325,10 +325,10 @@ final class EditorView: BaseUIView {
         let routePoints = state.trackPoints.toCanvasPoints(in: backgroundImageView.bounds.size)
 
         let markers = state.timelineMarkers.compactMap { marker -> RouteTimelineMarker? in
-            guard let point = state.trackPoints.toCanvasPoint(
+            guard let point = markerPoint(
                 latitude: marker.latitude,
                 longitude: marker.longitude,
-                in: backgroundImageView.bounds.size
+                canvasSize: backgroundImageView.bounds.size
             ) else {
                 return nil
             }
@@ -354,6 +354,51 @@ final class EditorView: BaseUIView {
             y: backgroundImageView.frame.maxY - stickerHeight,
             width: routeRect.width + stickerHorizontalInset * 2,
             height: stickerHeight
+        )
+    }
+
+    private func markerPoint(
+        latitude: Double,
+        longitude: Double,
+        canvasSize: CGSize,
+        padding: CGFloat = 60
+    ) -> CGPoint? {
+        guard state.trackPoints.count >= 2 else { return nil }
+
+        let latitudes = state.trackPoints.map(\.latitude)
+        let longitudes = state.trackPoints.map(\.longitude)
+
+        guard let minLatitude = latitudes.min(),
+              let maxLatitude = latitudes.max(),
+              let minLongitude = longitudes.min(),
+              let maxLongitude = longitudes.max()
+        else {
+            return nil
+        }
+
+        let latitudeRange = maxLatitude - minLatitude
+        let longitudeRange = maxLongitude - minLongitude
+
+        guard latitudeRange > 0, longitudeRange > 0 else {
+            return nil
+        }
+
+        let drawableWidth = canvasSize.width - padding * 2
+        let drawableHeight = canvasSize.height - padding * 2
+
+        let scaleX = drawableWidth / CGFloat(longitudeRange)
+        let scaleY = drawableHeight / CGFloat(latitudeRange)
+        let scale = Swift.min(scaleX, scaleY)
+
+        let routeWidth = CGFloat(longitudeRange) * scale
+        let routeHeight = CGFloat(latitudeRange) * scale
+
+        let offsetX = (canvasSize.width - routeWidth) / 2
+        let offsetY = (canvasSize.height - routeHeight) / 2
+
+        return CGPoint(
+            x: CGFloat(longitude - minLongitude) * scale + offsetX,
+            y: CGFloat(maxLatitude - latitude) * scale + offsetY
         )
     }
 

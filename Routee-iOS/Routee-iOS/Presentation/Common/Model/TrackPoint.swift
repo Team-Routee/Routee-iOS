@@ -10,32 +10,13 @@ import CoreGraphics
 struct TrackPoint {
     let latitude: Double
     let longitude: Double
-    let pointIndex: Int
 }
 
 extension Array where Element == TrackPoint {
     func toCanvasPoints(in canvasSize: CGSize, padding: CGFloat = 60) -> [CGPoint] {
-        guard let converter = canvasPointConverter(in: canvasSize, padding: padding) else { return [] }
-
-        return map { converter($0.latitude, $0.longitude) }
-    }
-
-    func toCanvasPoint(
-        latitude: Double,
-        longitude: Double,
-        in canvasSize: CGSize,
-        padding: CGFloat = 60
-    ) -> CGPoint? {
-        guard let converter = canvasPointConverter(in: canvasSize, padding: padding) else { return nil }
-
-        return converter(latitude, longitude)
-    }
-
-    private func canvasPointConverter(
-        in canvasSize: CGSize,
-        padding: CGFloat
-    ) -> ((Double, Double) -> CGPoint)? {
-        guard count >= 2 else { return nil }
+        guard count >= 2 else {
+            return []
+        }
 
         let latitudes = map(\.latitude)
         let longitudes = map(\.longitude)
@@ -45,19 +26,23 @@ extension Array where Element == TrackPoint {
               let minLongitude = longitudes.min(),
               let maxLongitude = longitudes.max()
         else {
-            return nil
+            return []
         }
 
         let latitudeRange = maxLatitude - minLatitude
         let longitudeRange = maxLongitude - minLongitude
 
-        guard latitudeRange > 0, longitudeRange > 0 else { return nil }
+        guard latitudeRange > 0, longitudeRange > 0
+        else {
+            return []
+        }
 
         let drawableWidth = canvasSize.width - padding * 2
         let drawableHeight = canvasSize.height - padding * 2
 
         let scaleX = drawableWidth / CGFloat(longitudeRange)
         let scaleY = drawableHeight / CGFloat(latitudeRange)
+
         let scale = Swift.min(scaleX, scaleY)
 
         let routeWidth = CGFloat(longitudeRange) * scale
@@ -66,11 +51,12 @@ extension Array where Element == TrackPoint {
         let offsetX = (canvasSize.width - routeWidth) / 2
         let offsetY = (canvasSize.height - routeHeight) / 2
 
-        return { latitude, longitude in
-            CGPoint(
-                x: CGFloat(longitude - minLongitude) * scale + offsetX,
-                y: CGFloat(maxLatitude - latitude) * scale + offsetY
-            )
+        return map { point in
+            let xPoint = CGFloat(point.longitude - minLongitude) * scale + offsetX
+
+            let yPoint = CGFloat(maxLatitude - point.latitude) * scale + offsetY
+
+            return CGPoint(x: xPoint, y: yPoint)
         }
     }
 }
@@ -78,21 +64,21 @@ extension Array where Element == TrackPoint {
 extension TrackPoint {
     static func dummyTrackPoints() -> [TrackPoint] {
         [
-            TrackPoint(latitude: 37.5665, longitude: 126.9780, pointIndex: 0),
-            TrackPoint(latitude: 37.5670, longitude: 126.9785, pointIndex: 1),
-            TrackPoint(latitude: 37.5680, longitude: 126.9790, pointIndex: 2),
-            TrackPoint(latitude: 37.5685, longitude: 126.9800, pointIndex: 3),
-            TrackPoint(latitude: 37.5695, longitude: 126.9810, pointIndex: 4),
-            TrackPoint(latitude: 37.5700, longitude: 126.9825, pointIndex: 5),
-            TrackPoint(latitude: 37.5710, longitude: 126.9830, pointIndex: 6),
-            TrackPoint(latitude: 37.5715, longitude: 126.9845, pointIndex: 7),
-            TrackPoint(latitude: 37.5720, longitude: 126.9850, pointIndex: 8),
-            TrackPoint(latitude: 37.5730, longitude: 126.9840, pointIndex: 9),
-            TrackPoint(latitude: 37.5740, longitude: 126.9835, pointIndex: 10),
-            TrackPoint(latitude: 37.5750, longitude: 126.9820, pointIndex: 11),
-            TrackPoint(latitude: 37.5755, longitude: 126.9805, pointIndex: 12),
-            TrackPoint(latitude: 37.5745, longitude: 126.9790, pointIndex: 13),
-            TrackPoint(latitude: 37.5730, longitude: 126.9785, pointIndex: 14)
+            TrackPoint(latitude: 37.5665, longitude: 126.9780),
+            TrackPoint(latitude: 37.5670, longitude: 126.9785),
+            TrackPoint(latitude: 37.5680, longitude: 126.9790),
+            TrackPoint(latitude: 37.5685, longitude: 126.9800),
+            TrackPoint(latitude: 37.5695, longitude: 126.9810),
+            TrackPoint(latitude: 37.5700, longitude: 126.9825),
+            TrackPoint(latitude: 37.5710, longitude: 126.9830),
+            TrackPoint(latitude: 37.5715, longitude: 126.9845),
+            TrackPoint(latitude: 37.5720, longitude: 126.9850),
+            TrackPoint(latitude: 37.5730, longitude: 126.9840),
+            TrackPoint(latitude: 37.5740, longitude: 126.9835),
+            TrackPoint(latitude: 37.5750, longitude: 126.9820),
+            TrackPoint(latitude: 37.5755, longitude: 126.9805),
+            TrackPoint(latitude: 37.5745, longitude: 126.9790),
+            TrackPoint(latitude: 37.5730, longitude: 126.9785)
         ]
     }
 }
