@@ -10,8 +10,8 @@ import Foundation
 protocol ActivityRepository {
     func getActivityRoute(activityId: Int64) async throws -> ActivityEditorModel
     func getActivityStatistics(activityId: Int64) async throws -> TimeLineMetricModel
-    func getActivityTimelineList(activityId: Int64) async throws -> TimeLineListModel
-    func getActivityCourseList(activityId: Int64) async throws -> TimeLineCourseModel
+    func getActivityTimelineList(activityId: Int64) async throws -> TimeLineData
+    func getActivityCourseList(activityId: Int64) async throws -> CourseData
 }
 
 struct DefaultActivityRepository: ActivityRepository {
@@ -70,7 +70,7 @@ struct DefaultActivityRepository: ActivityRepository {
         return response.toModel()
     }
 
-    func getActivityTimelineList(activityId: Int64) async throws -> TimeLineListModel {
+    func getActivityTimelineList(activityId: Int64) async throws -> TimeLineData {
         let accessToken = keychainService.read(.accessToken)
 
         guard !accessToken.isEmpty else {
@@ -90,7 +90,7 @@ struct DefaultActivityRepository: ActivityRepository {
         return response.toModel()
     }
 
-    func getActivityCourseList(activityId: Int64) async throws -> TimeLineCourseModel {
+    func getActivityCourseList(activityId: Int64) async throws -> CourseData {
         let accessToken = keychainService.read(.accessToken)
 
         guard !accessToken.isEmpty else {

@@ -36,11 +36,11 @@ final class TimeLineViewModel {
         try await activityRepository.getActivityRoute(activityId: activityId)
     }
 
-    func fetchTimeLineList(activityId: Int64) async throws -> TimeLineListModel {
+    func fetchTimeLineList(activityId: Int64) async throws -> TimeLineData {
         try await activityRepository.getActivityTimelineList(activityId: activityId)
     }
 
-    func fetchCourseList(activityId: Int64) async throws -> TimeLineCourseModel {
+    func fetchCourseList(activityId: Int64) async throws -> CourseData {
         try await activityRepository.getActivityCourseList(activityId: activityId)
     }
 

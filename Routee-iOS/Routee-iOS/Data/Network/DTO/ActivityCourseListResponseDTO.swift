@@ -19,8 +19,8 @@ struct ActivityCourseListResponseDTO: Decodable, Sendable {
 }
 
 extension ActivityCourseListResponseDTO {
-    func toModel() -> TimeLineCourseModel {
-        TimeLineCourseModel(
+    func toModel() -> CourseData {
+        CourseData(
             activityId: activityId,
             courses: routes.map { $0.toModel() }
         )
@@ -28,8 +28,8 @@ extension ActivityCourseListResponseDTO {
 }
 
 extension ActivityCourseListResponseDTO.Route {
-    func toModel() -> TimeLineCourseItemModel {
-        TimeLineCourseItemModel(
+    func toModel() -> CourseItemData {
+        CourseItemData(
             routeId: routeId,
             name: name,
             sequence: sequence

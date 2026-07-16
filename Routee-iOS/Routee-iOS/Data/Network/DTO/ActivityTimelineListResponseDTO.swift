@@ -20,8 +20,8 @@ struct ActivityTimelineListResponseDTO: Decodable, Sendable {
 }
 
 extension ActivityTimelineListResponseDTO {
-    func toModel() -> TimeLineListModel {
-        TimeLineListModel(
+    func toModel() -> TimeLineData {
+        TimeLineData(
             activityId: activityId,
             timelines: timelines.map { $0.toModel() }
         )
@@ -29,8 +29,8 @@ extension ActivityTimelineListResponseDTO {
 }
 
 extension ActivityTimelineListResponseDTO.Timeline {
-    func toModel() -> TimeLineModel {
-        TimeLineModel(
+    func toModel() -> TimeLineItemData {
+        TimeLineItemData(
             timelineId: timelineId,
             title: title,
             imageUrl: imageUrl,

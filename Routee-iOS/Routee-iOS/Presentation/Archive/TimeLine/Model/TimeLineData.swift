@@ -1,5 +1,5 @@
 //
-//  TimeLineListModel.swift
+//  TimeLineData.swift
 //  Routee-iOS
 //
 //  Created by 초긍정행운의포춘쿠키 on 7/15/26.
@@ -7,19 +7,19 @@
 
 import Foundation
 
-struct TimeLineListModel {
+struct TimeLineData {
     let activityId: Int64
-    let timelines: [TimeLineModel]
+    let timelines: [TimeLineItemData]
 }
 
-struct TimeLineModel {
+struct TimeLineItemData {
     let timelineId: Int64
     let title: String
     let imageUrl: String
     let createdAt: String
 }
 
-extension TimeLineListModel {
+extension TimeLineData {
     var imageUrls: [String] {
         timelines.map(\.imageUrl)
     }

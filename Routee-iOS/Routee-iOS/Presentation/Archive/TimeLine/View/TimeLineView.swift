@@ -70,7 +70,7 @@ final class TimeLineView: BaseUIView {
         )
     }
 
-    func configureTimeLineList(with model: TimeLineListModel) {
+    func configureTimeLineList(with model: TimeLineData) {
         guard showTimelineCard else { return }
 
         timelineCard.configure(
@@ -79,7 +79,7 @@ final class TimeLineView: BaseUIView {
         )
     }
 
-    func configureCourseList(with model: TimeLineCourseModel) {
+    func configureCourseList(with model: CourseData) {
         myRoute.configure(mode: .read, routePoint: model.routePoint)
     }
 
