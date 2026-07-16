@@ -39,7 +39,7 @@ final class TimeLineCard: BaseUIView {
 
             guard let locations,
                   locations.indices.contains(index),
-                  let location = locations[index] else { return }
+                  let location = Self.validLocationTitle(locations[index]) else { return }
 
             let locationTag = LocationTag(title: location)
             imageContainerView.addSubview(locationTag)
@@ -197,7 +197,7 @@ final class TimeLineCard: BaseUIView {
 
             guard let locations,
                   locations.indices.contains(index),
-                  let location = locations[index] else { return }
+                  let location = Self.validLocationTitle(locations[index]) else { return }
 
             let locationTag = LocationTag(title: location)
             imageContainerView.addSubview(locationTag)
@@ -211,6 +211,13 @@ final class TimeLineCard: BaseUIView {
         pageControl.numberOfPages = min(imageCount, 5)
         pageControl.currentPage = 0
         imageScrollView.setContentOffset(.zero, animated: false)
+    }
+
+    private static func validLocationTitle(_ title: String?) -> String? {
+        guard let title else { return nil }
+
+        let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmedTitle.isEmpty ? nil : trimmedTitle
     }
 }
 
