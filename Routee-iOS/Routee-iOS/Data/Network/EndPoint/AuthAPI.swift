@@ -12,12 +12,13 @@ import Alamofire
 enum AuthAPI {
     case login(header: HeaderType, requestDTO: LoginRequestDTO)
     case reissue(header: HeaderType, requestDTO: TokenReissueRequestDTO)
+    case logout(header: HeaderType, requestDTO: LogoutRequestDTO)
 }
 
 extension AuthAPI: RouteeEndPoint {
     var basePath: String {
         switch self {
-        case .login, .reissue:
+        case .login, .reissue, .logout:
             "/api/v1/auth"
         }
     }
@@ -28,26 +29,28 @@ extension AuthAPI: RouteeEndPoint {
             return "/login"
         case .reissue:
             return "/reissue"
+        case .logout:
+            return "/logout"
         }
     }
     
     var method: Alamofire.HTTPMethod {
         switch self {
-        case .login, .reissue:
+        case .login, .reissue, .logout:
             return .post
         }
     }
     
     var headers: HeaderType {
         switch self {
-        case .login(let header, _), .reissue(let header, _):
+        case .login(let header, _), .reissue(let header, _), .logout(let header, _):
             return header
         }
     }
     
     var parameterEncoding: any Alamofire.ParameterEncoding {
         switch self {
-        case .login, .reissue:
+        case .login, .reissue, .logout:
             return JSONEncoding.default
         }
     }
@@ -61,6 +64,8 @@ extension AuthAPI: RouteeEndPoint {
         case .login(_, let dto):
             return dto.asParameters()
         case .reissue(_, let dto):
+            return dto.asParameters()
+        case .logout(_, let dto):
             return dto.asParameters()
         }
     }
