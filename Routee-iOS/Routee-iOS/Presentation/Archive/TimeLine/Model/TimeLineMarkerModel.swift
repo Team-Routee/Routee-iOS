@@ -7,10 +7,4 @@
 
 import Foundation
 
-struct TimeLineMarkerModel {
-    let timelineId: Int64
-    let thumbnailUrl: String
-    let latitude: Double
-    let longitude: Double
-    let pointIndex: Int
-}
+typealias TimeLineMarkerModel = TimelineMarkerModel

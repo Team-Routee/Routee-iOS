@@ -14,7 +14,7 @@ final class RouteSticker: BaseUIView {
     
     // MARK: - Properties
     
-    private var routeTitles = RouteStickerDummyData.routeTitles
+    private var routeTitles: [String] = []
     private var currentColor: UIColor = .staticWhite
     
     // MARK: - UI Properties

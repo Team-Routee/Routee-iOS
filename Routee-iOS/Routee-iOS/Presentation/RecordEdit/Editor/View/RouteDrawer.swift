@@ -5,7 +5,14 @@
 //  Created by 김세령 on 7/12/26.
 //
 
+import Kingfisher
+import SnapKit
 import UIKit
+
+struct RouteTimelineMarker {
+    let thumbnailUrl: String
+    let point: CGPoint
+}
 
 final class RouteDrawer: UIView {
 
@@ -14,6 +21,7 @@ final class RouteDrawer: UIView {
     private var points: [CGPoint] = []
     private var contentSize: CGSize = .zero
     private var routeColor: UIColor = .recapMint
+    private var markerImageViews: [UIImageView] = []
 
     override var intrinsicContentSize: CGSize {
         contentSize == .zero ? super.intrinsicContentSize : contentSize
@@ -35,7 +43,7 @@ final class RouteDrawer: UIView {
 
     // MARK: - Public Methods
 
-    func configureSticker(points: [CGPoint]) -> CGRect? {
+    func configureSticker(points: [CGPoint], markers: [RouteTimelineMarker]) -> CGRect? {
         guard let routeRect = routeRect(from: points) else { return nil }
 
         let routeSize = CGSize(
@@ -50,6 +58,8 @@ final class RouteDrawer: UIView {
             )
         }
         self.contentSize = routeSize
+        configureMarkers(markers, routeRect: routeRect)
+
         invalidateIntrinsicContentSize()
         setNeedsDisplay()
 
@@ -58,6 +68,9 @@ final class RouteDrawer: UIView {
 
     func updateColor(_ color: UIColor) {
         routeColor = color
+        markerImageViews.forEach {
+            $0.layer.borderColor = color.cgColor
+        }
         setNeedsDisplay()
     }
 
@@ -99,5 +112,39 @@ final class RouteDrawer: UIView {
 
     override func draw(_ rect: CGRect) {
         drawRoute()
+    }
+
+    private func configureMarkers(
+        _ markers: [RouteTimelineMarker],
+        routeRect: CGRect
+    ) {
+        markerImageViews.forEach { $0.removeFromSuperview() }
+        markerImageViews.removeAll()
+
+        markers.forEach { marker in
+            let imageView = UIImageView()
+            imageView.contentMode = .scaleAspectFill
+            imageView.clipsToBounds = true
+            imageView.layer.cornerRadius = 12
+            imageView.layer.borderWidth = 3
+            imageView.layer.borderColor = routeColor.cgColor
+
+            if let url = URL(string: marker.thumbnailUrl) {
+                imageView.kf.setImage(with: url)
+            }
+
+            addSubview(imageView)
+            markerImageViews.append(imageView)
+
+            imageView.snp.makeConstraints {
+                $0.size.equalTo(36)
+                $0.center.equalTo(
+                    CGPoint(
+                        x: marker.point.x - routeRect.minX,
+                        y: marker.point.y - routeRect.minY
+                    )
+                )
+            }
+        }
     }
 }

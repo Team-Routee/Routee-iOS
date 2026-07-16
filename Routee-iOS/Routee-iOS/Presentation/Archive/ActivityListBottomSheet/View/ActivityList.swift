@@ -97,8 +97,7 @@ final class ActivityList: BaseUIView {
         }
 
         thumbnailImageView.kf.setImage(
-            with: url,
-            placeholder: UIImage.routeeLogoBlack
+            with: url, placeholder: UIImage.routeeLogoBlack
         )
     }
 

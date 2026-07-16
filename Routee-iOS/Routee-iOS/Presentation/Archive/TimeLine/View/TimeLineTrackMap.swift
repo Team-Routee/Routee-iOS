@@ -17,7 +17,7 @@ final class TimeLineTrackMap: BaseUIView {
     // MARK: - Properties
 
     private var trackPoints: [TrackPoint]
-    private var markers: [TimeLineMarkerModel]
+    private var markers: [TimelineMarkerModel]
     private var shouldUpdateCamera = true
     private var shouldUpdatePhotoMarkers = true
 
@@ -31,7 +31,7 @@ final class TimeLineTrackMap: BaseUIView {
 
     init(
         trackPoints: [TrackPoint] = [],
-        markers: [TimeLineMarkerModel] = []
+        markers: [TimelineMarkerModel] = []
     ) {
         self.trackPoints = trackPoints
         self.markers = markers
@@ -54,7 +54,7 @@ final class TimeLineTrackMap: BaseUIView {
 
     func updateRoute(
         trackPoints: [TrackPoint],
-        markers: [TimeLineMarkerModel]
+        markers: [TimelineMarkerModel]
     ) {
         self.trackPoints = trackPoints
         self.markers = markers
@@ -131,12 +131,12 @@ final class TimeLineTrackMap: BaseUIView {
         }
     }
 
-    private func coordinate(for marker: TimeLineMarkerModel) -> NMGLatLng? {
+    private func coordinate(for marker: TimelineMarkerModel) -> NMGLatLng? {
         NMGLatLng(lat: marker.latitude, lng: marker.longitude)
     }
 
     private func addPhotoMarker(
-        _ markerModel: TimeLineMarkerModel,
+        _ markerModel: TimelineMarkerModel,
         imageURL: URL,
         at coordinate: NMGLatLng
     ) {
