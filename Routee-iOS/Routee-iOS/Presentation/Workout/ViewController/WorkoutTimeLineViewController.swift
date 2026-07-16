@@ -109,6 +109,11 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     @objc
     private func didTapGoToEditButton() {
         Task {
+            do {
+                try await uploadCourseList()
+            } catch {
+                RouteeLogger.error(error)
+            }
             await finishRecordingIfNeeded()
             navigationController?.pushViewController(
                 EditorViewController(activityId: activityId),
