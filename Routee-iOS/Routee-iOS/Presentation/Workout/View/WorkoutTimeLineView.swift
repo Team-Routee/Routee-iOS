@@ -106,6 +106,9 @@ final class WorkoutTimeLineView: BaseUIView {
     }
     
     override func setStyle() {
+        timeLineStackView.isHidden = timelineImages.isEmpty
+        timeLineCard.isHidden = timelineImages.isEmpty
+
         timeLineStackView.do {
             $0.axis = .vertical
             $0.spacing = 4
@@ -174,7 +177,11 @@ final class WorkoutTimeLineView: BaseUIView {
         }
         
         myRoute.snp.makeConstraints {
-            $0.top.equalTo(timeLineCard.snp.bottom).offset(61)
+            if timelineImages.isEmpty {
+                $0.top.equalTo(trackMap.snp.bottom).offset(48)
+            } else {
+                $0.top.equalTo(timeLineCard.snp.bottom).offset(61)
+            }
             $0.horizontalEdges.equalToSuperview().inset(16)
             $0.bottom.equalTo(scrollView.contentLayoutGuide).inset(140)
         }
