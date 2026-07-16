@@ -123,10 +123,10 @@ final class WorkoutViewController: BaseUIViewController {
         guard workoutMode != .finishing else { return }
         workoutMode = .finishing
 
-        let backgroundMapTask = Task {
+        let backgroundMapTask = Task { () -> UIImage? in
             guard let mapImage = await workoutView.captureBackgroundMapImage(
                 fitting: viewModel.routePoints.map(\.latLng)
-            ) else { return }
+            ) else { return nil }
 
             do {
                 try await viewModel.uploadBackgroundMap(image: mapImage)
@@ -134,16 +134,32 @@ final class WorkoutViewController: BaseUIViewController {
             } catch {
                 RouteeLogger.error(error)
             }
+            return mapImage
         }
 
         workoutView.playFinishAnimation { [weak self] in
             guard let self else { return }
 
             Task {
-                await backgroundMapTask.value
-                self.navigationController?.pushViewController(WorkoutTimeLineViewController(), animated: true)
+                let mapImage = await backgroundMapTask.value
+                self.pushWorkoutTimeLineViewController(backgroundMapImage: mapImage)
             }
         }
+    }
+
+    private func pushWorkoutTimeLineViewController(backgroundMapImage: UIImage?) {
+        let viewController = WorkoutTimeLineViewController(
+            title: viewModel.activityTitle ?? "",
+            distanceInMeters: viewModel.totalDistance,
+            durationInSeconds: viewModel.elapsedTimeInSeconds,
+            maxAltitudeInMeters: viewModel.maximumAltitudeInMeters,
+            backgroundMapImage: backgroundMapImage,
+            trackPoints: viewModel.routePoints.map {
+                TrackPoint(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude)
+            },
+            photoRecords: viewModel.photoRecords
+        )
+        navigationController?.pushViewController(viewController, animated: true)
     }
     
     private func requestCameraAccess() {
@@ -443,12 +459,12 @@ extension WorkoutViewController: UIImagePickerControllerDelegate, UINavigationCo
     private func savePhotoRecord(_ photoRecord: WorkoutPhotoRecord, title: String) {
         guard let routePoint = viewModel.routePoint(matching: photoRecord.pointIndex) else { return }
 
-        let photoIndex = viewModel.savePhotoRecord(photoRecord)
+        let photoIndex = viewModel.savePhotoRecord(photoRecord, title: title)
         workoutView.addPhotoMarker(photoRecord, at: routePoint.coordinate)
 
         Task {
             do {
-                try await viewModel.uploadPhoto(at: photoIndex, title: title)
+                try await viewModel.uploadPhoto(at: photoIndex)
             } catch {
                 RouteeLogger.error(error)
             }

@@ -11,5 +11,6 @@ struct WorkoutPhotoRecord {
     let image: UIImage
     let pointIndex: Int
     let createdAt: Date = Date()
+    var locationTitle: String?
     var objectKey: String?
 }

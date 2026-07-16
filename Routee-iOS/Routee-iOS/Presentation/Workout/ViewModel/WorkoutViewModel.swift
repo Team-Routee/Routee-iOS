@@ -25,7 +25,7 @@ final class WorkoutViewModel {
     private let activityRepository: ActivityRepository
     private var lastReverseGeocodingLocation: CLLocation?
     private var lastRecordedLocation: CLLocation?
-    private var totalDistance: CLLocationDistance = 0
+    private(set) var totalDistance: CLLocationDistance = 0
     private var elapsedTimeTimer: Timer?
     private var accumulatedElapsedTime: TimeInterval = 0
     private var elapsedTimeSegmentStartedAt: Date?
@@ -107,8 +107,10 @@ final class WorkoutViewModel {
     }
     
     @discardableResult
-    func savePhotoRecord(_ photoRecord: WorkoutPhotoRecord) -> Int {
-        photoRecords.append(photoRecord)
+    func savePhotoRecord(_ photoRecord: WorkoutPhotoRecord, title: String) -> Int {
+        var record = photoRecord
+        record.locationTitle = title
+        photoRecords.append(record)
         return photoRecords.count - 1
     }
 
@@ -209,7 +211,7 @@ final class WorkoutViewModel {
         try await activityRepository.finishActivity(activityId: activityId, requestModel: finishModel)
     }
 
-    func uploadPhoto(at index: Int, title: String) async throws {
+    func uploadPhoto(at index: Int) async throws {
         guard let activityId,
               photoRecords.indices.contains(index) else {
             throw RouteeError.noData
@@ -236,7 +238,11 @@ final class WorkoutViewModel {
 
         photoRecords[index].objectKey = presigned.objectKey
 
-        try await createTimeLine(for: photoRecords[index], objectKey: presigned.objectKey, title: title)
+        try await createTimeLine(
+            for: photoRecords[index],
+            objectKey: presigned.objectKey,
+            title: photoRecords[index].locationTitle ?? ""
+        )
     }
 
     func uploadBackgroundMap(image: UIImage) async throws {
