@@ -29,6 +29,7 @@ final class WorkoutTimeLineView: BaseUIView {
     private let altitude: String
     private let backgroundMapImage: UIImage?
     private let trackPoints: [TrackPoint]
+    private let photoRecords: [WorkoutPhotoRecord]
     private let timelineImages: [UIImage]
     private let timelineLocations: [String?]
 
@@ -41,8 +42,7 @@ final class WorkoutTimeLineView: BaseUIView {
         maxAltitudeInMeters: Double?,
         backgroundMapImage: UIImage?,
         trackPoints: [TrackPoint],
-        timelineImages: [UIImage],
-        timelineLocations: [String?]
+        photoRecords: [WorkoutPhotoRecord]
     ) {
         self.title = title
         self.distance = String(format: "%.2f", distanceInMeters / 1_000)
@@ -54,8 +54,9 @@ final class WorkoutTimeLineView: BaseUIView {
         self.altitude = maxAltitudeInMeters.map { String(Int($0.rounded())) } ?? "0"
         self.backgroundMapImage = backgroundMapImage
         self.trackPoints = trackPoints
-        self.timelineImages = timelineImages
-        self.timelineLocations = timelineLocations
+        self.photoRecords = photoRecords
+        self.timelineImages = photoRecords.map(\.image)
+        self.timelineLocations = photoRecords.map(\.locationTitle)
 
         super.init(frame: .zero)
     }
@@ -73,7 +74,8 @@ final class WorkoutTimeLineView: BaseUIView {
     private lazy var workoutMetric = WorkoutMetric(distance: distance, time: time, altitude: altitude)
     private lazy var trackMap = TrackMap(
         backgroundImage: backgroundMapImage ?? UIImage(resource: .imgNavermapMain),
-        trackPoints: trackPoints
+        trackPoints: trackPoints,
+        photos: photoRecords.map { TrackMap.Photo(image: $0.image, pointIndex: $0.pointIndex) }
     )
     private let timeLineStackView = UIStackView()
     private let timeLineLabel = UILabel()

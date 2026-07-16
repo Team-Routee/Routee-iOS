@@ -9,9 +9,9 @@ import Foundation
 
 struct CourseListModel {
     let activityId: Int64
-    let routes: [Route]
+    let routes: [RouteData]
 
-    struct Route {
+    struct RouteData {
         let routeId: Int64
         let name: String
         let sequence: Int

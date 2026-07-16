@@ -17,7 +17,7 @@ extension CreateCourseListResponseDTO {
         CourseListModel(
             activityId: activityId,
             routes: routes.map {
-                CourseListModel.Route(
+                CourseListModel.RouteData(
                     routeId: $0.routeId,
                     name: $0.name,
                     sequence: $0.sequence

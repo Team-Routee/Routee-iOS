@@ -38,8 +38,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
             maxAltitudeInMeters: maxAltitudeInMeters,
             backgroundMapImage: backgroundMapImage,
             trackPoints: trackPoints,
-            timelineImages: photoRecords.map(\.image),
-            timelineLocations: photoRecords.map(\.locationTitle)
+            photoRecords: photoRecords
         )
         super.init(nibName: nil, bundle: nil)
     }
