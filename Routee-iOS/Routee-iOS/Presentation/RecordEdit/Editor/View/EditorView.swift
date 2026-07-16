@@ -23,7 +23,7 @@ final class EditorView: BaseUIView {
         var selectedColor: UIColor = .recapMint
         var didSetRouteTimelineStickerFrame = false
         var trackPoints: [TrackPoint] = TrackPoint.dummyTrackPoints()
-        var pointIndices: [Int] = []
+        var timelineMarkers: [TimelineMarkerModel] = []
     }
 
     // MARK: - UI Properties
@@ -129,7 +129,7 @@ final class EditorView: BaseUIView {
 
     func configure(with model: ActivityEditorModel) {
         state.trackPoints = model.trackPoints
-        state.pointIndices = model.pointIndices
+        state.timelineMarkers = model.timelineMarkers
         state.didSetRouteTimelineStickerFrame = false
         setTimelineFrame()
     }
@@ -324,7 +324,27 @@ final class EditorView: BaseUIView {
 
         let routePoints = state.trackPoints.toCanvasPoints(in: backgroundImageView.bounds.size)
 
-        guard let routeRect = routeTimelineDrawingView.configureSticker(points: routePoints) else { return }
+        let markers = state.timelineMarkers.compactMap { marker -> RouteTimelineMarker? in
+            guard let point = state.trackPoints.toCanvasPoint(
+                latitude: marker.latitude,
+                longitude: marker.longitude,
+                in: backgroundImageView.bounds.size
+            ) else {
+                return nil
+            }
+
+            return RouteTimelineMarker(
+                thumbnailUrl: marker.thumbnailUrl,
+                point: point
+            )
+        }
+
+        guard let routeRect = routeTimelineDrawingView.configureSticker(
+            points: routePoints,
+            markers: markers
+        ) else {
+            return
+        }
 
         let stickerHeight = routeRect.height + stickerVerticalInset * 2
 
