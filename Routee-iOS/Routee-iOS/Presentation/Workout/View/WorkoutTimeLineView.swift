@@ -14,14 +14,13 @@ final class WorkoutTimeLineView: BaseUIView {
     
     // MARK: - Properties
 
-    var backButtonAction: (() -> Void)? {
-        get { navigationBar.backButtonAction }
-        set { navigationBar.backButtonAction = newValue }
-    }
-
     var completeButtonAction: (() -> Void)? {
         get { navigationBar.rightButtonAction }
         set { navigationBar.rightButtonAction = newValue }
+    }
+
+    var routePointTitles: [String] {
+        myRoute.currentPoints
     }
     
     private let title: String
@@ -106,8 +105,14 @@ final class WorkoutTimeLineView: BaseUIView {
     }
     
     override func setStyle() {
+        navigationBar.setBackButtonEnabled(false)
         timeLineStackView.isHidden = timelineImages.isEmpty
         timeLineCard.isHidden = timelineImages.isEmpty
+
+        let routeTitles = timelineLocations
+            .compactMap { $0 }
+            .filter { !$0.isEmpty }
+        myRoute.configure(mode: .write, routePoint: RoutePointModel(points: routeTitles))
 
         timeLineStackView.do {
             $0.axis = .vertical
