@@ -22,3 +22,23 @@ struct TimeLineRecordModel {
         let pointIndex: Int
     }
 }
+
+extension TimeLineRecordModel {
+    func toDTO() -> CreateTimeLineRequestDTO {
+        CreateTimeLineRequestDTO(
+            title: title,
+            timelineImageObjectKey: imageObjectKey,
+            createdAt: createdAt,
+            trackPointIndex: trackPointIndex,
+            location: locations.map {
+                LocationData(
+                    latitude: $0.latitude,
+                    longitude: $0.longitude,
+                    elevation: $0.elevation,
+                    pointIndex: $0.pointIndex
+                )
+            },
+            status: status
+        )
+    }
+}

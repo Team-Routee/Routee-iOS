@@ -12,7 +12,7 @@ protocol ActivityRepository {
     func createActivity(activityType: String, startedAt: String) async throws -> WorkoutRecordStartModel
     func timeLinePresignedURL(activityId: Int64, fileName: String) async throws -> ImagePresignedURLModel
     func uploadTimeLineImage(presignedURL: String, imageData: Data) async throws
-    func createTimeLine(activityId: Int64, timeLine: TimeLineRecordModel) async throws
+    func createTimeLine(activityId: Int64, requestDTO: CreateTimeLineRequestDTO) async throws
 }
 
 struct DefaultActivityRepository: ActivityRepository {
@@ -93,14 +93,14 @@ struct DefaultActivityRepository: ActivityRepository {
         try await service.presignedURLUploadData(imageData, to: presignedURL, contentType: "image/jpeg")
     }
     
-    func createTimeLine(activityId: Int64, timeLine: TimeLineRecordModel) async throws {
+    func createTimeLine(activityId: Int64, requestDTO: CreateTimeLineRequestDTO) async throws {
         let accessToken = keychainService.read(.accessToken)
 
         guard !accessToken.isEmpty else {
             throw RouteeError.forbidden
         }
 
-        let dto = CreateTimeLineRequestDTO(model: timeLine)
+        let dto = requestDTO
 
         let endpoint = ActivityAPI.createTimeLine(
             header: .withAuthTimeZone(accessToken: accessToken, timeZone: TimeZone.current.identifier),
