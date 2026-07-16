@@ -7,6 +7,7 @@
 
 import UIKit
 
+import Kingfisher
 import SnapKit
 import Then
 
@@ -181,7 +182,39 @@ final class WorkoutRecordThumbnail: BaseUIView {
         }
     }
 
+    func configure(imageURLs: [String]) {
+        let imageURLs = Array(imageURLs.prefix(4))
+        let hasImages = !imageURLs.isEmpty
+
+        backgroundContainerView.backgroundColor = hasImages ? .white_30 : .grey900
+        backgroundPhotoView.isHidden = !hasImages
+        borderOverlayView.isHidden = !hasImages
+        emptyIconImageView.isHidden = hasImages
+
+        configureImageView(backgroundPhotoView, with: imageURLs.first)
+
+        foregroundPhotoViews.enumerated().forEach { index, imageView in
+            let imageIndex = index + 1
+            let hasForegroundImage = imageIndex < imageURLs.count
+
+            configureImageView(imageView, with: hasForegroundImage ? imageURLs[imageIndex] : nil)
+            imageView.isHidden = !hasForegroundImage
+        }
+    }
+
     // MARK: - Private Methods
+
+    private func configureImageView(_ imageView: UIImageView, with imageURL: String?) {
+        imageView.kf.cancelDownloadTask()
+
+        guard let imageURL,
+              let url = URL(string: imageURL) else {
+            imageView.image = nil
+            return
+        }
+
+        imageView.kf.setImage(with: url)
+    }
 
     private func setActions() {
         editButton.addTarget(

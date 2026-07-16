@@ -7,6 +7,7 @@
 
 import UIKit
 
+import Kingfisher
 import SnapKit
 import Then
 
@@ -132,6 +133,16 @@ final class EditorView: BaseUIView {
         state.timelineMarkers = model.timelineMarkers
         state.didSetRouteTimelineStickerFrame = false
         setTimelineFrame()
+    }
+
+    func configure(with model: RecordEditResourceModel) {
+        dataInfo.configure(
+            distance: model.distance,
+            durationSec: model.durationSec,
+            maxElevation: model.maxElevation
+        )
+        routeSticker.configure(with: model.routes.sorted { $0.sequence < $1.sequence }.map(\.name))
+        configureBackgroundImage(with: model.mapImageURL)
     }
 
     func setBackgroundTapAction(_ action: @escaping () -> Void) {
@@ -430,6 +441,18 @@ final class EditorView: BaseUIView {
         stickerBox.layoutIfNeeded()
 
         return stickerBox.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
+    }
+
+    private func configureBackgroundImage(with imageURL: String) {
+        guard let url = URL(string: imageURL) else {
+            backgroundImageView.image = .imgNavermapMain
+            return
+        }
+
+        backgroundImageView.kf.setImage(
+            with: url,
+            placeholder: UIImage.imgNavermapMain
+        )
     }
 
 }
