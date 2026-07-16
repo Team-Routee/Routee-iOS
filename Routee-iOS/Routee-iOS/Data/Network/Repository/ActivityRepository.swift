@@ -81,6 +81,6 @@ struct DefaultActivityRepository: ActivityRepository {
     }
 
     func uploadTimeLineImage(presignedURL: String, imageData: Data) async throws {
-        try await service.uploadData(imageData, to: presignedURL, contentType: "image/jpeg")
+        try await service.presignedURLUploadData(imageData, to: presignedURL, contentType: "image/jpeg")
     }
 }
