@@ -12,7 +12,7 @@
 | :---: | :---: | :---: |
 | **Lead / iOS** | **iOS** | **iOS** |
 | [**이상엽**](https://github.com/sangyup12) | [**김세령**](https://github.com/ser0kim) | [**이승희**](https://github.com/sssthnnhee) |
-| `애플로그인` <br/> `닉네임 설정` <br/> `메인 운동 기록` <br/> `운동 중 이미지 삽입` <br/> `최종 타임라인 수정` | `기록 편집 메인` <br/> `기록 편집 기능` <br/> `기록 편집 완료` <br/> `상단 네비게이션바` <br/> `설정` | `유저 정보` <br/> `마운틴 맵` <br/> `캘린더` <br/> `하단 탭바` <br/> `엣지 케이스` |
+| `애플 로그인` <br/> `닉네임 설정` <br/> `운동 기록` <br/> `운동 중 이미지 삽입` <br/> `최종 타임라인 수정` | `기록 편집 메인` <br/> `기록 편집 기능` <br/> `기록 편집 완료` <br/> `상단 네비게이션바` <br/> `설정` | `유저 프로필` <br/> `마운틴 맵` <br/> `아카이브 캘린더` <br/> `하단 탭바` <br/> `엣지 케이스` |
 
 <br>
 
@@ -63,11 +63,12 @@ https://github.com/user-attachments/assets/3d46ba62-6abd-44ea-a5b7-739a4e13fb86
 | UI 프레임워크 | **UIKit** | 높은 안정성의 UI Framework |
 | 아키텍처 | **MVVM** | UI, 데이터 계층 분리로 유지보수 용이 |
 | 네트워킹 | **Alamofire** | 공통 네트워크 요청 처리 및 API 레이어 추상화 |
-| 비동기/반응형 | **Combine** | 지속적인 상태 바인딩 최적화, ViewModel의 Input/Output 스트림 관리 |
 | 비동기 처리 | **Swift Concurrency** | 네트워크 요청의 명확하고 안전한 비동기 흐름 관리 |
 | 지도 | **NMapsMap** | 네이버 지도를 활용하여 간단한 약도부터 유명 관광지 표시 등 다양한 정보 제공 |
 | 애니메이션 | **Lottie** | 트렌디한 UI 표현, 디자이너 협업 효율, 벡터 기반 경량 애니메이션 |
 | 이미지 처리 | **Kingfisher** | 이미지 캐싱 및 네트워크 병목 방지 |
+| 이미지 크롭 | **TOCropViewController** | 이미지 크롭 라이브러리 |
+| 멀티 미디어 | **AVFoundation** | Apple 플랫폼에서  카메라, 미디어 편집을 세밀하게 제어할 수 있도록 지원하는 프레임워크 |
 | 로그 관리 | **OSLog** | 구조화된 로깅을 지원하여 성능 저하 없이 효율적으로 로그 수집 및 분석 가능 |
 | 패키지 관리 및 모듈화 | **SPM** | Swift Package Manager 기반 외부 라이브러리 관리 |
 | 버전 관리 | **Git, GitHub** | 브랜치 전략 기반 협업, PR 및 코드리뷰 활용 |
@@ -275,7 +276,7 @@ https://github.com/user-attachments/assets/3d46ba62-6abd-44ea-a5b7-739a4e13fb86
 | `hotfix`   | 긴급 수정 (배포 또는 개발 중 발생한 치명적 이슈 해결) |
 
 
-### <img width="20" alt="shape1" src="https://github.com/user-attachments/assets/a00194e1-b34c-4ad4-8d7a-ba1cae42313b" /> Commit Message 규칙
+### <img width="20" alt="shape1" src="https://github.com/user-attachments/assets/a00194e1-b34c-4ad4-8d7a-ba1cae42313b" /> Commit Message
 
 1. **소문자**로 작성합니다.  
 2. **한글**로 작성합니다.
