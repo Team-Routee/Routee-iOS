@@ -84,7 +84,7 @@ final class ArchiveView: BaseUIView {
         mountainMapView.snp.makeConstraints {
             $0.top.equalTo(monthSelector.snp.bottom).offset(7)
             $0.centerX.equalToSuperview()
-            $0.width.equalTo(343)
+            $0.width.equalTo(347)
             $0.height.equalTo(127)
         }
 
