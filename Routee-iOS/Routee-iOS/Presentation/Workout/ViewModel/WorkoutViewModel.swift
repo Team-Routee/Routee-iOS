@@ -8,6 +8,7 @@
 import CoreLocation
 import UIKit
 
+@MainActor
 final class WorkoutViewModel {
     var elapsedTimeDidChange: ((TimeInterval) -> Void)?
     var maximumAltitudeDidChange: ((CLLocationDistance?) -> Void)?
@@ -139,7 +140,9 @@ final class WorkoutViewModel {
     private func startElapsedTimeTimer() {
         elapsedTimeTimer?.invalidate()
         let timer = Timer(timeInterval: 1, repeats: true) { [weak self] _ in
-            self?.publishElapsedTime()
+            MainActor.assumeIsolated {
+                self?.publishElapsedTime()
+            }
         }
         elapsedTimeTimer = timer
         RunLoop.main.add(timer, forMode: .common)
@@ -218,7 +221,7 @@ final class WorkoutViewModel {
                     pointIndex: $0.pointIndex
                 )
             },
-            endedAt: Self.timeLineDateFormatter.string(from: Date())
+            endedAt: Self.timeLineDateString(from: Date())
         )
 
         try await activityRepository.finishActivity(activityId: activityId, requestModel: finishModel)
@@ -308,7 +311,7 @@ final class WorkoutViewModel {
         let timeLine = TimeLineRecordModel(
             title: title,
             imageObjectKey: objectKey,
-            createdAt: Self.timeLineDateFormatter.string(from: photoRecord.createdAt),
+            createdAt: Self.timeLineDateString(from: photoRecord.createdAt),
             trackPointIndex: photoRecord.pointIndex,
             location: TimeLineRecordModel.Location(
                 latitude: routePoint.coordinate.latitude,
@@ -322,12 +325,12 @@ final class WorkoutViewModel {
         try await activityRepository.createTimeLine(activityId: activityId, requestDTO: timeLine.toDTO())
     }
 
-    private static let timeLineDateFormatter: DateFormatter = {
+    private static func timeLineDateString(from date: Date) -> String {
         let formatter = DateFormatter()
         formatter.calendar = Calendar(identifier: .gregorian)
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.timeZone = .current
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        return formatter
-    }()
+        return formatter.string(from: date)
+    }
 }

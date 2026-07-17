@@ -11,7 +11,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     private let workoutTimelineView: WorkoutTimeLineView
     private let activityId: Int64?
     private let activityRepository: ActivityRepository
-    private let finishRecording: (String) async throws -> Void
+    private let finishRecording: @MainActor (String) async throws -> Void
 
     // MARK: - Initializer
 
@@ -24,7 +24,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
         backgroundMapImage: UIImage?,
         trackPoints: [TrackPoint],
         photoRecords: [WorkoutPhotoRecord],
-        finishRecording: @escaping (String) async throws -> Void,
+        finishRecording: @escaping @MainActor (String) async throws -> Void,
         activityRepository: ActivityRepository = DefaultActivityRepository()
     ) {
         self.activityId = activityId
