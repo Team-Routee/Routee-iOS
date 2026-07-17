@@ -43,6 +43,8 @@ final class RecordInfo: BaseUIView {
         [distanceDataLabel, timeDataLabel, altitudeDataLabel].forEach {
             $0.font = .display_26
             $0.textColor = .recapMint
+            $0.setContentCompressionResistancePriority(.required, for: .horizontal)
+            $0.setContentHuggingPriority(.required, for: .horizontal)
         }
         
         distanceLabel.do {
@@ -54,7 +56,7 @@ final class RecordInfo: BaseUIView {
         distanceDataLabel.do {
             $0.font = .display_26
             $0.textColor = .recapMint
-            $0.text = "15.5km"
+            $0.text = "15.50km"
         }
         
         timeLabel.do {
