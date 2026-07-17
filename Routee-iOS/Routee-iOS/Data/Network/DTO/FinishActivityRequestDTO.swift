@@ -24,4 +24,3 @@ struct TrackData: Encodable {
     let elevation: Int
     let pointIndex: Int
 }
-
