@@ -66,6 +66,15 @@ final class WorkoutPhotoLocationViewController: BaseUIViewController {
             action: #selector(locationTextFieldDidSubmit),
             for: .editingDidEndOnExit
         )
+
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapBackground))
+        tapGesture.cancelsTouchesInView = false
+        rootView.addGestureRecognizer(tapGesture)
+    }
+
+    @objc
+    private func didTapBackground() {
+        view.endEditing(true)
     }
     
     @objc
