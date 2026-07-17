@@ -20,11 +20,10 @@ final class TimeLineView: BaseUIView {
     }
 
     private let record: ActivityListModel?
-    private var showTimelineCard: Bool {
-        guard let record else { return true }
-        return record.thumbnailUrl != nil
-    }
-    private let showMyRoute: Bool = true
+    private var didConfigureTimeLine = false
+    private var didConfigureCourse = false
+    private var showsTimeLineSection = false
+    private var showsMyRouteSection = false
 
     // MARK: - UI Properties
 
@@ -71,16 +70,29 @@ final class TimeLineView: BaseUIView {
     }
 
     func configureTimeLineList(with model: TimeLineData) {
-        guard showTimelineCard else { return }
+        didConfigureTimeLine = true
+        showsTimeLineSection = !model.imageUrls.filter { !$0.isEmpty }.isEmpty
 
-        timelineCard.configure(
-            imageUrls: model.imageUrls,
-            locations: model.locations
-        )
+        if showsTimeLineSection {
+            timelineCard.configure(
+                imageUrls: model.imageUrls,
+                locations: model.locations
+            )
+        }
+        updateContentVisibility()
     }
 
     func configureCourseList(with model: CourseData) {
-        myRoute.configure(mode: .read, routePoint: model.routePoint)
+        let routePoint = RoutePointModel(
+            points: model.routePoint.points.filter { !$0.isEmpty }
+        )
+        didConfigureCourse = true
+        showsMyRouteSection = !routePoint.points.isEmpty
+
+        if showsMyRouteSection {
+            myRoute.configure(mode: .read, routePoint: routePoint)
+        }
+        updateContentVisibility()
     }
 
     // MARK: - UI Setting
@@ -118,20 +130,13 @@ final class TimeLineView: BaseUIView {
         contentView.addSubviews(
             titleTextField,
             workoutMetric,
-            trackMap
+            trackMap,
+            timelineTitleLabel,
+            timelineDateLabel,
+            timelineCard,
+            myRoute,
+            emptyStateLabel
         )
-
-        if showTimelineCard {
-            contentView.addSubviews(timelineTitleLabel,
-                                    timelineDateLabel,
-                                    timelineCard)
-        }
-
-        if showMyRoute {
-            contentView.addSubview(myRoute)
-        } else {
-            contentView.addSubview(emptyStateLabel)
-        }
     }
 
     override func setLayout() {
@@ -170,44 +175,93 @@ final class TimeLineView: BaseUIView {
             $0.height.equalTo(480)
         }
 
-        if showTimelineCard {
-            timelineTitleLabel.snp.makeConstraints {
-                $0.top.equalTo(trackMap.snp.bottom).offset(48)
-                $0.horizontalEdges.equalToSuperview().inset(16)
-                $0.height.equalTo(25)
-            }
-
-            timelineDateLabel.snp.makeConstraints {
-                $0.top.equalTo(timelineTitleLabel.snp.bottom).offset(4)
-                $0.horizontalEdges.equalToSuperview().inset(16)
-                $0.height.equalTo(17)
-            }
-
-            timelineCard.snp.makeConstraints {
-                $0.top.equalTo(timelineDateLabel.snp.bottom).offset(16)
-                $0.horizontalEdges.equalToSuperview()
-            }
+        timelineTitleLabel.snp.makeConstraints {
+            $0.top.equalTo(trackMap.snp.bottom).offset(48)
+            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.height.equalTo(25)
         }
 
-        if showMyRoute {
-            myRoute.snp.makeConstraints {
-                if showTimelineCard {
-                    $0.top.equalTo(timelineCard.snp.bottom).offset(82)
-                } else {
-                    $0.top.equalTo(trackMap.snp.bottom).offset(28)
-                }
-                $0.horizontalEdges.equalToSuperview().inset(16)
+        timelineDateLabel.snp.makeConstraints {
+            $0.top.equalTo(timelineTitleLabel.snp.bottom).offset(4)
+            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.height.equalTo(17)
+        }
+
+        timelineCard.snp.makeConstraints {
+            $0.top.equalTo(timelineDateLabel.snp.bottom).offset(16)
+            $0.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(timelineCard.snp.width)
+        }
+
+        myRoute.snp.makeConstraints {
+            $0.top.equalTo(timelineCard.snp.bottom).offset(82)
+            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.bottom.equalToSuperview().inset(64)
+        }
+
+        emptyStateLabel.snp.makeConstraints {
+            $0.top.equalTo(trackMap.snp.bottom).offset(28)
+            $0.centerX.equalToSuperview()
+            $0.height.equalTo(20)
+            $0.bottom.equalToSuperview().inset(64)
+        }
+
+        updateContentVisibility()
+    }
+
+    // MARK: - Private Methods
+
+    private func updateContentVisibility() {
+        let shouldShowEmptyState = didConfigureTimeLine
+            && didConfigureCourse
+            && !showsTimeLineSection
+            && !showsMyRouteSection
+
+        timelineTitleLabel.isHidden = !showsTimeLineSection
+        timelineDateLabel.isHidden = !showsTimeLineSection
+        timelineCard.isHidden = !showsTimeLineSection
+        myRoute.isHidden = !showsMyRouteSection
+        emptyStateLabel.isHidden = !shouldShowEmptyState
+
+        updateTimeLineCardLayout()
+        updateMyRouteLayout()
+        updateEmptyStateLayout()
+    }
+
+    private func updateTimeLineCardLayout() {
+        timelineCard.snp.remakeConstraints {
+            $0.top.equalTo(timelineDateLabel.snp.bottom).offset(16)
+            $0.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(timelineCard.snp.width)
+        }
+    }
+
+    private func updateMyRouteLayout() {
+        myRoute.snp.remakeConstraints {
+            if showsTimeLineSection {
+                let topOffset = showsMyRouteSection ? 82 : 0
+                $0.top.equalTo(timelineCard.snp.bottom).offset(topOffset)
+            } else {
+                $0.top.equalTo(trackMap.snp.bottom).offset(28)
+            }
+            $0.horizontalEdges.equalToSuperview().inset(16)
+
+            if showsMyRouteSection {
+                $0.bottom.equalToSuperview().inset(64)
+            } else if showsTimeLineSection {
+                $0.height.equalTo(0)
                 $0.bottom.equalToSuperview().inset(64)
             }
-        } else {
-            emptyStateLabel.snp.makeConstraints {
-                if showTimelineCard {
-                    $0.top.equalTo(timelineCard.snp.bottom).offset(48)
-                } else {
-                    $0.top.equalTo(trackMap.snp.bottom).offset(28)
-                }
-                $0.centerX.equalToSuperview()
-                $0.height.equalTo(20)
+        }
+    }
+
+    private func updateEmptyStateLayout() {
+        emptyStateLabel.snp.remakeConstraints {
+            $0.top.equalTo(trackMap.snp.bottom).offset(28)
+            $0.centerX.equalToSuperview()
+            $0.height.equalTo(20)
+
+            if !showsTimeLineSection && !showsMyRouteSection {
                 $0.bottom.equalToSuperview().inset(64)
             }
         }

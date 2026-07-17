@@ -68,6 +68,10 @@ final class WorkoutTimeLineView: BaseUIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
     
     // MARK: - UI Properties
     
@@ -277,9 +281,5 @@ final class WorkoutTimeLineView: BaseUIView {
 
     private func containsFirstResponder(in view: UIView) -> Bool {
         view.isFirstResponder || view.subviews.contains { containsFirstResponder(in: $0) }
-    }
-
-    deinit {
-        NotificationCenter.default.removeObserver(self)
     }
 }
