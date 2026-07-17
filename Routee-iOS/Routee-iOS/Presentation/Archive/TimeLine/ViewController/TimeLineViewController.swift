@@ -59,7 +59,7 @@ final class TimeLineViewController: BaseUIViewController {
         guard let activityId = record?.activityId else { return }
 
         activityStatisticsTask?.cancel()
-        activityStatisticsTask = Task { [weak self] in
+        activityStatisticsTask = Task { @MainActor [weak self] in
             guard let self else { return }
 
             do {
@@ -80,7 +80,7 @@ final class TimeLineViewController: BaseUIViewController {
         guard let activityId = record?.activityId else { return }
 
         activityRouteTask?.cancel()
-        activityRouteTask = Task { [weak self] in
+        activityRouteTask = Task { @MainActor [weak self] in
             guard let self else { return }
 
             do {
@@ -101,7 +101,7 @@ final class TimeLineViewController: BaseUIViewController {
         guard let activityId = record?.activityId else { return }
 
         timeLineListTask?.cancel()
-        timeLineListTask = Task { [weak self] in
+        timeLineListTask = Task { @MainActor [weak self] in
             guard let self else { return }
 
             do {
@@ -122,7 +122,7 @@ final class TimeLineViewController: BaseUIViewController {
         guard let activityId = record?.activityId else { return }
 
         courseListTask?.cancel()
-        courseListTask = Task { [weak self] in
+        courseListTask = Task { @MainActor [weak self] in
             guard let self else { return }
 
             do {
