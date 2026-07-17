@@ -127,6 +127,7 @@ final class WorkoutViewController: BaseUIViewController {
     private func pauseRecordingRoute() {
         workoutMode = .paused
         viewModel.pauseDistanceTracking()
+        workoutView.setFinishButtonEnabled(viewModel.canFinishRecording)
         changeActivityStatus(to: "ACTIVITY_PAUSED")
     }
 
@@ -136,7 +137,10 @@ final class WorkoutViewController: BaseUIViewController {
     }
     
     private func finishRecordingRoute() {
-        guard workoutMode != .finishing else { return }
+        guard
+            workoutMode != .finishing,
+            viewModel.canFinishRecording
+        else { return }
         workoutMode = .finishing
 
         let backgroundMapTask = Task { () -> UIImage? in
@@ -157,7 +161,9 @@ final class WorkoutViewController: BaseUIViewController {
 
             Task {
                 let mapImage = await backgroundMapTask.value
-                self.pushWorkoutTimeLineViewController(backgroundMapImage: mapImage)
+                await MainActor.run {
+                    self.pushWorkoutTimeLineViewController(backgroundMapImage: mapImage)
+                }
             }
         }
     }
@@ -395,16 +401,20 @@ final class WorkoutViewController: BaseUIViewController {
                 )
 
                 RouteeLogger.debug("운동 기록 시작 완료 (activityId: \(activity.activityId))")
-                workoutMode = .recording
-                workoutView.playCountdownAnimation()
-                workoutView.updateDistance(viewModel.startDistanceTracking())
-                workoutView.updateRoutePath(viewModel.routePoints.map(\.latLng))
+                await MainActor.run {
+                    self.workoutMode = .recording
+                    self.workoutView.playCountdownAnimation()
+                    self.workoutView.updateDistance(self.viewModel.startDistanceTracking())
+                    self.workoutView.updateRoutePath(self.viewModel.routePoints.map(\.latLng))
 
-                if let currentLocation = locationManager.location {
-                    appendRouteLocationIfNeeded(currentLocation)
+                    if let currentLocation = self.locationManager.location {
+                        self.appendRouteLocationIfNeeded(currentLocation)
+                    }
                 }
             } catch {
-                workoutView.recordButton.isEnabled = true
+                await MainActor.run {
+                    self.workoutView.recordButton.isEnabled = true
+                }
                 RouteeLogger.error(error)
             }
         }

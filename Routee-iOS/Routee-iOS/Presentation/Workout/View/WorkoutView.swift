@@ -293,6 +293,10 @@ final class WorkoutView: BaseUIView {
         workoutMetric.updateMaximumAltitude(formattedAltitude)
         workoutPauseView.updateAltitude(formattedAltitude)
     }
+
+    func setFinishButtonEnabled(_ isEnabled: Bool) {
+        workoutPauseView.setFinishButtonEnabled(isEnabled)
+    }
     
     func updateCurrentLocationAddress(_ address: String) {
         currentLocationLabel.text = address

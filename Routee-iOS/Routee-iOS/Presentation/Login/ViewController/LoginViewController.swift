@@ -31,9 +31,16 @@ final class LoginViewController: BaseUIViewController {
                     identityToken: identityToken,
                     appleUserID: appleUserID
                 )
-                goToMainService()
+                await MainActor.run {
+                    self.goToMainService()
+                }
             } catch RouteeError.notFound {
-                goToRegister(identityToken: identityToken, appleUserID: appleUserID)
+                await MainActor.run {
+                    self.goToRegister(
+                        identityToken: identityToken,
+                        appleUserID: appleUserID
+                    )
+                }
             } catch {
                 RouteeLogger.error(error)
             }

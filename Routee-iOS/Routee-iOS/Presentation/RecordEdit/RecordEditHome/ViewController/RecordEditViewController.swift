@@ -18,6 +18,7 @@ final class RecordEditViewController: BaseUIViewController {
     private let viewModel = RecordEditViewModel()
     private let profileViewModel = ProfileViewModel()
     private var records: [WorkoutListModel] = []
+    private var selectedMonth = Date().startOfMonth
     private let joinedDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.calendar = Calendar(identifier: .gregorian)
@@ -41,14 +42,14 @@ final class RecordEditViewController: BaseUIViewController {
 
         setCollectionView()
         setMonthSelector()
-        loadProfile()
-        fetchRecords(for: Date())
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         (tabBarController as? TabBarViewController)?.setCustomTabBarHidden(false)
+        loadProfile()
+        fetchRecords(for: selectedMonth)
     }
 
     // MARK: - Private Methods
@@ -65,6 +66,7 @@ final class RecordEditViewController: BaseUIViewController {
 
     private func setMonthSelector() {
         rootView.setMonthChangedHandler { [weak self] date in
+            self?.selectedMonth = date
             self?.fetchRecords(for: date)
         }
     }
@@ -78,7 +80,9 @@ final class RecordEditViewController: BaseUIViewController {
                 let joinDateText = String(profile.joinDate.prefix(10))
                 let joinDate = joinedDateFormatter.date(from: joinDateText)
 
-                rootView.configureMinimumMonth(joinDate)
+                await MainActor.run {
+                    self.rootView.configureMinimumMonth(joinDate)
+                }
             } catch {
                 RouteeLogger.error(error)
             }
@@ -99,10 +103,13 @@ final class RecordEditViewController: BaseUIViewController {
                     month: month
                 )
 
-                records = viewModel.records
-                rootView.updateView(isEmpty: records.isEmpty)
-                rootView.workoutRecordCollectionView.reloadData()
-                rootView.scrollToTop()
+                let fetchedRecords = viewModel.records
+                await MainActor.run {
+                    self.records = fetchedRecords
+                    self.rootView.updateView(isEmpty: fetchedRecords.isEmpty)
+                    self.rootView.workoutRecordCollectionView.reloadData()
+                    self.rootView.scrollToTop()
+                }
             } catch {
                 RouteeLogger.error(error)
             }
