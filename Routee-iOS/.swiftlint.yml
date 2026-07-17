@@ -33,3 +33,4 @@ disabled_rules: # 기본 활성화된 룰 중에 비활성화할 룰을 지정
   - function_body_length                   # 함수 본문 50줄 제한 비활성화
   - file_length                            # 파일 길이 제한 비활성화
   - type_body_length
+  - line_length                            # 한 줄 길이 제한 비활성화
