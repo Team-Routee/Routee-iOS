@@ -1,13 +1,41 @@
-# 루티 Routee
+<img width="2300" alt="KakaoTalk_Photo_2026-07-17-16-50-14" src="https://github.com/user-attachments/assets/0545f1e5-1adf-4f2e-96c8-7ca4e2e46243" />
 
-> 긴 호흡의 운동을 하나의 기록으로 남기고, 쉽게 공유할 수 있도록 돕는 경험 플랫폼
+# <img width="50" alt="Union" src="https://github.com/user-attachments/assets/89472edd-a888-4c8a-befe-3f4c1dca46f5" /> 루티 Routee
 
-함께 산을 오를 때, 누구나 공유하고 싶어지는 산행 기록을 쉽게 만들 수 있도록, <br>
-트렌디한 산행 리캡으로 기록해주는 iOS 애플리케이션입니다.<br>
+>
+루티(Routee)는 정상이 아닌, 산행의 여정을 기록하는 트렌디한 등산 경험 플랫폼입니다.  <br>
+등산 중 발생하는 운동 데이터, 사진, 위치 지점을 하나의 흐름으로 연결해 산행 경험을 기록하고 공유할 수 있도록 돕습니다. <br>
+
+## <img width="40" alt="Union" src="https://github.com/user-attachments/assets/89472edd-a888-4c8a-befe-3f4c1dca46f5" /> Contributors
+
+| <img width="500" alt="이상엽" src="https://github.com/user-attachments/assets/76bca745-9317-4d8b-a314-0952d992c2e3" /> | <img width="500" alt="김세령" src="https://github.com/user-attachments/assets/78a4df86-6887-4962-8bbc-19b375242590" /> | <img width="500" alt="이승희" src="https://github.com/user-attachments/assets/3baa8586-73af-4847-a731-142977131c6b" /> |
+| :---: | :---: | :---: |
+| **Lead / iOS** | **iOS** | **iOS** |
+| [**이상엽**](https://github.com/sangyup12) | [**김세령**](https://github.com/ser0kim) | [**이승희**](https://github.com/sssthnnhee) |
+| `애플로그인` <br/> `닉네임 설정` <br/> `메인 운동 기록` <br/> `운동 중 이미지 삽입` <br/> `최종 타임라인 수정` | `기록 편집 메인` <br/> `기록 편집 기능` <br/> `기록 편집 완료` <br/> `상단 네비게이션바` <br/> `설정` | `유저 정보` <br/> `마운틴 맵` <br/> `캘린더` <br/> `하단 탭바` <br/> `엣지 케이스` |
 
 <br>
 
-## 기술 스택
+## 기능 소개
+
+| 기능 | 설명 | 주요 특징 |
+|---|---|---|
+| 애플 로그인 및 닉네임 설정 | 사용자는 애플 로그인을 통해 간편하게 가입하고 닉네임을 설정할 수 있습니다. | - 간편한 온보딩<br>- 사용자별 산행 기록 관리<br>- 개인화된 기록 경험 제공 |
+| 실시간 산행 기록 | 등산 시작 버튼을 누르면 GPS 기반으로 거리, 시간, 최고 고도를 자동 기록합니다. | - 시작 카운트다운 애니메이션<br>- 실시간 거리, 시간, 최고 고도 기록<br>- 정지 및 종료 인터랙션 제공 |
+| 사진 및 위치 기록 | 산행 중 카메라 버튼을 눌러 현재 순간을 사진과 위치 정보로 함께 기록할 수 있습니다. | - 사진과 GPS 위치 연결<br>- 산행 루트 위 포토 핀 생성<br>- 순간별 메모 및 위치 지점 기록 |
+| 산행 타임라인 | 기록 종료 후 산행 데이터와 사진, 위치 지점을 타임라인 형태로 확인할 수 있습니다. | - 운동 데이터와 추억 통합<br>- 산행 과정 순서대로 정리<br>- 누락된 루트 지점 추가 및 수정 가능 |
+| 기록 관리 | 완료된 산행 기록을 한곳에서 확인하고 원하는 기록을 선택할 수 있습니다. | - 과거 산행 기록 모아보기<br>- 날짜별 기록 접근<br>- 기록 상세 데이터 확인 |
+| 기록 편집 | 산행 기록을 기반으로 SNS 공유용 리캡 이미지를 만들 수 있습니다. | - 배경 변경<br>- 색상 커스터마이징<br>- 경로 스타일 변경<br>- 사진 타임라인 및 루트 스티커 추가 |
+| 리캡 이미지 저장 및 공유 | 편집한 기록 이미지를 저장하고 SNS에 바로 공유할 수 있습니다. | - 별도 편집 앱 없이 공유 이미지 제작<br>- 트렌디한 운동 스토리 생성<br>- 사진과 운동 기록을 하나의 이미지로 표현 |
+| 아카이브 | 사용자의 누적 산행 기록을 히트맵과 캘린더로 확인할 수 있습니다. | - 마운틴 히트맵 제공<br>- 월별 산행 현황 확인<br>- 캘린더 기반 과거 기록 탐색 |
+| 산행 상세 기록 조회 | 캘린더에서 특정 날짜를 선택하면 해당 산행의 상세 기록을 확인할 수 있습니다. | - 운동 데이터 확인<br>- 코스 및 위치 지점 확인<br>- 산행 중 남긴 사진 모아보기 |
+
+## <img width="40" alt="Union" src="https://github.com/user-attachments/assets/89472edd-a888-4c8a-befe-3f4c1dca46f5" /> 핵심 가치
+
+루티는 흩어져 있던 운동 데이터, 사진, 코스 위치를 하나의 산행 경험으로 연결합니다.  
+기록은 더 간편하게, 공유는 더 트렌디하게, 추억은 더 오래 남길 수 있도록 설계되었습니다.
+
+## <img width="40" alt="Union" src="https://github.com/user-attachments/assets/89472edd-a888-4c8a-befe-3f4c1dca46f5" /> 기술 스택
 | 분류 | 기술 | 역할 |
 |:---:|:---:|---|
 | UI 프레임워크 | **UIKit** | 높은 안정성의 UI Framework |
@@ -24,12 +52,12 @@
 | 협업 도구 | **Figma, Notion** | 디자인 및 기능 흐름 시각화, 문서화 기반 협업 |
 <br>
 
-## Architecture
+## <img width="40" alt="Union" src="https://github.com/user-attachments/assets/89472edd-a888-4c8a-befe-3f4c1dca46f5" /> Architecture
 <img width="4266" height="2400" alt="아키텍처" src="https://github.com/user-attachments/assets/fad04f8d-f958-4ea4-b4cf-00a5df7533b7" />
 
 <br>
 
-## 프로젝트 구조
+## <img width="40" alt="Union" src="https://github.com/user-attachments/assets/89472edd-a888-4c8a-befe-3f4c1dca46f5" /> 프로젝트 구조
 
 ```Text
 📁 Routee-iOS
@@ -60,7 +88,7 @@
     └──  📃 Info.plist                     # 앱 설정 및 빌드 설정값 관리
 ```
 
-## Convention
+## <img width="40" alt="Union" src="https://github.com/user-attachments/assets/89472edd-a888-4c8a-befe-3f4c1dca46f5" /> Convention
 
 ### Code Style
 - [Swift 스타일 쉐어 가이드](https://github.com/StyleShare/swift-style-guide)를 따릅니다.  
