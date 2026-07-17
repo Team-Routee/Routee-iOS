@@ -12,7 +12,6 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     private let activityId: Int64?
     private let activityRepository: ActivityRepository
     private let finishRecording: (String) async throws -> Void
-    private var hasRequestedFinish = false
 
     // MARK: - Initializer
 
@@ -72,9 +71,6 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     }
 
     private func finishRecordingIfNeeded() async {
-        guard !hasRequestedFinish else { return }
-        hasRequestedFinish = true
-
         do {
             workoutTimelineView.endEditing(true)
             try await finishRecording(workoutTimelineView.activityTitle)
