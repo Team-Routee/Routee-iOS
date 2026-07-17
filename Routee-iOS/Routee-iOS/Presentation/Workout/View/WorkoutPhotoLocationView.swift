@@ -19,6 +19,7 @@ final class WorkoutPhotoLocationView: BaseUIView {
     let locationTextField = UITextField()
     let completeButton = RouteeButton(titleText: "기록 완료", type: .enabled)
     
+    private let contentClippingView = UIView()
     private let contentContainerView = UIView()
     private let photoImageView = UIImageView()
     private let locationContainerView = UIView()
@@ -39,21 +40,24 @@ final class WorkoutPhotoLocationView: BaseUIView {
     // MARK: - UI Setting
     
     override func setUI() {
-        addSubviews(contentContainerView, completeButton)
-        
+        addSubviews(contentClippingView, topNavigationBar, completeButton)
+
+        contentClippingView.addSubview(contentContainerView)
+
         contentContainerView.addSubviews(
-            topNavigationBar,
             photoImageView,
             locationContainerView,
             textLengthLabel
         )
-        
+
         locationContainerView.addSubviews(locationIcon, locationTextField)
     }
     
     override func setStyle() {
         backgroundColor = .bgPrimary
-        
+
+        contentClippingView.clipsToBounds = true
+
         photoImageView.do {
             $0.contentMode = .scaleAspectFill
             $0.layer.cornerRadius = 12
@@ -68,7 +72,7 @@ final class WorkoutPhotoLocationView: BaseUIView {
         }
         
         locationIcon.do {
-            $0.image = .icLocationInfoSmGradient
+            $0.image = .icLocationInfoSmMint
             $0.contentMode = .scaleAspectFit
         }
         
@@ -91,17 +95,23 @@ final class WorkoutPhotoLocationView: BaseUIView {
     }
     
     override func setLayout() {
-        contentContainerView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
-        
         topNavigationBar.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide)
             $0.horizontalEdges.equalToSuperview()
         }
-        
+
+        contentClippingView.snp.makeConstraints {
+            $0.top.equalTo(topNavigationBar.snp.bottom)
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalToSuperview()
+        }
+
+        contentContainerView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+
         photoImageView.snp.makeConstraints {
-            $0.top.equalTo(topNavigationBar.snp.bottom).offset(25)
+            $0.top.equalToSuperview().offset(25)
             $0.horizontalEdges.equalToSuperview().inset(16)
             $0.height.equalTo(468)
         }
