@@ -109,10 +109,13 @@ final class WorkoutPauseView: BaseUIView {
         }
         
         restartButton.do {
-            $0.setTitle("다시 시작", for: .normal)
-            $0.setImage(.icRestart, for: .normal)
-            $0.titleLabel?.font = .label_sb_16
-            $0.setTitleColor(.bgPrimary, for: .normal)
+            $0.setImageTitle(
+                title: "다시 시작",
+                image: .icRestart,
+                font: .label_sb_16,
+                foregroundColor: .bgPrimary,
+                imagePadding: 4
+            )
             $0.backgroundColor = .staticWhite
             $0.layer.cornerRadius = 30
             $0.clipsToBounds = true

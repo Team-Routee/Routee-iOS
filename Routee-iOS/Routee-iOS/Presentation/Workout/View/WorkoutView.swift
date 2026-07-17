@@ -14,11 +14,13 @@ import SnapKit
 import Then
 
 final class WorkoutView: BaseUIView {
+    
     // MARK: - Properties
     
     var distance = "0.00"
     var time = "00:00"
     var altitude = "0"
+    
     // MARK: - UI Properties
     
     private let routeeMapView = NMFNaverMapView()
@@ -143,10 +145,13 @@ final class WorkoutView: BaseUIView {
         }
         
         pauseButton.do {
-            $0.setTitle("정지", for: .normal)
-            $0.setImage(.icStop, for: .normal)
-            $0.titleLabel?.font = .label_sb_16
-            $0.setTitleColor(.bgPrimary, for: .normal)
+            $0.setImageTitle(
+                title: "정지",
+                image: .icStop,
+                font: .label_sb_16,
+                foregroundColor: .bgPrimary,
+                imagePadding: 4
+            )
             $0.backgroundColor = .staticWhite
             $0.layer.cornerRadius = 30
             $0.clipsToBounds = true
