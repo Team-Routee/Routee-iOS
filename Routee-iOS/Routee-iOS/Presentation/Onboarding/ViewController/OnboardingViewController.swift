@@ -35,10 +35,6 @@ final class OnboardingViewController: BaseUIViewController {
     // MARK: - Add Targets
     
     override func setAddTarget() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapKeyboardHide))
-        tapGesture.cancelsTouchesInView = false
-        view.addGestureRecognizer(tapGesture)
-        
         nicknameSettingView.startButton.addTarget(
             self,
             action: #selector(didTapStartButton),
@@ -48,11 +44,6 @@ final class OnboardingViewController: BaseUIViewController {
         
     // MARK: - Actions
 
-    @objc
-    private func didTapKeyboardHide() {
-        view.endEditing(true)
-    }
-    
     @objc
     private func didTapStartButton() {
         guard let identityToken, let appleUserID else {
