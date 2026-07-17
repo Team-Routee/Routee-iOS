@@ -181,6 +181,14 @@ final class WorkoutTimeLineView: BaseUIView {
             $0.horizontalEdges.equalTo(scrollView.contentLayoutGuide).inset(16)
         }
         
+        timeLineLabel.snp.makeConstraints {
+            $0.height.equalTo(25)
+        }
+        
+        timeLineDateLabel.snp.makeConstraints {
+            $0.height.equalTo(17)
+        }
+        
         timeLineCard.snp.makeConstraints {
             $0.top.equalTo(timeLineStackView.snp.bottom).offset(16)
             $0.centerX.equalToSuperview()
@@ -200,6 +208,7 @@ final class WorkoutTimeLineView: BaseUIView {
         goToEditButton.snp.makeConstraints {
             $0.bottom.equalTo(safeAreaLayoutGuide).inset(28)
             $0.centerX.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview().inset(16)
         }
     }
 }

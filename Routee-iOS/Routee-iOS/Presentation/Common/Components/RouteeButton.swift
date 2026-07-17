@@ -70,7 +70,6 @@ final class RouteeButton: UIButton {
         
         self.snp.makeConstraints {
             $0.height.equalTo(54)
-            $0.width.equalTo(343)
         }
     }
     
