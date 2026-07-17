@@ -34,8 +34,15 @@ final class ArchiveViewController: BaseUIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        loadProfile()
         loadArchive()
+        loadProfile()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        loadProfile()
+        
     }
 
     override func setView() {
