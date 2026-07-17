@@ -15,6 +15,8 @@ final class MonthSelector: BaseUIView {
     // MARK: - Properties
 
     var onMonthChanged: ((Date) -> Void)?
+
+    private var minimumDate: Date?
     
     private var currentDate = Date().startOfMonth {
         didSet {
@@ -51,7 +53,7 @@ final class MonthSelector: BaseUIView {
         }
         
         leftButton.do {
-            $0.setImage(UIImage(named: "ic_chevron_left_sm_white"), for: .normal)
+            configureButton($0, normalImage: .icChevronLeftSmWhite, disabledImage: .icChevronLeftSmGrey)
         }
         
         monthLabel.do {
@@ -61,7 +63,7 @@ final class MonthSelector: BaseUIView {
         }
         
         rightButton.do {
-            $0.setImage(UIImage(named: "ic_chevron_right_sm_white"), for: .normal)
+            configureButton($0, normalImage: .icChevronRightSmWhite, disabledImage: .icChevronRightSmGrey)
         }
     }
     
@@ -101,8 +103,22 @@ final class MonthSelector: BaseUIView {
     
     private func updateMonthState() {
         updateMonthLabel()
-        rightButton.isEnabled = !currentDate.isSameMonth(as: Date())
+        updateButton(leftButton, isEnabled: canMoveToPreviousMonth)
+        updateButton(rightButton, isEnabled: !currentDate.isSameMonth(as: Date()))
         onMonthChanged?(currentDate)
+    }
+
+    private var canMoveToPreviousMonth: Bool {
+        guard let minimumDate,
+              let previousMonth = Calendar.current.date(
+                byAdding: .month,
+                value: -1,
+                to: currentDate
+              )?.startOfMonth else {
+            return true
+        }
+
+        return previousMonth >= minimumDate
     }
     
     private func setAddTarget() {
@@ -123,18 +139,21 @@ final class MonthSelector: BaseUIView {
     
     @objc
     private func didTapPrevious() {
+        guard leftButton.isEnabled else { return }
+
         guard let date = Calendar.current.date(
             byAdding: .month,
             value: -1,
             to: currentDate
-        ) else { return }
+        )?.startOfMonth,
+              minimumDate.map({ date >= $0 }) ?? true else { return }
 
-        currentDate = date.startOfMonth
+        currentDate = date
     }
     
     @objc
     private func didTapNext() {
-        guard !currentDate.isSameMonth(as: Date()) else { return }
+        guard rightButton.isEnabled else { return }
         
         guard let date = Calendar.current.date(
             byAdding: .month,
@@ -143,5 +162,39 @@ final class MonthSelector: BaseUIView {
         ) else { return }
 
         currentDate = date.startOfMonth
+    }
+
+    private func updateButton(_ button: UIButton, isEnabled: Bool) {
+        button.isEnabled = isEnabled
+        button.isUserInteractionEnabled = isEnabled
+        button.setNeedsUpdateConfiguration()
+    }
+
+    // MARK: - Public Methods
+
+    func configureMinimumDate(_ date: Date?) {
+        minimumDate = date?.startOfMonth
+
+        if let minimumDate,
+           currentDate < minimumDate {
+            currentDate = minimumDate
+            return
+        }
+
+        updateMonthState()
+    }
+
+    private func configureButton(_ button: UIButton, normalImage: UIImage, disabledImage: UIImage) {
+        var configuration = UIButton.Configuration.plain()
+        configuration.contentInsets = .zero
+        configuration.image = normalImage
+        button.configuration = configuration
+        button.adjustsImageWhenDisabled = false
+
+        button.configurationUpdateHandler = { button in
+            var updatedConfiguration = button.configuration
+            updatedConfiguration?.image = button.isEnabled ? normalImage : disabledImage
+            button.configuration = updatedConfiguration
+        }
     }
 }

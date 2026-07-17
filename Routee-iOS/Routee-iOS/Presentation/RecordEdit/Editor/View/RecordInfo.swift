@@ -72,7 +72,7 @@ final class RecordInfo: BaseUIView {
         altitudeLabel.do {
             $0.font = .label_sb_12
             $0.textColor = .recapMint
-            $0.text = "고도"
+            $0.text = "최고 고도"
         }
         
         altitudeDataLabel.do {
@@ -98,13 +98,26 @@ final class RecordInfo: BaseUIView {
         dataInfoStackView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
+        
+        [distanceLabel, timeLabel, altitudeLabel].forEach {
+            $0.snp.makeConstraints {
+                $0.height.equalTo(17)
+            }
+        }
+        
+        [distanceDataLabel, timeDataLabel, altitudeDataLabel].forEach {
+            $0.snp.makeConstraints {
+                $0.height.equalTo(31)
+            }
+        }
+        
     }
     
     // MARK: - Public Methods
 
     func configure(distance: Int, durationSec: Int, maxElevation: Int) {
         let distanceInKm = Double(distance) / 1000.0
-        distanceDataLabel.text = String(format: "%.1fkm", distanceInKm)
+        distanceDataLabel.text = String(format: "%.2fkm", distanceInKm)
         timeDataLabel.text = "\(durationSec / 3600)h \((durationSec % 3600) / 60)m"
         altitudeDataLabel.text = "\(maxElevation)m"
     }

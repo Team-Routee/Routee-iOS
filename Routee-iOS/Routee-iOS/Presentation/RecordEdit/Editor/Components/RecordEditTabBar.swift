@@ -104,6 +104,7 @@ final class RecordEditTabBar: BaseUIView {
     func hideOptionView() {
         colorPalette.isHidden = true
         stickerSelector.isHidden = true
+        stickerSelector.deselectAll()
         tabItems.forEach { $0.isSelected = false }
         onStickerEditingChanged?(false)
     }
@@ -163,6 +164,7 @@ final class RecordEditTabBar: BaseUIView {
     @objc
     private func colorButtonTapped() {
         stickerSelector.isHidden = true
+        stickerSelector.deselectAll()
         onStickerEditingChanged?(false)
         onColorTap?()
         
@@ -182,11 +184,13 @@ final class RecordEditTabBar: BaseUIView {
         
         if stickerSelector.isHidden {
             selectItem(stickerItem)
+            stickerSelector.deselectAll()
             stickerSelector.isHidden = false
             onStickerEditingChanged?(true)
         } else {
             tabItems.forEach { $0.isSelected = false }
             stickerSelector.isHidden = true
+            stickerSelector.deselectAll()
             onStickerEditingChanged?(false)
         }
     }
