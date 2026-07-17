@@ -18,6 +18,8 @@ final class RouteDrawer: UIView {
 
     // MARK: - Properties
 
+    private let routeLineWidth: CGFloat = 3
+    private let markerSize: CGFloat = 36
     private var points: [CGPoint] = []
     private var contentSize: CGSize = .zero
     private var routeColor: UIColor = .recapMint
@@ -44,7 +46,7 @@ final class RouteDrawer: UIView {
     // MARK: - Public Methods
 
     func configureSticker(points: [CGPoint], markers: [RouteTimelineMarker]) -> CGRect? {
-        guard let routeRect = routeRect(from: points) else { return nil }
+        guard let routeRect = contentRect(from: points, markers: markers) else { return nil }
 
         let routeSize = CGSize(
             width: max(routeRect.width, 1),
@@ -104,7 +106,7 @@ final class RouteDrawer: UIView {
         }
 
         routeColor.setStroke()
-        path.lineWidth = 3
+        path.lineWidth = routeLineWidth
         path.lineCapStyle = .round
         path.lineJoinStyle = .round
         path.stroke()
@@ -137,7 +139,7 @@ final class RouteDrawer: UIView {
             markerImageViews.append(imageView)
 
             imageView.snp.makeConstraints {
-                $0.size.equalTo(36)
+                $0.size.equalTo(markerSize)
                 $0.center.equalTo(
                     CGPoint(
                         x: marker.point.x - routeRect.minX,
@@ -146,5 +148,27 @@ final class RouteDrawer: UIView {
                 )
             }
         }
+    }
+
+    private func contentRect(
+        from points: [CGPoint],
+        markers: [RouteTimelineMarker]
+    ) -> CGRect? {
+        guard var rect = routeRect(from: points) else { return nil }
+
+        let routePadding = routeLineWidth / 2
+        rect = rect.insetBy(dx: -routePadding, dy: -routePadding)
+
+        markers.forEach {
+            let markerRect = CGRect(
+                x: $0.point.x - markerSize / 2,
+                y: $0.point.y - markerSize / 2,
+                width: markerSize,
+                height: markerSize
+            )
+            rect = rect.union(markerRect)
+        }
+
+        return rect
     }
 }

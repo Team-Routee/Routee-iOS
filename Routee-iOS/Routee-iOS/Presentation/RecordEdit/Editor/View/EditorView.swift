@@ -18,6 +18,7 @@ final class EditorView: BaseUIView {
     private let stickerHorizontalInset: CGFloat = 13
     private let stickerVerticalInset: CGFloat = 10
     private let stickerMovementInset: CGFloat = 12
+    private let timelineStickerBottomOffset: CGFloat = 36
     private var state = EditorState()
 
     private struct EditorState {
@@ -106,7 +107,7 @@ final class EditorView: BaseUIView {
             $0.top.equalTo(backgroundImageView.snp.top).offset(80)
             $0.leading.equalTo(backgroundImageView.snp.leading).offset(32)
             $0.height.equalTo(164)
-            $0.width.equalTo(85)
+            $0.width.equalTo(120)
         }
 
         lottieOverlayView.snp.makeConstraints {
@@ -358,14 +359,16 @@ final class EditorView: BaseUIView {
         }
 
         let stickerHeight = routeRect.height + stickerVerticalInset * 2
-
-        routeTimelineDrawingView.updateColor(state.selectedColor)
-        routeTimelineStickerBox.frame = CGRect(
+        let stickerWidth = routeRect.width + stickerHorizontalInset * 2
+        let targetFrame = CGRect(
             x: backgroundImageView.frame.minX + routeRect.minX - stickerHorizontalInset,
-            y: backgroundImageView.frame.maxY - stickerHeight,
-            width: routeRect.width + stickerHorizontalInset * 2,
+            y: backgroundImageView.frame.maxY - stickerHeight - timelineStickerBottomOffset,
+            width: stickerWidth,
             height: stickerHeight
         )
+
+        routeTimelineDrawingView.updateColor(state.selectedColor)
+        routeTimelineStickerBox.frame = clampedStickerFrame(targetFrame)
     }
 
     // MARK: - Sticker Helpers
@@ -396,6 +399,26 @@ final class EditorView: BaseUIView {
         stickerBox.layoutIfNeeded()
 
         return stickerBox.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
+    }
+
+    private func clampedStickerFrame(_ frame: CGRect) -> CGRect {
+        let movementBounds = backgroundImageView.frame.insetBy(
+            dx: stickerMovementInset,
+            dy: stickerMovementInset
+        )
+        let maxX = movementBounds.maxX - frame.width
+        let maxY = movementBounds.maxY - frame.height
+
+        return CGRect(
+            x: maxX < movementBounds.minX
+                ? movementBounds.minX
+                : min(max(frame.minX, movementBounds.minX), maxX),
+            y: maxY < movementBounds.minY
+                ? movementBounds.minY
+                : min(max(frame.minY, movementBounds.minY), maxY),
+            width: frame.width,
+            height: frame.height
+        )
     }
 
     private func configureBackgroundImage(with imageURL: String) {

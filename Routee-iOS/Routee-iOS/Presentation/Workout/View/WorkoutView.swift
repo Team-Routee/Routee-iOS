@@ -425,8 +425,7 @@ extension WorkoutView {
         let sourceImage = photoRecord.image
         let pointIndex = photoRecord.pointIndex
 
-        Task {
-            [weak self] in
+        Task { [weak self] in
             let thumbnailImage = await Task.detached(priority: .userInitiated) {
                 sourceImage
                     .resized(to: markerSize)
