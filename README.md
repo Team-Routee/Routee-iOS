@@ -36,6 +36,27 @@
 루티는 흩어져 있던 운동 데이터, 사진, 코스 위치를 하나의 산행 경험으로 연결합니다.  
 기록은 더 간편하게, 공유는 더 트렌디하게, 추억은 더 오래 남길 수 있도록 설계되었습니다.
 
+
+## 📱 미리보기
+
+### 운동 기록
+https://github.com/user-attachments/assets/d6dbcbd7-b6d8-41ee-888b-9b80439c18ea
+
+### 기록 추가
+https://github.com/user-attachments/assets/8fb1f250-8d3c-49fd-8cbb-9b01e2283e10
+
+### 기록 편집
+https://github.com/user-attachments/assets/fbf3cb9e-c97e-42d9-8fbe-fb283d397e1f
+
+### 아카이브
+https://github.com/user-attachments/assets/7d612739-4e3c-49ec-9aba-6c93c73122c4
+
+### 설정
+https://github.com/user-attachments/assets/3d46ba62-6abd-44ea-a5b7-739a4e13fb86
+
+
+
+
 ## <img width="20" alt="shape3" src="https://github.com/user-attachments/assets/41e09367-88fc-4b6b-9ada-d59a75b01ac9" /> 기술 스택
 | 분류 | 기술 | 역할 |
 |:---:|:---:|---|
