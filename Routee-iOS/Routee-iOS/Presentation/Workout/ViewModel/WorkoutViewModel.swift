@@ -17,6 +17,10 @@ final class WorkoutViewModel {
     private(set) var maximumAltitudeInMeters: CLLocationDistance?
     private(set) var routePoints: [WorkoutRoutePoint] = []
     private(set) var photoRecords: [WorkoutPhotoRecord] = []
+
+    var canFinishRecording: Bool {
+        routePoints.count > 1
+    }
     private(set) var activityId: Int64?
     private(set) var activityTitle: String?
     private(set) var backgroundMapImageURL: String?
@@ -198,9 +202,12 @@ final class WorkoutViewModel {
     func finishRecording(title: String) async throws {
         guard let activityId,
               let backgroundMapImageURL,
-              let coverImageObjectKey,
-              !routePoints.isEmpty else {
+              canFinishRecording else {
             throw RouteeError.noData
+        }
+
+        let normalizedCoverImageObjectKey = coverImageObjectKey.flatMap {
+            $0.isEmpty ? nil : $0
         }
         
         let finishModel = WorkoutRecordFinishModel(
@@ -209,7 +216,7 @@ final class WorkoutViewModel {
             durationSec: elapsedTimeInSeconds,
             maxAltitude: Int(maximumAltitudeInMeters ?? 0),
             mapImageUrl: backgroundMapImageURL,
-            coverImageObjectKey: coverImageObjectKey,
+            coverImageObjectKey: normalizedCoverImageObjectKey,
             tracks: routePoints.map {
                 WorkoutRecordFinishModel.Track(
                     latitude: $0.coordinate.latitude,

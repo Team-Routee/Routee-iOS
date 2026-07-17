@@ -66,7 +66,9 @@ final class EditorViewController: BaseUIViewController {
 
                 guard let activityEditorModel = viewModel.activityEditorModel else { return }
 
-                    rootView.configure(with: activityEditorModel)
+                await MainActor.run {
+                    self.rootView.configure(with: activityEditorModel)
+                }
 
             } catch {
                 RouteeLogger.error(error)
@@ -84,7 +86,9 @@ final class EditorViewController: BaseUIViewController {
 
                 guard let recordEditResourceModel = recordEditResourceViewModel.recordEditResourceModel else { return }
 
-                rootView.configure(with: recordEditResourceModel)
+                await MainActor.run {
+                    self.rootView.configure(with: recordEditResourceModel)
+                }
 
             } catch {
                 RouteeLogger.error(error)

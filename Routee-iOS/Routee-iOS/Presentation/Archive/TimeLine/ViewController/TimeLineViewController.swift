@@ -67,7 +67,9 @@ final class TimeLineViewController: BaseUIViewController {
 
                 guard !Task.isCancelled else { return }
 
-                rootView.configureMetric(with: metric)
+                await MainActor.run {
+                    self.rootView.configureMetric(with: metric)
+                }
             } catch {
                 guard !Task.isCancelled else { return }
 
@@ -88,7 +90,9 @@ final class TimeLineViewController: BaseUIViewController {
 
                 guard !Task.isCancelled else { return }
 
-                rootView.configureTrackMap(with: model)
+                await MainActor.run {
+                    self.rootView.configureTrackMap(with: model)
+                }
             } catch {
                 guard !Task.isCancelled else { return }
 
@@ -109,7 +113,9 @@ final class TimeLineViewController: BaseUIViewController {
 
                 guard !Task.isCancelled else { return }
 
-                rootView.configureTimeLineList(with: model)
+                await MainActor.run {
+                    self.rootView.configureTimeLineList(with: model)
+                }
             } catch {
                 guard !Task.isCancelled else { return }
 
@@ -130,7 +136,9 @@ final class TimeLineViewController: BaseUIViewController {
 
                 guard !Task.isCancelled else { return }
 
-                rootView.configureCourseList(with: model)
+                await MainActor.run {
+                    self.rootView.configureCourseList(with: model)
+                }
             } catch {
                 guard !Task.isCancelled else { return }
 
