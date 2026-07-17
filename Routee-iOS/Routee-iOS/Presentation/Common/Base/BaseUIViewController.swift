@@ -17,6 +17,16 @@ class BaseUIViewController: UIViewController, UIGestureRecognizerDelegate {
         setDelegate()
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+
+        if #available(iOS 26.0, *) {
+            navigationController?.interactiveContentPopGestureRecognizer?.isEnabled = false
+        }
+    }
+
     private func configureKeyboardDismissGesture() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tapGesture.cancelsTouchesInView = false
