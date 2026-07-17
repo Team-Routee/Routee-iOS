@@ -48,7 +48,11 @@ final class WorkoutViewController: BaseUIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
-        if workoutMode == .finishing { workoutMode = .ready }
+        if workoutMode == .finishing {
+            workoutMode = .ready
+            requestCurrentLocationAuthorization()
+            moveCameraToCurrentLocation()
+        }
     }
     
     override func loadView() {
@@ -75,6 +79,16 @@ final class WorkoutViewController: BaseUIViewController {
         }
     }
     
+    private func moveCameraToCurrentLocation() {
+        guard let location = locationManager.location else { return }
+
+        let currentLatLng = NMGLatLng(
+            lat: location.coordinate.latitude,
+            lng: location.coordinate.longitude
+        )
+        workoutView.moveCamera(to: currentLatLng, zoomTo: 16)
+    }
+
     private func startShowingCurrentLocation() {
         workoutView.showLocationOverlay()
         locationManager.startUpdatingLocation()
