@@ -78,7 +78,7 @@ final class TimeLineCard: BaseUIView {
         pageControl.do {
             $0.numberOfPages = min(imageCount, 5)
             $0.currentPage = 0
-            $0.hidesForSinglePage = false
+            $0.hidesForSinglePage = true
             $0.isUserInteractionEnabled = false
             $0.pageIndicatorTintColor = .grey400
             $0.currentPageIndicatorTintColor = .staticWhite
