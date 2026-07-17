@@ -99,6 +99,6 @@ final class SettingSectionView: UIView {
     func setAction(index: Int, target: Any?, action: Selector) {
         guard itemViews.indices.contains(index) else { return }
 
-        itemViews[index].setChevronAction(target: target, action: action)
+        itemViews[index].setAction(target: target, action: action)
     }
 }

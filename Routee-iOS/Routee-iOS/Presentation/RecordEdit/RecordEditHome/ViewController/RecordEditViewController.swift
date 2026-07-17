@@ -16,7 +16,15 @@ final class RecordEditViewController: BaseUIViewController {
 
     var onMonthChanged: ((Date) -> Void)?
     private let viewModel = RecordEditViewModel()
+    private let profileViewModel = ProfileViewModel()
     private var records: [WorkoutListModel] = []
+    private let joinedDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
 
     // MARK: - UI Properties
 
@@ -33,6 +41,7 @@ final class RecordEditViewController: BaseUIViewController {
 
         setCollectionView()
         setMonthSelector()
+        loadProfile()
         fetchRecords(for: Date())
     }
     
@@ -57,6 +66,22 @@ final class RecordEditViewController: BaseUIViewController {
     private func setMonthSelector() {
         rootView.setMonthChangedHandler { [weak self] date in
             self?.fetchRecords(for: date)
+        }
+    }
+
+    private func loadProfile() {
+        Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                let profile = try await profileViewModel.fetchProfile()
+                let joinDateText = String(profile.joinDate.prefix(10))
+                let joinDate = joinedDateFormatter.date(from: joinDateText)
+
+                rootView.configureMinimumMonth(joinDate)
+            } catch {
+                RouteeLogger.error(error)
+            }
         }
     }
 

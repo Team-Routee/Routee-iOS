@@ -37,7 +37,7 @@ final class StickerSelector: BaseUIView {
         super.init(frame: frame)
 
         setActions()
-        selectPhotoTimeline()
+        deselectAll()
     }
 
     required init?(coder: NSCoder) {
@@ -127,6 +127,19 @@ final class StickerSelector: BaseUIView {
             $0.trailing.equalToSuperview().inset(12)
             $0.centerY.equalToSuperview()
         }
+    }
+
+    // MARK: - Public Methods
+
+    func deselectAll() {
+        photoTimelineButton.backgroundColor = .clear
+        routeButton.backgroundColor = .clear
+
+        photoTimelineIconImageView.image = .icPhotoTimelineStickerSmGrey
+        routeIconImageView.image = .icRouteStickerSmGrey
+
+        photoTimelineTitleLabel.textColor = .grey200
+        routeTitleLabel.textColor = .grey200
     }
 
     // MARK: - Private Methods
