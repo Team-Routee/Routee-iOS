@@ -22,7 +22,7 @@ final class LoginViewController: BaseUIViewController {
     // MARK: - Private Methods
     
     private func login(identityToken: String, appleUserID: String) {
-        Task { @MainActor [weak self] in
+        Task { [weak self] in
             guard let self else { return }
 
             do {
