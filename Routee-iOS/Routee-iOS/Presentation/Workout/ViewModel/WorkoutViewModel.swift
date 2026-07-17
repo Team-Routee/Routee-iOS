@@ -19,7 +19,8 @@ final class WorkoutViewModel {
     private(set) var photoRecords: [WorkoutPhotoRecord] = []
     private(set) var activityId: Int64?
     private(set) var activityTitle: String?
-    private(set) var backgroundMapObjectKey: String?
+    private(set) var backgroundMapImageURL: String?
+    private(set) var coverImageObjectKey: String?
     
     private let reverseGeocodingRepository: ReverseGeocodingRepository
     private let activityRepository: ActivityRepository
@@ -194,20 +195,21 @@ final class WorkoutViewModel {
         )
     }
 
-    func finishRecording() async throws {
+    func finishRecording(title: String) async throws {
         guard let activityId,
-              let backgroundMapObjectKey,
+              let backgroundMapImageURL,
+              let coverImageObjectKey,
               !routePoints.isEmpty else {
             throw RouteeError.noData
         }
 
         let finishModel = WorkoutRecordFinishModel(
-            title: activityTitle ?? "",
+            title: title,
             distance: Int(totalDistance),
             durationSec: elapsedTimeInSeconds,
             maxAltitude: Int(maximumAltitudeInMeters ?? 0),
-            mapImageUrl: backgroundMapObjectKey,
-            coverImageObjectKey: "",
+            mapImageUrl: backgroundMapImageURL,
+            coverImageObjectKey: coverImageObjectKey,
             tracks: routePoints.map {
                 WorkoutRecordFinishModel.Track(
                     latitude: $0.coordinate.latitude,
@@ -248,7 +250,8 @@ final class WorkoutViewModel {
         )
 
         photoRecords[index].objectKey = presigned.objectKey
-
+        coverImageObjectKey = presigned.objectKey
+        
         try await createTimeLine(
             for: photoRecords[index],
             objectKey: presigned.objectKey,
@@ -279,7 +282,22 @@ final class WorkoutViewModel {
             imageData: imageData
         )
 
-        backgroundMapObjectKey = presigned.objectKey
+        backgroundMapImageURL = try Self.imageURL(from: presigned.presignedURL)
+    }
+
+    private static func imageURL(from presignedURL: String) throws -> String {
+        guard var components = URLComponents(string: presignedURL) else {
+            throw RouteeError.URLError
+        }
+
+        components.query = nil
+        components.fragment = nil
+
+        guard let imageURL = components.string else {
+            throw RouteeError.URLError
+        }
+
+        return imageURL
     }
 
     private func createTimeLine(for photoRecord: WorkoutPhotoRecord, objectKey: String, title: String) async throws {

@@ -66,6 +66,7 @@ final class WorkoutPhotoLocationViewController: BaseUIViewController {
             action: #selector(locationTextFieldDidSubmit),
             for: .editingDidEndOnExit
         )
+
     }
     
     @objc

@@ -22,6 +22,10 @@ final class WorkoutTimeLineView: BaseUIView {
     var routePointTitles: [String] {
         myRoute.currentPoints
     }
+
+    var activityTitle: String {
+        titleTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+    }
     
     private let title: String
     private let distance: String
@@ -64,6 +68,10 @@ final class WorkoutTimeLineView: BaseUIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
     
     // MARK: - UI Properties
     
@@ -104,6 +112,19 @@ final class WorkoutTimeLineView: BaseUIView {
         )
         
         timeLineStackView.addArrangedSubviews(timeLineLabel, timeLineDateLabel)
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow(_:)),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide(_:)),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
     }
     
     override func setStyle() {
@@ -177,6 +198,14 @@ final class WorkoutTimeLineView: BaseUIView {
             $0.horizontalEdges.equalTo(scrollView.contentLayoutGuide).inset(16)
         }
         
+        timeLineLabel.snp.makeConstraints {
+            $0.height.equalTo(25)
+        }
+        
+        timeLineDateLabel.snp.makeConstraints {
+            $0.height.equalTo(17)
+        }
+        
         timeLineCard.snp.makeConstraints {
             $0.top.equalTo(timeLineStackView.snp.bottom).offset(16)
             $0.centerX.equalToSuperview()
@@ -196,6 +225,61 @@ final class WorkoutTimeLineView: BaseUIView {
         goToEditButton.snp.makeConstraints {
             $0.bottom.equalTo(safeAreaLayoutGuide).inset(28)
             $0.centerX.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview().inset(16)
         }
+    }
+
+    @objc
+    private func keyboardWillShow(_ notification: Notification) {
+        guard containsFirstResponder(in: myRoute),
+              let keyboardScreenFrame = notification.userInfo?[
+                UIResponder.keyboardFrameEndUserInfoKey
+              ] as? CGRect
+        else { return }
+
+        layoutIfNeeded()
+
+        let keyboardFrame = scrollView.convert(keyboardScreenFrame, from: nil)
+        let keyboardOverlap = max(0, scrollView.bounds.maxY - keyboardFrame.minY)
+        let bottomInset = keyboardOverlap + 16
+        let myRouteFrame = myRoute.convert(myRoute.bounds, to: scrollView)
+        let visibleHeight = scrollView.bounds.height - bottomInset
+        let targetOffsetY = myRouteFrame.maxY - visibleHeight + 16
+        let maximumOffsetY = max(
+            0,
+            scrollView.contentSize.height - scrollView.bounds.height + bottomInset
+        )
+        let adjustedOffsetY = min(max(0, targetOffsetY), maximumOffsetY)
+        let duration = keyboardAnimationDuration(from: notification)
+
+        UIView.animate(withDuration: duration) { [weak self] in
+            guard let self else { return }
+            scrollView.contentInset.bottom = bottomInset
+            scrollView.verticalScrollIndicatorInsets.bottom = bottomInset
+            scrollView.contentOffset = CGPoint(
+                x: scrollView.contentOffset.x,
+                y: adjustedOffsetY
+            )
+        }
+    }
+
+    @objc
+    private func keyboardWillHide(_ notification: Notification) {
+        let duration = keyboardAnimationDuration(from: notification)
+
+        UIView.animate(withDuration: duration) { [weak self] in
+            self?.scrollView.contentInset.bottom = 0
+            self?.scrollView.verticalScrollIndicatorInsets.bottom = 0
+        }
+    }
+
+    private func keyboardAnimationDuration(from notification: Notification) -> Double {
+        notification.userInfo?[
+            UIResponder.keyboardAnimationDurationUserInfoKey
+        ] as? Double ?? 0.25
+    }
+
+    private func containsFirstResponder(in view: UIView) -> Bool {
+        view.isFirstResponder || view.subviews.contains { containsFirstResponder(in: $0) }
     }
 }
