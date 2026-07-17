@@ -143,4 +143,8 @@ final class RecordEditView: BaseUIView {
     func setMonthChangedHandler(_ handler: @escaping (Date) -> Void) {
         monthSelector.onMonthChanged = handler
     }
+
+    func configureMinimumMonth(_ date: Date?) {
+        monthSelector.configureMinimumDate(date)
+    }
 }

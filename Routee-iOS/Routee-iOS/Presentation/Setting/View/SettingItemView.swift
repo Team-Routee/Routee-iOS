@@ -66,7 +66,12 @@ final class SettingItemView: UIView {
 
     // MARK: - Public Methods
 
-    func setChevronAction(target: Any?, action: Selector) {
+    func setAction(target: Any?, action: Selector) {
+        titleLabel.isUserInteractionEnabled = true
+        titleLabel.addGestureRecognizer(
+            UITapGestureRecognizer(target: target, action: action)
+        )
+
         chevronButton.isUserInteractionEnabled = true
         chevronButton.addTarget(target, action: action, for: .touchUpInside)
     }
