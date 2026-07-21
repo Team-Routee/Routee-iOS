@@ -31,18 +31,11 @@ final class ArchiveViewController: BaseUIViewController {
 
     // MARK: - Life Cycle
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        loadArchive()
-        loadProfile()
-    }
-
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
+        loadArchive()
         loadProfile()
-        
     }
 
     override func setView() {
@@ -65,30 +58,36 @@ final class ArchiveViewController: BaseUIViewController {
                     month: requestedMonth
                 )
 
-                guard
-                    !Task.isCancelled,
-                    year == requestedYear,
-                    month == requestedMonth
-                else { return }
+                guard !Task.isCancelled else { return }
 
-                applyArchive(
-                    records,
-                    year: requestedYear,
-                    month: requestedMonth
-                )
+                await MainActor.run {
+                    guard
+                        self.year == requestedYear,
+                        self.month == requestedMonth
+                    else { return }
+
+                    self.applyArchive(
+                        records,
+                        year: requestedYear,
+                        month: requestedMonth
+                    )
+                }
             } catch {
-                guard
-                    !Task.isCancelled,
-                    year == requestedYear,
-                    month == requestedMonth
-                else { return }
+                guard !Task.isCancelled else { return }
 
                 RouteeLogger.error(error)
-                applyArchive(
-                    [],
-                    year: requestedYear,
-                    month: requestedMonth
-                )
+                await MainActor.run {
+                    guard
+                        self.year == requestedYear,
+                        self.month == requestedMonth
+                    else { return }
+
+                    self.applyArchive(
+                        [],
+                        year: requestedYear,
+                        month: requestedMonth
+                    )
+                }
             }
         }
     }
@@ -103,9 +102,11 @@ final class ArchiveViewController: BaseUIViewController {
 
                 guard !Task.isCancelled else { return }
 
-                joinDate = profile.joinDate
-                rootView.configureProfile(with: profile)
-                configureMonthSelector(year: year, month: month)
+                await MainActor.run {
+                    self.joinDate = profile.joinDate
+                    self.rootView.configureProfile(with: profile)
+                    self.configureMonthSelector(year: self.year, month: self.month)
+                }
             } catch {
                 guard !Task.isCancelled else { return }
 
@@ -198,7 +199,9 @@ final class ArchiveViewController: BaseUIViewController {
 
                 guard !Task.isCancelled else { return }
 
-                routeToActivityList(model)
+                await MainActor.run {
+                    self.routeToActivityList(model)
+                }
             } catch {
                 guard !Task.isCancelled else { return }
 

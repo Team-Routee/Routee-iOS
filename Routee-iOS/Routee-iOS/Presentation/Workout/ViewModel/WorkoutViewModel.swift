@@ -8,7 +8,6 @@
 import CoreLocation
 import UIKit
 
-@MainActor
 final class WorkoutViewModel {
     var elapsedTimeDidChange: ((TimeInterval) -> Void)?
     var maximumAltitudeDidChange: ((CLLocationDistance?) -> Void)?
@@ -18,6 +17,10 @@ final class WorkoutViewModel {
     private(set) var maximumAltitudeInMeters: CLLocationDistance?
     private(set) var routePoints: [WorkoutRoutePoint] = []
     private(set) var photoRecords: [WorkoutPhotoRecord] = []
+
+    var canFinishRecording: Bool {
+        routePoints.count > 1
+    }
     private(set) var activityId: Int64?
     private(set) var activityTitle: String?
     private(set) var backgroundMapImageURL: String?
@@ -115,7 +118,7 @@ final class WorkoutViewModel {
         photoRecords.append(record)
         return photoRecords.count - 1
     }
-
+    
     func routePoint(matching pointIndex: Int) -> WorkoutRoutePoint? {
         let arrayIndex = pointIndex - 1
         guard routePoints.indices.contains(arrayIndex),
@@ -140,9 +143,7 @@ final class WorkoutViewModel {
     private func startElapsedTimeTimer() {
         elapsedTimeTimer?.invalidate()
         let timer = Timer(timeInterval: 1, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated {
-                self?.publishElapsedTime()
-            }
+            self?.publishElapsedTime()
         }
         elapsedTimeTimer = timer
         RunLoop.main.add(timer, forMode: .common)
@@ -181,38 +182,41 @@ final class WorkoutViewModel {
             activityType: activityType,
             startedAt: startedAt
         )
-
+        
         activityId = activity.activityId
         activityTitle = activity.title
         return activity
     }
-
+    
     func changeActivityStatus(_ status: String) async throws {
         guard let activityId else {
             throw RouteeError.noData
         }
-
+        
         _ = try await activityRepository.changeActivityStatus(
             activityId: activityId,
             requestDTO: ChangeActivityStatusRequestDTO(status: status)
         )
     }
-
+    
     func finishRecording(title: String) async throws {
         guard let activityId,
               let backgroundMapImageURL,
-              let coverImageObjectKey,
-              !routePoints.isEmpty else {
+              canFinishRecording else {
             throw RouteeError.noData
         }
 
+        let normalizedCoverImageObjectKey = coverImageObjectKey.flatMap {
+            $0.isEmpty ? nil : $0
+        }
+        
         let finishModel = WorkoutRecordFinishModel(
             title: title,
             distance: Int(totalDistance),
             durationSec: elapsedTimeInSeconds,
             maxAltitude: Int(maximumAltitudeInMeters ?? 0),
             mapImageUrl: backgroundMapImageURL,
-            coverImageObjectKey: coverImageObjectKey,
+            coverImageObjectKey: normalizedCoverImageObjectKey,
             tracks: routePoints.map {
                 WorkoutRecordFinishModel.Track(
                     latitude: $0.coordinate.latitude,
@@ -221,27 +225,27 @@ final class WorkoutViewModel {
                     pointIndex: $0.pointIndex
                 )
             },
-            endedAt: Self.timeLineDateString(from: Date())
+            endedAt: Self.timeLineDateFormatter.string(from: Date())
         )
-
+        
         try await activityRepository.finishActivity(activityId: activityId, requestModel: finishModel)
     }
-
+    
     func uploadPhoto(at index: Int) async throws {
         guard let activityId,
               photoRecords.indices.contains(index) else {
             throw RouteeError.noData
         }
-
+        
         let image = photoRecords[index].image
         let imageData = await Task.detached(priority: .userInitiated) {
             image.jpegData(compressionQuality: 0.8)
         }.value
-
+        
         guard let imageData else {
             throw RouteeError.noData
         }
-
+        
         let fileName = "\(UUID().uuidString).jpg"
         let presigned = try await activityRepository.timeLinePresignedURL(
             activityId: activityId,
@@ -251,7 +255,7 @@ final class WorkoutViewModel {
             presignedURL: presigned.presignedURL,
             imageData: imageData
         )
-
+        
         photoRecords[index].objectKey = presigned.objectKey
         coverImageObjectKey = presigned.objectKey
         
@@ -261,20 +265,20 @@ final class WorkoutViewModel {
             title: photoRecords[index].locationTitle ?? ""
         )
     }
-
+    
     func uploadBackgroundMap(image: UIImage) async throws {
         guard let activityId else {
             throw RouteeError.noData
         }
-
+        
         let imageData = await Task.detached(priority: .userInitiated) {
             image.jpegData(compressionQuality: 0.8)
         }.value
-
+        
         guard let imageData else {
             throw RouteeError.noData
         }
-
+        
         let fileName = "\(UUID().uuidString).jpg"
         let presigned = try await activityRepository.backgroundMapPresignedURL(
             activityId: activityId,
@@ -284,25 +288,25 @@ final class WorkoutViewModel {
             presignedURL: presigned.presignedURL,
             imageData: imageData
         )
-
+        
         backgroundMapImageURL = try Self.imageURL(from: presigned.presignedURL)
     }
-
+    
     private static func imageURL(from presignedURL: String) throws -> String {
         guard var components = URLComponents(string: presignedURL) else {
             throw RouteeError.URLError
         }
-
+        
         components.query = nil
         components.fragment = nil
-
+        
         guard let imageURL = components.string else {
             throw RouteeError.URLError
         }
-
+        
         return imageURL
     }
-
+    
     private func createTimeLine(for photoRecord: WorkoutPhotoRecord, objectKey: String, title: String) async throws {
         guard let activityId,
               let routePoint = routePoint(matching: photoRecord.pointIndex) else {
@@ -311,7 +315,7 @@ final class WorkoutViewModel {
         let timeLine = TimeLineRecordModel(
             title: title,
             imageObjectKey: objectKey,
-            createdAt: Self.timeLineDateString(from: photoRecord.createdAt),
+            createdAt: Self.timeLineDateFormatter.string(from: photoRecord.createdAt),
             trackPointIndex: photoRecord.pointIndex,
             location: TimeLineRecordModel.Location(
                 latitude: routePoint.coordinate.latitude,
@@ -321,16 +325,16 @@ final class WorkoutViewModel {
             ),
             status: "SUCCESSFUL_CREATED"
         )
-
+        
         try await activityRepository.createTimeLine(activityId: activityId, requestDTO: timeLine.toDTO())
     }
-
-    private static func timeLineDateString(from date: Date) -> String {
+    
+    private static let timeLineDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.calendar = Calendar(identifier: .gregorian)
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.timeZone = .current
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        return formatter.string(from: date)
-    }
+        return formatter
+    }()
 }

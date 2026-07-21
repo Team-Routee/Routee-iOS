@@ -72,6 +72,10 @@ final class TimeLineView: BaseUIView {
     func configureTimeLineList(with model: TimeLineData) {
         didConfigureTimeLine = true
         showsTimeLineSection = !model.imageUrls.filter { !$0.isEmpty }.isEmpty
+        timelineDateLabel.text = model.timelines.first.map {
+            String($0.createdAt.prefix(10))
+                .replacingOccurrences(of: "-", with: ".")
+        }
 
         if showsTimeLineSection {
             timelineCard.configure(

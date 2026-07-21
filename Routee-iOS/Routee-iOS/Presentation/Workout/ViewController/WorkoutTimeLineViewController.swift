@@ -11,7 +11,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     private let workoutTimelineView: WorkoutTimeLineView
     private let activityId: Int64?
     private let activityRepository: ActivityRepository
-    private let finishRecording: @MainActor (String) async throws -> Void
+    private let finishRecording: (String) async throws -> Void
 
     // MARK: - Initializer
 
@@ -24,7 +24,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
         backgroundMapImage: UIImage?,
         trackPoints: [TrackPoint],
         photoRecords: [WorkoutPhotoRecord],
-        finishRecording: @escaping @MainActor (String) async throws -> Void,
+        finishRecording: @escaping (String) async throws -> Void,
         activityRepository: ActivityRepository = DefaultActivityRepository()
     ) {
         self.activityId = activityId
@@ -66,14 +66,19 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
                 RouteeLogger.error(error)
             }
             await finishRecordingIfNeeded()
-            navigationController?.popToRootViewController(animated: true)
+            await MainActor.run {
+                _ = self.navigationController?.popToRootViewController(animated: true)
+            }
         }
     }
 
     private func finishRecordingIfNeeded() async {
         do {
-            workoutTimelineView.endEditing(true)
-            try await finishRecording(workoutTimelineView.activityTitle)
+            let title = await MainActor.run {
+                self.workoutTimelineView.endEditing(true)
+                return self.workoutTimelineView.activityTitle
+            }
+            try await finishRecording(title)
         } catch {
             RouteeLogger.error(error)
         }
@@ -82,8 +87,10 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     private func uploadCourseList() async throws {
         guard let activityId else { return }
 
-        let titles = workoutTimelineView.routePointTitles
-            .filter { !$0.isEmpty }
+        let titles = await MainActor.run {
+            self.workoutTimelineView.routePointTitles
+                .filter { !$0.isEmpty }
+        }
 
         guard !titles.isEmpty else { return }
 
@@ -112,10 +119,12 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
                 RouteeLogger.error(error)
             }
             await finishRecordingIfNeeded()
-            navigationController?.pushViewController(
-                EditorViewController(activityId: activityId),
-                animated: true
-            )
+            await MainActor.run {
+                self.navigationController?.pushViewController(
+                    EditorViewController(activityId: self.activityId),
+                    animated: true
+                )
+            }
         }
     }
 }
