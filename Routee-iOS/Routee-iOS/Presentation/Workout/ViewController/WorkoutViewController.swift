@@ -449,6 +449,7 @@ extension WorkoutViewController: CLLocationManagerDelegate {
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.distanceFilter = 3
         locationManager.activityType = .fitness
+        locationManager.allowsBackgroundLocationUpdates = true
         requestCurrentLocationAuthorization()
     }
     
