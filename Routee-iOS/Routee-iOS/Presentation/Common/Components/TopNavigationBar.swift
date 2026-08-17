@@ -16,16 +16,19 @@ final class TopNavigationBar: BaseUIView {
     
     var backButtonAction: (() -> Void)?
     var rightButtonAction: (() -> Void)?
+    private let title: String?
     private let rightTitle: String?
     
     // MARK: - UI Properties
     
     private let backButton = UIButton()
+    private let titleLabel = UILabel()
     private let rightButton = UIButton()
     
     // MARK: - Initializer
     
-    init(rightTitle: String? = nil) {
+    init(title: String? = nil, rightTitle: String? = nil) {
+        self.title = title
         self.rightTitle = rightTitle
         super.init(frame: .zero)
     }
@@ -40,6 +43,14 @@ final class TopNavigationBar: BaseUIView {
         backButton.do {
             $0.setImage(UIImage(named: "ic_arrow_left_sm_white"), for: .normal)
         }
+
+        titleLabel.do {
+            $0.text = title
+            $0.textColor = .staticWhite
+            $0.font = .label_sb_18
+            $0.textAlignment = .center
+            $0.isHidden = title == nil
+        }
         
         rightButton.do {
             $0.setTitle(rightTitle, for: .normal)
@@ -51,7 +62,7 @@ final class TopNavigationBar: BaseUIView {
     }
     
     override func setUI() {
-        addSubviews(backButton, rightButton)
+        addSubviews(backButton, titleLabel, rightButton)
         
         setActions()
     }
@@ -65,6 +76,10 @@ final class TopNavigationBar: BaseUIView {
             $0.leading.equalToSuperview().inset(4)
             $0.centerY.equalToSuperview()
             $0.size.equalTo(44)
+        }
+
+        titleLabel.snp.makeConstraints {
+            $0.center.equalToSuperview()
         }
         
         rightButton.snp.makeConstraints {
