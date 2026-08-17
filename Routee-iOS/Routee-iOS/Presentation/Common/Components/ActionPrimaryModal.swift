@@ -1,0 +1,238 @@
+//
+//  ActionPrimaryModal.swift
+//  Routee-iOS
+//
+//  Created by Codex on 8/17/26.
+//
+
+import UIKit
+
+import SnapKit
+import Then
+
+final class ActionPrimaryModal: UIViewController {
+
+    // MARK: - Properties
+
+    private let titleText: String
+    private let descriptionText: String?
+    private let leftButtonTitle: String
+    private let rightButtonTitle: String
+    private let dismissOnAction: Bool
+    private let leftButtonAction: (() -> Void)?
+    private let rightButtonAction: (() -> Void)?
+    private var hasDescription: Bool {
+        !(descriptionText?.isEmpty ?? true)
+    }
+
+    // MARK: - UI Properties
+
+    private let dimButton = UIButton()
+    private let modalView = UIView()
+    private let contentStackView = UIStackView()
+    private let titleLabel = UILabel()
+    private let descriptionLabel = UILabel()
+    private let buttonStackView = UIStackView()
+    private let leftButton = UIButton()
+    private let rightButton = UIButton()
+
+    // MARK: - Initializer
+
+    init(
+        title: String,
+        description: String? = nil,
+        leftButtonTitle: String,
+        rightButtonTitle: String,
+        dismissOnAction: Bool = true,
+        leftButtonAction: (() -> Void)? = nil,
+        rightButtonAction: (() -> Void)? = nil
+    ) {
+        self.titleText = title
+        self.descriptionText = description
+        self.leftButtonTitle = leftButtonTitle
+        self.rightButtonTitle = rightButtonTitle
+        self.dismissOnAction = dismissOnAction
+        self.leftButtonAction = leftButtonAction
+        self.rightButtonAction = rightButtonAction
+
+        super.init(nibName: nil, bundle: nil)
+
+        modalPresentationStyle = .overFullScreen
+        modalTransitionStyle = .crossDissolve
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    // MARK: - Life Cycle
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        setStyle()
+        setUI()
+        setLayout()
+        setAddTarget()
+    }
+
+    // MARK: - UI Setting
+
+    private func setStyle() {
+        view.backgroundColor = .clear
+
+        dimButton.do {
+            $0.backgroundColor = .bg_primary
+        }
+
+        modalView.do {
+            $0.backgroundColor = .grey_800
+            $0.layer.cornerRadius = .r24
+            $0.clipsToBounds = true
+        }
+
+        contentStackView.do {
+            $0.axis = .vertical
+            $0.alignment = .fill
+        }
+
+        titleLabel.do {
+            $0.text = titleText
+            $0.textColor = .white
+            $0.font = .title_sb_18
+            $0.textAlignment = .center
+            $0.numberOfLines = 0
+        }
+
+        descriptionLabel.do {
+            $0.text = descriptionText
+            $0.textColor = .grey_300
+            $0.font = .label_m_14
+            $0.textAlignment = .center
+            $0.numberOfLines = 0
+            $0.isHidden = !hasDescription
+        }
+
+        buttonStackView.do {
+            $0.axis = .horizontal
+            $0.spacing = .s16
+            $0.distribution = .fillEqually
+        }
+
+        configureButton(
+            leftButton,
+            title: leftButtonTitle,
+            titleColor: .white_60
+        )
+        configureButton(
+            rightButton,
+            title: rightButtonTitle,
+            titleColor: .status_error
+        )
+    }
+
+    private func setUI() {
+        view.addSubviews(dimButton, modalView)
+        modalView.addSubview(contentStackView)
+
+        contentStackView.addArrangedSubview(titleLabel)
+
+        if hasDescription {
+            contentStackView.setCustomSpacing(
+                .s16,
+                after: titleLabel
+            )
+            contentStackView.addArrangedSubview(descriptionLabel)
+            contentStackView.setCustomSpacing(
+                .s32,
+                after: descriptionLabel
+            )
+        } else {
+            contentStackView.setCustomSpacing(
+                .s32,
+                after: titleLabel
+            )
+        }
+
+        contentStackView.addArrangedSubview(buttonStackView)
+
+        buttonStackView.addArrangedSubview(leftButton)
+        buttonStackView.addArrangedSubview(rightButton)
+    }
+
+    private func setLayout() {
+        dimButton.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+
+        modalView.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.width.equalToSuperview()
+                .offset(-(CGFloat.s24 * 2))
+                .priority(.high)
+            $0.width.lessThanOrEqualTo(318)
+        }
+
+        contentStackView.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview()
+                .inset(CGFloat.s24)
+            $0.verticalEdges.equalToSuperview()
+                .inset(CGFloat.s24)
+        }
+
+        leftButton.snp.makeConstraints {
+            $0.height.equalTo(46)
+        }
+    }
+
+    private func setAddTarget() {
+        dimButton.addTarget(self, action: #selector(didTapDimButton), for: .touchUpInside)
+        leftButton.addTarget(self, action: #selector(didTapLeftButton), for: .touchUpInside)
+        rightButton.addTarget(self, action: #selector(didTapRightButton), for: .touchUpInside)
+    }
+
+    // MARK: - Private Methods
+
+    private func configureButton(
+        _ button: UIButton,
+        title: String,
+        titleColor: UIColor
+    ) {
+        button.do {
+            $0.setTitle(title, for: .normal)
+            $0.setTitleColor(titleColor, for: .normal)
+            $0.titleLabel?.font = .label_sb_16
+            $0.backgroundColor = .white_10
+            $0.layer.cornerRadius = 23
+            $0.clipsToBounds = true
+        }
+    }
+
+    private func performAction(_ action: (() -> Void)?) {
+        guard dismissOnAction else {
+            action?()
+            return
+        }
+
+        dismiss(animated: true) {
+            action?()
+        }
+    }
+
+    // MARK: - Actions
+
+    @objc
+    private func didTapDimButton() {
+        dismiss(animated: true)
+    }
+
+    @objc
+    private func didTapLeftButton() {
+        performAction(leftButtonAction)
+    }
+
+    @objc
+    private func didTapRightButton() {
+        performAction(rightButtonAction)
+    }
+}
