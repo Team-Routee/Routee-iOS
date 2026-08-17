@@ -157,7 +157,7 @@ final class ActionPrimaryModal: UIViewController {
             contentStackView.setCustomSpacing(0, after: textStackView)
         } else {
             contentStackView.setCustomSpacing(
-                .s32,
+                .s16,
                 after: textStackView
             )
         }
