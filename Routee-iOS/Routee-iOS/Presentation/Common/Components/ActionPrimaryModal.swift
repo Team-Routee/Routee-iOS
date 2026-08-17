@@ -30,6 +30,7 @@ final class ActionPrimaryModal: UIViewController {
     private let dimButton = UIButton()
     private let modalView = UIView()
     private let contentStackView = UIStackView()
+    private let textStackView = UIStackView()
     private let titleLabel = UILabel()
     private let descriptionLabel = UILabel()
     private let buttonStackView = UIStackView()
@@ -82,7 +83,7 @@ final class ActionPrimaryModal: UIViewController {
         view.backgroundColor = .clear
 
         dimButton.do {
-            $0.backgroundColor = .bg_primary
+            $0.backgroundColor = .dim_secondary
         }
 
         modalView.do {
@@ -94,6 +95,19 @@ final class ActionPrimaryModal: UIViewController {
         contentStackView.do {
             $0.axis = .vertical
             $0.alignment = .fill
+        }
+
+        textStackView.do {
+            $0.axis = .vertical
+            $0.alignment = .fill
+            $0.spacing = .s8
+            $0.layoutMargins = UIEdgeInsets(
+                top: .s8,
+                left: .s8,
+                bottom: .s16,
+                right: .s8
+            )
+            $0.isLayoutMarginsRelativeArrangement = true
         }
 
         titleLabel.do {
@@ -115,7 +129,7 @@ final class ActionPrimaryModal: UIViewController {
 
         buttonStackView.do {
             $0.axis = .horizontal
-            $0.spacing = .s16
+            $0.spacing = .s8
             $0.distribution = .fillEqually
         }
 
@@ -135,22 +149,16 @@ final class ActionPrimaryModal: UIViewController {
         view.addSubviews(dimButton, modalView)
         modalView.addSubview(contentStackView)
 
-        contentStackView.addArrangedSubview(titleLabel)
+        contentStackView.addArrangedSubview(textStackView)
+        textStackView.addArrangedSubview(titleLabel)
 
         if hasDescription {
-            contentStackView.setCustomSpacing(
-                .s16,
-                after: titleLabel
-            )
-            contentStackView.addArrangedSubview(descriptionLabel)
-            contentStackView.setCustomSpacing(
-                .s32,
-                after: descriptionLabel
-            )
+            textStackView.addArrangedSubview(descriptionLabel)
+            contentStackView.setCustomSpacing(0, after: textStackView)
         } else {
             contentStackView.setCustomSpacing(
                 .s32,
-                after: titleLabel
+                after: textStackView
             )
         }
 
@@ -178,6 +186,12 @@ final class ActionPrimaryModal: UIViewController {
                 .inset(CGFloat.s24)
             $0.verticalEdges.equalToSuperview()
                 .inset(CGFloat.s24)
+        }
+
+        if hasDescription {
+            textStackView.snp.makeConstraints {
+                $0.height.equalTo(77)
+            }
         }
 
         leftButton.snp.makeConstraints {

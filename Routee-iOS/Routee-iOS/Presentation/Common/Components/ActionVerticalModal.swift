@@ -27,7 +27,7 @@ final class ActionVerticalModal: UIViewController {
     private let dimButton = UIButton()
     private let modalView = UIView()
     private let closeButton = UIButton()
-    private let contentStackView = UIStackView()
+    private let titleContainerView = UIView()
     private let titleLabel = UILabel()
     private let buttonStackView = UIStackView()
     private let firstButton = UIButton()
@@ -79,7 +79,7 @@ final class ActionVerticalModal: UIViewController {
         view.backgroundColor = .clear
 
         dimButton.do {
-            $0.backgroundColor = .bg_primary
+            $0.backgroundColor = .dim_secondary
         }
 
         modalView.do {
@@ -89,17 +89,11 @@ final class ActionVerticalModal: UIViewController {
         }
 
         closeButton.do {
-            let image = UIImage(systemName: "xmark")
+            let image = UIImage(named: "ic_cancel_sm_outline")
             $0.setImage(image, for: .normal)
-            $0.tintColor = .white
             $0.backgroundColor = .white_10
-            $0.layer.cornerRadius = .r22
+            $0.layer.cornerRadius = .r12
             $0.clipsToBounds = true
-        }
-
-        contentStackView.do {
-            $0.axis = .vertical
-            $0.alignment = .fill
         }
 
         titleLabel.do {
@@ -112,7 +106,7 @@ final class ActionVerticalModal: UIViewController {
 
         buttonStackView.do {
             $0.axis = .vertical
-            $0.spacing = .s16
+            $0.spacing = .s10
             $0.distribution = .fill
         }
 
@@ -122,15 +116,9 @@ final class ActionVerticalModal: UIViewController {
 
     private func setUI() {
         view.addSubviews(dimButton, modalView)
-        modalView.addSubviews(contentStackView, closeButton)
+        modalView.addSubviews(titleContainerView, buttonStackView, closeButton)
 
-        contentStackView.addArrangedSubview(titleLabel)
-        contentStackView.setCustomSpacing(
-            .s32,
-            after: titleLabel
-        )
-        contentStackView.addArrangedSubview(buttonStackView)
-
+        titleContainerView.addSubview(titleLabel)
         buttonStackView.addArrangedSubview(firstButton)
         buttonStackView.addArrangedSubview(secondButton)
     }
@@ -146,15 +134,31 @@ final class ActionVerticalModal: UIViewController {
                 .offset(-(CGFloat.s24 * 2))
                 .priority(.high)
             $0.width.lessThanOrEqualTo(318)
+            $0.height.equalTo(211)
         }
 
         closeButton.snp.makeConstraints {
-            $0.top.trailing.equalToSuperview().inset(CGFloat.s24)
-            $0.size.equalTo(44)
+            $0.top.equalToSuperview().inset(CGFloat.s20)
+            $0.trailing.equalToSuperview().inset(CGFloat.s24)
+            $0.size.equalTo(CGFloat.s24)
         }
 
-        contentStackView.snp.makeConstraints {
-            $0.top.equalToSuperview().inset(CGFloat.s80)
+        titleContainerView.snp.makeConstraints {
+            $0.top.equalTo(closeButton.snp.bottom)
+            $0.horizontalEdges.equalToSuperview()
+                .inset(CGFloat.s24)
+            $0.height.equalTo(41)
+        }
+
+        titleLabel.snp.makeConstraints {
+            $0.top.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview()
+                .inset(CGFloat.s16)
+            $0.bottom.equalToSuperview().inset(CGFloat.s16)
+        }
+
+        buttonStackView.snp.makeConstraints {
+            $0.top.equalTo(titleContainerView.snp.bottom)
             $0.horizontalEdges.equalToSuperview()
                 .inset(CGFloat.s24)
             $0.bottom.equalToSuperview().inset(CGFloat.s24)
