@@ -163,7 +163,6 @@ final class ActionPrimaryModal: UIViewController {
         }
 
         contentStackView.addArrangedSubview(buttonStackView)
-
         buttonStackView.addArrangedSubview(leftButton)
         buttonStackView.addArrangedSubview(rightButton)
     }
