@@ -24,7 +24,7 @@ final class ActionVerticalModal: UIViewController {
 
     // MARK: - UI Properties
 
-    private let dimButton = UIButton()
+    private let dimBackgroundView = UIControl()
     private let modalView = UIView()
     private let closeButton = UIButton()
     private let titleContainerView = UIView()
@@ -78,7 +78,7 @@ final class ActionVerticalModal: UIViewController {
     private func setStyle() {
         view.backgroundColor = .clear
 
-        dimButton.do {
+        dimBackgroundView.do {
             $0.backgroundColor = .dim_secondary
         }
 
@@ -115,7 +115,7 @@ final class ActionVerticalModal: UIViewController {
     }
 
     private func setUI() {
-        view.addSubviews(dimButton, modalView)
+        view.addSubviews(dimBackgroundView, modalView)
         modalView.addSubviews(titleContainerView, buttonStackView, closeButton)
 
         titleContainerView.addSubview(titleLabel)
@@ -124,7 +124,7 @@ final class ActionVerticalModal: UIViewController {
     }
 
     private func setLayout() {
-        dimButton.snp.makeConstraints {
+        dimBackgroundView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
 
@@ -174,7 +174,7 @@ final class ActionVerticalModal: UIViewController {
     }
 
     private func setAddTarget() {
-        dimButton.addTarget(self, action: #selector(didTapDimButton), for: .touchUpInside)
+        dimBackgroundView.addTarget(self, action: #selector(didTapDimBackground), for: .touchUpInside)
         closeButton.addTarget(self, action: #selector(didTapCloseButton), for: .touchUpInside)
         firstButton.addTarget(self, action: #selector(didTapFirstButton), for: .touchUpInside)
         secondButton.addTarget(self, action: #selector(didTapSecondButton), for: .touchUpInside)
@@ -207,7 +207,7 @@ final class ActionVerticalModal: UIViewController {
     // MARK: - Actions
 
     @objc
-    private func didTapDimButton() {
+    private func didTapDimBackground() {
         dismiss(animated: true)
     }
 

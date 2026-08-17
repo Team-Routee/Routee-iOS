@@ -27,7 +27,7 @@ final class ActionPrimaryModal: UIViewController {
 
     // MARK: - UI Properties
 
-    private let dimButton = UIButton()
+    private let dimBackgroundView = UIControl()
     private let modalView = UIView()
     private let contentStackView = UIStackView()
     private let textStackView = UIStackView()
@@ -82,7 +82,7 @@ final class ActionPrimaryModal: UIViewController {
     private func setStyle() {
         view.backgroundColor = .clear
 
-        dimButton.do {
+        dimBackgroundView.do {
             $0.backgroundColor = .dim_secondary
         }
 
@@ -146,7 +146,7 @@ final class ActionPrimaryModal: UIViewController {
     }
 
     private func setUI() {
-        view.addSubviews(dimButton, modalView)
+        view.addSubviews(dimBackgroundView, modalView)
         modalView.addSubview(contentStackView)
 
         contentStackView.addArrangedSubview(textStackView)
@@ -168,7 +168,7 @@ final class ActionPrimaryModal: UIViewController {
     }
 
     private func setLayout() {
-        dimButton.snp.makeConstraints {
+        dimBackgroundView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
 
@@ -199,7 +199,7 @@ final class ActionPrimaryModal: UIViewController {
     }
 
     private func setAddTarget() {
-        dimButton.addTarget(self, action: #selector(didTapDimButton), for: .touchUpInside)
+        dimBackgroundView.addTarget(self, action: #selector(didTapDimBackground), for: .touchUpInside)
         leftButton.addTarget(self, action: #selector(didTapLeftButton), for: .touchUpInside)
         rightButton.addTarget(self, action: #selector(didTapRightButton), for: .touchUpInside)
     }
@@ -235,7 +235,7 @@ final class ActionPrimaryModal: UIViewController {
     // MARK: - Actions
 
     @objc
-    private func didTapDimButton() {
+    private func didTapDimBackground() {
         dismiss(animated: true)
     }
 
