@@ -605,6 +605,16 @@
     }
   },
   "radius": {
+    "radius-4": {
+      "$type": "number",
+      "$value": 4,
+      "$extensions": {
+        "com.figma.variableId": "VariableID:9788:29013",
+        "com.figma.scopes": [
+          "ALL_SCOPES"
+        ]
+      }
+    },
     "radius-8": {
       "$type": "number",
       "$value": 8,
@@ -651,7 +661,7 @@
       "$extensions": {
         "com.figma.variableId": "VariableID:2924:25470",
         "com.figma.scopes": [
-          "ALL_SCOPES"
+          "CORNER_RADIUS"
         ]
       }
     },
@@ -671,7 +681,7 @@
       "$extensions": {
         "com.figma.variableId": "VariableID:2916:26178",
         "com.figma.scopes": [
-          "ALL_SCOPES"
+          "CORNER_RADIUS"
         ]
       }
     }
