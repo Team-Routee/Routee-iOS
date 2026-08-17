@@ -23,6 +23,7 @@ extension CGFloat {
     static let s32: CGFloat = 32
     static let s80: CGFloat = 80
 
+    static let r4: CGFloat = 4
     static let r8: CGFloat = 8
     static let r12: CGFloat = 12
     static let r16: CGFloat = 16
