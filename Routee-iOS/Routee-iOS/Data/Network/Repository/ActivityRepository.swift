@@ -21,6 +21,7 @@ protocol ActivityRepository {
     func backgroundMapPresignedURL(activityId: Int64, requestDTO: BackgroundMapPresignedURLRequestDTO) async throws -> ImagePresignedURLModel
     func finishActivity(activityId: Int64, requestModel: WorkoutRecordFinishModel) async throws
     func changeActivityStatus(activityId: Int64, requestDTO: ChangeActivityStatusRequestDTO) async throws -> ChangeActivityStatusResponseDTO
+    func updateArchiveActivityTitle(activityId: Int64, requestDTO: UpdateArchiveActivityTitleRequestDTO) async throws -> UpdateArchiveActivityTitleResponseDTO
     func createCourseList(activityId: Int64, requestDTO: CreateCourseListRequestDTO) async throws -> CourseListModel
 }
 
@@ -279,6 +280,25 @@ struct DefaultActivityRepository: ActivityRepository {
         
         let response = try await service.request(endpoint, decodingType: ChangeActivityStatusResponseDTO.self)
         return response
+    }
+
+    func updateArchiveActivityTitle(activityId: Int64, requestDTO: UpdateArchiveActivityTitleRequestDTO) async throws -> UpdateArchiveActivityTitleResponseDTO {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.forbidden
+        }
+
+        let endpoint = ActivityAPI.updateArchiveActivityTitle(
+            header: .withAuth(accessToken: accessToken),
+            activityId: activityId,
+            requestDTO: requestDTO
+        )
+
+        return try await service.request(
+            endpoint,
+            decodingType: UpdateArchiveActivityTitleResponseDTO.self
+        )
     }
     
     func createCourseList(activityId: Int64, requestDTO: CreateCourseListRequestDTO) async throws -> CourseListModel {
