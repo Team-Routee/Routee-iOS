@@ -38,8 +38,7 @@ final class TimeLineView: BaseUIView {
     private let contentView = UIView()
     private lazy var titleTextField = TitleTextField(
         title: record?.title ?? "숭실대 동기모임 북한산",
-        showsEditIcon: true,
-        maxLength: 16
+        showsEditIcon: true
     )
     private let workoutMetric = WorkoutMetric(distance: "15.53", time: "03:20", altitude: "2132")
     private let trackMap = TimeLineTrackMap()

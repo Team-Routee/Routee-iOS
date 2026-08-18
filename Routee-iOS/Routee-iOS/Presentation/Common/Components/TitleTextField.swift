@@ -11,9 +11,9 @@ import SnapKit
 import Then
 
 final class TitleTextField: BaseUIView {
+    private let titleMaxLength = 16
     private let title: String
     private let showsEditIcon: Bool
-    private let maxLength: Int?
 
     var editingDidEnd: ((String) -> Void)?
     
@@ -24,10 +24,9 @@ final class TitleTextField: BaseUIView {
     private let titleTextField = UITextField()
     private let editButton = UIButton()
     
-    init(title: String, showsEditIcon: Bool, maxLength: Int? = nil) {
+    init(title: String, showsEditIcon: Bool) {
         self.title = title
         self.showsEditIcon = showsEditIcon
-        self.maxLength = maxLength
         
         super.init(frame: .zero)
     }
@@ -97,14 +96,13 @@ extension TitleTextField: UITextFieldDelegate {
         shouldChangeCharactersIn range: NSRange,
         replacementString string: String
     ) -> Bool {
-        guard let maxLength,
-              let currentText = textField.text,
+        guard let currentText = textField.text,
               let textRange = Range(range, in: currentText) else {
             return true
         }
 
         let updatedText = currentText.replacingCharacters(in: textRange, with: string)
-        return updatedText.count <= maxLength
+        return updatedText.count <= titleMaxLength
     }
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
