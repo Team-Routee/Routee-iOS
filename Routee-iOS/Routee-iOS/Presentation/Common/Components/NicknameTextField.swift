@@ -212,7 +212,7 @@ final class NicknameTextField: UITextField {
             hideStatusIcon()
 
         case .valid:
-            layer.borderColor = unfocusedBorderColor.cgColor
+            layer.borderColor = isEditing ? focusedBorderColor.cgColor : unfocusedBorderColor.cgColor
             setGuideLabel(color: .white60)
             showStatusIcon(.icSuccess, size: iconSize)
 
