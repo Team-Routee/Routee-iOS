@@ -30,7 +30,7 @@ final class NickNameTextField: UITextField {
     private let unfocusedBorderColor = UIColor.white30
     private let errorBorderColor = UIColor.statusError
     private let guideText = "한글, 영문, 숫자만 입력 가능해요 (공백 연속 불가, 최대 12자)"
-    private let fieldCase: NickNameTextFieldCase
+    private let fieldCase: NicknameTextFieldCase
     private let initialNickname: String?
 
     private let nicknameGuideLabel = UILabel()
@@ -39,7 +39,7 @@ final class NickNameTextField: UITextField {
     private var currentStatusIconSize: CGFloat = 24
 
     init(
-        fieldCase: NickNameTextFieldCase = .onboarding,
+        fieldCase: NicknameTextFieldCase = .onboarding,
         nickname: String? = nil,
         placeholder: String = "닉네임을 입력해주세요"
     ) {
