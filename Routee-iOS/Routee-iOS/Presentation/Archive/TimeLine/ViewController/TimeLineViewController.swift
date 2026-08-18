@@ -9,11 +9,15 @@ import UIKit
 
 final class TimeLineViewController: BaseUIViewController {
 
+    // MARK: - Properties
+
+    var titleDidUpdate: ((Int64, String) -> Void)?
+
     // MARK: - UI Properties
 
     private let rootView: TimeLineView
 
-    // MARK: - Properties
+    // MARK: - Private Properties
 
     private let record: ActivityListModel?
     private let viewModel = TimeLineViewModel()
@@ -160,7 +164,14 @@ final class TimeLineViewController: BaseUIViewController {
             guard let self else { return }
 
             do {
-                _ = try await viewModel.updateArchiveActivityTitle(activityId: activityId, title: title)
+                let response = try await viewModel.updateArchiveActivityTitle(
+                    activityId: activityId,
+                    title: title
+                )
+
+                await MainActor.run {
+                    self.titleDidUpdate?(response.activityId, response.title)
+                }
             } catch {
                 guard !Task.isCancelled else { return }
 

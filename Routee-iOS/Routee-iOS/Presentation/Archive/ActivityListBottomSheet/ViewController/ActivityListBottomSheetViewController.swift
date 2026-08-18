@@ -12,7 +12,7 @@ final class ActivityListBottomSheetViewController: BaseUIViewController {
     // MARK: - UI Properties
     
     private let rootView = ActivityListBottomSheet()
-    private let viewModel: ActivityListViewModel
+    private var viewModel: ActivityListViewModel
     private var sheetHeight: CGFloat {
         viewModel.isCompactHeight ? 247 : 344
     }
@@ -68,7 +68,15 @@ final class ActivityListBottomSheetViewController: BaseUIViewController {
     private func navigateToTimeLineView(record: ActivityListModel) {
         let timeLineViewController = TimeLineViewController(record: record)
         timeLineViewController.modalPresentationStyle = .fullScreen
+        timeLineViewController.titleDidUpdate = { [weak self] activityId, title in
+            self?.updateActivityTitle(activityId: activityId, title: title)
+        }
 
         present(timeLineViewController, animated: true)
+    }
+
+    private func updateActivityTitle(activityId: Int64, title: String) {
+        viewModel.updateTitle(activityId: activityId, title: title)
+        rootView.configure(with: viewModel)
     }
 }
