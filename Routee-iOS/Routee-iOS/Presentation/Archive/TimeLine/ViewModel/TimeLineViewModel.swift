@@ -44,6 +44,14 @@ final class TimeLineViewModel {
         try await activityRepository.getActivityCourseList(activityId: activityId)
     }
 
+    func updateArchiveActivityTitle(activityId: Int64, title: String) async throws -> UpdateArchiveActivityTitleResponseDTO {
+        let requestDTO = UpdateArchiveActivityTitleRequestDTO(title: title)
+        return try await activityRepository.updateArchiveActivityTitle(
+            activityId: activityId,
+            requestDTO: requestDTO
+        )
+    }
+
     // MARK: - Private Methods
 
     private func makeMetricViewModel(
