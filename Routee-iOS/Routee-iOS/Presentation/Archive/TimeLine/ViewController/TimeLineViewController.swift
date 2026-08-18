@@ -21,6 +21,7 @@ final class TimeLineViewController: BaseUIViewController {
     private var activityRouteTask: Task<Void, Never>?
     private var timeLineListTask: Task<Void, Never>?
     private var courseListTask: Task<Void, Never>?
+    private var titleUpdateTask: Task<Void, Never>?
 
     // MARK: - Initializer
 
@@ -45,6 +46,10 @@ final class TimeLineViewController: BaseUIViewController {
     override func setView() {
         rootView.backButtonAction = { [weak self] in
             self?.dismiss(animated: true)
+        }
+
+        rootView.titleEditingDidEnd = { [weak self] title in
+            self?.updateArchiveActivityTitle(title: title)
         }
 
         loadActivityStatistics()
@@ -139,6 +144,23 @@ final class TimeLineViewController: BaseUIViewController {
                 await MainActor.run {
                     self.rootView.configureCourseList(with: model)
                 }
+            } catch {
+                guard !Task.isCancelled else { return }
+
+                RouteeLogger.error(error)
+            }
+        }
+    }
+
+    private func updateArchiveActivityTitle(title: String) {
+        guard let activityId = record?.activityId else { return }
+
+        titleUpdateTask?.cancel()
+        titleUpdateTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                _ = try await viewModel.updateArchiveActivityTitle(activityId: activityId, title: title)
             } catch {
                 guard !Task.isCancelled else { return }
 
