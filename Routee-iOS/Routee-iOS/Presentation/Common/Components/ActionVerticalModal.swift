@@ -2,7 +2,7 @@
 //  ActionVerticalModal.swift
 //  Routee-iOS
 //
-//  Created by Codex on 8/17/26.
+//  Created by 김세령 on 8/17/26.
 //
 
 import UIKit
@@ -15,11 +15,11 @@ final class ActionVerticalModal: UIViewController {
     // MARK: - Properties
 
     private let titleText: String
-    private let firstButtonTitle: String
-    private let secondButtonTitle: String
+    private let topButtonTitle: String
+    private let bottomButtonTitle: String
     private let dismissOnAction: Bool
-    private let firstButtonAction: (() -> Void)?
-    private let secondButtonAction: (() -> Void)?
+    private let topButtonAction: (() -> Void)?
+    private let bottomButtonAction: (() -> Void)?
     private let closeButtonAction: (() -> Void)?
 
     // MARK: - UI Properties
@@ -30,26 +30,26 @@ final class ActionVerticalModal: UIViewController {
     private let titleContainerView = UIView()
     private let titleLabel = UILabel()
     private let buttonStackView = UIStackView()
-    private let firstButton = UIButton()
-    private let secondButton = UIButton()
+    private let topButton = UIButton()
+    private let bottomButton = UIButton()
 
     // MARK: - Initializer
 
     init(
         title: String,
-        firstButtonTitle: String,
-        secondButtonTitle: String,
+        topButtonTitle: String,
+        bottomButtonTitle: String,
         dismissOnAction: Bool = true,
-        firstButtonAction: (() -> Void)? = nil,
-        secondButtonAction: (() -> Void)? = nil,
+        topButtonAction: (() -> Void)? = nil,
+        bottomButtonAction: (() -> Void)? = nil,
         closeButtonAction: (() -> Void)? = nil
     ) {
         self.titleText = title
-        self.firstButtonTitle = firstButtonTitle
-        self.secondButtonTitle = secondButtonTitle
+        self.topButtonTitle = topButtonTitle
+        self.bottomButtonTitle = bottomButtonTitle
         self.dismissOnAction = dismissOnAction
-        self.firstButtonAction = firstButtonAction
-        self.secondButtonAction = secondButtonAction
+        self.topButtonAction = topButtonAction
+        self.bottomButtonAction = bottomButtonAction
         self.closeButtonAction = closeButtonAction
 
         super.init(nibName: nil, bundle: nil)
@@ -110,8 +110,8 @@ final class ActionVerticalModal: UIViewController {
             $0.distribution = .fill
         }
 
-        configureButton(firstButton, title: firstButtonTitle)
-        configureButton(secondButton, title: secondButtonTitle)
+        configureButton(topButton, title: topButtonTitle)
+        configureButton(bottomButton, title: bottomButtonTitle)
     }
 
     private func setUI() {
@@ -119,8 +119,8 @@ final class ActionVerticalModal: UIViewController {
         modalView.addSubviews(titleContainerView, buttonStackView, closeButton)
 
         titleContainerView.addSubview(titleLabel)
-        buttonStackView.addArrangedSubview(firstButton)
-        buttonStackView.addArrangedSubview(secondButton)
+        buttonStackView.addArrangedSubview(topButton)
+        buttonStackView.addArrangedSubview(bottomButton)
     }
 
     private func setLayout() {
@@ -164,11 +164,11 @@ final class ActionVerticalModal: UIViewController {
             $0.bottom.equalToSuperview().inset(CGFloat.s24)
         }
 
-        firstButton.snp.makeConstraints {
+        topButton.snp.makeConstraints {
             $0.height.equalTo(46)
         }
 
-        secondButton.snp.makeConstraints {
+        bottomButton.snp.makeConstraints {
             $0.height.equalTo(46)
         }
     }
@@ -176,8 +176,8 @@ final class ActionVerticalModal: UIViewController {
     private func setAddTarget() {
         dimBackgroundView.addTarget(self, action: #selector(didTapDimBackground), for: .touchUpInside)
         closeButton.addTarget(self, action: #selector(didTapCloseButton), for: .touchUpInside)
-        firstButton.addTarget(self, action: #selector(didTapFirstButton), for: .touchUpInside)
-        secondButton.addTarget(self, action: #selector(didTapSecondButton), for: .touchUpInside)
+        topButton.addTarget(self, action: #selector(didTapTopButton), for: .touchUpInside)
+        bottomButton.addTarget(self, action: #selector(didTapBottomButton), for: .touchUpInside)
     }
 
     // MARK: - Private Methods
@@ -219,12 +219,12 @@ final class ActionVerticalModal: UIViewController {
     }
 
     @objc
-    private func didTapFirstButton() {
-        performAction(firstButtonAction)
+    private func didTapTopButton() {
+        performAction(topButtonAction)
     }
 
     @objc
-    private func didTapSecondButton() {
-        performAction(secondButtonAction)
+    private func didTapBottomButton() {
+        performAction(bottomButtonAction)
     }
 }
