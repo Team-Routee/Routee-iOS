@@ -12,10 +12,12 @@ import Then
 
 final class NickNameTextField: UITextField {
 
-    enum NickNameTextFieldCase {
+    enum NicknameTextFieldCase {
         case onboarding
         case profile
     }
+
+    var validationChanged: ((Bool) -> Void)?
 
     private enum NicknameValidationState {
         case guide
@@ -186,6 +188,8 @@ final class NickNameTextField: UITextField {
             setGuideLabel(color: .statusError)
             showStatusIcon(.icError, size: iconSize)
         }
+
+        validationChanged?(validationState == .valid)
     }
 
     private func setGuideLabel(color: UIColor) {
