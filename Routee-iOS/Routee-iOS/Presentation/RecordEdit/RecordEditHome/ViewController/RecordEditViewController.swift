@@ -61,7 +61,6 @@ final class RecordEditViewController: BaseUIViewController {
         )
 
         rootView.workoutRecordCollectionView.dataSource = self
-        rootView.workoutRecordCollectionView.delegate = self
     }
 
     private func setMonthSelector() {
@@ -122,17 +121,6 @@ final class RecordEditViewController: BaseUIViewController {
     }
 }
 
-    // MARK: - extensions
-
-extension RecordEditViewController: UICollectionViewDelegate {
-    func collectionView(
-        _ collectionView: UICollectionView,
-        didSelectItemAt indexPath: IndexPath
-    ) {
-        pushEditorViewController(activityId: records[indexPath.item].activityId)
-    }
-}
-
 extension RecordEditViewController: UICollectionViewDataSource {
     func collectionView(
         _ collectionView: UICollectionView,
@@ -155,7 +143,7 @@ extension RecordEditViewController: UICollectionViewDataSource {
         let record = records[indexPath.item]
 
         cell.configure(with: record)
-        cell.editButtonAction = { [weak self] in
+        cell.thumbnailTapAction = { [weak self] in
             self?.pushEditorViewController(activityId: record.activityId)
         }
 
