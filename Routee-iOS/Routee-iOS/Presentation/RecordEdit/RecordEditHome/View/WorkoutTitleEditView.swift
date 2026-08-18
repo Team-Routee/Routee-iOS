@@ -12,11 +12,20 @@ import Then
 
 final class WorkoutTitleEditView: BaseUIView {
 
+    private enum EditState {
+        case display
+        case editing
+    }
+
     // MARK: - Properties
 
     private let maxTitleLength = 16
     private var currentTitle = ""
-    private var isEditingTitle = false
+    private var editState: EditState = .display {
+        didSet {
+            updateEditState()
+        }
+    }
 
     // MARK: - UI Properties
 
@@ -140,7 +149,7 @@ final class WorkoutTitleEditView: BaseUIView {
     }
 
     func endEditingIfNeeded() {
-        guard isEditingTitle else { return }
+        guard editState == .editing else { return }
 
         endTitleEditing()
     }
@@ -155,23 +164,31 @@ final class WorkoutTitleEditView: BaseUIView {
         titleLabel.text = currentTitle
     }
 
+    private func updateEditState() {
+        switch editState {
+        case .display:
+            titleDisplayStackView.isHidden = false
+            titleEditingContainerView.isHidden = true
+            titleUnderlineView.alpha = 0
+            titleTextField.isUserInteractionEnabled = false
+
+        case .editing:
+            titleDisplayStackView.isHidden = true
+            titleEditingContainerView.isHidden = false
+            titleUnderlineView.alpha = 1
+            titleTextField.isUserInteractionEnabled = true
+        }
+    }
+
     private func beginTitleEditing() {
-        titleDisplayStackView.isHidden = true
-        titleEditingContainerView.isHidden = false
-        isEditingTitle = true
-        titleUnderlineView.alpha = 1
         titleTextField.text = currentTitle
-        titleTextField.isUserInteractionEnabled = true
+        editState = .editing
         titleTextField.becomeFirstResponder()
     }
 
     private func endTitleEditing() {
         currentTitle = titleTextField.text ?? ""
-        isEditingTitle = false
-        titleTextField.isUserInteractionEnabled = false
-        titleUnderlineView.alpha = 0
-        titleEditingContainerView.isHidden = true
-        titleDisplayStackView.isHidden = false
+        editState = .display
         updateTitleDisplay()
     }
 
