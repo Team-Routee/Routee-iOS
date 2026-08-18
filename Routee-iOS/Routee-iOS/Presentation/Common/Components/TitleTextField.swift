@@ -13,6 +13,9 @@ import Then
 final class TitleTextField: BaseUIView {
     private let title: String
     private let showsEditIcon: Bool
+    private let maxLength: Int?
+
+    var editingDidEnd: ((String) -> Void)?
     
     var text: String? {
         titleTextField.text
@@ -21,9 +24,10 @@ final class TitleTextField: BaseUIView {
     private let titleTextField = UITextField()
     private let editButton = UIButton()
     
-    init(title: String, showsEditIcon: Bool) {
+    init(title: String, showsEditIcon: Bool, maxLength: Int? = nil) {
         self.title = title
         self.showsEditIcon = showsEditIcon
+        self.maxLength = maxLength
         
         super.init(frame: .zero)
     }
@@ -88,6 +92,21 @@ final class TitleTextField: BaseUIView {
 }
 
 extension TitleTextField: UITextFieldDelegate {
+    func textField(
+        _ textField: UITextField,
+        shouldChangeCharactersIn range: NSRange,
+        replacementString string: String
+    ) -> Bool {
+        guard let maxLength,
+              let currentText = textField.text,
+              let textRange = Range(range, in: currentText) else {
+            return true
+        }
+
+        let updatedText = currentText.replacingCharacters(in: textRange, with: string)
+        return updatedText.count <= maxLength
+    }
+
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
@@ -95,5 +114,6 @@ extension TitleTextField: UITextFieldDelegate {
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         textField.isUserInteractionEnabled = false
+        editingDidEnd?(textField.text ?? "")
     }
 }
