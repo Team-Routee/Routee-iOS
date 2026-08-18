@@ -268,7 +268,7 @@ final class TimeLineCard: BaseUIView {
 
         toastMessageView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.bottom.equalTo(imageScrollView.snp.bottom).inset(24)
+            $0.bottom.equalToSuperview().inset(16)
             $0.width.equalTo(toastWidth)
             $0.height.equalTo(37)
         }
