@@ -19,23 +19,27 @@ final class TimeLineCard: BaseUIView {
     private var imageContainerViews: [UIView] = []
     private var imageViews: [UIImageView] = []
     private var locationTags: [LocationTag] = []
+    private var photoDownloadButtons: [PhotoDownloadButton] = []
     private var imageCount = 0
     
     init(images: [UIImage?], locations: [String?]? = nil) {
         var imageContainerViews: [UIView] = []
         var imageViews: [UIImageView] = []
         var locationTags: [LocationTag] = []
+        var photoDownloadButtons: [PhotoDownloadButton] = []
 
         images.enumerated().forEach { index, image in
             let imageContainerView = UIView()
             let imageView = UIImageView()
+            let photoDownloadButton = PhotoDownloadButton()
             imageView.image = image
             imageView.contentMode = .scaleAspectFill
             imageView.clipsToBounds = true
 
-            imageContainerView.addSubview(imageView)
+            imageContainerView.addSubviews(imageView, photoDownloadButton)
             imageContainerViews.append(imageContainerView)
             imageViews.append(imageView)
+            photoDownloadButtons.append(photoDownloadButton)
 
             guard let locations,
                   locations.indices.contains(index),
@@ -49,9 +53,17 @@ final class TimeLineCard: BaseUIView {
         self.imageContainerViews = imageContainerViews
         self.imageViews = imageViews
         self.locationTags = locationTags
+        self.photoDownloadButtons = photoDownloadButtons
         imageCount = images.count
 
         super.init(frame: .zero)
+
+        zip(self.photoDownloadButtons, self.imageViews).forEach { button, imageView in
+            button.configure(
+                imageProvider: { [weak imageView] in imageView?.image },
+                showToast: { [weak self] title in self?.showToast(title: title) }
+            )
+        }
     }
 
     convenience init(imageNames: [String], locations: [String?]? = nil) {
@@ -127,6 +139,13 @@ final class TimeLineCard: BaseUIView {
             }
         }
 
+        photoDownloadButtons.forEach {
+            $0.snp.makeConstraints {
+                $0.top.equalToSuperview().inset(12)
+                $0.trailing.equalToSuperview().inset(14)
+            }
+        }
+
         pageControl.snp.makeConstraints {
             $0.centerX.equalToSuperview()
             $0.top.equalTo(imageScrollView.snp.bottom).offset(12)
@@ -167,13 +186,19 @@ final class TimeLineCard: BaseUIView {
         imageContainerViews.removeAll()
         imageViews.removeAll()
         locationTags.removeAll()
+        photoDownloadButtons.removeAll()
         imageCount = imageUrls.count
 
         imageUrls.enumerated().forEach { index, imageUrl in
             let imageContainerView = UIView()
             let imageView = UIImageView()
+            let photoDownloadButton = PhotoDownloadButton()
             imageView.contentMode = .scaleAspectFill
             imageView.clipsToBounds = true
+            photoDownloadButton.configure(
+                imageProvider: { [weak imageView] in imageView?.image },
+                showToast: { [weak self] title in self?.showToast(title: title) }
+            )
 
             if let url = URL(string: imageUrl) {
                 imageView.kf.setImage(
@@ -182,10 +207,11 @@ final class TimeLineCard: BaseUIView {
                 )
             }
 
-            imageContainerView.addSubview(imageView)
+            imageContainerView.addSubviews(imageView, photoDownloadButton)
             imageStackView.addArrangedSubview(imageContainerView)
             imageContainerViews.append(imageContainerView)
             imageViews.append(imageView)
+            photoDownloadButtons.append(photoDownloadButton)
 
             imageContainerView.snp.makeConstraints {
                 $0.width.equalTo(imageScrollView.frameLayoutGuide)
@@ -193,6 +219,11 @@ final class TimeLineCard: BaseUIView {
 
             imageView.snp.makeConstraints {
                 $0.edges.equalToSuperview()
+            }
+
+            photoDownloadButton.snp.makeConstraints {
+                $0.top.equalToSuperview().inset(12)
+                $0.trailing.equalToSuperview().inset(14)
             }
 
             guard let locations,
@@ -218,6 +249,40 @@ final class TimeLineCard: BaseUIView {
 
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmedTitle.isEmpty ? nil : trimmedTitle
+    }
+
+    private func showToast(title: String) {
+        subviews
+            .filter { $0 is ToastMessageView }
+            .forEach { $0.removeFromSuperview() }
+
+        let toastMessageView = ToastMessageView(title: title)
+
+        addSubview(toastMessageView)
+        layoutIfNeeded()
+
+        let toastWidth = min(
+            toastMessageView.titleLabel.intrinsicContentSize.width + 32,
+            bounds.width - 48
+        )
+
+        toastMessageView.snp.makeConstraints {
+            $0.centerX.equalToSuperview()
+            $0.bottom.equalTo(imageScrollView.snp.bottom).inset(24)
+            $0.width.equalTo(toastWidth)
+            $0.height.equalTo(37)
+        }
+
+        toastMessageView.layer.cornerRadius = 12
+        toastMessageView.clipsToBounds = true
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            UIView.animate(withDuration: 0.2) {
+                toastMessageView.alpha = 0
+            } completion: { _ in
+                toastMessageView.removeFromSuperview()
+            }
+        }
     }
 }
 
