@@ -34,6 +34,7 @@ final class NicknameTextField: UITextField {
     private let guideText = "한글, 영문, 숫자만 입력 가능해요 (공백 연속 불가, 최대 12자)"
     private let fieldCase: NicknameTextFieldCase
     private let initialNickname: String?
+    private let placeholderText: String
 
     private let nicknameGuideLabel = UILabel()
     private let statusIconContainer = UIView()
@@ -47,11 +48,13 @@ final class NicknameTextField: UITextField {
     ) {
         self.fieldCase = fieldCase
         self.initialNickname = nickname
+        self.placeholderText = placeholder
         super.init(frame: .zero)
 
         setStyle()
+        setUI()
         setLayout()
-        setPlaceholder(placeholder)
+        setAddTarget()
         setInitialState()
     }
 
@@ -243,7 +246,7 @@ final class NicknameTextField: UITextField {
     }
 }
 
-extension NickNameTextField: UITextFieldDelegate {
+extension NicknameTextField: UITextFieldDelegate {
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
         true
     }
