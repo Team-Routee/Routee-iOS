@@ -170,7 +170,8 @@ final class TimeLineView: BaseUIView {
         }
 
         titleTextField.snp.makeConstraints {
-            $0.top.leading.equalToSuperview()
+            $0.top.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview()
         }
 
         workoutMetric.snp.makeConstraints {
