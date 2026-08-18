@@ -31,6 +31,7 @@ final class NickNameTextField: UITextField {
     private let errorBorderColor = UIColor.statusError
     private let guideText = "한글, 영문, 숫자만 입력 가능해요 (공백 연속 불가, 최대 12자)"
     private let fieldCase: NickNameTextFieldCase
+    private let initialNickname: String?
 
     private let nicknameGuideLabel = UILabel()
     private let statusIconContainer = UIView()
@@ -39,9 +40,11 @@ final class NickNameTextField: UITextField {
 
     init(
         fieldCase: NickNameTextFieldCase = .onboarding,
+        nickname: String? = nil,
         placeholder: String = "닉네임을 입력해주세요"
     ) {
         self.fieldCase = fieldCase
+        self.initialNickname = nickname
         super.init(frame: .zero)
 
         setStyle()
@@ -84,6 +87,11 @@ final class NickNameTextField: UITextField {
                 .foregroundColor: UIColor.white30
             ]
         )
+    }
+
+    func configure(nickname: String) {
+        text = nickname
+        updateState(for: nickname, isEditing: isEditing)
     }
     
     private func setStyle() {
@@ -154,7 +162,7 @@ final class NickNameTextField: UITextField {
             hideStatusIcon()
 
         case .profile:
-            text = "관악산 날다람쥐"
+            text = initialNickname
             showStatusIcon(.icEditSmLineWhite, size: editIconSize)
         }
     }
