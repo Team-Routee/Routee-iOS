@@ -80,16 +80,6 @@ final class NicknameTextField: UITextField {
         }
         return insets
     }
-        
-    func setPlaceholder(_ placeholder: String) {
-        attributedPlaceholder = NSAttributedString(
-            string: placeholder,
-            attributes: [
-                .font: UIFont.body_r_16,
-                .foregroundColor: UIColor.white30
-            ]
-        )
-    }
 
     func configure(nickname: String) {
         text = nickname
@@ -105,6 +95,7 @@ final class NicknameTextField: UITextField {
         autocapitalizationType = .none
         returnKeyType = .done
         delegate = self
+        setPlaceholder()
         
         layer.cornerRadius = .r12
         layer.borderWidth = 1
@@ -116,20 +107,35 @@ final class NicknameTextField: UITextField {
             $0.font = .label_r_12
         }
 
+        statusImageView.contentMode = .scaleAspectFit
+    }
+
+    private func setPlaceholder() {
+        attributedPlaceholder = NSAttributedString(
+            string: placeholderText,
+            attributes: [
+                .font: UIFont.body_r_16,
+                .foregroundColor: UIColor.white30
+            ]
+        )
+    }
+
+    private func setUI() {
+        addSubview(nicknameGuideLabel)
+
         setStatusIconContainerFrame()
         statusIconContainer.addSubview(statusImageView)
-        statusImageView.contentMode = .scaleAspectFit
         rightView = statusIconContainer
         rightViewMode = .never
-        
+    }
+
+    private func setAddTarget() {
         addTarget(self, action: #selector(didBeginEditing), for: .editingDidBegin)
         addTarget(self, action: #selector(didEndEditing), for: .editingDidEnd)
         addTarget(self, action: #selector(didChangeText), for: .editingChanged)
     }
 
     private func setLayout() {
-        addSubview(nicknameGuideLabel)
-
         nicknameGuideLabel.snp.makeConstraints {
             $0.leading.equalToSuperview()
             $0.top.equalTo(snp.bottom).offset(6)
