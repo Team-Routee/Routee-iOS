@@ -19,6 +19,11 @@ final class TimeLineView: BaseUIView {
         set { topNavigationBar.backButtonAction = newValue }
     }
 
+    var titleEditingDidEnd: ((String) -> Void)? {
+        get { titleTextField.editingDidEnd }
+        set { titleTextField.editingDidEnd = newValue }
+    }
+
     private let record: ActivityListModel?
     private var didConfigureTimeLine = false
     private var didConfigureCourse = false
@@ -33,7 +38,8 @@ final class TimeLineView: BaseUIView {
     private let contentView = UIView()
     private lazy var titleTextField = TitleTextField(
         title: record?.title ?? "숭실대 동기모임 북한산",
-        showsEditIcon: false
+        showsEditIcon: true,
+        maxLength: 16
     )
     private let workoutMetric = WorkoutMetric(distance: "15.53", time: "03:20", altitude: "2132")
     private let trackMap = TimeLineTrackMap()
