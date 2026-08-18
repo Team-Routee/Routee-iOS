@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class NickNameTextField: UITextField {
+final class NicknameTextField: UITextField {
 
     enum NicknameTextFieldCase {
         case onboarding
