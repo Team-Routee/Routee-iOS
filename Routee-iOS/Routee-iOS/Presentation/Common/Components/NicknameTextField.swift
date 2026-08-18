@@ -12,6 +12,8 @@ import Then
 
 final class NicknameTextField: UITextField {
 
+    // MARK: - Properties
+
     enum NicknameTextFieldCase {
         case onboarding
         case profile
@@ -36,10 +38,22 @@ final class NicknameTextField: UITextField {
     private let initialNickname: String?
     private let placeholderText: String
 
+    private var textAreaInsets: UIEdgeInsets {
+        var insets = textInsets
+        if rightViewMode == .always {
+            insets.right += currentStatusIconSize + textInsets.right
+        }
+        return insets
+    }
+
+    // MARK: - UI Properties
+
     private let nicknameGuideLabel = UILabel()
     private let statusIconContainer = UIView()
     private let statusImageView = UIImageView()
     private var currentStatusIconSize: CGFloat = 24
+
+    // MARK: - Initializer
 
     init(
         fieldCase: NicknameTextFieldCase = .onboarding,
@@ -62,6 +76,8 @@ final class NicknameTextField: UITextField {
         fatalError("init(coder:) has not been implemented")
     }
 
+    // MARK: - Override Methods
+
     override func textRect(forBounds bounds: CGRect) -> CGRect {
         bounds.inset(by: textAreaInsets)
     }
@@ -76,19 +92,8 @@ final class NicknameTextField: UITextField {
         return super.canPerformAction(action, withSender: sender)
     }
 
-    private var textAreaInsets: UIEdgeInsets {
-        var insets = textInsets
-        if rightViewMode == .always {
-            insets.right += currentStatusIconSize + textInsets.right
-        }
-        return insets
-    }
+    // MARK: - UI Setting
 
-    func configure(nickname: String) {
-        text = nickname
-        updateState(for: nickname, isEditing: isEditing)
-    }
-    
     private func setStyle() {
         backgroundColor = .dimPrimary
         textColor = .static_white
@@ -99,7 +104,7 @@ final class NicknameTextField: UITextField {
         returnKeyType = .done
         delegate = self
         setPlaceholder()
-        
+
         layer.cornerRadius = .r12
         layer.borderWidth = 1
         layer.borderColor = unfocusedBorderColor.cgColor
@@ -143,18 +148,20 @@ final class NicknameTextField: UITextField {
             $0.leading.equalToSuperview()
             $0.top.equalTo(snp.bottom).offset(6)
         }
-        
+
         self.snp.makeConstraints {
             $0.width.equalTo(311)
             $0.height.equalTo(50)
         }
     }
-    
+
+    // MARK: - Actions
+
     @objc
     private func didBeginEditing() {
         updateState(for: text ?? "", isEditing: true)
     }
-    
+
     @objc
     private func didEndEditing() {
         updateState(for: text ?? "", isEditing: false)
@@ -164,6 +171,15 @@ final class NicknameTextField: UITextField {
     private func didChangeText() {
         updateState(for: text ?? "", isEditing: isEditing)
     }
+
+    // MARK: - Public Methods
+
+    func configure(nickname: String) {
+        text = nickname
+        updateState(for: nickname, isEditing: isEditing)
+    }
+
+    // MARK: - Private Methods
 
     private func setInitialState() {
         setGuideLabel(color: .white60)
