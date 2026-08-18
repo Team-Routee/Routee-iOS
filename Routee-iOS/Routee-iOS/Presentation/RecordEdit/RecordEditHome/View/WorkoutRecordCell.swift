@@ -15,8 +15,8 @@ final class WorkoutRecordCell: UICollectionViewCell {
     // MARK: - Properties
     
     static let identifier = "WorkoutRecordCell"
-    var editButtonAction: (() -> Void)?
-    
+    var onThumbnailTap: (() -> Void)?
+
     private let formatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy.MM.dd."
@@ -26,7 +26,7 @@ final class WorkoutRecordCell: UICollectionViewCell {
     // MARK: - UI Properties
     
     private let workoutRecordThumbnail = WorkoutRecordThumbnail()
-    private let titleLabel = UILabel()
+    private let workoutTitleEditView = WorkoutTitleEditView()
     private let dateLabel = UILabel()
     
     // MARK: - Initializer
@@ -48,7 +48,8 @@ final class WorkoutRecordCell: UICollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         
-        editButtonAction = nil
+        onThumbnailTap = nil
+        workoutTitleEditView.endEditingIfNeeded()
         workoutRecordThumbnail.configure(imageNames: [])
         workoutRecordThumbnail.configure(imageURLs: [])
     }
@@ -56,13 +57,6 @@ final class WorkoutRecordCell: UICollectionViewCell {
     // MARK: - UI Setting
     
     private func setStyle() {
-        titleLabel.do {
-            $0.text = "숭실대 동기모임 2탄"
-            $0.font = .body_sb_14
-            $0.textColor = .staticWhite
-            $0.textAlignment = .center
-        }
-        
         dateLabel.do {
             $0.text = "2026.03.23."
             $0.font = .label_m_12
@@ -74,9 +68,11 @@ final class WorkoutRecordCell: UICollectionViewCell {
     private func setUI() {
         contentView.addSubviews(
             workoutRecordThumbnail,
-            titleLabel,
+            workoutTitleEditView,
             dateLabel
         )
+
+        setActions()
     }
     
     private func setLayout() {
@@ -85,13 +81,13 @@ final class WorkoutRecordCell: UICollectionViewCell {
             $0.height.equalTo(192)
         }
         
-        titleLabel.snp.makeConstraints {
-            $0.top.equalTo(workoutRecordThumbnail.snp.bottom).offset(12)
-            $0.leading.trailing.equalTo(contentView)
+        workoutTitleEditView.snp.makeConstraints {
+            $0.top.equalTo(workoutRecordThumbnail.snp.bottom).offset(CGFloat.s16)
+            $0.horizontalEdges.equalTo(contentView)
         }
         
         dateLabel.snp.makeConstraints {
-            $0.top.equalTo(titleLabel.snp.bottom).offset(2)
+            $0.top.equalTo(workoutTitleEditView.snp.bottom).offset(2)
             $0.leading.trailing.equalTo(contentView)
             $0.bottom.lessThanOrEqualTo(contentView)
         }
@@ -100,20 +96,31 @@ final class WorkoutRecordCell: UICollectionViewCell {
     // MARK: - Public Methods
 
     func configure(with workout: WorkoutRecordModel) {
-        titleLabel.text = workout.title
+        workoutTitleEditView.configure(title: workout.title)
         dateLabel.text = formatter.string(from: workout.date)
         workoutRecordThumbnail.configure(imageNames: workout.imageNames)
-        workoutRecordThumbnail.editButtonAction = { [weak self] in
-            self?.editButtonAction?()
-        }
     }
 
     func configure(with workout: WorkoutListModel) {
-        titleLabel.text = workout.title
+        workoutTitleEditView.configure(title: workout.title)
         dateLabel.text = workout.activityDate.replacingOccurrences(of: "-", with: ".") + "."
         workoutRecordThumbnail.configure(imageURLs: workout.timelineImageUrls)
-        workoutRecordThumbnail.editButtonAction = { [weak self] in
-            self?.editButtonAction?()
-        }
+    }
+
+    // MARK: - Private Methods
+
+    private func setActions() {
+        let thumbnailTapGesture = UITapGestureRecognizer(
+            target: self,
+            action: #selector(didTapThumbnail)
+        )
+        workoutRecordThumbnail.addGestureRecognizer(thumbnailTapGesture)
+    }
+
+    // MARK: - Actions
+
+    @objc
+    private func didTapThumbnail() {
+        onThumbnailTap?()
     }
 }

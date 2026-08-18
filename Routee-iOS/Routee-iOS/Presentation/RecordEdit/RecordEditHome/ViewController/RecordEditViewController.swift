@@ -143,7 +143,7 @@ extension RecordEditViewController: UICollectionViewDataSource {
         let record = records[indexPath.item]
 
         cell.configure(with: record)
-        cell.thumbnailTapAction = { [weak self] in
+        cell.onThumbnailTap = { [weak self] in
             self?.pushEditorViewController(activityId: record.activityId)
         }
 
