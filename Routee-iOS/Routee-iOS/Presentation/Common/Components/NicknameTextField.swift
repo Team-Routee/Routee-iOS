@@ -93,7 +93,7 @@ final class NicknameTextField: UITextField {
     }
 
     // MARK: - UI Setting
-
+    
     private func setStyle() {
         backgroundColor = .dimPrimary
         textColor = .static_white
@@ -104,7 +104,7 @@ final class NicknameTextField: UITextField {
         returnKeyType = .done
         delegate = self
         setPlaceholder()
-
+        
         layer.cornerRadius = .r12
         layer.borderWidth = 1
         layer.borderColor = unfocusedBorderColor.cgColor
@@ -141,6 +141,9 @@ final class NicknameTextField: UITextField {
         addTarget(self, action: #selector(didBeginEditing), for: .editingDidBegin)
         addTarget(self, action: #selector(didEndEditing), for: .editingDidEnd)
         addTarget(self, action: #selector(didChangeText), for: .editingChanged)
+        statusIconContainer.addGestureRecognizer(
+            UITapGestureRecognizer(target: self, action: #selector(didTapStatusIcon))
+        )
     }
 
     private func setLayout() {
@@ -148,20 +151,20 @@ final class NicknameTextField: UITextField {
             $0.leading.equalToSuperview()
             $0.top.equalTo(snp.bottom).offset(6)
         }
-
+        
         self.snp.makeConstraints {
             $0.width.equalTo(311)
             $0.height.equalTo(50)
         }
     }
-
+    
     // MARK: - Actions
-
+    
     @objc
     private func didBeginEditing() {
         updateState(for: text ?? "", isEditing: true)
     }
-
+    
     @objc
     private func didEndEditing() {
         updateState(for: text ?? "", isEditing: false)
@@ -170,6 +173,11 @@ final class NicknameTextField: UITextField {
     @objc
     private func didChangeText() {
         updateState(for: text ?? "", isEditing: isEditing)
+    }
+
+    @objc
+    private func didTapStatusIcon() {
+        becomeFirstResponder()
     }
 
     // MARK: - Public Methods
