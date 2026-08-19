@@ -22,6 +22,7 @@ enum ActivityAPI {
     case backgroundMapPresignedURL(header: HeaderType, activityId: Int64, requestDTO: BackgroundMapPresignedURLRequestDTO)
     case finishActivity(header: HeaderType, activityId: Int64, requestDTO: FinishActivityRequestDTO)
     case changeActivityStatus(header: HeaderType, activityId: Int64, requestDTO: ChangeActivityStatusRequestDTO)
+    case updateArchiveActivityTitle(header: HeaderType, activityId: Int64, requestDTO: UpdateArchiveActivityTitleRequestDTO)
     case createCourseList(header: HeaderType, activityId: Int64, requestDTO: CreateCourseListRequestDTO)
 }
 
@@ -41,6 +42,7 @@ extension ActivityAPI: RouteeEndPoint {
              .backgroundMapPresignedURL,
              .finishActivity,
              .changeActivityStatus,
+             .updateArchiveActivityTitle,
              .createCourseList:
             return "/api/v1/activity"
         }
@@ -72,6 +74,8 @@ extension ActivityAPI: RouteeEndPoint {
             return "/\(activityId)"
         case .changeActivityStatus(_, let activityId, _):
             return "/\(activityId)/status"
+        case .updateArchiveActivityTitle(_, let activityId, _):
+            return "/\(activityId)/title"
         case .createCourseList(_, let activityId, _):
             return "/\(activityId)/route"
         }
@@ -85,7 +89,7 @@ extension ActivityAPI: RouteeEndPoint {
             return .post
         case .finishActivity:
             return .put
-        case .changeActivityStatus:
+        case .changeActivityStatus, .updateArchiveActivityTitle:
             return .patch
         }
     }
@@ -99,6 +103,7 @@ extension ActivityAPI: RouteeEndPoint {
                 .backgroundMapPresignedURL(let header, _, _),
                 .finishActivity(let header, _, _),
                 .changeActivityStatus(let header, _, _),
+                .updateArchiveActivityTitle(let header, _, _),
                 .createCourseList(let header, _, _):
             return header
         case .activityStatistics(let header, _):
@@ -118,7 +123,14 @@ extension ActivityAPI: RouteeEndPoint {
         switch self {
         case .activityRoute, .activityStatistics, .activityTimelineList, .activityCourseList, .recordEditResource, .workoutList:
             return URLEncoding.default
-        case .createActivity, .timeLinePresignedURL, .createTimeLine, .backgroundMapPresignedURL, .finishActivity, .changeActivityStatus, .createCourseList:
+        case .createActivity,
+                .timeLinePresignedURL,
+                .createTimeLine,
+                .backgroundMapPresignedURL,
+                .finishActivity,
+                .changeActivityStatus,
+                .updateArchiveActivityTitle,
+                .createCourseList:
             return JSONEncoding.default
         }
     }
@@ -136,6 +148,7 @@ extension ActivityAPI: RouteeEndPoint {
              .backgroundMapPresignedURL,
              .finishActivity,
              .changeActivityStatus,
+             .updateArchiveActivityTitle,
              .createCourseList:
             return nil
         case .workoutList(_, let requestDTO):
@@ -161,6 +174,8 @@ extension ActivityAPI: RouteeEndPoint {
         case .finishActivity(_, _, let requestDTO):
             return requestDTO.asParameters()
         case .changeActivityStatus(_, _, let requestDTO):
+            return requestDTO.asParameters()
+        case .updateArchiveActivityTitle(_, _, let requestDTO):
             return requestDTO.asParameters()
         case .createCourseList(_, _, let requestDTO):
             return requestDTO.asParameters()
