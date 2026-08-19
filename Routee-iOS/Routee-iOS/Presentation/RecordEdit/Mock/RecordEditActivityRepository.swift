@@ -80,7 +80,7 @@ struct MockActivityRepository: ActivityRepository {
             ),
             WorkoutListModel(
                 activityId: 2,
-                title: "운동 기록 제목 길이 테스트",
+                title: "레전드 산책 중인 마운틴듀",
                 activityDate: "\(year)-\(String(format: "%02d", month))-18",
                 timelineImageUrls: []
             ),
