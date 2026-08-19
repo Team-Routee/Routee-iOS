@@ -26,7 +26,7 @@ final class WorkoutRecordCell: UICollectionViewCell {
     // MARK: - UI Properties
     
     private let workoutRecordThumbnail = WorkoutRecordThumbnail()
-    private let workoutTitleEditView = WorkoutTitleEditView()
+    private let workoutTitleEditor = WorkoutTitleEditor()
     private let dateLabel = UILabel()
     
     // MARK: - Initializer
@@ -49,7 +49,7 @@ final class WorkoutRecordCell: UICollectionViewCell {
         super.prepareForReuse()
         
         onThumbnailTap = nil
-        workoutTitleEditView.endEditingIfNeeded()
+        workoutTitleEditor.endEditingIfNeeded()
         workoutRecordThumbnail.configure(imageNames: [])
         workoutRecordThumbnail.configure(imageURLs: [])
     }
@@ -68,7 +68,7 @@ final class WorkoutRecordCell: UICollectionViewCell {
     private func setUI() {
         contentView.addSubviews(
             workoutRecordThumbnail,
-            workoutTitleEditView,
+            workoutTitleEditor,
             dateLabel
         )
 
@@ -81,13 +81,13 @@ final class WorkoutRecordCell: UICollectionViewCell {
             $0.height.equalTo(192)
         }
         
-        workoutTitleEditView.snp.makeConstraints {
+        workoutTitleEditor.snp.makeConstraints {
             $0.top.equalTo(workoutRecordThumbnail.snp.bottom).offset(CGFloat.s16)
             $0.horizontalEdges.equalTo(contentView)
         }
         
         dateLabel.snp.makeConstraints {
-            $0.top.equalTo(workoutTitleEditView.snp.bottom).offset(2)
+            $0.top.equalTo(workoutTitleEditor.snp.bottom).offset(2)
             $0.leading.trailing.equalTo(contentView)
             $0.bottom.lessThanOrEqualTo(contentView)
         }
@@ -96,13 +96,13 @@ final class WorkoutRecordCell: UICollectionViewCell {
     // MARK: - Public Methods
 
     func configure(with workout: WorkoutRecordModel) {
-        workoutTitleEditView.configure(title: workout.title)
+        workoutTitleEditor.configure(title: workout.title)
         dateLabel.text = formatter.string(from: workout.date)
         workoutRecordThumbnail.configure(imageNames: workout.imageNames)
     }
 
     func configure(with workout: WorkoutListModel) {
-        workoutTitleEditView.configure(title: workout.title)
+        workoutTitleEditor.configure(title: workout.title)
         dateLabel.text = workout.activityDate.replacingOccurrences(of: "-", with: ".") + "."
         workoutRecordThumbnail.configure(imageURLs: workout.timelineImageUrls)
     }

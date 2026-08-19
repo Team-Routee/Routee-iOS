@@ -1,5 +1,5 @@
 //
-//  WorkoutTitleEditView.swift
+//  WorkoutTitleEditor.swift
 //  Routee-iOS
 //
 //  Created by 김세령 on 8/19/26.
@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class WorkoutTitleEditView: BaseUIView {
+final class WorkoutTitleEditor: BaseUIView {
 
     private enum EditState {
         case display
@@ -200,7 +200,7 @@ final class WorkoutTitleEditView: BaseUIView {
     }
 }
 
-extension WorkoutTitleEditView: UITextFieldDelegate {
+extension WorkoutTitleEditor: UITextFieldDelegate {
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
