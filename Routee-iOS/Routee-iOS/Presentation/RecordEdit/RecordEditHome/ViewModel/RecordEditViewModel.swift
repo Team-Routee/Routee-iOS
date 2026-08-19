@@ -17,7 +17,7 @@ final class RecordEditViewModel {
 
     // MARK: - Initializer
 
-    init(activityRepository: ActivityRepository = DefaultActivityRepository()) {
+    init(activityRepository: ActivityRepository = RecordEditActivityRepository.make()) {
         self.activityRepository = activityRepository
     }
 
