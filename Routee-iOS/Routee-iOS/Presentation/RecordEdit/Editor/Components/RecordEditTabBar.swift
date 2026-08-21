@@ -15,6 +15,7 @@ final class RecordEditTabBar: BaseUIView {
     // MARK: - Properties
     
     var onBackgroundTap: (() -> Void)?
+    var onBrightnessTap: (() -> Void)?
     var onColorTap: (() -> Void)?
     var onStickerTap: (() -> Void)?
     var onColorSelected: ((UIColor) -> Void)?
@@ -22,8 +23,11 @@ final class RecordEditTabBar: BaseUIView {
     var onStickerEditingChanged: ((Bool) -> Void)?
     
     private lazy var tabItems: [RecordEditTabBarItem] = {
-        [backgroundItem, colorItem, stickerItem]
+        [backgroundItem, brightnessItem, colorItem, stickerItem]
     }()
+    private var tabItemsWidth: CGFloat {
+        CGFloat(tabItems.count) * 84
+    }
     
     // MARK: - UI Properties
     
@@ -32,6 +36,11 @@ final class RecordEditTabBar: BaseUIView {
         title: "배경 변경",
         normalImage: .icChangeBgSmGrey,
         selectedImage: .icChangeBgSmWhite
+    )
+    private let brightnessItem = RecordEditTabBarItem(
+        title: "밝기",
+        normalImage: .icBrightnessSmGrey,
+        selectedImage: .icBrightnessSmWhite
     )
     private let colorItem = RecordEditTabBarItem(
         title: "색상 변경",
@@ -66,6 +75,7 @@ final class RecordEditTabBar: BaseUIView {
         
         buttonStackView.addArrangedSubviews(
             backgroundItem,
+            brightnessItem,
             colorItem,
             stickerItem
         )
@@ -88,7 +98,8 @@ final class RecordEditTabBar: BaseUIView {
         
         buttonStackView.snp.makeConstraints {
             $0.top.bottom.equalToSuperview()
-            $0.leading.equalToSuperview().inset(16)
+            $0.centerX.equalToSuperview()
+            $0.width.equalTo(tabItemsWidth)
         }
         
         tabItems.forEach {
@@ -145,6 +156,7 @@ final class RecordEditTabBar: BaseUIView {
     
     private func setActions() {
         backgroundItem.addTarget(self, action: #selector(backgroundButtonTapped), for: .touchUpInside)
+        brightnessItem.addTarget(self, action: #selector(brightnessButtonTapped), for: .touchUpInside)
         colorItem.addTarget(self, action: #selector(colorButtonTapped), for: .touchUpInside)
         stickerItem.addTarget(self, action: #selector(stickerButtonTapped), for: .touchUpInside)
         
@@ -163,6 +175,7 @@ final class RecordEditTabBar: BaseUIView {
     
     @objc
     private func colorButtonTapped() {
+        brightnessItem.isSelected = false
         stickerSelector.isHidden = true
         stickerSelector.deselectAll()
         onStickerEditingChanged?(false)
@@ -179,6 +192,7 @@ final class RecordEditTabBar: BaseUIView {
     
     @objc
     private func stickerButtonTapped() {
+        brightnessItem.isSelected = false
         colorPalette.isHidden = true
         onStickerTap?()
         
@@ -200,5 +214,15 @@ final class RecordEditTabBar: BaseUIView {
         selectItem(backgroundItem)
         hideOptionView()
         onBackgroundTap?()
+    }
+
+    @objc
+    private func brightnessButtonTapped() {
+        colorPalette.isHidden = true
+        stickerSelector.isHidden = true
+        stickerSelector.deselectAll()
+        onStickerEditingChanged?(false)
+        selectItem(brightnessItem)
+        onBrightnessTap?()
     }
 }
