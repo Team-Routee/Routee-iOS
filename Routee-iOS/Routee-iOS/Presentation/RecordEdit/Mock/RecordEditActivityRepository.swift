@@ -181,6 +181,16 @@ struct MockActivityRepository: ActivityRepository {
         )
     }
 
+    func updateArchiveActivityTitle(
+        activityId: Int64,
+        requestDTO: UpdateArchiveActivityTitleRequestDTO
+    ) async throws -> UpdateArchiveActivityTitleResponseDTO {
+        UpdateArchiveActivityTitleResponseDTO(
+            activityId: activityId,
+            title: requestDTO.title
+        )
+    }
+
     func createCourseList(
         activityId: Int64,
         requestDTO: CreateCourseListRequestDTO
