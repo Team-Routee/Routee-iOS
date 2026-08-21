@@ -100,6 +100,15 @@ final class EditorViewController: BaseUIViewController {
         navigationController?.popViewController(animated: false)
     }
 
+    private func handleBackButtonTap() {
+        guard rootView.hasChanges else {
+            popViewController()
+            return
+        }
+
+        presentStopEditingModal()
+    }
+
     private func presentStopEditingModal() {
         let modal = ActionPrimaryModal(
             title: "편집을 중단하시겠습니까?",
@@ -152,7 +161,7 @@ final class EditorViewController: BaseUIViewController {
         rootView.setInitialState()
 
         rootView.topNavigationBar.backButtonAction = { [weak self] in
-            self?.presentStopEditingModal()
+            self?.handleBackButtonTap()
         }
 
         rootView.topNavigationBar.rightButtonAction = { [weak self] in

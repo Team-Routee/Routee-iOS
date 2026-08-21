@@ -23,6 +23,7 @@ final class EditorView: BaseUIView {
 
     private struct EditorState {
         var selectedColor: UIColor = .recapMint
+        var hasChanges = false
         var didSetRouteTimelineStickerFrame = false
         var trackPoints: [TrackPoint] = TrackPoint.dummyTrackPoints()
         var timelineMarkers: [TimelineMarkerModel] = []
@@ -124,9 +125,14 @@ final class EditorView: BaseUIView {
 
     // MARK: - Public Methods
 
+    var hasChanges: Bool {
+        state.hasChanges
+    }
+
     func updateBackgroundImage(_ image: UIImage) {
         backgroundImageView.image = image
         backgroundOpacityView.backgroundColor = .black40
+        markChanged()
     }
 
     func configure(with model: ActivityEditorModel) {
@@ -221,6 +227,14 @@ final class EditorView: BaseUIView {
 
             removeStickerBox(routeStickerBox)
         }
+
+        routeTimelineStickerBox.onMoved = { [weak self] in
+            self?.markChanged()
+        }
+
+        routeStickerBox.onMoved = { [weak self] in
+            self?.markChanged()
+        }
     }
 
     @objc
@@ -249,10 +263,13 @@ final class EditorView: BaseUIView {
     // MARK: - Color Update
 
     private func updateEditorColor(_ color: UIColor) {
+        guard state.selectedColor != color else { return }
+
         state.selectedColor = color
         dataInfo.updateColor(color)
         routeTimelineDrawingView.updateColor(color)
         routeSticker.updateColor(color)
+        markChanged()
     }
 
     // MARK: - Sticker Editing
@@ -274,6 +291,7 @@ final class EditorView: BaseUIView {
         if routeTimelineStickerBox.superview == nil {
             addSubview(routeTimelineStickerBox)
             updateTimelineFrame()
+            markChanged()
         }
 
         activateStickerBox(routeTimelineStickerBox)
@@ -288,6 +306,7 @@ final class EditorView: BaseUIView {
         }
 
         addSubview(routeStickerBox)
+        markChanged()
         layoutIfNeeded()
         routeSticker.updateColor(state.selectedColor)
 
@@ -386,7 +405,10 @@ final class EditorView: BaseUIView {
     }
 
     private func removeStickerBox(_ stickerBox: StickerBox) {
+        guard stickerBox.superview != nil else { return }
+
         stickerBox.removeFromSuperview()
+        markChanged()
     }
 
     private func bringControlsFront() {
@@ -431,6 +453,10 @@ final class EditorView: BaseUIView {
             with: url,
             placeholder: UIImage.imgNavermapMain
         )
+    }
+
+    private func markChanged() {
+        state.hasChanges = true
     }
 
 }
