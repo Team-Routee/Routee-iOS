@@ -7,6 +7,7 @@
 
 import UIKit
 
+import Lottie
 import SnapKit
 import Then
 
@@ -26,6 +27,8 @@ final class WorkoutPauseView: BaseUIView {
     private let altitudeLabel = UILabel()
     private let altitudeDataLabel = UILabel()
     private let buttonStackView = UIStackView()
+    private let endingAnimationView = LottieAnimationView(asset: "ending")
+
     let restartButton = UIButton()
     let finishButton = UIButton()
     
@@ -43,6 +46,8 @@ final class WorkoutPauseView: BaseUIView {
         altitudeStackView.addArrangedSubviews(altitudeLabel, altitudeDataLabel)
         
         buttonStackView.addArrangedSubviews(restartButton, finishButton)
+
+        finishButton.addSubview(endingAnimationView)
     }
     
     override func setStyle() {
@@ -129,6 +134,13 @@ final class WorkoutPauseView: BaseUIView {
             $0.layer.cornerRadius = 30
             $0.clipsToBounds = true
         }
+
+        endingAnimationView.do {
+            $0.contentMode = .scaleAspectFill
+            $0.isUserInteractionEnabled = false
+            $0.loopMode = .playOnce
+            $0.isHidden = true
+        }
         
         buttonStackView.do {
             $0.spacing = 12
@@ -164,11 +176,15 @@ final class WorkoutPauseView: BaseUIView {
                 $0.width.equalTo(60)
                 $0.height.equalTo(60)
             }
-            
+
             buttonStackView.snp.makeConstraints {
                 $0.bottom.equalTo(safeAreaLayoutGuide).inset(31)
                 $0.centerX.equalToSuperview()
             }
+        }
+
+        endingAnimationView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
         }
     }
     
@@ -184,6 +200,25 @@ final class WorkoutPauseView: BaseUIView {
         finishButton.isEnabled = isEnabled
         finishButton.isUserInteractionEnabled = isEnabled
         finishButton.alpha = isEnabled ? 1 : 0.4
+    }
+
+    func playEndingAnimation() {
+        let targetDuration: TimeInterval = 1.5
+        let animationDuration = endingAnimationView.animation?.duration ?? targetDuration
+
+        endingAnimationView.animationSpeed = CGFloat(animationDuration / targetDuration)
+        endingAnimationView.currentProgress = 0
+        endingAnimationView.isHidden = false
+        endingAnimationView.play { [weak self] isFinished in
+            guard isFinished else { return }
+            self?.endingAnimationView.isHidden = true
+        }
+    }
+
+    func stopEndingAnimation() {
+        endingAnimationView.stop()
+        endingAnimationView.currentProgress = 0
+        endingAnimationView.isHidden = true
     }
 
     func updateDistance(_ distanceInKilometers: String) {

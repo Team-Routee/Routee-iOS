@@ -423,6 +423,14 @@ extension WorkoutView {
             completion()
         }
     }
+
+    func playFinishButtonAnimation() {
+        workoutPauseView.playEndingAnimation()
+    }
+
+    func stopFinishButtonAnimation() {
+        workoutPauseView.stopEndingAnimation()
+    }
     
     func addPhotoMarker(_ photoRecord: WorkoutPhotoRecord, at coordinate: CLLocationCoordinate2D) {
         let markerSize = CGSize(width: 42, height: 42)

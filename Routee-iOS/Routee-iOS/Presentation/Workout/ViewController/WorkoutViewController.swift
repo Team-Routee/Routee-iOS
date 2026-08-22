@@ -388,11 +388,13 @@ final class WorkoutViewController: BaseUIViewController {
     @objc
     private func didTouchDownFinishButton() {
         hapticManager.play(.workoutFinished)
+        workoutView.playFinishButtonAnimation()
     }
 
     @objc
     private func didEndPressFinishButton() {
         hapticManager.stop()
+        workoutView.stopFinishButtonAnimation()
     }
     
     @objc
