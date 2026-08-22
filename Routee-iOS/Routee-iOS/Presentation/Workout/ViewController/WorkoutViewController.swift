@@ -34,6 +34,7 @@ final class WorkoutViewController: BaseUIViewController {
     private let locationManager = CLLocationManager()
     private var initialLocation = false
     private var lastReverseGeocodingLocation: CLLocation?
+    private let hapticManager = HapticManager()
     
     // MARK: - Life Cycle
     
@@ -335,6 +336,18 @@ final class WorkoutViewController: BaseUIViewController {
             for: .touchUpInside
         )
         
+        workoutView.finishButton.addTarget(
+            self,
+            action: #selector(didTouchDownFinishButton),
+            for: .touchDown
+        )
+        
+        workoutView.finishButton.addTarget(
+            self,
+            action: #selector(didEndPressFinishButton),
+            for: [.touchUpInside, .touchUpOutside, .touchCancel]
+        )
+        
         let finishLongPressGesture = UILongPressGestureRecognizer(
             target: self,
             action: #selector(didLongPressFinishButton(_:))
@@ -370,6 +383,16 @@ final class WorkoutViewController: BaseUIViewController {
     private func didTapFinishButton() {
         let generator = UIImpactFeedbackGenerator(style: .rigid)
         generator.impactOccurred()
+    }
+
+    @objc
+    private func didTouchDownFinishButton() {
+        hapticManager.play(.workoutFinished)
+    }
+
+    @objc
+    private func didEndPressFinishButton() {
+        hapticManager.stop()
     }
     
     @objc
