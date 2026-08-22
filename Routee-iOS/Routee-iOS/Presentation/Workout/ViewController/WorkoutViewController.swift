@@ -329,6 +329,12 @@ final class WorkoutViewController: BaseUIViewController {
             for: .touchUpInside
         )
         
+        workoutView.finishButton.addTarget(
+            self,
+            action: #selector(didTapFinishButton),
+            for: .touchUpInside
+        )
+        
         let finishLongPressGesture = UILongPressGestureRecognizer(
             target: self,
             action: #selector(didLongPressFinishButton(_:))
@@ -356,6 +362,14 @@ final class WorkoutViewController: BaseUIViewController {
     @objc
     private func didTapRestartButton() {
         resumeRecordingRoute()
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
+    }
+    
+    @objc
+    private func didTapFinishButton() {
+        let generator = UIImpactFeedbackGenerator(style: .rigid)
+        generator.impactOccurred()
     }
     
     @objc
