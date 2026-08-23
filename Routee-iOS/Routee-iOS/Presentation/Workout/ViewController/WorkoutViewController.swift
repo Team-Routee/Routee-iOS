@@ -28,6 +28,7 @@ final class WorkoutViewController: BaseUIViewController {
             guard oldValue != workoutMode else { return }
             updateUI(for: workoutMode)
             updateElapsedTimeTracking(from: oldValue, to: workoutMode)
+            updateBackgroundLocationTracking(for: workoutMode)
         }
     }
     let viewModel = WorkoutViewModel()
@@ -439,6 +440,10 @@ extension WorkoutViewController {
             break
         }
     }
+
+    private func updateBackgroundLocationTracking(for mode: WorkoutMode) {
+        locationManager.allowsBackgroundLocationUpdates = mode == .recording
+    }
 }
 
 // MARK: - Extensions
@@ -449,6 +454,7 @@ extension WorkoutViewController: CLLocationManagerDelegate {
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.distanceFilter = 3
         locationManager.activityType = .fitness
+        locationManager.allowsBackgroundLocationUpdates = false
         requestCurrentLocationAuthorization()
     }
     
