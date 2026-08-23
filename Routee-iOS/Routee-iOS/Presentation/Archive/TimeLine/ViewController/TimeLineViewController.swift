@@ -9,11 +9,15 @@ import UIKit
 
 final class TimeLineViewController: BaseUIViewController {
 
+    // MARK: - Properties
+
+    var titleDidUpdate: ((Int64, String) -> Void)?
+
     // MARK: - UI Properties
 
     private let rootView: TimeLineView
 
-    // MARK: - Properties
+    // MARK: - Private Properties
 
     private let record: ActivityListModel?
     private let viewModel = TimeLineViewModel()
@@ -21,6 +25,7 @@ final class TimeLineViewController: BaseUIViewController {
     private var activityRouteTask: Task<Void, Never>?
     private var timeLineListTask: Task<Void, Never>?
     private var courseListTask: Task<Void, Never>?
+    private var titleUpdateTask: Task<Void, Never>?
 
     // MARK: - Initializer
 
@@ -45,6 +50,10 @@ final class TimeLineViewController: BaseUIViewController {
     override func setView() {
         rootView.backButtonAction = { [weak self] in
             self?.dismiss(animated: true)
+        }
+
+        rootView.titleEditingDidEnd = { [weak self] title in
+            self?.updateArchiveActivityTitle(title: title)
         }
 
         loadActivityStatistics()
@@ -138,6 +147,30 @@ final class TimeLineViewController: BaseUIViewController {
 
                 await MainActor.run {
                     self.rootView.configureCourseList(with: model)
+                }
+            } catch {
+                guard !Task.isCancelled else { return }
+
+                RouteeLogger.error(error)
+            }
+        }
+    }
+
+    private func updateArchiveActivityTitle(title: String) {
+        guard let activityId = record?.activityId else { return }
+
+        titleUpdateTask?.cancel()
+        titleUpdateTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                let response = try await viewModel.updateArchiveActivityTitle(
+                    activityId: activityId,
+                    title: title
+                )
+
+                await MainActor.run {
+                    self.titleDidUpdate?(response.activityId, response.title)
                 }
             } catch {
                 guard !Task.isCancelled else { return }

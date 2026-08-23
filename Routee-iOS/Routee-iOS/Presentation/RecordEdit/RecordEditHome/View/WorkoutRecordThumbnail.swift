@@ -12,11 +12,7 @@ import SnapKit
 import Then
 
 final class WorkoutRecordThumbnail: BaseUIView {
-    
-    // MARK: - Properties
-    
-    var editButtonAction: (() -> Void)?
-    
+
     // MARK: - UI Properties
     
     private let backgroundContainerView = UIView()
@@ -26,8 +22,6 @@ final class WorkoutRecordThumbnail: BaseUIView {
     private let firstPhotoView = UIImageView()
     private let secondPhotoView = UIImageView()
     private let thirdPhotoView = UIImageView()
-    private let editButton = UIButton()
-    
     private lazy var foregroundPhotoViews = [
         firstPhotoView,
         secondPhotoView,
@@ -84,12 +78,6 @@ final class WorkoutRecordThumbnail: BaseUIView {
         thirdPhotoView.do {
             $0.transform = CGAffineTransform(rotationAngle: 8 * .pi / 180)
         }
-        
-        editButton.do {
-            $0.setImage(UIImage(named: "ic_edit_sm_fill_mint"), for: .normal)
-            $0.backgroundColor = .dimSecondary
-            $0.layer.cornerRadius = 12
-        }
     }
     
     override func setUI() {
@@ -101,11 +89,8 @@ final class WorkoutRecordThumbnail: BaseUIView {
             emptyIconImageView,
             firstPhotoView,
             secondPhotoView,
-            thirdPhotoView,
-            editButton
+            thirdPhotoView
         )
-
-        setActions()
     }
     
     override func setLayout() {
@@ -152,12 +137,6 @@ final class WorkoutRecordThumbnail: BaseUIView {
             $0.trailing.equalTo(backgroundContainerView.snp.trailing).offset(-15)
             $0.height.equalTo(72)
             $0.width.equalTo(56)
-        }
-        
-        editButton.snp.makeConstraints {
-            $0.size.equalTo(36)
-            $0.top.equalToSuperview().inset(16)
-            $0.trailing.equalToSuperview().inset(16)
         }
     }
     
@@ -214,20 +193,5 @@ final class WorkoutRecordThumbnail: BaseUIView {
         }
 
         imageView.kf.setImage(with: url)
-    }
-
-    private func setActions() {
-        editButton.addTarget(
-            self,
-            action: #selector(didTapEditButton),
-            for: .touchUpInside
-        )
-    }
-    
-    // MARK: - Actions
-    
-    @objc
-    private func didTapEditButton() {
-        editButtonAction?()
     }
 }

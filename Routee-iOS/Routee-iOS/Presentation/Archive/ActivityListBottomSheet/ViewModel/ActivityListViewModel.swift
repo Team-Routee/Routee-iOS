@@ -17,24 +17,27 @@ struct ActivityListViewModel {
     // MARK: - Properties
 
     let dateText: String
-    let rows: [ActivityListRowViewModel]
-    let isCompactHeight: Bool
-    let isScrollEnabled: Bool
-    private let model: ActivityListDateModel
+    var rows: [ActivityListRowViewModel] {
+        model.items.map {
+            ActivityListRowViewModel(
+                title: $0.title,
+                thumbnailURL: $0.thumbnailUrl.flatMap(URL.init(string:))
+            )
+        }
+    }
+    var isCompactHeight: Bool {
+        model.items.count <= 2
+    }
+    var isScrollEnabled: Bool {
+        model.items.count > 3
+    }
+    private var model: ActivityListDateModel
 
     // MARK: - Initializer
 
     init(model: ActivityListDateModel) {
         self.model = model
         dateText = model.dateText
-        rows = model.items.map {
-            ActivityListRowViewModel(
-                title: $0.title,
-                thumbnailURL: $0.thumbnailUrl.flatMap(URL.init(string:))
-            )
-        }
-        isCompactHeight = model.items.count <= 2
-        isScrollEnabled = model.items.count > 3
     }
 
     // MARK: - Public Methods
@@ -42,5 +45,22 @@ struct ActivityListViewModel {
     func record(at index: Int) -> ActivityListModel? {
         guard model.items.indices.contains(index) else { return nil }
         return model.items[index]
+    }
+
+    mutating func updateTitle(activityId: Int64, title: String) {
+        let items = model.items.map {
+            guard $0.activityId == activityId else { return $0 }
+
+            return ActivityListModel(
+                activityId: $0.activityId,
+                title: title,
+                thumbnailUrl: $0.thumbnailUrl
+            )
+        }
+
+        model = ActivityListDateModel(
+            dateText: model.dateText,
+            items: items
+        )
     }
 }
