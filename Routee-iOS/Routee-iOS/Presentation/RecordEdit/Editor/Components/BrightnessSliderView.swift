@@ -30,7 +30,7 @@ final class BrightnessSliderView: BaseUIView {
     private let backgroundView = UIView()
     private let tickMarkView = BrightnessTickMarkView(tickSpacing: Layout.tickSpacing)
     private let currentValueIndicatorView = UIView()
-    private let slider = BrightnessSlider()
+    private let slider = BrightnessTrackingSlider()
 
     // MARK: - UI Setting
 
@@ -136,7 +136,7 @@ final class BrightnessSliderView: BaseUIView {
     }
 }
 
-private final class BrightnessSlider: UISlider {
+private final class BrightnessTrackingSlider: UISlider {
 
     override func beginTracking(_ touch: UITouch, with event: UIEvent?) -> Bool {
         updateValue(with: touch)
