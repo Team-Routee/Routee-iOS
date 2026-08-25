@@ -64,7 +64,6 @@ final class ArchiveView: BaseUIView {
             $0.top.equalTo(safeAreaLayoutGuide)
             $0.leading.equalTo(mountainMapView.snp.leading)
             $0.trailing.equalTo(mountainMapView.snp.trailing)
-            $0.height.equalTo(60)
         }
 
         profileView.snp.makeConstraints {

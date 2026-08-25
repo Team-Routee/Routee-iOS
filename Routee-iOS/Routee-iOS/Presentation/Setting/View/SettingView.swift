@@ -17,8 +17,6 @@ final class SettingView: BaseUIView {
     var instagramButtonAction: (() -> Void)?
     var logoutButtonAction: (() -> Void)?
     var policyButtonAction: (() -> Void)?
-    private var privacyButtonTapCount = 0
-    private let requiredPrivacyButtonTapCount = 10
 
     // MARK: - UI Properties
 
@@ -26,9 +24,7 @@ final class SettingView: BaseUIView {
     private let titleLabel = UILabel()
     private let contentStackView = UIStackView()
     private let routeeSectionView = SettingSectionView()
-    private let routeeDividerLineView = UIView()
     private let policySectionView = SettingSectionView()
-    private let policyDividerLineView = UIView()
     private let appInfoSectionView = SettingSectionView()
 
     // MARK: - UI Setting
@@ -102,15 +98,6 @@ final class SettingView: BaseUIView {
             $0.top.equalTo(titleLabel.snp.bottom).offset(40)
             $0.width.equalTo(343)
         }
-
-        [
-            routeeDividerLineView,
-            policyDividerLineView
-        ].forEach {
-            $0.snp.makeConstraints {
-                $0.height.equalTo(1)
-            }
-        }
     }
 
     // MARK: - Private Methods
@@ -118,7 +105,11 @@ final class SettingView: BaseUIView {
     private func setItemActions() {
         routeeSectionView.setAction(index: 2, target: self, action: #selector(instagramItemTapped))
         appInfoSectionView.setAction(index: 1, target: self, action: #selector(logoutItemTapped))
-        policySectionView.setAction(index: 1, target: self, action: #selector(didTapPrivacyButton))
+        appInfoSectionView.setAction(index: 2, target: self, action: #selector(didTapPrivacyButton))
+    }
+
+    private var appVersionText: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
     }
 
     // MARK: - Actions
@@ -135,11 +126,6 @@ final class SettingView: BaseUIView {
     
     @objc
     private func didTapPrivacyButton() {
-        privacyButtonTapCount += 1
-
-        guard privacyButtonTapCount >= requiredPrivacyButtonTapCount else { return }
-
-        privacyButtonTapCount = 0
         policyButtonAction?()
     }
 }

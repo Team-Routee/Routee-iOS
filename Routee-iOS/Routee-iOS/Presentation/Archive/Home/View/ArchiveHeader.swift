@@ -31,6 +31,9 @@ final class ArchiveHeader: BaseUIView {
     }
 
     override func setLayout() {
+        snp.makeConstraints {
+            $0.height.equalTo(60)
+        }
         titleLabel.snp.makeConstraints {
             $0.top.leading.bottom.equalToSuperview()
         }
