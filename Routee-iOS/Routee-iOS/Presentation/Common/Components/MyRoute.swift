@@ -31,7 +31,7 @@ final class MyRoute: BaseUIView {
     
     // MARK: - Properties
     
-    private let maxPointCount = 12
+    private let maxPointCount = 20
     private let collapsedPointCount = 3
     private var mode: RouteViewMode
     private var routePoint: RoutePointModel
