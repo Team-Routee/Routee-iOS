@@ -15,14 +15,16 @@ final class SettingItemView: UIView {
     // MARK: - UI Properties
 
     private let titleLabel = UILabel()
+    private let trailingLabel = UILabel()
     private let chevronButton = UIButton()
 
     // MARK: - Initializer
 
-    init(title: String) {
+    init(title: String, trailingText: String? = nil) {
         super.init(frame: .zero)
 
         titleLabel.text = title
+        trailingLabel.text = trailingText
         setStyle()
         setUI()
         setLayout()
@@ -37,7 +39,13 @@ final class SettingItemView: UIView {
     private func setStyle() {
         titleLabel.do {
             $0.textColor = .staticWhite
-            $0.font = .label_m_14
+            $0.font = .label_m_16
+        }
+
+        trailingLabel.do {
+            $0.textColor = .staticWhite
+            $0.font = .label_r_14
+            $0.isHidden = trailingLabel.text == nil
         }
 
         chevronButton.do {
@@ -49,13 +57,22 @@ final class SettingItemView: UIView {
     }
 
     private func setUI() {
-        addSubviews(titleLabel, chevronButton)
+        addSubviews(titleLabel, trailingLabel, chevronButton)
     }
 
     private func setLayout() {
+        snp.makeConstraints {
+            $0.width.equalTo(311)
+            $0.height.equalTo(40)
+        }
+
         titleLabel.snp.makeConstraints {
             $0.leading.centerY.equalToSuperview()
-            $0.verticalEdges.equalToSuperview()
+        }
+
+        trailingLabel.snp.makeConstraints {
+            $0.centerY.equalToSuperview()
+            $0.trailing.equalTo(chevronButton.snp.leading).offset(-2)
         }
 
         chevronButton.snp.makeConstraints {
@@ -67,8 +84,8 @@ final class SettingItemView: UIView {
     // MARK: - Public Methods
 
     func setAction(target: Any?, action: Selector) {
-        titleLabel.isUserInteractionEnabled = true
-        titleLabel.addGestureRecognizer(
+        isUserInteractionEnabled = true
+        addGestureRecognizer(
             UITapGestureRecognizer(target: target, action: action)
         )
 
