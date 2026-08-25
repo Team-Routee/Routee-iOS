@@ -29,24 +29,27 @@ final class SettingViewController: BaseUIViewController {
         guard let url = URL(string: "https://www.instagram.com/routee_official/?hl=ko") else { return }
         UIApplication.shared.open(url)
     }
-    
-    private func didTapPrivacyButton() {
-        Task {
-            do {
-                try await viewModel.withdraw()
-                
-                await MainActor.run {
-                    NotificationCenter.default.post(
-                        name: .navigateLoginViewController,
-                        object: nil
-                    )
-                }
-            } catch {
-                print("회원 탈퇴 실패", error)
-            }
-        }
+
+    private func navigateToWithdrawViewController() {
+        let withdrawViewController = WithdrawViewController()
+        navigationController?.pushViewController(withdrawViewController, animated: true)
     }
-    
+
+    private func presentLogoutModal() {
+        let logoutAction: () -> Void = { [weak self] in
+            self?.logout()
+        }
+
+        let modal = ActionPrimaryModal(
+            title: "로그아웃하시겠습니까?",
+            leftButtonTitle: "취소",
+            rightButtonTitle: "확인",
+            rightButtonAction: logoutAction
+        )
+
+        present(modal, animated: true)
+    }
+
     private func logout() {
         Task {
             do {
@@ -72,11 +75,11 @@ final class SettingViewController: BaseUIViewController {
         }
         
         rootView.logoutButtonAction = { [weak self] in
-            self?.logout()
+            self?.presentLogoutModal()
         }
         
-        rootView.policyButtonAction = { [weak self] in
-            self?.didTapPrivacyButton()
+        rootView.withdrawButtonAction = { [weak self] in
+            self?.navigateToWithdrawViewController()
         }
     }
 }
