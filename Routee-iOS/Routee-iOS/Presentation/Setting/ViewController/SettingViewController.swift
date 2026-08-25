@@ -32,6 +32,7 @@ final class SettingViewController: BaseUIViewController {
 
     private func navigateToWithdrawViewController() {
         let withdrawViewController = WithdrawViewController()
+        withdrawViewController.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(withdrawViewController, animated: true)
     }
 

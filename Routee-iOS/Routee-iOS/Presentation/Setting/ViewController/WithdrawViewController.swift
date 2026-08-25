@@ -1,0 +1,49 @@
+import UIKit
+
+final class WithdrawViewController: BaseUIViewController {
+
+    // MARK: - Properties
+
+    private let viewModel = SettingViewModel()
+
+    // MARK: - UI Properties
+
+    private let rootView = WithdrawView()
+
+    // MARK: - Life Cycle
+
+    override func loadView() {
+        view = rootView
+    }
+
+    // MARK: - Private Methods
+
+    private func withdraw() {
+        Task {
+            do {
+                try await viewModel.withdraw()
+
+                await MainActor.run {
+                    NotificationCenter.default.post(
+                        name: .navigateLoginViewController,
+                        object: nil
+                    )
+                }
+            } catch {
+                RouteeLogger.error(error)
+            }
+        }
+    }
+
+    // MARK: - Actions
+
+    override func setAddTarget() {
+        rootView.backButtonAction = { [weak self] in
+            self?.navigationController?.popViewController(animated: true)
+        }
+
+        rootView.withdrawButtonAction = { [weak self] in
+            self?.withdraw()
+        }
+    }
+}
