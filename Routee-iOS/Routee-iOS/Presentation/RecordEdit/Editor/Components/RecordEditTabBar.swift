@@ -18,6 +18,7 @@ final class RecordEditTabBar: BaseUIView {
     var onBrightnessTap: (() -> Void)?
     var onColorTap: (() -> Void)?
     var onStickerTap: (() -> Void)?
+    var onBrightnessChanged: ((CGFloat) -> Void)?
     var onColorSelected: ((UIColor) -> Void)?
     var onStickerSelected: ((StickerSelector.StickerType) -> Void)?
     var onStickerEditingChanged: ((Bool) -> Void)?
@@ -27,6 +28,12 @@ final class RecordEditTabBar: BaseUIView {
     }()
     private var tabItemsWidth: CGFloat {
         CGFloat(tabItems.count) * 84
+    }
+
+    private enum OptionView {
+        case brightness
+        case color
+        case sticker
     }
     
     // MARK: - UI Properties
@@ -54,12 +61,14 @@ final class RecordEditTabBar: BaseUIView {
     )
     private let colorPalette = ColorPalette()
     private let stickerSelector = StickerSelector()
+    private let brightnessSliderView = BrightnessSliderView()
     
     // MARK: - UI Setting
     
     override func setStyle() {
         backgroundColor = .dimSecondary
         
+        brightnessSliderView.isHidden = true
         colorPalette.isHidden = true
         stickerSelector.isHidden = true
         
@@ -71,7 +80,7 @@ final class RecordEditTabBar: BaseUIView {
     }
     
     override func setUI() {
-        addSubviews(colorPalette, stickerSelector, buttonStackView)
+        addSubviews(brightnessSliderView, colorPalette, stickerSelector, buttonStackView)
         
         buttonStackView.addArrangedSubviews(
             backgroundItem,
@@ -84,6 +93,12 @@ final class RecordEditTabBar: BaseUIView {
     }
     
     override func setLayout() {
+        brightnessSliderView.snp.makeConstraints {
+            $0.leading.trailing.equalToSuperview()
+            $0.bottom.equalTo(snp.top)
+            $0.height.equalTo(42)
+        }
+
         colorPalette.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview().inset(16)
             $0.bottom.equalTo(snp.top)
@@ -113,11 +128,12 @@ final class RecordEditTabBar: BaseUIView {
     // MARK: - Public Methods
     
     func hideOptionView() {
-        colorPalette.isHidden = true
-        stickerSelector.isHidden = true
-        stickerSelector.deselectAll()
+        hideOptionViews()
         tabItems.forEach { $0.isSelected = false }
-        onStickerEditingChanged?(false)
+    }
+
+    func setBrightnessValue(_ value: CGFloat) {
+        brightnessSliderView.setValue(value)
     }
     
     func containsInteractivePoint(_ point: CGPoint) -> Bool {
@@ -127,9 +143,11 @@ final class RecordEditTabBar: BaseUIView {
         
         let palettePoint = colorPalette.convert(point, from: self)
         let stickerPoint = stickerSelector.convert(point, from: self)
+        let brightnessPoint = brightnessSliderView.convert(point, from: self)
         
         return (!colorPalette.isHidden && colorPalette.bounds.contains(palettePoint))
         || (!stickerSelector.isHidden && stickerSelector.bounds.contains(stickerPoint))
+        || (!brightnessSliderView.isHidden && brightnessSliderView.bounds.contains(brightnessPoint))
     }
     
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
@@ -140,6 +158,13 @@ final class RecordEditTabBar: BaseUIView {
         if !colorPalette.isHidden,
            let paletteHitView = colorPalette.hitTest(palettePoint, with: event) {
             return paletteHitView
+        }
+
+        let brightnessPoint = brightnessSliderView.convert(point, from: self)
+
+        if !brightnessSliderView.isHidden,
+           let brightnessHitView = brightnessSliderView.hitTest(brightnessPoint, with: event) {
+            return brightnessHitView
         }
         
         let stickerPoint = stickerSelector.convert(point, from: self)
@@ -161,6 +186,10 @@ final class RecordEditTabBar: BaseUIView {
         stickerItem.addTarget(self, action: #selector(stickerButtonTapped), for: .touchUpInside)
         
         colorPalette.onColorSelected = { [weak self] color in self?.onColorSelected?(color) }
+
+        brightnessSliderView.onValueChanged = { [weak self] value in
+            self?.onBrightnessChanged?(value)
+        }
         
         stickerSelector.onStickerSelected = { [weak self] sticker in self?.onStickerSelected?(sticker) }
     }
@@ -170,42 +199,47 @@ final class RecordEditTabBar: BaseUIView {
             $0.isSelected = ($0 === selectedItem)
         }
     }
+
+    private func hideOptionViews(except visibleOptionView: OptionView? = nil) {
+        brightnessSliderView.isHidden = visibleOptionView != .brightness
+        colorPalette.isHidden = visibleOptionView != .color
+        stickerSelector.isHidden = visibleOptionView != .sticker
+
+        if visibleOptionView != .sticker {
+            stickerSelector.deselectAll()
+            onStickerEditingChanged?(false)
+        }
+    }
     
     // MARK: - Actions
     
     @objc
     private func colorButtonTapped() {
-        brightnessItem.isSelected = false
-        stickerSelector.isHidden = true
-        stickerSelector.deselectAll()
-        onStickerEditingChanged?(false)
+        let shouldShowColorPalette = colorPalette.isHidden
+
+        hideOptionViews(except: shouldShowColorPalette ? .color : nil)
         onColorTap?()
-        
-        if colorPalette.isHidden {
+
+        if shouldShowColorPalette {
             selectItem(colorItem)
-            colorPalette.isHidden = false
         } else {
             tabItems.forEach { $0.isSelected = false }
-            colorPalette.isHidden = true
         }
     }
     
     @objc
     private func stickerButtonTapped() {
-        brightnessItem.isSelected = false
-        colorPalette.isHidden = true
+        let shouldShowStickerSelector = stickerSelector.isHidden
+
+        hideOptionViews(except: shouldShowStickerSelector ? .sticker : nil)
         onStickerTap?()
-        
-        if stickerSelector.isHidden {
+
+        if shouldShowStickerSelector {
             selectItem(stickerItem)
             stickerSelector.deselectAll()
-            stickerSelector.isHidden = false
             onStickerEditingChanged?(true)
         } else {
             tabItems.forEach { $0.isSelected = false }
-            stickerSelector.isHidden = true
-            stickerSelector.deselectAll()
-            onStickerEditingChanged?(false)
         }
     }
     
@@ -218,11 +252,15 @@ final class RecordEditTabBar: BaseUIView {
 
     @objc
     private func brightnessButtonTapped() {
-        colorPalette.isHidden = true
-        stickerSelector.isHidden = true
-        stickerSelector.deselectAll()
-        onStickerEditingChanged?(false)
-        selectItem(brightnessItem)
-        onBrightnessTap?()
+        let shouldShowBrightnessSlider = brightnessSliderView.isHidden
+
+        hideOptionViews(except: shouldShowBrightnessSlider ? .brightness : nil)
+
+        if shouldShowBrightnessSlider {
+            selectItem(brightnessItem)
+            onBrightnessTap?()
+        } else {
+            tabItems.forEach { $0.isSelected = false }
+        }
     }
 }
