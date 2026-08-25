@@ -1,5 +1,5 @@
 //
-//  SettingSectionView.swift
+//  SettingSection.swift
 //  Routee-iOS
 //
 //  Created by 김세령 on 7/13/26.
@@ -10,13 +10,13 @@ import UIKit
 import SnapKit
 import Then
 
-final class SettingSectionView: UIView {
+final class SettingSection: UIView {
 
     // MARK: - UI Properties
 
     private let sectionTitleLabel = UILabel()
     private let sectionStackView = UIStackView()
-    private var itemViews: [SettingItemView] = []
+    private var itemViews: [SettingItem] = []
 
     // MARK: - Initializer
 
@@ -92,7 +92,7 @@ final class SettingSectionView: UIView {
         }
 
         itemViews = items.map {
-            SettingItemView(title: $0.title, trailingText: $0.trailingText)
+            SettingItem(title: $0.title, trailingText: $0.trailingText)
         }
 
         itemViews.forEach {

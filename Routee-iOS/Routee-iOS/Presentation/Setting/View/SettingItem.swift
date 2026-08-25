@@ -1,5 +1,5 @@
 //
-//  SettingItemView.swift
+//  SettingItem.swift
 //  Routee-iOS
 //
 //  Created by 김세령 on 7/13/26.
@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class SettingItemView: UIView {
+final class SettingItem: UIView {
 
     // MARK: - UI Properties
 

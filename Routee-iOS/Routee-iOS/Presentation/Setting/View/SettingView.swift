@@ -23,9 +23,9 @@ final class SettingView: BaseUIView {
     private let backgroundGradientView = RouteeEllipseBackground()
     private let titleLabel = UILabel()
     private let contentStackView = UIStackView()
-    private let routeeSectionView = SettingSectionView()
-    private let policySectionView = SettingSectionView()
-    private let appInfoSectionView = SettingSectionView()
+    private let routeeSectionView = SettingSection()
+    private let policySectionView = SettingSection()
+    private let appInfoSectionView = SettingSection()
 
     // MARK: - UI Setting
 
