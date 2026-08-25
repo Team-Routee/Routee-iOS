@@ -7,9 +7,11 @@
 
 import CoreHaptics
 
+@MainActor
 final class HapticManager {
     private var engine: CHHapticEngine?
     private var player: CHHapticPatternPlayer?
+    private var isEngineRunning = false
     
     init() {
         configureEngine()
@@ -21,6 +23,11 @@ final class HapticManager {
         do {
             stop()
 
+            if !isEngineRunning {
+                try engine.start()
+                isEngineRunning = true
+            }
+
             let hapticPattern = try CHHapticPattern(
                 events: pattern.events,
                 parameters: []
@@ -30,7 +37,7 @@ final class HapticManager {
             self.player = player
             try player.start(atTime: CHHapticTimeImmediate)
         } catch {
-            print("Failed to play haptic pattern: \(error)")
+            RouteeLogger.error(error)
         }
     }
 
@@ -41,7 +48,7 @@ final class HapticManager {
             try player.stop(atTime: CHHapticTimeImmediate)
             self.player = nil
         } catch {
-            print("Failed to stop haptic pattern: \(error)")
+            RouteeLogger.error(error)
         }
     }
 }
@@ -60,24 +67,45 @@ private extension HapticManager {
             configureHandlers(for: engine)
             
             try engine.start()
-            
+
             self.engine = engine
+            isEngineRunning = true
         } catch {
-            print("Failed to configure haptic engine: \(error)")
+            RouteeLogger.error(error)
         }
     }
     
     func configureHandlers(for engine: CHHapticEngine) {
         engine.resetHandler = { [weak self] in
-            do {
-                try self?.engine?.start()
-            } catch {
-                print("Failed to restart haptic engine: \(error)")
+            Task { @MainActor [weak self] in
+                self?.handleEngineReset()
             }
         }
         
-        engine.stoppedHandler = { reason in
-            print("Haptic engine stopped: \(reason)")
+        engine.stoppedHandler = { [weak self] reason in
+            Task { @MainActor [weak self] in
+                self?.handleEngineStopped(reason: reason)
+            }
         }
+    }
+
+    func handleEngineReset() {
+        player = nil
+        isEngineRunning = false
+
+        guard let engine else { return }
+
+        do {
+            try engine.start()
+            isEngineRunning = true
+        } catch {
+            RouteeLogger.error(error)
+        }
+    }
+
+    func handleEngineStopped(reason: CHHapticEngine.StoppedReason) {
+        player = nil
+        isEngineRunning = false
+        RouteeLogger.debug("Haptic engine stopped: \(reason.rawValue)")
     }
 }
