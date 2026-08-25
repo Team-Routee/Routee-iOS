@@ -39,21 +39,12 @@ final class WithdrawView: BaseUIView {
     private let warningSecondaryDescriptionLabel = UILabel()
     private let inquiryContainerView = UIView()
     private let inquiryTitleLabel = UILabel()
-    private let kakaoInquiryItemView = WithdrawInquiryItemView(
-        iconImage: .icKakaoCircle,
-        title: "카카오톡 문의하기"
-    )
-    private let emailInquiryItemView = WithdrawInquiryItemView(
-        iconImage: .icEmailCircle,
-        title: "이메일 문의하기"
-    )
+    private let kakaoInquiryItemView = WithdrawInquiryItem(iconImage: .icKakaoCircle, title: "카카오톡 문의하기")
+    private let emailInquiryItemView = WithdrawInquiryItem(iconImage: .icEmailCircle, title: "이메일 문의하기")
     private let inquiryDividerView = UIView()
     private let agreementButton = UIButton()
     private let agreementLabel = UILabel()
-    private let withdrawButton = RouteeButton(
-        titleText: "루티 탈퇴하기",
-        type: .disabled
-    )
+    private let withdrawButton = RouteeButton(titleText: "루티 탈퇴하기", type: .disabled)
 
     // MARK: - UI Setting
 
@@ -105,7 +96,6 @@ final class WithdrawView: BaseUIView {
             """
             $0.textColor = .grey200
             $0.font = .label_m_12
-            $0.numberOfLines = 2
         }
 
         warningSecondaryDescriptionLabel.do {
@@ -115,7 +105,6 @@ final class WithdrawView: BaseUIView {
             """
             $0.textColor = .grey200
             $0.font = .label_m_12
-            $0.numberOfLines = 2
         }
 
         inquiryTitleLabel.do {
@@ -196,7 +185,7 @@ final class WithdrawView: BaseUIView {
         }
 
         warningHeaderStackView.snp.makeConstraints {
-            $0.top.leading.equalToSuperview().inset(24)
+            $0.top.leading.equalToSuperview().inset(18)
         }
 
         warningIconImageView.snp.makeConstraints {
@@ -217,8 +206,7 @@ final class WithdrawView: BaseUIView {
         }
 
         inquiryTitleLabel.snp.makeConstraints {
-            $0.top.equalToSuperview().inset(18)
-            $0.leading.equalToSuperview().inset(18)
+            $0.top.leading.equalToSuperview().inset(18)
         }
 
         kakaoInquiryItemView.snp.makeConstraints {
@@ -229,14 +217,14 @@ final class WithdrawView: BaseUIView {
         }
 
         inquiryDividerView.snp.makeConstraints {
-            $0.top.equalTo(kakaoInquiryItemView.snp.bottom)
+            $0.top.equalTo(kakaoInquiryItemView.snp.bottom).offset(-1)
             $0.centerX.equalToSuperview()
             $0.width.equalTo(307)
             $0.height.equalTo(1)
         }
 
         emailInquiryItemView.snp.makeConstraints {
-            $0.top.equalTo(inquiryDividerView.snp.bottom).offset(-1)
+            $0.top.equalTo(inquiryDividerView.snp.bottom)
             $0.centerX.equalToSuperview()
             $0.width.equalTo(307)
             $0.height.equalTo(50)
@@ -297,68 +285,5 @@ final class WithdrawView: BaseUIView {
     @objc
     private func didTapWithdrawButton() {
         withdrawButtonAction?()
-    }
-}
-
-private final class WithdrawInquiryItemView: UIControl {
-
-    // MARK: - UI Properties
-
-    private let iconImageView = UIImageView()
-    private let titleLabel = UILabel()
-    private let chevronImageView = UIImageView()
-
-    // MARK: - Initializer
-
-    init(iconImage: ImageResource, title: String) {
-        super.init(frame: .zero)
-
-        iconImageView.image = UIImage(resource: iconImage)
-        titleLabel.text = title
-
-        setStyle()
-        setUI()
-        setLayout()
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    // MARK: - UI Setting
-
-    private func setStyle() {
-        iconImageView.contentMode = .scaleAspectFit
-
-        titleLabel.do {
-            $0.textColor = .staticWhite
-            $0.font = .label_m_14
-        }
-
-        chevronImageView.do {
-            $0.image = UIImage(resource: .icChevronRightSmWhite)
-            $0.contentMode = .scaleAspectFit
-        }
-    }
-
-    private func setUI() {
-        addSubviews(iconImageView, titleLabel, chevronImageView)
-    }
-
-    private func setLayout() {
-        iconImageView.snp.makeConstraints {
-            $0.leading.centerY.equalToSuperview()
-            $0.size.equalTo(24)
-        }
-
-        titleLabel.snp.makeConstraints {
-            $0.leading.equalTo(iconImageView.snp.trailing).offset(8)
-            $0.centerY.equalToSuperview()
-        }
-
-        chevronImageView.snp.makeConstraints {
-            $0.trailing.centerY.equalToSuperview()
-            $0.size.equalTo(24)
-        }
     }
 }
