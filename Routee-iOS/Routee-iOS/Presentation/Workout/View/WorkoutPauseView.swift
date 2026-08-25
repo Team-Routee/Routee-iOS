@@ -221,6 +221,40 @@ final class WorkoutPauseView: BaseUIView {
         endingAnimationView.isHidden = true
     }
 
+    func showFinishGuideToast() {
+        subviews
+            .filter { $0 is ToastMessageView }
+            .forEach { $0.removeFromSuperview() }
+
+        let toastMessageView = ToastMessageView(
+            title: "종료 버튼을 길게 누르면 기록이 종료됩니다"
+        )
+
+        addSubview(toastMessageView)
+        layoutIfNeeded()
+
+        let toastWidth = min(
+            toastMessageView.titleLabel.intrinsicContentSize.width + 32,
+            bounds.width - 48
+        )
+
+        toastMessageView.snp.makeConstraints {
+            $0.centerX.equalToSuperview()
+            $0.bottom.equalTo(buttonStackView.snp.top).offset(-16)
+            $0.width.equalTo(toastWidth)
+            $0.height.equalTo(37)
+        }
+
+        toastMessageView.layer.cornerRadius = 12
+        toastMessageView.clipsToBounds = true
+        
+        UIView.animate(withDuration: 0.2, delay: 0.6) {
+            toastMessageView.alpha = 0
+        } completion: { _ in
+            toastMessageView.removeFromSuperview()
+        }
+    }
+
     func updateDistance(_ distanceInKilometers: String) {
         distanceDataLabel.text = "\(distanceInKilometers)km"
     }

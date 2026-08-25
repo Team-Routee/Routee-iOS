@@ -381,6 +381,7 @@ final class WorkoutViewController: BaseUIViewController {
     
     @objc
     private func didTapFinishButton() {
+        workoutView.showFinishGuideToast()
         let generator = UIImpactFeedbackGenerator(style: .rigid)
         generator.impactOccurred()
     }
