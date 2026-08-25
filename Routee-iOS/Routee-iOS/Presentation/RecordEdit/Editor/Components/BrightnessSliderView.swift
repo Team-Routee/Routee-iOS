@@ -22,6 +22,7 @@ final class BrightnessSliderView: BaseUIView {
         static let tickMarkHeight: CGFloat = 12
         static let indicatorWidth: CGFloat = 2
         static let indicatorHeight: CGFloat = 26
+        static let sideGradientWidth: CGFloat = 40
     }
     private var tickMarkCenterXConstraint: Constraint?
 
@@ -29,6 +30,10 @@ final class BrightnessSliderView: BaseUIView {
 
     private let backgroundView = UIView()
     private let tickMarkView = BrightnessTickMarkView(tickSpacing: Layout.tickSpacing)
+    private let leftGradientView = UIView()
+    private let rightGradientView = UIView()
+    private let leftGradientLayer = CAGradientLayer()
+    private let rightGradientLayer = CAGradientLayer()
     private let currentValueIndicatorView = UIView()
     private let slider = BrightnessTrackingSlider()
 
@@ -47,6 +52,12 @@ final class BrightnessSliderView: BaseUIView {
             $0.clipsToBounds = true
         }
 
+        [leftGradientView, rightGradientView].forEach {
+            $0.isUserInteractionEnabled = false
+        }
+
+        configureGradientLayers()
+
         slider.do {
             $0.minimumValue = 0
             $0.maximumValue = 1
@@ -62,9 +73,14 @@ final class BrightnessSliderView: BaseUIView {
         addSubviews(
             backgroundView,
             tickMarkView,
+            leftGradientView,
+            rightGradientView,
             currentValueIndicatorView,
             slider
         )
+
+        leftGradientView.layer.addSublayer(leftGradientLayer)
+        rightGradientView.layer.addSublayer(rightGradientLayer)
 
         setAction()
     }
@@ -79,6 +95,16 @@ final class BrightnessSliderView: BaseUIView {
             $0.top.equalToSuperview().offset(13)
             $0.width.equalToSuperview().multipliedBy(Layout.tickMarkWidthMultiplier)
             $0.height.equalTo(Layout.tickMarkHeight)
+        }
+
+        leftGradientView.snp.makeConstraints {
+            $0.leading.top.bottom.equalToSuperview()
+            $0.width.equalTo(Layout.sideGradientWidth)
+        }
+
+        rightGradientView.snp.makeConstraints {
+            $0.trailing.top.bottom.equalToSuperview()
+            $0.width.equalTo(Layout.sideGradientWidth)
         }
 
         currentValueIndicatorView.snp.makeConstraints {
@@ -96,6 +122,8 @@ final class BrightnessSliderView: BaseUIView {
     override func layoutSubviews() {
         super.layoutSubviews()
 
+        leftGradientLayer.frame = leftGradientView.bounds
+        rightGradientLayer.frame = rightGradientView.bounds
         updateTickMarkPosition()
     }
 
@@ -121,6 +149,22 @@ final class BrightnessSliderView: BaseUIView {
         let tickMarkCenterOffset = (0.5 - sliderValue) * bounds.width
 
         tickMarkCenterXConstraint?.update(offset: tickMarkCenterOffset)
+    }
+
+    private func configureGradientLayers() {
+        leftGradientLayer.colors = [
+            UIColor.staticBlack.cgColor,
+            UIColor.staticBlack.withAlphaComponent(0).cgColor
+        ]
+        leftGradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
+        leftGradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
+
+        rightGradientLayer.colors = [
+            UIColor.staticBlack.withAlphaComponent(0).cgColor,
+            UIColor.staticBlack.cgColor
+        ]
+        rightGradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
+        rightGradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
     }
 
     private static func transparentThumbImage() -> UIImage {
