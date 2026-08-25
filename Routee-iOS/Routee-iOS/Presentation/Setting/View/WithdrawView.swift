@@ -96,6 +96,7 @@ final class WithdrawView: BaseUIView {
             """
             $0.textColor = .grey200
             $0.font = .label_m_12
+            $0.numberOfLines = 2
         }
 
         warningSecondaryDescriptionLabel.do {
@@ -105,6 +106,7 @@ final class WithdrawView: BaseUIView {
             """
             $0.textColor = .grey200
             $0.font = .label_m_12
+            $0.numberOfLines = 2
         }
 
         inquiryTitleLabel.do {
