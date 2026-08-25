@@ -21,7 +21,6 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
         distanceInMeters: Double,
         durationInSeconds: Int,
         maxAltitudeInMeters: Double?,
-        backgroundMapImage: UIImage?,
         trackPoints: [TrackPoint],
         photoRecords: [WorkoutPhotoRecord],
         finishRecording: @escaping (String) async throws -> Void,
@@ -35,7 +34,6 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
             distanceInMeters: distanceInMeters,
             durationInSeconds: durationInSeconds,
             maxAltitudeInMeters: maxAltitudeInMeters,
-            backgroundMapImage: backgroundMapImage,
             trackPoints: trackPoints,
             photoRecords: photoRecords
         )

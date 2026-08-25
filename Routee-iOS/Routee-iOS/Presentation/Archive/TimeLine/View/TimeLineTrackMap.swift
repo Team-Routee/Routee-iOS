@@ -14,10 +14,16 @@ import Then
 
 final class TimeLineTrackMap: BaseUIView {
 
+    struct Photo {
+        let image: UIImage
+        let pointIndex: Int
+    }
+
     // MARK: - Properties
 
     private var trackPoints: [TrackPoint]
     private var markers: [TimelineMarkerModel]
+    private let photos: [Photo]
     private var shouldUpdateCamera = true
     private var shouldUpdatePhotoMarkers = true
 
@@ -31,10 +37,12 @@ final class TimeLineTrackMap: BaseUIView {
 
     init(
         trackPoints: [TrackPoint] = [],
-        markers: [TimelineMarkerModel] = []
+        markers: [TimelineMarkerModel] = [],
+        photos: [Photo] = []
     ) {
         self.trackPoints = trackPoints
         self.markers = markers
+        self.photos = photos
         super.init(frame: .zero)
     }
 
@@ -129,10 +137,25 @@ final class TimeLineTrackMap: BaseUIView {
 
             addPhotoMarker(marker, imageURL: url, at: coordinate)
         }
+
+        photos.forEach { photo in
+            guard let coordinate = coordinate(for: photo.pointIndex) else { return }
+
+            addPhotoMarker(photo.image, pointIndex: photo.pointIndex, at: coordinate)
+        }
     }
 
     private func coordinate(for marker: TimelineMarkerModel) -> NMGLatLng? {
         NMGLatLng(lat: marker.latitude, lng: marker.longitude)
+    }
+
+    private func coordinate(for pointIndex: Int) -> NMGLatLng? {
+        let trackPointIndex = pointIndex - 1
+
+        guard trackPoints.indices.contains(trackPointIndex) else { return nil }
+
+        let trackPoint = trackPoints[trackPointIndex]
+        return NMGLatLng(lat: trackPoint.latitude, lng: trackPoint.longitude)
     }
 
     private func addPhotoMarker(
@@ -140,7 +163,6 @@ final class TimeLineTrackMap: BaseUIView {
         imageURL: URL,
         at coordinate: NMGLatLng
     ) {
-        let markerSize = CGSize(width: 42, height: 42)
         let pointIndex = markerModel.pointIndex
         let latitude = coordinate.lat
         let longitude = coordinate.lng
@@ -150,28 +172,44 @@ final class TimeLineTrackMap: BaseUIView {
         KingfisherManager.shared.retrieveImage(with: imageURL) { result in
             guard case .success(let value) = result else { return }
 
-            let sourceImage = value.image
+            Task { @MainActor [weak self] in
+                self?.addPhotoMarker(
+                    value.image,
+                    pointIndex: pointIndex,
+                    at: NMGLatLng(lat: latitude, lng: longitude)
+                )
+            }
+        }
+    }
 
-            Task { [weak self] in
-                let thumbnailImage = await Task.detached(priority: .userInitiated) {
-                    sourceImage
-                        .resized(to: markerSize)
-                        .thumbnailImage(borderWidth: 3, borderColor: .mint300, cornerRadius: 12)
-                }.value
+    private func addPhotoMarker(
+        _ sourceImage: UIImage,
+        pointIndex: Int,
+        at coordinate: NMGLatLng
+    ) {
+        let markerSize = CGSize(width: 42, height: 42)
 
-                await MainActor.run { [weak self] in
-                    guard let self else { return }
+        guard pointIndex >= 0 else { return }
 
-                    let marker = NMFMarker()
-                    marker.tag = UInt(pointIndex)
-                    marker.position = NMGLatLng(lat: latitude, lng: longitude)
-                    marker.iconImage = NMFOverlayImage(image: thumbnailImage)
-                    marker.width = markerSize.width
-                    marker.height = markerSize.height
-                    marker.anchor = CGPoint(x: 0.5, y: 0.5)
-                    marker.mapView = naverMapView.mapView
-                    photoMarkers.append(marker)
-                }
+        Task { [weak self] in
+            let thumbnailImage = await Task.detached(priority: .userInitiated) {
+                sourceImage
+                    .resized(to: markerSize)
+                    .thumbnailImage(borderWidth: 3, borderColor: .mint300, cornerRadius: 12)
+            }.value
+
+            await MainActor.run { [weak self] in
+                guard let self else { return }
+
+                let marker = NMFMarker()
+                marker.tag = UInt(pointIndex)
+                marker.position = coordinate
+                marker.iconImage = NMFOverlayImage(image: thumbnailImage)
+                marker.width = markerSize.width
+                marker.height = markerSize.height
+                marker.anchor = CGPoint(x: 0.5, y: 0.5)
+                marker.mapView = naverMapView.mapView
+                photoMarkers.append(marker)
             }
         }
     }

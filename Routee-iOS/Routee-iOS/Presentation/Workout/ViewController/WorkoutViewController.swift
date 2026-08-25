@@ -144,39 +144,37 @@ final class WorkoutViewController: BaseUIViewController {
         else { return }
         workoutMode = .finishing
 
-        let backgroundMapTask = Task { () -> UIImage? in
+        let backgroundMapTask = Task {
             guard let mapImage = await workoutView.captureBackgroundMapImage(
                 fitting: viewModel.routePoints.map(\.latLng)
-            ) else { return nil }
+            ) else { return }
 
             do {
                 try await viewModel.uploadBackgroundMap(image: mapImage)
             } catch {
                 RouteeLogger.error(error)
             }
-            return mapImage
         }
 
         workoutView.playFinishAnimation { [weak self] in
             guard let self else { return }
 
             Task {
-                let mapImage = await backgroundMapTask.value
+                await backgroundMapTask.value
                 await MainActor.run {
-                    self.pushWorkoutTimeLineViewController(backgroundMapImage: mapImage)
+                    self.pushWorkoutTimeLineViewController()
                 }
             }
         }
     }
 
-    private func pushWorkoutTimeLineViewController(backgroundMapImage: UIImage?) {
+    private func pushWorkoutTimeLineViewController() {
         let viewController = WorkoutTimeLineViewController(
             activityId: viewModel.activityId,
             title: viewModel.activityTitle ?? "",
             distanceInMeters: viewModel.totalDistance,
             durationInSeconds: viewModel.elapsedTimeInSeconds,
             maxAltitudeInMeters: viewModel.maximumAltitudeInMeters,
-            backgroundMapImage: backgroundMapImage,
             trackPoints: viewModel.routePoints.map {
                 TrackPoint(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude)
             },
