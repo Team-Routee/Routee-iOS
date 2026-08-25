@@ -99,14 +99,20 @@ final class WithdrawView: BaseUIView {
         }
 
         warningPrimaryDescriptionLabel.do {
-            $0.text = "루티 앱 계정의 모든 데이터가 삭제되며, 복구가 불가능합니다.\n중요한 정보가 있는지 다시 한 번 확인해주세요."
+            $0.text = """
+            루티 앱 계정의 모든 데이터가 삭제되며, 복구가 불가능합니다.
+            중요한 정보가 있는지 다시 한 번 확인해주세요.
+            """
             $0.textColor = .grey200
             $0.font = .label_m_12
             $0.numberOfLines = 2
         }
 
         warningSecondaryDescriptionLabel.do {
-            $0.text = "그러나 언제든지 마음이 바뀌면 돌아오셔서 새로운 루티 계정을\n만들어 소중한 경험을 이어나갈 수 있습니다."
+            $0.text = """
+            그러나 언제든지 마음이 바뀌면 돌아오셔서 새로운 루티 계정을
+            만들어 소중한 경험을 이어나갈 수 있습니다.
+            """
             $0.textColor = .grey200
             $0.font = .label_m_12
             $0.numberOfLines = 2
