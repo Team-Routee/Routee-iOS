@@ -44,47 +44,35 @@ final class SettingView: BaseUIView {
 
         contentStackView.do {
             $0.axis = .vertical
-            $0.spacing = 28
+            $0.spacing = 12
         }
 
         routeeSectionView.configure(
-            model: .init(
-                title: "루티 이용하기",
-                itemTitles: [
-                    "공지사항",
-                    "1:1 문의하기",
-                    "루티 인스타그램 바로가기"
-                ]
-            )
+            title: "루티 이용하기",
+            itemTitles: [
+                "프로필 변경",
+                "1:1 문의하기",
+                "루티 인스타그램 바로가기"
+            ]
         )
 
         policySectionView.configure(
-            model: .init(
-                title: "이용정책",
-                itemTitles: [
-                    "이용약관",
-                    "개인정보 처리방침",
-                    "위치기반 서비스 이용약관"
-                ]
-            )
+            title: "이용정책",
+            itemTitles: [
+                "이용약관",
+                "개인정보 처리방침",
+                "위치기반 서비스 이용약관"
+            ]
         )
 
         appInfoSectionView.configure(
-            model: .init(
-                title: "앱 정보",
-                itemTitles: [
-                    "버전정보",
-                    "로그아웃"
-                ]
-            )
+            title: "앱 정보",
+            items: [
+                (title: "버전정보", trailingText: appVersionText),
+                (title: "로그아웃", trailingText: nil),
+                (title: "회원탈퇴", trailingText: nil)
+            ]
         )
-
-        [
-            routeeDividerLineView,
-            policyDividerLineView
-        ].forEach {
-            $0.backgroundColor = .grey500
-        }
     }
 
     override func setUI() {
@@ -92,9 +80,7 @@ final class SettingView: BaseUIView {
 
         contentStackView.addArrangedSubviews(
             routeeSectionView,
-            routeeDividerLineView,
             policySectionView,
-            policyDividerLineView,
             appInfoSectionView
         )
 
