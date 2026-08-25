@@ -253,9 +253,9 @@ final class TabBarViewController: UITabBarController {
 extension TabBarViewController: UINavigationControllerDelegate {
     func navigationController(
         _ navigationController: UINavigationController,
-        didShow viewController: UIViewController,
+        willShow viewController: UIViewController,
         animated: Bool
     ) {
-        updateCustomTabBarVisibility()
+        customTabBar.isHidden = shouldHideCustomTabBar(for: viewController)
     }
 }
