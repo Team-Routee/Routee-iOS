@@ -196,18 +196,24 @@ final class EditorView: BaseUIView {
     func makeEditedImage() -> UIImage {
         routeTimelineStickerBox.setCloseButton(isSelected: false)
         routeStickerBox.setCloseButton(isSelected: false)
+        let isResetButtonHidden = resetButton.isHidden
+        resetButton.isHidden = true
         layoutIfNeeded()
 
         let renderFrame = backgroundImageView.frame
         let renderer = UIGraphicsImageRenderer(size: renderFrame.size)
 
-        return renderer.image { context in
+        let editedImage = renderer.image { context in
             context.cgContext.translateBy(
                 x: -renderFrame.minX,
                 y: -renderFrame.minY
             )
             layer.render(in: context.cgContext)
         }
+
+        resetButton.isHidden = isResetButtonHidden
+
+        return editedImage
     }
 
     func setGesture() {
