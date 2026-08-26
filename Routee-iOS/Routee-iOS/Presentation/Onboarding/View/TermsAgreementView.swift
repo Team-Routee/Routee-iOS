@@ -70,6 +70,11 @@ final class TermsAgreementView: BaseUIView {
     
     lazy var nextButton = RouteeButton(titleText: "다음", type: .disabled)
 
+    var backButtonAction: (() -> Void)? {
+        get { topNavigationBar.backButtonAction }
+        set { topNavigationBar.backButtonAction = newValue }
+    }
+
     var hasAgreedToRequiredTerms: Bool {
         requiredAgreementButtons.allSatisfy(\.isChecked)
     }
@@ -154,7 +159,7 @@ final class TermsAgreementView: BaseUIView {
         }
         
         allAgreementButton.snp.makeConstraints {
-            $0.top.equalTo(titleLabel.snp.bottom).offset(32)
+            $0.top.equalTo(titleLabel.snp.bottom).offset(52)
             $0.horizontalEdges.equalToSuperview().inset(28)
         }
 
@@ -182,14 +187,17 @@ final class TermsAgreementView: BaseUIView {
         individualAgreementButtons.forEach {
             $0.isChecked = allAgreementButton.isChecked
         }
+
+        updateNextButtonState()
     }
 
     @objc
     private func individualAgreementDidChange() {
         allAgreementButton.isChecked = individualAgreementButtons.allSatisfy(\.isChecked)
+        updateNextButtonState()
     }
-}
 
-#Preview {
-    TermsAgreementView()
+    private func updateNextButtonState() {
+        nextButton.updateType(hasAgreedToRequiredTerms ? .enabled : .disabled)
+    }
 }
