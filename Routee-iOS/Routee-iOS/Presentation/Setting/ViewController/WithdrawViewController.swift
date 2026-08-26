@@ -12,7 +12,6 @@ final class WithdrawViewController: BaseUIViewController {
     // MARK: - Properties
 
     private let viewModel = SettingViewModel()
-    private let emailCopiedToastMessage = "이메일이 복사되었습니다."
 
     // MARK: - UI Properties
 
@@ -62,7 +61,7 @@ final class WithdrawViewController: BaseUIViewController {
             guard let self else { return }
 
             ClipboardHelper.copy(ClipboardHelper.routeeEmail)
-            rootView.showToast(title: emailCopiedToastMessage)
+            rootView.showToast(title: ToastMessage.emailCopied)
         }
     }
 }

@@ -8,10 +8,6 @@ import UIKit
 
 final class ContactViewController: BaseUIViewController {
 
-    // MARK: - Properties
-
-    private let emailCopiedToastMessage = "이메일이 복사되었습니다."
-
     // MARK: - UI Properties
 
     private let rootView = ContactView()
@@ -37,7 +33,7 @@ final class ContactViewController: BaseUIViewController {
             guard let self else { return }
 
             ClipboardHelper.copy(ClipboardHelper.routeeEmail)
-            rootView.showToast(title: emailCopiedToastMessage)
+            rootView.showToast(title: ToastMessage.emailCopied)
         }
     }
 }
