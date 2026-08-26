@@ -244,7 +244,7 @@ final class WithdrawView: BaseUIView {
         }
 
         agreementLabel.snp.makeConstraints {
-            $0.leading.equalTo(agreementButton.snp.trailing).offset(10)
+            $0.leading.equalTo(agreementButton.snp.trailing).offset(12)
             $0.centerY.equalTo(agreementButton)
         }
     }
