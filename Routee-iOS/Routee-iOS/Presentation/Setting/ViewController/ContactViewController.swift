@@ -33,6 +33,10 @@ final class ContactViewController: BaseUIViewController {
         rootView.kakaoButtonAction = { [weak self] in
             self?.openKakaoChannel()
         }
+
+        rootView.emailButtonAction = { [weak self] in
+            self?.copyEmail()
+        }
     }
 
     // MARK: - Private Methods
@@ -41,5 +45,10 @@ final class ContactViewController: BaseUIViewController {
         guard let url = URL(string: kakaoChannelURLString) else { return }
 
         UIApplication.shared.open(url)
+    }
+
+    private func copyEmail() {
+        UIPasteboard.general.string = emailText
+        rootView.showToast(title: "이메일이 복사되었습니다.")
     }
 }
