@@ -13,7 +13,13 @@ final class EditCompleteViewController: BaseUIViewController {
 
     // MARK: - Properties
 
-    private let editedImage: UIImage
+    private enum WatermarkLayout {
+        static let designWidth: CGFloat = 343
+        static let leadingOffset: CGFloat = 249
+        static let bottomOffset: CGFloat = 19
+        static let size = CGSize(width: 74, height: 10)
+    }
+    private let watermarkedImage: UIImage
 
     // MARK: - UI Properties
 
@@ -22,7 +28,7 @@ final class EditCompleteViewController: BaseUIViewController {
     // MARK: - Initializer
 
     init(editedImage: UIImage) {
-        self.editedImage = editedImage
+        self.watermarkedImage = Self.makeWatermarkedImage(from: editedImage)
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -39,7 +45,7 @@ final class EditCompleteViewController: BaseUIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        rootView.updateImage(editedImage)
+        rootView.updateImage(watermarkedImage)
     }
 
     // MARK: - Private Methods
@@ -74,7 +80,7 @@ final class EditCompleteViewController: BaseUIViewController {
             }
 
             PHPhotoLibrary.shared().performChanges {
-                PHAssetChangeRequest.creationRequestForAsset(from: self.editedImage)
+                PHAssetChangeRequest.creationRequestForAsset(from: self.watermarkedImage)
             } completionHandler: { success, _ in
                 DispatchQueue.main.async {
                     if success {
@@ -89,11 +95,34 @@ final class EditCompleteViewController: BaseUIViewController {
 
     private func exportImage() {
         let activityViewController = UIActivityViewController(
-            activityItems: [editedImage],
+            activityItems: [watermarkedImage],
             applicationActivities: nil
         )
 
         present(activityViewController, animated: true)
+    }
+
+    private static func makeWatermarkedImage(from image: UIImage) -> UIImage {
+        guard let watermarkImage = UIImage(named: "routee_logo_watermark") else {
+            return image
+        }
+
+        let watermarkScale = image.size.width / WatermarkLayout.designWidth
+        let watermarkSize = CGSize(
+            width: WatermarkLayout.size.width * watermarkScale,
+            height: WatermarkLayout.size.height * watermarkScale
+        )
+        let watermarkOrigin = CGPoint(
+            x: WatermarkLayout.leadingOffset * watermarkScale,
+            y: image.size.height - (WatermarkLayout.bottomOffset * watermarkScale) - watermarkSize.height
+        )
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = image.scale
+
+        return UIGraphicsImageRenderer(size: image.size, format: format).image { _ in
+            image.draw(in: CGRect(origin: .zero, size: image.size))
+            watermarkImage.draw(in: CGRect(origin: watermarkOrigin, size: watermarkSize))
+        }
     }
 
     // MARK: - Actions
