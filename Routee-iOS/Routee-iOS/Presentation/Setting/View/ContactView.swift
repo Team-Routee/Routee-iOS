@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class ContactView: BaseUIView {
+final class ContactView: BaseUIView, SettingToastPresentable {
     
     // MARK: - Properties
     
@@ -48,11 +48,11 @@ final class ContactView: BaseUIView {
         }
 
         kakaoButton.do {
-            $0.setImage(.ctaKakao, for: .normal)
+            $0.setImage(.btnContactKakao, for: .normal)
         }
 
         emailButton.do {
-            $0.setImage(.ctaEmail, for: .normal)
+            $0.setImage(.btnContactEmail, for: .normal)
         }
     }
     
@@ -127,5 +127,3 @@ final class ContactView: BaseUIView {
         emailButtonAction?()
     }
 }
-
-extension ContactView: SettingToastPresentable { }

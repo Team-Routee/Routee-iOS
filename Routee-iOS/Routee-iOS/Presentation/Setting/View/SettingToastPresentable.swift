@@ -9,7 +9,9 @@ import UIKit
 
 import SnapKit
 
-protocol SettingToastPresentable where Self: UIView { }
+protocol SettingToastPresentable where Self: UIView {
+    func showToast(title: String)
+}
 
 extension SettingToastPresentable {
     func showToast(title: String) {

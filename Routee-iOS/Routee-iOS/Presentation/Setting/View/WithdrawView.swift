@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class WithdrawView: BaseUIView {
+final class WithdrawView: BaseUIView, SettingToastPresentable {
 
     // MARK: - Properties
 
@@ -289,5 +289,3 @@ final class WithdrawView: BaseUIView {
         withdrawButtonAction?()
     }
 }
-
-extension WithdrawView: SettingToastPresentable { }
