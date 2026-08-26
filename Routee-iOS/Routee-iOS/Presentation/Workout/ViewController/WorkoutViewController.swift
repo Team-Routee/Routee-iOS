@@ -28,12 +28,14 @@ final class WorkoutViewController: BaseUIViewController {
             guard oldValue != workoutMode else { return }
             updateUI(for: workoutMode)
             updateElapsedTimeTracking(from: oldValue, to: workoutMode)
+            updateBackgroundLocationTracking(for: workoutMode)
         }
     }
     let viewModel = WorkoutViewModel()
     private let locationManager = CLLocationManager()
     private var initialLocation = false
     private var lastReverseGeocodingLocation: CLLocation?
+    private let hapticManager = HapticManager()
     
     // MARK: - Life Cycle
     
@@ -329,6 +331,24 @@ final class WorkoutViewController: BaseUIViewController {
             for: .touchUpInside
         )
         
+        workoutView.finishButton.addTarget(
+            self,
+            action: #selector(didTapFinishButton),
+            for: .touchUpInside
+        )
+        
+        workoutView.finishButton.addTarget(
+            self,
+            action: #selector(didTouchDownFinishButton),
+            for: .touchDown
+        )
+        
+        workoutView.finishButton.addTarget(
+            self,
+            action: #selector(didEndPressFinishButton),
+            for: [.touchUpInside, .touchUpOutside, .touchCancel]
+        )
+        
         let finishLongPressGesture = UILongPressGestureRecognizer(
             target: self,
             action: #selector(didLongPressFinishButton(_:))
@@ -356,6 +376,27 @@ final class WorkoutViewController: BaseUIViewController {
     @objc
     private func didTapRestartButton() {
         resumeRecordingRoute()
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
+    }
+    
+    @objc
+    private func didTapFinishButton() {
+        workoutView.showFinishGuideToast()
+        let generator = UIImpactFeedbackGenerator(style: .rigid)
+        generator.impactOccurred()
+    }
+
+    @objc
+    private func didTouchDownFinishButton() {
+        hapticManager.play(.workoutFinished)
+        workoutView.playFinishButtonAnimation()
+    }
+
+    @objc
+    private func didEndPressFinishButton() {
+        hapticManager.stop()
+        workoutView.stopFinishButtonAnimation()
     }
     
     @objc
@@ -439,6 +480,10 @@ extension WorkoutViewController {
             break
         }
     }
+
+    private func updateBackgroundLocationTracking(for mode: WorkoutMode) {
+        locationManager.allowsBackgroundLocationUpdates = mode == .recording
+    }
 }
 
 // MARK: - Extensions
@@ -449,6 +494,7 @@ extension WorkoutViewController: CLLocationManagerDelegate {
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.distanceFilter = 3
         locationManager.activityType = .fitness
+        locationManager.allowsBackgroundLocationUpdates = false
         requestCurrentLocationAuthorization()
     }
     
