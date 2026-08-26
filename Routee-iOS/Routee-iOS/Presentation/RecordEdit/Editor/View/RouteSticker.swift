@@ -52,7 +52,7 @@ final class RouteSticker: BaseUIView {
         
         routeTitleStackView.snp.makeConstraints {
             $0.top.equalTo(routeIconImageView.snp.bottom).offset(6)
-            $0.leading.trailing.bottom.equalToSuperview()
+            $0.horizontalEdges.bottom.equalToSuperview()
         }
     }
     

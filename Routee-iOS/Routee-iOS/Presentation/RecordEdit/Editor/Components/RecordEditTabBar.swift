@@ -94,19 +94,19 @@ final class RecordEditTabBar: BaseUIView {
     
     override func setLayout() {
         brightnessSliderView.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalTo(snp.top)
             $0.height.equalTo(42)
         }
 
         colorPalette.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.horizontalEdges.equalToSuperview().inset(16)
             $0.bottom.equalTo(snp.top)
             $0.height.equalTo(48)
         }
         
         stickerSelector.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.horizontalEdges.equalToSuperview().inset(16)
             $0.bottom.equalTo(snp.top)
             $0.height.equalTo(48)
         }

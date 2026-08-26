@@ -88,7 +88,7 @@ final class EditorView: BaseUIView {
         }
 
         recordEditTabBar.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalTo(safeAreaLayoutGuide)
             $0.height.equalTo(71)
         }
@@ -96,13 +96,13 @@ final class EditorView: BaseUIView {
         backgroundOpacityView.snp.makeConstraints {
             $0.top.equalTo(topNavigationBar.snp.bottom).offset(12)
             $0.bottom.equalTo(recordEditTabBar.snp.top)
-            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.horizontalEdges.equalToSuperview().inset(16)
         }
 
         backgroundImageView.snp.makeConstraints {
             $0.top.equalTo(topNavigationBar.snp.bottom).offset(12)
             $0.bottom.equalTo(recordEditTabBar.snp.top)
-            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.horizontalEdges.equalToSuperview().inset(16)
         }
 
         dataInfo.snp.makeConstraints {
