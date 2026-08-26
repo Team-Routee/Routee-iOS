@@ -25,6 +25,12 @@ final class SettingViewController: BaseUIViewController {
     
     // MARK: - Private Methods
     
+    private func navigateToProfileChangeViewController() {
+        let profileChangeViewController = ProfileChangeViewController()
+        profileChangeViewController.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(profileChangeViewController, animated: true)
+    }
+
     private func navigateToWithdrawViewController() {
         let withdrawViewController = WithdrawViewController()
         withdrawViewController.hidesBottomBarWhenPushed = true
@@ -72,6 +78,10 @@ final class SettingViewController: BaseUIViewController {
     // MARK: - Actions
     
     override func setAddTarget() {
+        rootView.profileChangeButtonAction = { [weak self] in
+            self?.navigateToProfileChangeViewController()
+        }
+
         rootView.instagramButtonAction = {
             SettingActionHelper.openInstagram()
         }

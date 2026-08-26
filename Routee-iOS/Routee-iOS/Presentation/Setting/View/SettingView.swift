@@ -14,6 +14,7 @@ final class SettingView: BaseUIView {
 
     // MARK: - Properties
 
+    var profileChangeButtonAction: (() -> Void)?
     var instagramButtonAction: (() -> Void)?
     var contactButtonAction: (() -> Void)?
     var logoutButtonAction: (() -> Void)?
@@ -104,6 +105,7 @@ final class SettingView: BaseUIView {
     // MARK: - Private Methods
 
     private func setItemActions() {
+        routeeSectionView.setAction(index: 0, target: self, action: #selector(profileChangeItemTapped))
         routeeSectionView.setAction(index: 1, target: self, action: #selector(contactItemTapped))
         routeeSectionView.setAction(index: 2, target: self, action: #selector(instagramItemTapped))
         appInfoSectionView.setAction(index: 1, target: self, action: #selector(logoutItemTapped))
@@ -115,6 +117,11 @@ final class SettingView: BaseUIView {
     }
 
     // MARK: - Actions
+
+    @objc
+    private func profileChangeItemTapped() {
+        profileChangeButtonAction?()
+    }
 
     @objc
     private func instagramItemTapped() {
