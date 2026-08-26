@@ -49,7 +49,7 @@ final class Profile: BaseUIView {
         }
         
         nameLabel.do {
-            $0.text = "관악산 날다람쥐"
+            $0.text = " "
             $0.textColor = .static_white
             $0.font = .label_sb_18
         }
@@ -60,7 +60,7 @@ final class Profile: BaseUIView {
         }
         
         streakLabel.do {
-            $0.text = "8일째 함께하는 중"
+            $0.text = " "
             $0.textColor = .mint_300
             $0.font = .label_m_14
         }
@@ -78,7 +78,7 @@ final class Profile: BaseUIView {
         }
         
         pointLabel.do {
-            $0.text = "25"
+            $0.text = " "
             $0.textColor = .staticWhite
             $0.font = .label_r_12
         }
