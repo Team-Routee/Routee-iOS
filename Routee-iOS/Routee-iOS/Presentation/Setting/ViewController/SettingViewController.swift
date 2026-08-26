@@ -36,6 +36,12 @@ final class SettingViewController: BaseUIViewController {
         navigationController?.pushViewController(withdrawViewController, animated: true)
     }
 
+    private func navigateToContactViewController() {
+        let contactViewController = ContactViewController()
+        contactViewController.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(contactViewController, animated: true)
+    }
+
     private func presentLogoutModal() {
         let logoutAction: () -> Void = { [weak self] in
             self?.logout()
@@ -73,6 +79,10 @@ final class SettingViewController: BaseUIViewController {
     override func setAddTarget() {
         rootView.instagramButtonAction = { [weak self] in
             self?.openInstagram()
+        }
+
+        rootView.contactButtonAction = { [weak self] in
+            self?.navigateToContactViewController()
         }
         
         rootView.logoutButtonAction = { [weak self] in
