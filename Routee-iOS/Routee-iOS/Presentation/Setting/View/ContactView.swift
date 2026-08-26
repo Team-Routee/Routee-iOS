@@ -162,3 +162,5 @@ final class ContactView: BaseUIView {
         emailButtonAction?()
     }
 }
+
+extension ContactView: SettingToastPresentable { }

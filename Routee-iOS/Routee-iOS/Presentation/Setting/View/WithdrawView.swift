@@ -289,3 +289,5 @@ final class WithdrawView: BaseUIView {
         withdrawButtonAction?()
     }
 }
+
+extension WithdrawView: SettingToastPresentable { }
