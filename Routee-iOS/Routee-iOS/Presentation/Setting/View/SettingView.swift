@@ -17,6 +17,9 @@ final class SettingView: BaseUIView {
     var profileChangeButtonAction: (() -> Void)?
     var instagramButtonAction: (() -> Void)?
     var contactButtonAction: (() -> Void)?
+    var termsOfServiceButtonAction: (() -> Void)?
+    var privacyPolicyButtonAction: (() -> Void)?
+    var locationTermsButtonAction: (() -> Void)?
     var logoutButtonAction: (() -> Void)?
     var withdrawButtonAction: (() -> Void)?
 
@@ -108,6 +111,9 @@ final class SettingView: BaseUIView {
         routeeSectionView.setAction(index: 0, target: self, action: #selector(profileChangeItemTapped))
         routeeSectionView.setAction(index: 1, target: self, action: #selector(contactItemTapped))
         routeeSectionView.setAction(index: 2, target: self, action: #selector(instagramItemTapped))
+        policySectionView.setAction(index: 0, target: self, action: #selector(termsOfServiceItemTapped))
+        policySectionView.setAction(index: 1, target: self, action: #selector(privacyPolicyItemTapped))
+        policySectionView.setAction(index: 2, target: self, action: #selector(locationTermsItemTapped))
         appInfoSectionView.setAction(index: 1, target: self, action: #selector(logoutItemTapped))
         appInfoSectionView.setAction(index: 2, target: self, action: #selector(withdrawItemTapped))
     }
@@ -131,6 +137,21 @@ final class SettingView: BaseUIView {
     @objc
     private func contactItemTapped() {
         contactButtonAction?()
+    }
+
+    @objc
+    private func termsOfServiceItemTapped() {
+        termsOfServiceButtonAction?()
+    }
+
+    @objc
+    private func privacyPolicyItemTapped() {
+        privacyPolicyButtonAction?()
+    }
+
+    @objc
+    private func locationTermsItemTapped() {
+        locationTermsButtonAction?()
     }
 
     @objc

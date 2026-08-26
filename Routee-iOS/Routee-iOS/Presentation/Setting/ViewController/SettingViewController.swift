@@ -89,6 +89,18 @@ final class SettingViewController: BaseUIViewController {
         rootView.contactButtonAction = { [weak self] in
             self?.navigateToContactViewController()
         }
+
+        rootView.termsOfServiceButtonAction = {
+            SettingActionHelper.openTermsOfService()
+        }
+
+        rootView.privacyPolicyButtonAction = {
+            SettingActionHelper.openPrivacyPolicy()
+        }
+
+        rootView.locationTermsButtonAction = {
+            SettingActionHelper.openLocationTerms()
+        }
         
         rootView.logoutButtonAction = { [weak self] in
             self?.presentLogoutModal()

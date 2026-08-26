@@ -13,6 +13,9 @@ enum SettingActionHelper {
     private static let emailText = "routee.ask@gmail.com"
     private static let kakaoChannelURL = "http://pf.kakao.com/_ExkxgSX"
     private static let instagramURL = "https://www.instagram.com/routee_official/?hl=ko"
+    private static let termsOfServiceURL = "https://app.notion.com/p/395999c4e13b80f088a3c6ff365b0177?source=copy_link"
+    private static let privacyPolicyURL = "https://app.notion.com/p/395999c4e13b80e38b45c4fe81688642?source=copy_link"
+    private static let locationTermsURL = "https://app.notion.com/p/395999c4e13b80ebb999d285fdfaaffd?source=copy_link"
 
     static func copyEmail() {
         UIPasteboard.general.string = emailText
@@ -24,6 +27,18 @@ enum SettingActionHelper {
     
     static func openInstagram() {
         openURL(instagramURL)
+    }
+
+    static func openTermsOfService() {
+        openURL(termsOfServiceURL)
+    }
+
+    static func openPrivacyPolicy() {
+        openURL(privacyPolicyURL)
+    }
+
+    static func openLocationTerms() {
+        openURL(locationTermsURL)
     }
 
     private static func openURL(_ urlString: String) {
