@@ -16,7 +16,7 @@ final class OnboardingView: BaseUIView {
     
     private let backgroundImageView = RouteeEllipseBackground()
     private let settingGuideLabel = UILabel()
-    private let nicknameTextField = RouteeTextField()
+    private let nicknameTextField = NicknameTextField(fieldCase: .onboarding)
     let startButton = RouteeButton(titleText: "시작하기", type: .disabled)
     
     var nickname: String {
