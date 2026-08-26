@@ -10,7 +10,8 @@ final class ContactViewController: BaseUIViewController {
 
     // MARK: - Properties
 
-    private let kakaoChannelURLString = "https://pf.kakao.com/_wFdxjG"
+    private let kakaoChannelURLString = "http://pf.kakao.com/_ExkxgSX"
+    private let emailText = "routee.ask@gmail.com"
 
     // MARK: - UI Properties
 
