@@ -40,10 +40,11 @@ final class ContactView: BaseUIView {
         descriptionLabel.do {
             $0.text = """
                 원하시는 기능 혹은 오류가 발생한다면 언제든지 문의주세요.
-                순차적으로 빠르게 답변드리겠습니다
+                순차적으로 빠르게 답변드리겠습니다.
                 """
             $0.textColor = .grey200
             $0.font = .label_r_12
+            $0.numberOfLines = 2
         }
 
         kakaoButton.do {
@@ -80,7 +81,7 @@ final class ContactView: BaseUIView {
 
         titleLabel.snp.makeConstraints {
             $0.top.equalTo(topNavigationBar.snp.bottom).offset(27)
-            $0.leading.equalToSuperview().inset(32)
+            $0.leading.equalTo(kakaoButton.snp.leading)
         }
 
         descriptionLabel.snp.makeConstraints {
@@ -96,7 +97,7 @@ final class ContactView: BaseUIView {
         }
 
         emailButton.snp.makeConstraints {
-            $0.top.equalTo(kakaoButton.snp.bottom).offset(12)
+            $0.top.equalTo(kakaoButton.snp.bottom).offset(8)
             $0.centerX.equalToSuperview()
             $0.width.equalTo(343)
             $0.height.equalTo(48)
