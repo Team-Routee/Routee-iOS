@@ -25,11 +25,6 @@ final class SettingViewController: BaseUIViewController {
     
     // MARK: - Private Methods
     
-    private func openInstagram() {
-        guard let url = URL(string: "https://www.instagram.com/routee_official/?hl=ko") else { return }
-        UIApplication.shared.open(url)
-    }
-
     private func navigateToWithdrawViewController() {
         let withdrawViewController = WithdrawViewController()
         withdrawViewController.hidesBottomBarWhenPushed = true
@@ -77,8 +72,8 @@ final class SettingViewController: BaseUIViewController {
     // MARK: - Actions
     
     override func setAddTarget() {
-        rootView.instagramButtonAction = { [weak self] in
-            self?.openInstagram()
+        rootView.instagramButtonAction = {
+            SettingActionHelper.openInstagram()
         }
 
         rootView.contactButtonAction = { [weak self] in

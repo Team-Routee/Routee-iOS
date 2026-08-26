@@ -52,5 +52,14 @@ final class WithdrawViewController: BaseUIViewController {
         rootView.withdrawButtonAction = { [weak self] in
             self?.withdraw()
         }
+
+        rootView.kakaoButtonAction = {
+            SettingActionHelper.openKakaoChannel()
+        }
+
+        rootView.emailButtonAction = { [weak self] in
+            SettingActionHelper.copyEmail()
+            self?.rootView.showToast(title: SettingActionHelper.emailCopiedToastMessage)
+        }
     }
 }
