@@ -239,7 +239,7 @@ private final class BrightnessTickMarkView: UIView {
             let isAccentTick = index.isMultiple(of: 10)
 
             context?.setStrokeColor(
-                (isAccentTick ? UIColor.staticWhite : UIColor.white30).cgColor
+                (isAccentTick ? UIColor.staticWhite : UIColor.grey400).cgColor
             )
             let halfLineWidth = Layout.lineWidth / 2
 
