@@ -21,8 +21,10 @@ final class EditorView: BaseUIView {
     private let timelineStickerBottomOffset: CGFloat = 36
     private var state = EditorState()
 
-    private struct EditorState {
+      private struct EditorState {
         var selectedColor: UIColor = .recapMint
+        var backgroundOpacityBase: CGFloat = 0.5
+        var backgroundOpacity: CGFloat = 0.5
         var hasChanges = false
         var didSetRouteTimelineStickerFrame = false
         var trackPoints: [TrackPoint] = TrackPoint.dummyTrackPoints()
@@ -51,9 +53,8 @@ final class EditorView: BaseUIView {
 
     override func setStyle() {
         backgroundColor = .bgPrimary
-
         backgroundOpacityView.do {
-            $0.backgroundColor = .black50
+            $0.backgroundColor = UIColor.staticBlack.withAlphaComponent(state.backgroundOpacity)
         }
 
         backgroundImageView.do {
@@ -87,7 +88,7 @@ final class EditorView: BaseUIView {
         }
 
         recordEditTabBar.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalTo(safeAreaLayoutGuide)
             $0.height.equalTo(71)
         }
@@ -95,13 +96,13 @@ final class EditorView: BaseUIView {
         backgroundOpacityView.snp.makeConstraints {
             $0.top.equalTo(topNavigationBar.snp.bottom).offset(12)
             $0.bottom.equalTo(recordEditTabBar.snp.top)
-            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.horizontalEdges.equalToSuperview().inset(16)
         }
 
         backgroundImageView.snp.makeConstraints {
             $0.top.equalTo(topNavigationBar.snp.bottom).offset(12)
             $0.bottom.equalTo(recordEditTabBar.snp.top)
-            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.horizontalEdges.equalToSuperview().inset(16)
         }
 
         dataInfo.snp.makeConstraints {
@@ -131,7 +132,9 @@ final class EditorView: BaseUIView {
 
     func updateBackgroundImage(_ image: UIImage) {
         backgroundImageView.image = image
-        backgroundOpacityView.backgroundColor = .black40
+        state.backgroundOpacityBase = 0.4
+        setBackgroundOpacity(state.backgroundOpacityBase, marksChange: false)
+        recordEditTabBar.setBrightnessValue(0.5)
         markChanged()
     }
 
@@ -189,9 +192,16 @@ final class EditorView: BaseUIView {
     // MARK: - Actions
 
     func setAddTarget() {
+        setBrightnessAction()
         setColorAction()
         setStickerAction()
         setStickerDeleteAction()
+    }
+
+    private func setBrightnessAction() {
+        recordEditTabBar.onBrightnessChanged = { [weak self] value in
+            self?.updateBackgroundBrightness(value)
+        }
     }
 
     private func setColorAction() {
@@ -258,6 +268,38 @@ final class EditorView: BaseUIView {
         }
 
         recordEditTabBar.hideOptionView()
+    }
+
+    // MARK: - Brightness Update
+
+    private func updateBackgroundBrightness(_ value: CGFloat) {
+        setBackgroundOpacity(backgroundOpacity(for: value), marksChange: true)
+    }
+
+    private func backgroundOpacity(for value: CGFloat) -> CGFloat {
+        let clampedValue = min(max(value, 0), 1)
+        let centerValue: CGFloat = 0.5
+        let baseOpacity = state.backgroundOpacityBase
+
+        if clampedValue < centerValue {
+            let progress = (centerValue - clampedValue) / centerValue
+            return baseOpacity + ((1 - baseOpacity) * progress)
+        }
+
+        let progress = (clampedValue - centerValue) / centerValue
+        return baseOpacity * (1 - progress)
+    }
+
+    private func setBackgroundOpacity(_ opacity: CGFloat, marksChange: Bool) {
+        let clampedOpacity = min(max(opacity, 0), 1)
+        guard state.backgroundOpacity != clampedOpacity else { return }
+
+        state.backgroundOpacity = clampedOpacity
+        backgroundOpacityView.backgroundColor = UIColor.staticBlack.withAlphaComponent(clampedOpacity)
+
+        if marksChange {
+            markChanged()
+        }
     }
 
     // MARK: - Color Update

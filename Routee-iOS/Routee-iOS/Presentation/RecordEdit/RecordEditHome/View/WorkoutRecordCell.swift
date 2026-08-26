@@ -77,7 +77,7 @@ final class WorkoutRecordCell: UICollectionViewCell {
     
     private func setLayout() {
         workoutRecordThumbnail.snp.makeConstraints {
-            $0.top.leading.trailing.equalTo(contentView)
+            $0.top.horizontalEdges.equalTo(contentView)
             $0.height.equalTo(192)
         }
         
@@ -88,7 +88,7 @@ final class WorkoutRecordCell: UICollectionViewCell {
         
         dateLabel.snp.makeConstraints {
             $0.top.equalTo(workoutTitleEditor.snp.bottom).offset(2)
-            $0.leading.trailing.equalTo(contentView)
+            $0.horizontalEdges.equalTo(contentView)
             $0.bottom.lessThanOrEqualTo(contentView)
         }
     }
