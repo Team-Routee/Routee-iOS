@@ -83,7 +83,7 @@ final class SettingViewController: BaseUIViewController {
         }
 
         rootView.instagramButtonAction = {
-            SettingActionHelper.openInstagram()
+            ExternalURLHandler.openInstagram()
         }
 
         rootView.contactButtonAction = { [weak self] in
@@ -91,15 +91,15 @@ final class SettingViewController: BaseUIViewController {
         }
 
         rootView.termsOfServiceButtonAction = {
-            SettingActionHelper.openTermsOfService()
+            ExternalURLHandler.openTermsOfService()
         }
 
         rootView.privacyPolicyButtonAction = {
-            SettingActionHelper.openPrivacyPolicy()
+            ExternalURLHandler.openPrivacyPolicy()
         }
 
         rootView.locationTermsButtonAction = {
-            SettingActionHelper.openLocationTerms()
+            ExternalURLHandler.openLocationTerms()
         }
         
         rootView.logoutButtonAction = { [weak self] in
