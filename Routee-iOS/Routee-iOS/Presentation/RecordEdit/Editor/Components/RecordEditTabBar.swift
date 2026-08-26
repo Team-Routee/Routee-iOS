@@ -22,6 +22,7 @@ final class RecordEditTabBar: BaseUIView {
     var onColorSelected: ((UIColor) -> Void)?
     var onStickerSelected: ((StickerSelector.StickerType) -> Void)?
     var onStickerEditingChanged: ((Bool) -> Void)?
+    var onOptionViewVisibilityChanged: ((Bool) -> Void)?
     
     private lazy var tabItems: [RecordEditTabBarItem] = {
         [backgroundItem, brightnessItem, colorItem, stickerItem]
@@ -204,6 +205,7 @@ final class RecordEditTabBar: BaseUIView {
         brightnessSliderView.isHidden = visibleOptionView != .brightness
         colorPalette.isHidden = visibleOptionView != .color
         stickerSelector.isHidden = visibleOptionView != .sticker
+        onOptionViewVisibilityChanged?(visibleOptionView != nil)
 
         if visibleOptionView != .sticker {
             stickerSelector.deselectAll()

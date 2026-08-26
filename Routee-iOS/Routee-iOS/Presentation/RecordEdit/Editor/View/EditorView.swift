@@ -236,6 +236,7 @@ final class EditorView: BaseUIView {
     func setAddTarget() {
         setBrightnessAction()
         setColorAction()
+        setOptionViewVisibilityAction()
         setStickerAction()
         setStickerDeleteAction()
     }
@@ -249,6 +250,12 @@ final class EditorView: BaseUIView {
     private func setColorAction() {
         recordEditTabBar.onColorSelected = { [weak self] color in
             self?.updateEditorColor(color)
+        }
+    }
+
+    private func setOptionViewVisibilityAction() {
+        recordEditTabBar.onOptionViewVisibilityChanged = { [weak self] isVisible in
+            self?.resetButton.isHidden = isVisible
         }
     }
 
