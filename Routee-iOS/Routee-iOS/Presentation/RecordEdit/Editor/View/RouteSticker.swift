@@ -26,7 +26,7 @@ final class RouteSticker: BaseUIView {
     
     override func setStyle() {
         routeIconImageView.do {
-            $0.image = UIImage(named: "ic_location_info_sm_mint_no_spacing")?
+            $0.image = UIImage(named: "route_leading_graphic")?
                 .withRenderingMode(.alwaysTemplate)
             $0.tintColor = currentColor
         }
@@ -47,7 +47,7 @@ final class RouteSticker: BaseUIView {
     override func setLayout() {
         routeIconImageView.snp.makeConstraints {
             $0.top.leading.equalToSuperview()
-            $0.height.equalTo(14)
+            $0.size.equalTo(CGSize(width: 11.45, height: 21))
         }
         
         routeTitleStackView.snp.makeConstraints {
