@@ -12,7 +12,7 @@ import Photos
 final class EditCompleteViewController: BaseUIViewController {
 
     // MARK: - Properties
-
+    
     private enum WatermarkLayout {
         static let designWidth: CGFloat = 343
         static let leadingOffset: CGFloat = 249
