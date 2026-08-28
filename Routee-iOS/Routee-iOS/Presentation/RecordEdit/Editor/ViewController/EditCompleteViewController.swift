@@ -103,9 +103,7 @@ final class EditCompleteViewController: BaseUIViewController {
     }
 
     private static func makeWatermarkedImage(from image: UIImage) -> UIImage {
-        guard let watermarkImage = UIImage(named: "routee_logo_watermark") else {
-            return image
-        }
+        let watermarkImage = UIImage.routeeLogoWatermark
 
         let watermarkScale = image.size.width / WatermarkLayout.designWidth
         let watermarkSize = CGSize(
