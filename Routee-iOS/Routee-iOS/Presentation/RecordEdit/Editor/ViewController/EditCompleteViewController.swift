@@ -16,7 +16,7 @@ final class EditCompleteViewController: BaseUIViewController {
     private enum WatermarkLayout {
         static let designWidth: CGFloat = 343
         static let leadingOffset: CGFloat = 249
-        static let bottomOffset: CGFloat = 19
+        static let bottomOffset: CGFloat = 20
         static let size = CGSize(width: 74, height: 10)
     }
     private let watermarkedImage: UIImage
