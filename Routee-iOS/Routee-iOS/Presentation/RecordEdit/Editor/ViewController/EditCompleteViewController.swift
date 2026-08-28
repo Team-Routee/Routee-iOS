@@ -14,8 +14,7 @@ final class EditCompleteViewController: BaseUIViewController {
     // MARK: - Properties
     
     private enum WatermarkLayout {
-        static let designWidth: CGFloat = 343
-        static let leadingOffset: CGFloat = 249
+        static let trailingOffset: CGFloat = 20
         static let bottomOffset: CGFloat = 20
         static let size = CGSize(width: 74, height: 10)
     }
@@ -105,21 +104,16 @@ final class EditCompleteViewController: BaseUIViewController {
     private static func makeWatermarkedImage(from image: UIImage) -> UIImage {
         let watermarkImage = UIImage.routeeLogoWatermark
 
-        let watermarkScale = image.size.width / WatermarkLayout.designWidth
-        let watermarkSize = CGSize(
-            width: WatermarkLayout.size.width * watermarkScale,
-            height: WatermarkLayout.size.height * watermarkScale
-        )
         let watermarkOrigin = CGPoint(
-            x: WatermarkLayout.leadingOffset * watermarkScale,
-            y: image.size.height - (WatermarkLayout.bottomOffset * watermarkScale) - watermarkSize.height
+            x: image.size.width - WatermarkLayout.trailingOffset - WatermarkLayout.size.width,
+            y: image.size.height - WatermarkLayout.bottomOffset - WatermarkLayout.size.height
         )
         let format = UIGraphicsImageRendererFormat()
         format.scale = image.scale
 
         return UIGraphicsImageRenderer(size: image.size, format: format).image { _ in
             image.draw(in: CGRect(origin: .zero, size: image.size))
-            watermarkImage.draw(in: CGRect(origin: watermarkOrigin, size: watermarkSize))
+            watermarkImage.draw(in: CGRect(origin: watermarkOrigin, size: WatermarkLayout.size))
         }
     }
 
