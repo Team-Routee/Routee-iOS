@@ -54,6 +54,12 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
         }
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        workoutTimelineView.fitTrackMapToRoute()
+    }
+
     // MARK: - Network
 
     private func completeTimeLine() {

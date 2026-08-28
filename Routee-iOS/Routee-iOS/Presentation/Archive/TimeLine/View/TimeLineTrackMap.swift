@@ -71,6 +71,12 @@ final class TimeLineTrackMap: BaseUIView {
         setNeedsLayout()
     }
 
+    func fitRouteToMap() {
+        shouldUpdateCamera = true
+        setNeedsLayout()
+        layoutIfNeeded()
+    }
+
     // MARK: - UI Setting
 
     override func setStyle() {

@@ -26,6 +26,10 @@ final class WorkoutTimeLineView: BaseUIView {
     var activityTitle: String {
         titleTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
     }
+
+    func fitTrackMapToRoute() {
+        trackMap.fitRouteToMap()
+    }
     
     private let title: String
     private let distance: String
