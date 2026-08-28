@@ -15,6 +15,7 @@ final class StickerBox: BaseUIView {
     // MARK: - Properties
 
     var onDeleted: (() -> Void)?
+    var onMoved: (() -> Void)?
     var movementBounds: CGRect?
     var isSelected: Bool {
         !borderView.isHidden
@@ -112,8 +113,17 @@ final class StickerBox: BaseUIView {
         guard let superview else { return }
 
         let translation = gesture.translation(in: superview)
+        guard translation != .zero else { return }
+
         let movedFrame = frame.offsetBy(dx: translation.x, dy: translation.y)
-        frame = clampedFrame(movedFrame)
+        let updatedFrame = clampedFrame(movedFrame)
+        guard frame != updatedFrame else {
+            gesture.setTranslation(.zero, in: superview)
+            return
+        }
+
+        frame = updatedFrame
+        onMoved?()
 
         gesture.setTranslation(.zero, in: superview)
     }

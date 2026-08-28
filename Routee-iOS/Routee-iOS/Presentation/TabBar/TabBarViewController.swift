@@ -69,6 +69,7 @@ final class TabBarViewController: UITabBarController {
 
         [workout, recordEdit, archive, setting].forEach {
             $0.navigationBar.isHidden = true
+            $0.delegate = self
         }
 
         viewControllers = [
@@ -246,5 +247,15 @@ final class TabBarViewController: UITabBarController {
     @objc
     private func tabDidTap(_ sender: TabBarItem) {
         updateSelection(index: sender.tag)
+    }
+}
+
+extension TabBarViewController: UINavigationControllerDelegate {
+    func navigationController(
+        _ navigationController: UINavigationController,
+        willShow viewController: UIViewController,
+        animated: Bool
+    ) {
+        customTabBar.isHidden = shouldHideCustomTabBar(for: viewController)
     }
 }
