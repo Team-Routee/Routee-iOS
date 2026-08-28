@@ -47,7 +47,7 @@ final class RouteSticker: BaseUIView {
     override func setLayout() {
         routeIconImageView.snp.makeConstraints {
             $0.top.leading.equalToSuperview()
-            $0.size.equalTo(CGSize(width: 11.45, height: 21))
+            $0.size.equalTo(CGSize(width: 12, height: 21))
         }
         
         routeTitleStackView.snp.makeConstraints {
