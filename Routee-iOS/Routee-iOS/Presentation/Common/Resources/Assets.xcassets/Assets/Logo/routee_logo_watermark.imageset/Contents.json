@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "routee_logo_watermark.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
