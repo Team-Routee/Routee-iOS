@@ -37,10 +37,10 @@ final class TimeLineView: BaseUIView {
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     private lazy var titleTextField = TitleTextField(
-        title: record?.title ?? " ",
+        title: record?.title ?? "",
         showsEditIcon: true
     )
-    private let workoutMetric = WorkoutMetric(distance: " ", time: " ", altitude: " ")
+    private let workoutMetric = WorkoutMetric(distance: "", time: "", altitude: "")
     private let trackMap = TimeLineTrackMap()
     private let timelineTitleLabel = UILabel()
     private let timelineDateLabel = UILabel()
@@ -121,7 +121,7 @@ final class TimeLineView: BaseUIView {
         }
 
         timelineDateLabel.do {
-            $0.text = " "
+            $0.text = ""
             $0.font = .label_m_12
             $0.textColor = .grey_200
         }
