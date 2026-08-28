@@ -25,6 +25,9 @@ final class StickerBox: BaseUIView {
 
     private let contentView: UIView
     private let borderView = UIView()
+    private let topLeadingHandleView = UIView()
+    private let bottomLeadingHandleView = UIView()
+    private let bottomTrailingHandleView = UIView()
     private let closeButton = UIButton()
 
     // MARK: - Init
@@ -46,7 +49,17 @@ final class StickerBox: BaseUIView {
         backgroundColor = .clear
 
         borderView.do {
-            $0.layer.borderWidth = 2
+            $0.layer.borderWidth = 1
+            $0.layer.borderColor = UIColor.statusInfo.cgColor
+        }
+
+        [
+            topLeadingHandleView,
+            bottomLeadingHandleView,
+            bottomTrailingHandleView
+        ].forEach {
+            $0.backgroundColor = .staticWhite
+            $0.layer.borderWidth = 1
             $0.layer.borderColor = UIColor.statusInfo.cgColor
         }
 
@@ -57,7 +70,14 @@ final class StickerBox: BaseUIView {
     }
 
     override func setUI() {
-        addSubviews(contentView, borderView, closeButton)
+        addSubviews(
+            contentView,
+            borderView,
+            topLeadingHandleView,
+            bottomLeadingHandleView,
+            bottomTrailingHandleView,
+            closeButton
+        )
     }
 
     override func setLayout() {
@@ -68,6 +88,24 @@ final class StickerBox: BaseUIView {
 
         borderView.snp.makeConstraints {
             $0.edges.equalToSuperview()
+        }
+
+        topLeadingHandleView.snp.makeConstraints {
+            $0.centerX.equalTo(borderView.snp.leading)
+            $0.centerY.equalTo(borderView.snp.top)
+            $0.size.equalTo(8)
+        }
+
+        bottomLeadingHandleView.snp.makeConstraints {
+            $0.centerX.equalTo(borderView.snp.leading)
+            $0.centerY.equalTo(borderView.snp.bottom)
+            $0.size.equalTo(8)
+        }
+
+        bottomTrailingHandleView.snp.makeConstraints {
+            $0.centerX.equalTo(borderView.snp.trailing)
+            $0.centerY.equalTo(borderView.snp.bottom)
+            $0.size.equalTo(8)
         }
 
         closeButton.snp.makeConstraints {
@@ -90,6 +128,13 @@ final class StickerBox: BaseUIView {
 
     func setCloseButton(isSelected: Bool) {
         borderView.isHidden = !isSelected
+        [
+            topLeadingHandleView,
+            bottomLeadingHandleView,
+            bottomTrailingHandleView
+        ].forEach {
+            $0.isHidden = !isSelected
+        }
         closeButton.isHidden = !isSelected
     }
 
