@@ -16,6 +16,7 @@ final class StickerBox: BaseUIView {
 
     var onDeleted: (() -> Void)?
     var onMoved: (() -> Void)?
+    var onSelected: (() -> Void)?
     var movementBounds: CGRect?
     var isSelected: Bool {
         !borderView.isHidden
@@ -157,12 +158,17 @@ final class StickerBox: BaseUIView {
 
     @objc
     private func handleStickerTapped() {
+        onSelected?()
         setCloseButton(isSelected: true)
     }
 
     @objc
     private func handleStickerPanned(_ gesture: UIPanGestureRecognizer) {
         guard let superview else { return }
+
+        if gesture.state == .began {
+            onSelected?()
+        }
 
         let translation = gesture.translation(in: superview)
         guard translation != .zero else { return }

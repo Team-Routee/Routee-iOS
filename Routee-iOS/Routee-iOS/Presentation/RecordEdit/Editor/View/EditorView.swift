@@ -263,6 +263,18 @@ final class EditorView: BaseUIView {
         recordInfoStickerBox.onMoved = { [weak self] in
             self?.markChanged()
         }
+
+        [
+            recordInfoStickerBox,
+            routeTimelineStickerBox,
+            routeStickerBox
+        ].forEach { stickerBox in
+            stickerBox.onSelected = { [weak self, weak stickerBox] in
+                guard let self, let stickerBox else { return }
+
+                activateStickerBox(stickerBox)
+            }
+        }
     }
 
     @objc
@@ -368,8 +380,6 @@ final class EditorView: BaseUIView {
     }
 
     private func selectTimelineSticker() {
-        removeStickerBox(routeStickerBox)
-
         if routeTimelineStickerBox.superview == nil {
             addSubview(routeTimelineStickerBox)
             updateTimelineFrame()
@@ -380,8 +390,6 @@ final class EditorView: BaseUIView {
     }
 
     private func showRouteSticker() {
-        removeStickerBox(routeTimelineStickerBox)
-
         guard routeStickerBox.superview == nil else {
             activateStickerBox(routeStickerBox)
             return
@@ -513,10 +521,21 @@ final class EditorView: BaseUIView {
     // MARK: - Sticker Helpers
 
     private func activateStickerBox(_ stickerBox: StickerBox) {
+        deactivateStickerBoxes(except: stickerBox)
         stickerBox.isUserInteractionEnabled = true
         stickerBox.setCloseButton(isSelected: true)
         bringSubviewToFront(stickerBox)
         bringControlsFront()
+    }
+
+    private func deactivateStickerBoxes(except selectedStickerBox: StickerBox) {
+        [
+            recordInfoStickerBox,
+            routeTimelineStickerBox,
+            routeStickerBox
+        ]
+        .filter { $0 !== selectedStickerBox }
+        .forEach(deactivateStickerBox)
     }
 
     private func deactivateStickerBox(_ stickerBox: StickerBox) {
