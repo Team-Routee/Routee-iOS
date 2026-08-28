@@ -12,8 +12,13 @@ import Photos
 final class EditCompleteViewController: BaseUIViewController {
 
     // MARK: - Properties
-
-    private let editedImage: UIImage
+    
+    private enum WatermarkLayout {
+        static let trailingOffset: CGFloat = 20
+        static let bottomOffset: CGFloat = 20
+        static let size = CGSize(width: 74, height: 10)
+    }
+    private let watermarkedImage: UIImage
 
     // MARK: - UI Properties
 
@@ -22,7 +27,7 @@ final class EditCompleteViewController: BaseUIViewController {
     // MARK: - Initializer
 
     init(editedImage: UIImage) {
-        self.editedImage = editedImage
+        self.watermarkedImage = Self.makeWatermarkedImage(from: editedImage)
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -39,7 +44,7 @@ final class EditCompleteViewController: BaseUIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        rootView.updateImage(editedImage)
+        rootView.updateImage(watermarkedImage)
     }
 
     // MARK: - Private Methods
@@ -74,7 +79,7 @@ final class EditCompleteViewController: BaseUIViewController {
             }
 
             PHPhotoLibrary.shared().performChanges {
-                PHAssetChangeRequest.creationRequestForAsset(from: self.editedImage)
+                PHAssetChangeRequest.creationRequestForAsset(from: self.watermarkedImage)
             } completionHandler: { success, _ in
                 DispatchQueue.main.async {
                     if success {
@@ -89,11 +94,27 @@ final class EditCompleteViewController: BaseUIViewController {
 
     private func exportImage() {
         let activityViewController = UIActivityViewController(
-            activityItems: [editedImage],
+            activityItems: [watermarkedImage],
             applicationActivities: nil
         )
 
         present(activityViewController, animated: true)
+    }
+
+    private static func makeWatermarkedImage(from image: UIImage) -> UIImage {
+        let watermarkImage = UIImage.routeeLogoWatermark
+
+        let watermarkOrigin = CGPoint(
+            x: image.size.width - WatermarkLayout.trailingOffset - WatermarkLayout.size.width,
+            y: image.size.height - WatermarkLayout.bottomOffset - WatermarkLayout.size.height
+        )
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = image.scale
+
+        return UIGraphicsImageRenderer(size: image.size, format: format).image { _ in
+            image.draw(in: CGRect(origin: .zero, size: image.size))
+            watermarkImage.draw(in: CGRect(origin: watermarkOrigin, size: WatermarkLayout.size))
+        }
     }
 
     // MARK: - Actions
