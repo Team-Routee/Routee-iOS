@@ -67,9 +67,8 @@ final class SettingSection: UIView {
         }
 
         sectionStackView.snp.makeConstraints {
-            $0.leading.equalToSuperview().inset(18)
+            $0.top.leading.equalToSuperview().inset(18)
             $0.trailing.equalToSuperview().inset(14)
-            $0.top.equalToSuperview().inset(18)
             $0.bottom.equalToSuperview().inset(10)
         }
     }
