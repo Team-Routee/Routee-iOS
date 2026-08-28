@@ -14,22 +14,23 @@ final class SettingView: BaseUIView {
 
     // MARK: - Properties
 
+    var profileChangeButtonAction: (() -> Void)?
     var instagramButtonAction: (() -> Void)?
+    var contactButtonAction: (() -> Void)?
+    var termsOfServiceButtonAction: (() -> Void)?
+    var privacyPolicyButtonAction: (() -> Void)?
+    var locationTermsButtonAction: (() -> Void)?
     var logoutButtonAction: (() -> Void)?
-    var policyButtonAction: (() -> Void)?
-    private var privacyButtonTapCount = 0
-    private let requiredPrivacyButtonTapCount = 10
+    var withdrawButtonAction: (() -> Void)?
 
     // MARK: - UI Properties
 
     private let backgroundGradientView = RouteeEllipseBackground()
     private let titleLabel = UILabel()
     private let contentStackView = UIStackView()
-    private let routeeSectionView = SettingSectionView()
-    private let routeeDividerLineView = UIView()
-    private let policySectionView = SettingSectionView()
-    private let policyDividerLineView = UIView()
-    private let appInfoSectionView = SettingSectionView()
+    private let routeeSectionView = SettingSection()
+    private let policySectionView = SettingSection()
+    private let appInfoSectionView = SettingSection()
 
     // MARK: - UI Setting
 
@@ -44,47 +45,35 @@ final class SettingView: BaseUIView {
 
         contentStackView.do {
             $0.axis = .vertical
-            $0.spacing = 28
+            $0.spacing = 12
         }
 
         routeeSectionView.configure(
-            model: .init(
-                title: "루티 이용하기",
-                itemTitles: [
-                    "공지사항",
-                    "1:1 문의하기",
-                    "루티 인스타그램 바로가기"
-                ]
-            )
+            title: "루티 이용하기",
+            itemTitles: [
+                "프로필 변경",
+                "1:1 문의하기",
+                "루티 인스타그램 바로가기"
+            ]
         )
 
         policySectionView.configure(
-            model: .init(
-                title: "이용정책",
-                itemTitles: [
-                    "이용약관",
-                    "개인정보 처리방침",
-                    "위치기반 서비스 이용약관"
-                ]
-            )
+            title: "이용정책",
+            itemTitles: [
+                "이용약관",
+                "개인정보 처리방침",
+                "위치기반 서비스 이용약관"
+            ]
         )
 
         appInfoSectionView.configure(
-            model: .init(
-                title: "앱 정보",
-                itemTitles: [
-                    "버전정보",
-                    "로그아웃"
-                ]
-            )
+            title: "앱 정보",
+            items: [
+                (title: "버전정보", trailingText: appVersionText),
+                (title: "로그아웃", trailingText: nil),
+                (title: "회원탈퇴", trailingText: nil)
+            ]
         )
-
-        [
-            routeeDividerLineView,
-            policyDividerLineView
-        ].forEach {
-            $0.backgroundColor = .grey500
-        }
     }
 
     override func setUI() {
@@ -92,9 +81,7 @@ final class SettingView: BaseUIView {
 
         contentStackView.addArrangedSubviews(
             routeeSectionView,
-            routeeDividerLineView,
             policySectionView,
-            policyDividerLineView,
             appInfoSectionView
         )
 
@@ -116,26 +103,31 @@ final class SettingView: BaseUIView {
             $0.top.equalTo(titleLabel.snp.bottom).offset(40)
             $0.width.equalTo(343)
         }
-
-        [
-            routeeDividerLineView,
-            policyDividerLineView
-        ].forEach {
-            $0.snp.makeConstraints {
-                $0.height.equalTo(1)
-            }
-        }
     }
 
     // MARK: - Private Methods
 
     private func setItemActions() {
+        routeeSectionView.setAction(index: 0, target: self, action: #selector(profileChangeItemTapped))
+        routeeSectionView.setAction(index: 1, target: self, action: #selector(contactItemTapped))
         routeeSectionView.setAction(index: 2, target: self, action: #selector(instagramItemTapped))
+        policySectionView.setAction(index: 0, target: self, action: #selector(termsOfServiceItemTapped))
+        policySectionView.setAction(index: 1, target: self, action: #selector(privacyPolicyItemTapped))
+        policySectionView.setAction(index: 2, target: self, action: #selector(locationTermsItemTapped))
         appInfoSectionView.setAction(index: 1, target: self, action: #selector(logoutItemTapped))
-        policySectionView.setAction(index: 1, target: self, action: #selector(didTapPrivacyButton))
+        appInfoSectionView.setAction(index: 2, target: self, action: #selector(withdrawItemTapped))
+    }
+
+    private var appVersionText: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
     }
 
     // MARK: - Actions
+
+    @objc
+    private func profileChangeItemTapped() {
+        profileChangeButtonAction?()
+    }
 
     @objc
     private func instagramItemTapped() {
@@ -143,17 +135,32 @@ final class SettingView: BaseUIView {
     }
 
     @objc
+    private func contactItemTapped() {
+        contactButtonAction?()
+    }
+
+    @objc
+    private func termsOfServiceItemTapped() {
+        termsOfServiceButtonAction?()
+    }
+
+    @objc
+    private func privacyPolicyItemTapped() {
+        privacyPolicyButtonAction?()
+    }
+
+    @objc
+    private func locationTermsItemTapped() {
+        locationTermsButtonAction?()
+    }
+
+    @objc
     private func logoutItemTapped() {
         logoutButtonAction?()
     }
-    
+
     @objc
-    private func didTapPrivacyButton() {
-        privacyButtonTapCount += 1
-
-        guard privacyButtonTapCount >= requiredPrivacyButtonTapCount else { return }
-
-        privacyButtonTapCount = 0
-        policyButtonAction?()
+    private func withdrawItemTapped() {
+        withdrawButtonAction?()
     }
 }
