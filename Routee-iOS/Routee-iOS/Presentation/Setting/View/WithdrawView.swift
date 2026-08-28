@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class WithdrawView: BaseUIView, SettingToastPresentable {
+final class WithdrawView: BaseUIView, SettingTabToastPresentable {
 
     // MARK: - Properties
 
