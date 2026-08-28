@@ -19,6 +19,7 @@ final class EditorView: BaseUIView {
     private let stickerVerticalInset: CGFloat = 10
     private let stickerMovementInset: CGFloat = 12
     private let timelineStickerBottomOffset: CGFloat = 36
+    private let recordInfoContentSize = CGSize(width: 120, height: 164)
     private var state = EditorState()
 
       private struct EditorState {
@@ -26,6 +27,7 @@ final class EditorView: BaseUIView {
         var backgroundOpacityBase: CGFloat = 0.5
         var backgroundOpacity: CGFloat = 0.5
         var hasChanges = false
+        var didSetRecordInfoStickerFrame = false
         var didSetRouteTimelineStickerFrame = false
         var trackPoints: [TrackPoint] = TrackPoint.dummyTrackPoints()
         var timelineMarkers: [TimelineMarkerModel] = []
@@ -42,6 +44,7 @@ final class EditorView: BaseUIView {
     private let dataInfo = RecordInfo()
     private let recordEditTabBar = RecordEditTabBar()
     private let lottieOverlayView = LottieOverlayView()
+    private lazy var recordInfoStickerBox = StickerBox(contentView: dataInfo)
     private lazy var routeTimelineStickerBox = StickerBox(contentView: routeTimelineDrawingView)
     private lazy var routeStickerBox = StickerBox(contentView: routeSticker)
     private lazy var hideOptionViewTapGesture = UITapGestureRecognizer(
@@ -69,8 +72,8 @@ final class EditorView: BaseUIView {
             backgroundGradientView,
             backgroundImageView,
             backgroundOpacityView,
+            recordInfoStickerBox,
             routeTimelineStickerBox,
-            dataInfo,
             topNavigationBar,
             recordEditTabBar,
             lottieOverlayView
@@ -105,13 +108,6 @@ final class EditorView: BaseUIView {
             $0.horizontalEdges.equalToSuperview().inset(16)
         }
 
-        dataInfo.snp.makeConstraints {
-            $0.top.equalTo(backgroundImageView.snp.top).offset(80)
-            $0.leading.equalTo(backgroundImageView.snp.leading).offset(32)
-            $0.height.equalTo(164)
-            $0.width.equalTo(120)
-        }
-
         lottieOverlayView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
@@ -121,6 +117,7 @@ final class EditorView: BaseUIView {
         super.layoutSubviews()
 
         updateMoveBounds()
+        setRecordInfoFrame()
         setTimelineFrame()
     }
 
@@ -164,6 +161,7 @@ final class EditorView: BaseUIView {
     }
 
     func makeEditedImage() -> UIImage {
+        recordInfoStickerBox.setCloseButton(isSelected: false)
         routeTimelineStickerBox.setCloseButton(isSelected: false)
         routeStickerBox.setCloseButton(isSelected: false)
         layoutIfNeeded()
@@ -186,6 +184,7 @@ final class EditorView: BaseUIView {
     }
 
     func setInitialState() {
+        deactivateStickerBox(recordInfoStickerBox)
         deactivateStickerBox(routeTimelineStickerBox)
     }
 
@@ -217,6 +216,8 @@ final class EditorView: BaseUIView {
 
         recordEditTabBar.onStickerSelected = { [weak self] stickerType in
             switch stickerType {
+            case .record:
+                self?.showRecordInfoSticker()
             case .photoTimeline:
                 self?.selectTimelineSticker()
             case .route:
@@ -238,6 +239,12 @@ final class EditorView: BaseUIView {
             removeStickerBox(routeStickerBox)
         }
 
+        recordInfoStickerBox.onDeleted = { [weak self] in
+            guard let self else { return }
+
+            removeStickerBox(recordInfoStickerBox)
+        }
+
         routeTimelineStickerBox.onMoved = { [weak self] in
             self?.markChanged()
         }
@@ -245,15 +252,26 @@ final class EditorView: BaseUIView {
         routeStickerBox.onMoved = { [weak self] in
             self?.markChanged()
         }
+
+        recordInfoStickerBox.onMoved = { [weak self] in
+            self?.markChanged()
+        }
     }
 
     @objc
     private func handleViewTapped(_ gesture: UITapGestureRecognizer) {
         let point = gesture.location(in: recordEditTabBar)
+        let recordInfoStickerPoint = gesture.location(in: recordInfoStickerBox)
         let routeTimelineStickerPoint = gesture.location(in: routeTimelineStickerBox)
         let routeStickerPoint = gesture.location(in: routeStickerBox)
 
         guard !recordEditTabBar.containsInteractivePoint(point) else { return }
+
+        if recordInfoStickerBox.superview != nil,
+           recordInfoStickerBox.isSelected,
+           !recordInfoStickerBox.bounds.contains(recordInfoStickerPoint) {
+            deactivateStickerBox(recordInfoStickerBox)
+        }
 
         if routeTimelineStickerBox.superview != nil,
            routeTimelineStickerBox.isSelected,
@@ -318,13 +336,28 @@ final class EditorView: BaseUIView {
 
     private func setStickerEditingEnabled(_ isEnabled: Bool) {
         if !isEnabled {
+            deactivateStickerBox(recordInfoStickerBox)
             deactivateStickerBox(routeTimelineStickerBox)
             deactivateStickerBox(routeStickerBox)
             return
         }
 
+        recordInfoStickerBox.isUserInteractionEnabled = recordInfoStickerBox.superview != nil
         routeTimelineStickerBox.isUserInteractionEnabled = routeTimelineStickerBox.superview != nil
         routeStickerBox.isUserInteractionEnabled = routeStickerBox.superview != nil
+    }
+
+    private func showRecordInfoSticker() {
+        guard recordInfoStickerBox.superview == nil else {
+            activateStickerBox(recordInfoStickerBox)
+            return
+        }
+
+        addSubview(recordInfoStickerBox)
+        recordInfoStickerBox.frame = defaultRecordInfoStickerFrame()
+        state.didSetRecordInfoStickerFrame = true
+        markChanged()
+        activateStickerBox(recordInfoStickerBox)
     }
 
     private func selectTimelineSticker() {
@@ -353,10 +386,11 @@ final class EditorView: BaseUIView {
         routeSticker.updateColor(state.selectedColor)
 
         let stickerSize = stickerBoxSize(for: routeStickerBox)
+        let dataInfoFrame = recordInfoFrameForRouteAnchor()
 
         routeStickerBox.frame = CGRect(
-            x: dataInfo.frame.minX - 8,
-            y: dataInfo.frame.maxY + 11,
+            x: dataInfoFrame.minX - 8,
+            y: dataInfoFrame.maxY + 11,
             width: stickerSize.width,
             height: stickerSize.height
         )
@@ -372,8 +406,41 @@ final class EditorView: BaseUIView {
             dy: stickerMovementInset
         )
 
+        recordInfoStickerBox.movementBounds = movementBounds
         routeTimelineStickerBox.movementBounds = movementBounds
         routeStickerBox.movementBounds = movementBounds
+    }
+
+    private func setRecordInfoFrame() {
+        guard !state.didSetRecordInfoStickerFrame,
+              backgroundImageView.bounds.width > 0,
+              backgroundImageView.bounds.height > 0
+        else {
+            return
+        }
+
+        recordInfoStickerBox.frame = defaultRecordInfoStickerFrame()
+        state.didSetRecordInfoStickerFrame = true
+    }
+
+    private func defaultRecordInfoStickerFrame() -> CGRect {
+        CGRect(
+            x: backgroundImageView.frame.minX + 32 - stickerHorizontalInset,
+            y: backgroundImageView.frame.minY + 80 - stickerVerticalInset,
+            width: recordInfoContentSize.width + stickerHorizontalInset * 2,
+            height: recordInfoContentSize.height + stickerVerticalInset * 2
+        )
+    }
+
+    private func recordInfoFrameForRouteAnchor() -> CGRect {
+        guard dataInfo.window != nil else {
+            return defaultRecordInfoStickerFrame().insetBy(
+                dx: stickerHorizontalInset,
+                dy: stickerVerticalInset
+            )
+        }
+
+        return dataInfo.convert(dataInfo.bounds, to: self)
     }
 
     private func setTimelineFrame() {
