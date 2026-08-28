@@ -132,13 +132,6 @@ final class EditorView: BaseUIView {
             $0.horizontalEdges.equalToSuperview().inset(16)
         }
 
-        dataInfo.snp.makeConstraints {
-            $0.top.equalTo(backgroundImageView.snp.top).offset(80)
-            $0.leading.equalTo(backgroundImageView.snp.leading).offset(32)
-            $0.height.equalTo(164)
-            $0.width.equalTo(120)
-        }
-
         resetButton.snp.makeConstraints {
             $0.leading.equalToSuperview().offset(resetButtonLeadingOffset)
             $0.bottom.equalTo(recordEditTabBar.snp.top).offset(-resetButtonBottomOffset)
@@ -620,7 +613,7 @@ final class EditorView: BaseUIView {
 
     private func restoreRouteTimelineStickerBox() {
         if routeTimelineStickerBox.superview == nil {
-            insertSubview(routeTimelineStickerBox, belowSubview: dataInfo)
+            insertSubview(routeTimelineStickerBox, belowSubview: recordInfoStickerBox)
         }
 
         layoutIfNeeded()
