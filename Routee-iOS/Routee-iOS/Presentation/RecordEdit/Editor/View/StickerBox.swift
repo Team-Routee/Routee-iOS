@@ -24,6 +24,7 @@ final class StickerBox: BaseUIView {
     // MARK: - UI Properties
 
     private let contentView: UIView
+    private let contentInsets: UIEdgeInsets
     private let borderView = UIView()
     private let topLeadingHandleView = UIView()
     private let bottomLeadingHandleView = UIView()
@@ -32,8 +33,12 @@ final class StickerBox: BaseUIView {
 
     // MARK: - Init
 
-    init(contentView: UIView) {
+    init(
+        contentView: UIView,
+        contentInsets: UIEdgeInsets = UIEdgeInsets(top: 10, left: 13, bottom: 10, right: 13)
+    ) {
         self.contentView = contentView
+        self.contentInsets = contentInsets
         super.init(frame: .zero)
 
         setGesture()
@@ -82,8 +87,10 @@ final class StickerBox: BaseUIView {
 
     override func setLayout() {
         contentView.snp.makeConstraints {
-            $0.horizontalEdges.equalToSuperview().inset(13)
-            $0.verticalEdges.equalToSuperview().inset(10)
+            $0.top.equalToSuperview().inset(contentInsets.top)
+            $0.leading.equalToSuperview().inset(contentInsets.left)
+            $0.trailing.equalToSuperview().inset(contentInsets.right)
+            $0.bottom.equalToSuperview().inset(contentInsets.bottom)
         }
 
         borderView.snp.makeConstraints {

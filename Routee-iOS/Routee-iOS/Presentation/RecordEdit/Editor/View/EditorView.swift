@@ -15,8 +15,9 @@ final class EditorView: BaseUIView {
 
     // MARK: - Properties
 
-    private let stickerHorizontalInset: CGFloat = 13
-    private let stickerVerticalInset: CGFloat = 10
+    private let recordInfoStickerInsets = UIEdgeInsets(top: 15, left: 17, bottom: 12, right: 23)
+    private let timelineStickerInsets = UIEdgeInsets(top: 10, left: 13, bottom: 10, right: 13)
+    private let routeStickerInsets = UIEdgeInsets(top: 16, left: 14, bottom: 13, right: 9)
     private let stickerMovementInset: CGFloat = 12
     private let timelineStickerBottomOffset: CGFloat = 36
     private let recordInfoContentSize = CGSize(width: 120, height: 164)
@@ -44,9 +45,15 @@ final class EditorView: BaseUIView {
     private let dataInfo = RecordInfo()
     private let recordEditTabBar = RecordEditTabBar()
     private let lottieOverlayView = LottieOverlayView()
-    private lazy var recordInfoStickerBox = StickerBox(contentView: dataInfo)
+    private lazy var recordInfoStickerBox = StickerBox(
+        contentView: dataInfo,
+        contentInsets: recordInfoStickerInsets
+    )
     private lazy var routeTimelineStickerBox = StickerBox(contentView: routeTimelineDrawingView)
-    private lazy var routeStickerBox = StickerBox(contentView: routeSticker)
+    private lazy var routeStickerBox = StickerBox(
+        contentView: routeSticker,
+        contentInsets: routeStickerInsets
+    )
     private lazy var hideOptionViewTapGesture = UITapGestureRecognizer(
         target: self,
         action: #selector(handleViewTapped(_:))
@@ -425,18 +432,22 @@ final class EditorView: BaseUIView {
 
     private func defaultRecordInfoStickerFrame() -> CGRect {
         CGRect(
-            x: backgroundImageView.frame.minX + 32 - stickerHorizontalInset,
-            y: backgroundImageView.frame.minY + 80 - stickerVerticalInset,
-            width: recordInfoContentSize.width + stickerHorizontalInset * 2,
-            height: recordInfoContentSize.height + stickerVerticalInset * 2
+            x: backgroundImageView.frame.minX + 32 - recordInfoStickerInsets.left,
+            y: backgroundImageView.frame.minY + 80 - recordInfoStickerInsets.top,
+            width: recordInfoContentSize.width + recordInfoStickerInsets.left + recordInfoStickerInsets.right,
+            height: recordInfoContentSize.height + recordInfoStickerInsets.top + recordInfoStickerInsets.bottom
         )
     }
 
     private func recordInfoFrameForRouteAnchor() -> CGRect {
         guard dataInfo.window != nil else {
-            return defaultRecordInfoStickerFrame().insetBy(
-                dx: stickerHorizontalInset,
-                dy: stickerVerticalInset
+            let stickerFrame = defaultRecordInfoStickerFrame()
+
+            return CGRect(
+                x: stickerFrame.minX + recordInfoStickerInsets.left,
+                y: stickerFrame.minY + recordInfoStickerInsets.top,
+                width: recordInfoContentSize.width,
+                height: recordInfoContentSize.height
             )
         }
 
@@ -486,10 +497,10 @@ final class EditorView: BaseUIView {
             return
         }
 
-        let stickerHeight = routeRect.height + stickerVerticalInset * 2
-        let stickerWidth = routeRect.width + stickerHorizontalInset * 2
+        let stickerHeight = routeRect.height + timelineStickerInsets.top + timelineStickerInsets.bottom
+        let stickerWidth = routeRect.width + timelineStickerInsets.left + timelineStickerInsets.right
         let targetFrame = CGRect(
-            x: backgroundImageView.frame.minX + routeRect.minX - stickerHorizontalInset,
+            x: backgroundImageView.frame.minX + routeRect.minX - timelineStickerInsets.left,
             y: backgroundImageView.frame.maxY - stickerHeight - timelineStickerBottomOffset,
             width: stickerWidth,
             height: stickerHeight
