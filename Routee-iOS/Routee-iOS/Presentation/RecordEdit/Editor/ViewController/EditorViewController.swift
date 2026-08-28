@@ -27,6 +27,8 @@ final class EditorViewController: BaseUIViewController {
     init(activityId: Int64? = nil) {
         self.activityId = activityId
         super.init(nibName: nil, bundle: nil)
+        
+        hidesBottomBarWhenPushed = true
     }
 
     required init?(coder: NSCoder) {
