@@ -245,8 +245,8 @@ final class StickerBox: BaseUIView {
         )
         let resizedFrame = resizedFrame(scale: targetScale)
 
-        transform = CGAffineTransform(scaleX: targetScale, y: targetScale)
-        center = CGPoint(x: resizedFrame.midX, y: resizedFrame.midY)
+        frame = resizedFrame
+        layoutIfNeeded()
     }
 
     private func scale(
