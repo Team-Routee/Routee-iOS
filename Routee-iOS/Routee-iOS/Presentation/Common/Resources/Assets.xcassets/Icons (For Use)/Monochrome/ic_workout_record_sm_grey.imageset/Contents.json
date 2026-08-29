@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "ic_workout_record_sm_grey.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
