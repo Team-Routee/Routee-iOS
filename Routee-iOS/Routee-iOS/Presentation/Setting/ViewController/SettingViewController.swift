@@ -25,28 +25,39 @@ final class SettingViewController: BaseUIViewController {
     
     // MARK: - Private Methods
     
-    private func openInstagram() {
-        guard let url = URL(string: "https://www.instagram.com/routee_official/?hl=ko") else { return }
-        UIApplication.shared.open(url)
+    private func navigateToProfileChangeViewController() {
+        let profileChangeViewController = ProfileChangeViewController()
+        profileChangeViewController.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(profileChangeViewController, animated: true)
     }
-    
-    private func didTapPrivacyButton() {
-        Task {
-            do {
-                try await viewModel.withdraw()
-                
-                await MainActor.run {
-                    NotificationCenter.default.post(
-                        name: .navigateLoginViewController,
-                        object: nil
-                    )
-                }
-            } catch {
-                print("회원 탈퇴 실패", error)
-            }
+
+    private func navigateToWithdrawViewController() {
+        let withdrawViewController = WithdrawViewController()
+        withdrawViewController.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(withdrawViewController, animated: true)
+    }
+
+    private func navigateToContactViewController() {
+        let contactViewController = ContactViewController()
+        contactViewController.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(contactViewController, animated: true)
+    }
+
+    private func presentLogoutModal() {
+        let logoutAction: () -> Void = { [weak self] in
+            self?.logout()
         }
+
+        let modal = ActionPrimaryModal(
+            title: "로그아웃하시겠습니까?",
+            leftButtonTitle: "취소",
+            rightButtonTitle: "확인",
+            rightButtonAction: logoutAction
+        )
+
+        present(modal, animated: true)
     }
-    
+
     private func logout() {
         Task {
             do {
@@ -67,16 +78,36 @@ final class SettingViewController: BaseUIViewController {
     // MARK: - Actions
     
     override func setAddTarget() {
-        rootView.instagramButtonAction = { [weak self] in
-            self?.openInstagram()
+        rootView.profileChangeButtonAction = { [weak self] in
+            self?.navigateToProfileChangeViewController()
+        }
+
+        rootView.instagramButtonAction = {
+            ExternalURLHandler.openInstagram()
+        }
+
+        rootView.contactButtonAction = { [weak self] in
+            self?.navigateToContactViewController()
+        }
+
+        rootView.termsOfServiceButtonAction = {
+            ExternalURLHandler.openTermsOfService()
+        }
+
+        rootView.privacyPolicyButtonAction = {
+            ExternalURLHandler.openPrivacyPolicy()
+        }
+
+        rootView.locationTermsButtonAction = {
+            ExternalURLHandler.openLocationTerms()
         }
         
         rootView.logoutButtonAction = { [weak self] in
-            self?.logout()
+            self?.presentLogoutModal()
         }
         
-        rootView.policyButtonAction = { [weak self] in
-            self?.didTapPrivacyButton()
+        rootView.withdrawButtonAction = { [weak self] in
+            self?.navigateToWithdrawViewController()
         }
     }
 }

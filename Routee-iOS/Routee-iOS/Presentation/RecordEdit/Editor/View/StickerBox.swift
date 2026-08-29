@@ -16,6 +16,7 @@ final class StickerBox: BaseUIView {
 
     var onDeleted: (() -> Void)?
     var onMoved: (() -> Void)?
+    var onSelected: (() -> Void)?
     var movementBounds: CGRect?
     var isSelected: Bool {
         !borderView.isHidden
@@ -24,13 +25,21 @@ final class StickerBox: BaseUIView {
     // MARK: - UI Properties
 
     private let contentView: UIView
+    private let contentInsets: UIEdgeInsets
     private let borderView = UIView()
+    private let topLeadingHandleView = UIView()
+    private let bottomLeadingHandleView = UIView()
+    private let bottomTrailingHandleView = UIView()
     private let closeButton = UIButton()
 
     // MARK: - Init
 
-    init(contentView: UIView) {
+    init(
+        contentView: UIView,
+        contentInsets: UIEdgeInsets = UIEdgeInsets(top: 10, left: 13, bottom: 10, right: 13)
+    ) {
         self.contentView = contentView
+        self.contentInsets = contentInsets
         super.init(frame: .zero)
 
         setGesture()
@@ -46,7 +55,17 @@ final class StickerBox: BaseUIView {
         backgroundColor = .clear
 
         borderView.do {
-            $0.layer.borderWidth = 2
+            $0.layer.borderWidth = 1
+            $0.layer.borderColor = UIColor.statusInfo.cgColor
+        }
+
+        [
+            topLeadingHandleView,
+            bottomLeadingHandleView,
+            bottomTrailingHandleView
+        ].forEach {
+            $0.backgroundColor = .staticWhite
+            $0.layer.borderWidth = 1
             $0.layer.borderColor = UIColor.statusInfo.cgColor
         }
 
@@ -57,17 +76,44 @@ final class StickerBox: BaseUIView {
     }
 
     override func setUI() {
-        addSubviews(contentView, borderView, closeButton)
+        addSubviews(
+            contentView,
+            borderView,
+            topLeadingHandleView,
+            bottomLeadingHandleView,
+            bottomTrailingHandleView,
+            closeButton
+        )
     }
 
     override func setLayout() {
         contentView.snp.makeConstraints {
-            $0.horizontalEdges.equalToSuperview().inset(13)
-            $0.verticalEdges.equalToSuperview().inset(10)
+            $0.top.equalToSuperview().inset(contentInsets.top)
+            $0.leading.equalToSuperview().inset(contentInsets.left)
+            $0.trailing.equalToSuperview().inset(contentInsets.right)
+            $0.bottom.equalToSuperview().inset(contentInsets.bottom)
         }
 
         borderView.snp.makeConstraints {
             $0.edges.equalToSuperview()
+        }
+
+        topLeadingHandleView.snp.makeConstraints {
+            $0.centerX.equalTo(borderView.snp.leading)
+            $0.centerY.equalTo(borderView.snp.top)
+            $0.size.equalTo(8)
+        }
+
+        bottomLeadingHandleView.snp.makeConstraints {
+            $0.centerX.equalTo(borderView.snp.leading)
+            $0.centerY.equalTo(borderView.snp.bottom)
+            $0.size.equalTo(8)
+        }
+
+        bottomTrailingHandleView.snp.makeConstraints {
+            $0.centerX.equalTo(borderView.snp.trailing)
+            $0.centerY.equalTo(borderView.snp.bottom)
+            $0.size.equalTo(8)
         }
 
         closeButton.snp.makeConstraints {
@@ -90,6 +136,13 @@ final class StickerBox: BaseUIView {
 
     func setCloseButton(isSelected: Bool) {
         borderView.isHidden = !isSelected
+        [
+            topLeadingHandleView,
+            bottomLeadingHandleView,
+            bottomTrailingHandleView
+        ].forEach {
+            $0.isHidden = !isSelected
+        }
         closeButton.isHidden = !isSelected
     }
 
@@ -105,12 +158,17 @@ final class StickerBox: BaseUIView {
 
     @objc
     private func handleStickerTapped() {
+        onSelected?()
         setCloseButton(isSelected: true)
     }
 
     @objc
     private func handleStickerPanned(_ gesture: UIPanGestureRecognizer) {
         guard let superview else { return }
+
+        if gesture.state == .began {
+            onSelected?()
+        }
 
         let translation = gesture.translation(in: superview)
         guard translation != .zero else { return }

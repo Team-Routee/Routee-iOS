@@ -27,6 +27,8 @@ final class EditorViewController: BaseUIViewController {
     init(activityId: Int64? = nil) {
         self.activityId = activityId
         super.init(nibName: nil, bundle: nil)
+        
+        hidesBottomBarWhenPushed = true
     }
 
     required init?(coder: NSCoder) {
@@ -114,11 +116,25 @@ final class EditorViewController: BaseUIViewController {
             title: "편집을 중단하시겠습니까?",
             description: "편집 중단 시 변경 사항이 저장되지 않습니다.",
             leftButtonTitle: "취소",
-            rightButtonTitle: "확인",
-            rightButtonAction: { [weak self] in
-                self?.popViewController()
-            }
-        )
+            rightButtonTitle: "확인"
+        ) { [weak self] in
+            self?.popViewController()
+        }
+
+        present(modal, animated: true)
+    }
+
+    private func presentResetEditingModal() {
+        guard rootView.hasChanges else { return }
+
+        let modal = ActionPrimaryModal(
+            title: "편집 내용을 초기화하시겠습니까?",
+            description: "초기화 시 변경 사항이 저장되지 않습니다.",
+            leftButtonTitle: "취소",
+            rightButtonTitle: "확인"
+        ) { [weak self] in
+            self?.rootView.resetEditingContent()
+        }
 
         present(modal, animated: true)
     }
@@ -172,6 +188,10 @@ final class EditorViewController: BaseUIViewController {
 
         rootView.setBackgroundTapAction { [weak self] in
             self?.presentImagePicker()
+        }
+
+        rootView.setResetButtonAction { [weak self] in
+            self?.presentResetEditingModal()
         }
     }
 }

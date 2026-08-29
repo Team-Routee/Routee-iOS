@@ -75,7 +75,7 @@ final class RecordEditTabBarItem: UIControl {
 
     private func setLayout() {
         lineView.snp.makeConstraints {
-            $0.top.leading.trailing.equalToSuperview()
+            $0.top.horizontalEdges.equalToSuperview()
             $0.height.equalTo(2)
         }
 
