@@ -16,7 +16,7 @@ final class EditorView: BaseUIView {
     // MARK: - Properties
 
     private let recordInfoStickerInsets = UIEdgeInsets(top: 15, left: 17, bottom: 12, right: 23)
-    private let timelineStickerInsets = UIEdgeInsets(top: 10, left: 13, bottom: 10, right: 13)
+    private let timelineStickerInsets = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
     private let routeStickerInsets = UIEdgeInsets(top: 16, left: 14, bottom: 13, right: 9)
     private let timelineStickerBottomOffset: CGFloat = 36
     private let routeStickerLeadingOffset: CGFloat = 24
@@ -56,7 +56,10 @@ final class EditorView: BaseUIView {
         contentView: dataInfo,
         contentInsets: recordInfoStickerInsets
     )
-    private lazy var routeTimelineStickerBox = StickerBox(contentView: routeTimelineDrawingView)
+    private lazy var routeTimelineStickerBox = StickerBox(
+        contentView: routeTimelineDrawingView,
+        contentInsets: timelineStickerInsets
+    )
     private lazy var routeStickerBox = StickerBox(
         contentView: routeSticker,
         contentInsets: routeStickerInsets
@@ -427,6 +430,7 @@ final class EditorView: BaseUIView {
 
         stickerContainerView.addSubview(recordInfoStickerBox)
         recordInfoStickerBox.frame = defaultRecordInfoStickerFrame()
+        recordInfoStickerBox.resetContentLayoutScale()
         state.didSetRecordInfoStickerFrame = true
         markChanged()
         activateStickerBox(recordInfoStickerBox)
@@ -455,6 +459,7 @@ final class EditorView: BaseUIView {
 
         let stickerSize = stickerBoxSize(for: routeStickerBox)
         routeStickerBox.frame = defaultRouteStickerFrame(stickerSize: stickerSize)
+        routeStickerBox.resetContentLayoutScale()
 
         activateStickerBox(routeStickerBox)
     }
@@ -470,6 +475,7 @@ final class EditorView: BaseUIView {
         }
 
         recordInfoStickerBox.frame = defaultRecordInfoStickerFrame()
+        recordInfoStickerBox.resetContentLayoutScale()
         state.didSetRecordInfoStickerFrame = true
     }
 
@@ -545,6 +551,7 @@ final class EditorView: BaseUIView {
 
         routeTimelineDrawingView.updateColor(state.selectedColor)
         routeTimelineStickerBox.frame = clampedStickerFrame(targetFrame)
+        routeTimelineStickerBox.resetContentLayoutScale()
     }
 
     // MARK: - Sticker Helpers
