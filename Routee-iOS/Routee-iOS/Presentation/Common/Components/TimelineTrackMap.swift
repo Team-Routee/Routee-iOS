@@ -201,7 +201,7 @@ final class TimelineTrackMap: BaseUIView {
             let thumbnailImage = await Task.detached(priority: .userInitiated) {
                 sourceImage
                     .resized(to: markerSize)
-                    .thumbnailImage(borderWidth: 3, borderColor: .mint300, cornerRadius: 12)
+                    .thumbnailImage(borderWidth: 3, borderColor: .mint300, cornerRadius: .r12)
             }.value
 
             await MainActor.run { [weak self] in
