@@ -12,8 +12,7 @@ struct FinishActivityRequestDTO: Encodable {
     let distance: Int
     let durationSec: Int
     let maxElevation: Int
-    let mapImageUrl: String
-    let coverImageObjectKey: String?
+    let mapImageObjectKey: String
     let track: [TrackData]
     let endedAt: String
 
@@ -22,8 +21,7 @@ struct FinishActivityRequestDTO: Encodable {
         case distance
         case durationSec
         case maxElevation
-        case mapImageUrl
-        case coverImageObjectKey
+        case mapImageObjectKey
         case track
         case endedAt
     }
@@ -34,12 +32,7 @@ struct FinishActivityRequestDTO: Encodable {
         try container.encode(distance, forKey: .distance)
         try container.encode(durationSec, forKey: .durationSec)
         try container.encode(maxElevation, forKey: .maxElevation)
-        try container.encode(mapImageUrl, forKey: .mapImageUrl)
-        if let coverImageObjectKey {
-            try container.encode(coverImageObjectKey, forKey: .coverImageObjectKey)
-        } else {
-            try container.encodeNil(forKey: .coverImageObjectKey)
-        }
+        try container.encode(mapImageObjectKey, forKey: .mapImageObjectKey)
         try container.encode(track, forKey: .track)
         try container.encode(endedAt, forKey: .endedAt)
     }

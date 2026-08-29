@@ -16,12 +16,14 @@ final class OnboardingView: BaseUIView {
     
     private let backgroundImageView = RouteeEllipseBackground()
     private let settingGuideLabel = UILabel()
-    private let nicknameTextField = RouteeTextField()
+    private let nicknameTextField = NicknameTextField(fieldCase: .onboarding)
     let startButton = RouteeButton(titleText: "시작하기", type: .disabled)
     
     var nickname: String {
         nicknameTextField.text ?? ""
     }
+
+    private(set) var isNicknameValid = false
     
     override init(frame: CGRect) {
         super.init(frame: .zero)
@@ -41,11 +43,10 @@ final class OnboardingView: BaseUIView {
             startButton
         )
 
-        nicknameTextField.addTarget(
-            self,
-            action: #selector(nicknameDidChange),
-            for: .editingChanged
-        )
+        nicknameTextField.validationChanged = { [weak self] isValid in
+            self?.isNicknameValid = isValid
+            self?.startButton.updateType(isValid ? .enabled : .disabled)
+        }
     }
     
     override func setStyle() {
@@ -72,14 +73,9 @@ final class OnboardingView: BaseUIView {
         }
         
         startButton.snp.makeConstraints {
-            $0.bottom.equalTo(safeAreaLayoutGuide).inset(59)
+            $0.bottom.equalTo(safeAreaLayoutGuide).inset(75)
             $0.horizontalEdges.equalToSuperview().inset(16)
         }
     }
 
-    @objc
-    private func nicknameDidChange() {
-        let nickname = nicknameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        startButton.updateType(nickname.isEmpty ? .disabled : .enabled)
-    }
 }

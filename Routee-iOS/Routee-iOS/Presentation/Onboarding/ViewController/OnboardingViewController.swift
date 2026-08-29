@@ -52,8 +52,7 @@ final class OnboardingViewController: BaseUIViewController {
         }
         let nickname = nicknameSettingView.nickname.trimmingCharacters(in: .whitespacesAndNewlines)
         
-        guard !nickname.isEmpty else {
-            print("닉네임을 입력해주세요.")
+        guard nicknameSettingView.isNicknameValid, !nickname.isEmpty else {
             return
         }
         

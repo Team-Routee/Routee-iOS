@@ -40,8 +40,8 @@ final class TimeLineView: BaseUIView {
         title: record?.title ?? "",
         showsEditIcon: true
     )
+    private let trackMap = TimelineTrackMap()
     private let workoutMetric = WorkoutMetric(distance: "", time: "", altitude: "")
-    private let trackMap = TimeLineTrackMap()
     private let timelineTitleLabel = UILabel()
     private let timelineDateLabel = UILabel()
     private let timelineCard = TimeLineCard(imageNames: [])
