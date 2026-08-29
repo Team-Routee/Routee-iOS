@@ -22,6 +22,8 @@ final class OnboardingView: BaseUIView {
     var nickname: String {
         nicknameTextField.text ?? ""
     }
+
+    private(set) var isNicknameValid = false
     
     override init(frame: CGRect) {
         super.init(frame: .zero)
@@ -41,11 +43,10 @@ final class OnboardingView: BaseUIView {
             startButton
         )
 
-        nicknameTextField.addTarget(
-            self,
-            action: #selector(nicknameDidChange),
-            for: .editingChanged
-        )
+        nicknameTextField.validationChanged = { [weak self] isValid in
+            self?.isNicknameValid = isValid
+            self?.startButton.updateType(isValid ? .enabled : .disabled)
+        }
     }
     
     override func setStyle() {
@@ -77,9 +78,4 @@ final class OnboardingView: BaseUIView {
         }
     }
 
-    @objc
-    private func nicknameDidChange() {
-        let nickname = nicknameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        startButton.updateType(nickname.isEmpty ? .disabled : .enabled)
-    }
 }
