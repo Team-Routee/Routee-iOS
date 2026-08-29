@@ -23,7 +23,6 @@ final class TermsAgreementView: BaseUIView {
     let allAgreementButton = CheckBoxButton(
         titleText: "모두 동의합니다.",
         prefixStyle: .none,
-        isChecked: false,
         showsChevron: false,
         fontStyle: .labelSB16
     )
@@ -31,7 +30,6 @@ final class TermsAgreementView: BaseUIView {
     let serviceTermsButton = CheckBoxButton(
         titleText: "서비스 이용약관",
         prefixStyle: .required,
-        isChecked: false,
         showsChevron: true,
         fontStyle: .labelR14
     )
@@ -39,7 +37,6 @@ final class TermsAgreementView: BaseUIView {
     let privacyPolicyButton = CheckBoxButton(
         titleText: "개인정보 처리방침",
         prefixStyle: .required,
-        isChecked: false,
         showsChevron: true,
         fontStyle: .labelR14
     )
@@ -47,7 +44,6 @@ final class TermsAgreementView: BaseUIView {
     let locationTermsButton = CheckBoxButton(
         titleText: "위치기반 서비스 이용약관",
         prefixStyle: .required,
-        isChecked: false,
         showsChevron: true,
         fontStyle: .labelR14
     )
@@ -55,7 +51,6 @@ final class TermsAgreementView: BaseUIView {
     let ageRequirementButton = CheckBoxButton(
         titleText: "만 14세 이상입니다",
         prefixStyle: .required,
-        isChecked: false,
         showsChevron: false,
         fontStyle: .labelR14
     )
@@ -63,7 +58,6 @@ final class TermsAgreementView: BaseUIView {
     let marketingConsentButton = CheckBoxButton(
         titleText: "마케팅 활용 및 광고성 정보 수신 동의",
         prefixStyle: .optional,
-        isChecked: false,
         showsChevron: false,
         fontStyle: .labelR14
     )
