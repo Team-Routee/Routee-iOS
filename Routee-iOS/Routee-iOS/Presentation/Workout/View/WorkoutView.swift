@@ -36,7 +36,7 @@ final class WorkoutView: BaseUIView {
     private let pathOverlay = NMFPath()
     var photoMarkers: [NMFMarker] = []
     lazy var moveToUserlocationButton = UIButton(type: .custom)
-    lazy var recordButton = RouteeButton(titleText: "등산 기록", type: .enabled)
+    lazy var recordButton = RouteeButton(titleText: "운동 기록", type: .enabled)
     lazy var pauseButton = UIButton()
     lazy var cameraOnButton = UIButton()
     private let activityButtonStackView = UIStackView()
