@@ -48,11 +48,11 @@ final class LoginViewController: BaseUIViewController {
     }
 
     private func goToRegister(identityToken: String, appleUserID: String) {
-        let viewController = OnboardingViewController(
+        let viewController = TermsAgreementViewController(
             identityToken: identityToken,
             appleUserID: appleUserID
         )
-        navigationController?.setViewControllers([viewController], animated: true)
+        navigationController?.pushViewController(viewController, animated: true)
     }
     
     private func goToMainService() {
