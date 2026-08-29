@@ -20,14 +20,19 @@ final class StickerBox: BaseUIView {
         !borderView.isHidden
     }
     private let resizeHitArea: CGFloat = 24
+    private let minimumVisibleLength: CGFloat = 20
     private let minimumScale: CGFloat = 0.01
     private var activeResizeEdges: UIRectEdge = []
     private var initialPanFrame: CGRect = .zero
+    private var baseStickerSize: CGSize = .zero
+    private var baseContentSize: CGSize = .zero
+    private var contentScale: CGFloat = 1
 
     // MARK: - UI Properties
 
     private let contentView: UIView
     private let contentInsets: UIEdgeInsets
+    private let contentContainerView = UIView()
     private let borderView = UIView()
     private let topLeadingHandleView = UIView()
     private let bottomLeadingHandleView = UIView()
@@ -38,7 +43,7 @@ final class StickerBox: BaseUIView {
 
     init(
         contentView: UIView,
-        contentInsets: UIEdgeInsets = UIEdgeInsets(top: 10, left: 13, bottom: 10, right: 13)
+        contentInsets: UIEdgeInsets
     ) {
         self.contentView = contentView
         self.contentInsets = contentInsets
@@ -55,6 +60,7 @@ final class StickerBox: BaseUIView {
 
     override func setStyle() {
         backgroundColor = .clear
+        contentContainerView.clipsToBounds = true
 
         borderView.do {
             $0.layer.borderWidth = 1
@@ -79,23 +85,18 @@ final class StickerBox: BaseUIView {
 
     override func setUI() {
         addSubviews(
-            contentView,
+            contentContainerView,
             borderView,
             topLeadingHandleView,
             bottomLeadingHandleView,
             bottomTrailingHandleView,
             closeButton
         )
+
+        contentContainerView.addSubview(contentView)
     }
 
     override func setLayout() {
-        contentView.snp.makeConstraints {
-            $0.top.equalToSuperview().inset(contentInsets.top)
-            $0.leading.equalToSuperview().inset(contentInsets.left)
-            $0.trailing.equalToSuperview().inset(contentInsets.right)
-            $0.bottom.equalToSuperview().inset(contentInsets.bottom)
-        }
-
         borderView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
@@ -123,6 +124,13 @@ final class StickerBox: BaseUIView {
             $0.centerY.equalTo(borderView.snp.top)
             $0.size.equalTo(24)
         }
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        setBaseSizeIfNeeded()
+        layoutContentView()
     }
 
     // MARK: - Public Methods
@@ -156,6 +164,23 @@ final class StickerBox: BaseUIView {
         closeButton.isHidden = !isSelected
     }
 
+    func resetContentLayoutScale() {
+        baseStickerSize = .zero
+        baseContentSize = .zero
+        contentScale = 1
+        activeResizeEdges = []
+        setNeedsLayout()
+    }
+
+    override func systemLayoutSizeFitting(_ targetSize: CGSize) -> CGSize {
+        let contentSize = contentView.systemLayoutSizeFitting(targetSize)
+
+        return CGSize(
+            width: contentSize.width + contentInsets.left + contentInsets.right,
+            height: contentSize.height + contentInsets.top + contentInsets.bottom
+        )
+    }
+
     // MARK: - Actions
 
     private func setGesture() {
@@ -169,6 +194,7 @@ final class StickerBox: BaseUIView {
         guard isSelected, let superview else { return }
 
         if gesture.state == .began {
+            setBaseSizeIfNeeded()
             activeResizeEdges = resizeEdges(for: gesture.location(in: self))
             initialPanFrame = frame
         }
@@ -177,10 +203,7 @@ final class StickerBox: BaseUIView {
         guard translation != .zero else { return }
 
         if activeResizeEdges.isEmpty {
-            center = CGPoint(
-                x: center.x + translation.x,
-                y: center.y + translation.y
-            )
+            frame = clampedVisibleFrame(frame.offsetBy(dx: translation.x, dy: translation.y))
             gesture.setTranslation(.zero, in: superview)
         } else {
             resize(with: translation)
@@ -217,6 +240,8 @@ final class StickerBox: BaseUIView {
     }
 
     private func resize(with translation: CGPoint) {
+        guard baseStickerSize.width > 0 else { return }
+
         var targetWidth = initialPanFrame.width
         var targetHeight = initialPanFrame.height
 
@@ -245,7 +270,8 @@ final class StickerBox: BaseUIView {
         )
         let resizedFrame = resizedFrame(scale: targetScale)
 
-        frame = resizedFrame
+        frame = clampedVisibleFrame(resizedFrame)
+        contentScale = frame.width / baseStickerSize.width
         layoutIfNeeded()
     }
 
@@ -289,5 +315,62 @@ final class StickerBox: BaseUIView {
         }
 
         return CGRect(origin: CGPoint(x: originX, y: originY), size: resizedSize)
+    }
+
+    private func setBaseSizeIfNeeded() {
+        guard baseStickerSize == .zero,
+              bounds.width > 0,
+              bounds.height > 0
+        else {
+            return
+        }
+
+        baseStickerSize = bounds.size
+        baseContentSize = CGSize(
+            width: bounds.width - contentInsets.left - contentInsets.right,
+            height: bounds.height - contentInsets.top - contentInsets.bottom
+        )
+    }
+
+    private func layoutContentView() {
+        contentContainerView.frame = bounds.inset(by: scaledContentInsets())
+
+        guard baseContentSize != .zero else {
+            contentView.frame = contentContainerView.bounds
+            return
+        }
+
+        contentView.transform = .identity
+        contentView.bounds = CGRect(origin: .zero, size: baseContentSize)
+        contentView.center = CGPoint(
+            x: contentContainerView.bounds.midX,
+            y: contentContainerView.bounds.midY
+        )
+        contentView.transform = CGAffineTransform(scaleX: contentScale, y: contentScale)
+    }
+
+    private func scaledContentInsets() -> UIEdgeInsets {
+        UIEdgeInsets(
+            top: contentInsets.top * contentScale,
+            left: contentInsets.left * contentScale,
+            bottom: contentInsets.bottom * contentScale,
+            right: contentInsets.right * contentScale
+        )
+    }
+
+    private func clampedVisibleFrame(_ frame: CGRect) -> CGRect {
+        guard let superview else { return frame }
+
+        var clampedFrame = frame
+        let bounds = superview.bounds
+        let minX = bounds.minX - frame.width + minimumVisibleLength
+        let maxX = bounds.maxX - minimumVisibleLength
+        let minY = bounds.minY - frame.height + minimumVisibleLength
+        let maxY = bounds.maxY - minimumVisibleLength
+
+        clampedFrame.origin.x = min(max(frame.minX, minX), maxX)
+        clampedFrame.origin.y = min(max(frame.minY, minY), maxY)
+
+        return clampedFrame
     }
 }
