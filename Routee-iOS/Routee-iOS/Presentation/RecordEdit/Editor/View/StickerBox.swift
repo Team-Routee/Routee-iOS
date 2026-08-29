@@ -19,7 +19,7 @@ final class StickerBox: BaseUIView {
     var isSelected: Bool {
         !borderView.isHidden
     }
-    private let resizeHitArea: CGFloat = 24
+    private let resizeHitArea: CGFloat = 8
     private let minimumVisibleLength: CGFloat = 20
     private let minimumScale: CGFloat = 0.01
     private var activeResizeEdges: UIRectEdge = []
