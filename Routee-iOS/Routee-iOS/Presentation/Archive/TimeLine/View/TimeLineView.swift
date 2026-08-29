@@ -37,11 +37,11 @@ final class TimeLineView: BaseUIView {
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     private lazy var titleTextField = TitleTextField(
-        title: record?.title ?? "숭실대 동기모임 북한산",
+        title: record?.title ?? "",
         showsEditIcon: true
     )
-    private let workoutMetric = WorkoutMetric(distance: "15.53", time: "03:20", altitude: "2132")
     private let trackMap = TimelineTrackMap()
+    private let workoutMetric = WorkoutMetric(distance: "", time: "", altitude: "")
     private let timelineTitleLabel = UILabel()
     private let timelineDateLabel = UILabel()
     private let timelineCard = TimeLineCard(imageNames: [])
@@ -121,7 +121,7 @@ final class TimeLineView: BaseUIView {
         }
 
         timelineDateLabel.do {
-            $0.text = "2026.03.12"
+            $0.text = ""
             $0.font = .label_m_12
             $0.textColor = .grey_200
         }
