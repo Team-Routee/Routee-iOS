@@ -18,8 +18,9 @@ final class EditorView: BaseUIView {
     private let recordInfoStickerInsets = UIEdgeInsets(top: 15, left: 17, bottom: 12, right: 23)
     private let timelineStickerInsets = UIEdgeInsets(top: 10, left: 13, bottom: 10, right: 13)
     private let routeStickerInsets = UIEdgeInsets(top: 16, left: 14, bottom: 13, right: 9)
-    private let stickerMovementInset: CGFloat = 12
     private let timelineStickerBottomOffset: CGFloat = 36
+    private let routeStickerLeadingOffset: CGFloat = 24
+    private let routeStickerTopOffset: CGFloat = 255
     private let recordInfoContentSize = CGSize(width: 120, height: 164)
     private let resetButtonSize: CGFloat = 36
     private let resetButtonLeadingOffset: CGFloat = 32
@@ -44,6 +45,7 @@ final class EditorView: BaseUIView {
     let topNavigationBar = TopNavigationBar(rightTitle: "완료")
     private let backgroundOpacityView = UIView()
     private let backgroundImageView = UIImageView()
+    private let stickerContainerView = UIView()
     private let routeTimelineDrawingView = RouteDrawer()
     private let routeSticker = RouteSticker()
     private let dataInfo = RecordInfo()
@@ -78,6 +80,11 @@ final class EditorView: BaseUIView {
             $0.clipsToBounds = true
         }
 
+        stickerContainerView.do {
+            $0.backgroundColor = .clear
+            $0.clipsToBounds = true
+        }
+
         resetButton.do {
             $0.backgroundColor = .bgPrimary
             $0.layer.cornerRadius = resetButtonSize / 2
@@ -95,12 +102,16 @@ final class EditorView: BaseUIView {
             backgroundGradientView,
             backgroundImageView,
             backgroundOpacityView,
-            recordInfoStickerBox,
-            routeTimelineStickerBox,
+            stickerContainerView,
             topNavigationBar,
             recordEditTabBar,
             resetButton,
             lottieOverlayView
+        )
+
+        stickerContainerView.addSubviews(
+            recordInfoStickerBox,
+            routeTimelineStickerBox
         )
     }
 
@@ -132,6 +143,10 @@ final class EditorView: BaseUIView {
             $0.horizontalEdges.equalToSuperview().inset(16)
         }
 
+        stickerContainerView.snp.makeConstraints {
+            $0.edges.equalTo(backgroundImageView)
+        }
+
         resetButton.snp.makeConstraints {
             $0.leading.equalToSuperview().offset(resetButtonLeadingOffset)
             $0.bottom.equalTo(recordEditTabBar.snp.top).offset(-resetButtonBottomOffset)
@@ -146,7 +161,6 @@ final class EditorView: BaseUIView {
     override func layoutSubviews() {
         super.layoutSubviews()
 
-        updateMoveBounds()
         setRecordInfoFrame()
         setTimelineFrame()
     }
@@ -319,17 +333,6 @@ final class EditorView: BaseUIView {
             self?.markChanged()
         }
 
-        [
-            recordInfoStickerBox,
-            routeTimelineStickerBox,
-            routeStickerBox
-        ].forEach { stickerBox in
-            stickerBox.onSelected = { [weak self, weak stickerBox] in
-                guard let self, let stickerBox else { return }
-
-                activateStickerBox(stickerBox)
-            }
-        }
     }
 
     @objc
@@ -343,19 +346,19 @@ final class EditorView: BaseUIView {
 
         if recordInfoStickerBox.superview != nil,
            recordInfoStickerBox.isSelected,
-           !recordInfoStickerBox.bounds.contains(recordInfoStickerPoint) {
+           !recordInfoStickerBox.point(inside: recordInfoStickerPoint, with: nil) {
             deactivateStickerBox(recordInfoStickerBox)
         }
 
         if routeTimelineStickerBox.superview != nil,
            routeTimelineStickerBox.isSelected,
-           !routeTimelineStickerBox.bounds.contains(routeTimelineStickerPoint) {
+           !routeTimelineStickerBox.point(inside: routeTimelineStickerPoint, with: nil) {
             deactivateStickerBox(routeTimelineStickerBox)
         }
 
         if routeStickerBox.superview != nil,
            routeStickerBox.isSelected,
-           !routeStickerBox.bounds.contains(routeStickerPoint) {
+           !routeStickerBox.point(inside: routeStickerPoint, with: nil) {
             deactivateStickerBox(routeStickerBox)
         }
 
@@ -413,12 +416,7 @@ final class EditorView: BaseUIView {
             deactivateStickerBox(recordInfoStickerBox)
             deactivateStickerBox(routeTimelineStickerBox)
             deactivateStickerBox(routeStickerBox)
-            return
         }
-
-        recordInfoStickerBox.isUserInteractionEnabled = recordInfoStickerBox.superview != nil
-        routeTimelineStickerBox.isUserInteractionEnabled = routeTimelineStickerBox.superview != nil
-        routeStickerBox.isUserInteractionEnabled = routeStickerBox.superview != nil
     }
 
     private func showRecordInfoSticker() {
@@ -427,7 +425,7 @@ final class EditorView: BaseUIView {
             return
         }
 
-        addSubview(recordInfoStickerBox)
+        stickerContainerView.addSubview(recordInfoStickerBox)
         recordInfoStickerBox.frame = defaultRecordInfoStickerFrame()
         state.didSetRecordInfoStickerFrame = true
         markChanged()
@@ -436,7 +434,7 @@ final class EditorView: BaseUIView {
 
     private func selectTimelineSticker() {
         if routeTimelineStickerBox.superview == nil {
-            addSubview(routeTimelineStickerBox)
+            stickerContainerView.addSubview(routeTimelineStickerBox)
             updateTimelineFrame()
             markChanged()
         }
@@ -450,41 +448,23 @@ final class EditorView: BaseUIView {
             return
         }
 
-        addSubview(routeStickerBox)
+        stickerContainerView.addSubview(routeStickerBox)
         markChanged()
         layoutIfNeeded()
         routeSticker.updateColor(state.selectedColor)
 
         let stickerSize = stickerBoxSize(for: routeStickerBox)
-        let dataInfoFrame = recordInfoFrameForRouteAnchor()
-
-        routeStickerBox.frame = CGRect(
-            x: dataInfoFrame.minX - 8,
-            y: dataInfoFrame.maxY + 11,
-            width: stickerSize.width,
-            height: stickerSize.height
-        )
+        routeStickerBox.frame = defaultRouteStickerFrame(stickerSize: stickerSize)
 
         activateStickerBox(routeStickerBox)
     }
 
     // MARK: - Sticker Layout
 
-    private func updateMoveBounds() {
-        let movementBounds = backgroundImageView.frame.insetBy(
-            dx: stickerMovementInset,
-            dy: stickerMovementInset
-        )
-
-        recordInfoStickerBox.movementBounds = movementBounds
-        routeTimelineStickerBox.movementBounds = movementBounds
-        routeStickerBox.movementBounds = movementBounds
-    }
-
     private func setRecordInfoFrame() {
         guard !state.didSetRecordInfoStickerFrame,
-              backgroundImageView.bounds.width > 0,
-              backgroundImageView.bounds.height > 0
+              stickerContainerView.bounds.width > 0,
+              stickerContainerView.bounds.height > 0
         else {
             return
         }
@@ -495,32 +475,26 @@ final class EditorView: BaseUIView {
 
     private func defaultRecordInfoStickerFrame() -> CGRect {
         CGRect(
-            x: backgroundImageView.frame.minX + 32 - recordInfoStickerInsets.left,
-            y: backgroundImageView.frame.minY + 80 - recordInfoStickerInsets.top,
+            x: 32 - recordInfoStickerInsets.left,
+            y: 80 - recordInfoStickerInsets.top,
             width: recordInfoContentSize.width + recordInfoStickerInsets.left + recordInfoStickerInsets.right,
             height: recordInfoContentSize.height + recordInfoStickerInsets.top + recordInfoStickerInsets.bottom
         )
     }
 
-    private func recordInfoFrameForRouteAnchor() -> CGRect {
-        guard dataInfo.window != nil else {
-            let stickerFrame = defaultRecordInfoStickerFrame()
-
-            return CGRect(
-                x: stickerFrame.minX + recordInfoStickerInsets.left,
-                y: stickerFrame.minY + recordInfoStickerInsets.top,
-                width: recordInfoContentSize.width,
-                height: recordInfoContentSize.height
-            )
-        }
-
-        return dataInfo.convert(dataInfo.bounds, to: self)
+    private func defaultRouteStickerFrame(stickerSize: CGSize) -> CGRect {
+        CGRect(
+            x: routeStickerLeadingOffset,
+            y: routeStickerTopOffset,
+            width: stickerSize.width,
+            height: stickerSize.height
+        )
     }
 
     private func setTimelineFrame() {
         guard !state.didSetRouteTimelineStickerFrame,
-              backgroundImageView.bounds.width > 0,
-              backgroundImageView.bounds.height > 0
+              stickerContainerView.bounds.width > 0,
+              stickerContainerView.bounds.height > 0
         else {
             return
         }
@@ -530,19 +504,19 @@ final class EditorView: BaseUIView {
     }
 
     private func updateTimelineFrame() {
-        guard backgroundImageView.bounds.width > 0,
-              backgroundImageView.bounds.height > 0
+        guard stickerContainerView.bounds.width > 0,
+              stickerContainerView.bounds.height > 0
         else {
             return
         }
 
-        let routePoints = state.trackPoints.toCanvasPoints(in: backgroundImageView.bounds.size)
+        let routePoints = state.trackPoints.toCanvasPoints(in: stickerContainerView.bounds.size)
 
         let markers = state.timelineMarkers.compactMap { marker -> RouteTimelineMarker? in
             guard let point = state.trackPoints.toCanvasPoint(
                 latitude: marker.latitude,
                 longitude: marker.longitude,
-                in: backgroundImageView.bounds.size
+                in: stickerContainerView.bounds.size
             ) else {
                 return nil
             }
@@ -563,8 +537,8 @@ final class EditorView: BaseUIView {
         let stickerHeight = routeRect.height + timelineStickerInsets.top + timelineStickerInsets.bottom
         let stickerWidth = routeRect.width + timelineStickerInsets.left + timelineStickerInsets.right
         let targetFrame = CGRect(
-            x: backgroundImageView.frame.minX + routeRect.minX - timelineStickerInsets.left,
-            y: backgroundImageView.frame.maxY - stickerHeight - timelineStickerBottomOffset,
+            x: routeRect.minX - timelineStickerInsets.left,
+            y: stickerContainerView.bounds.height - stickerHeight - timelineStickerBottomOffset,
             width: stickerWidth,
             height: stickerHeight
         )
@@ -579,7 +553,7 @@ final class EditorView: BaseUIView {
         deactivateStickerBoxes(except: stickerBox)
         stickerBox.isUserInteractionEnabled = true
         stickerBox.setCloseButton(isSelected: true)
-        bringSubviewToFront(stickerBox)
+        stickerBox.superview?.bringSubviewToFront(stickerBox)
         bringControlsFront()
     }
 
@@ -613,7 +587,7 @@ final class EditorView: BaseUIView {
 
     private func restoreRouteTimelineStickerBox() {
         if routeTimelineStickerBox.superview == nil {
-            insertSubview(routeTimelineStickerBox, belowSubview: recordInfoStickerBox)
+            stickerContainerView.insertSubview(routeTimelineStickerBox, belowSubview: recordInfoStickerBox)
         }
 
         layoutIfNeeded()
@@ -634,20 +608,16 @@ final class EditorView: BaseUIView {
     }
 
     private func clampedStickerFrame(_ frame: CGRect) -> CGRect {
-        let movementBounds = backgroundImageView.frame.insetBy(
-            dx: stickerMovementInset,
-            dy: stickerMovementInset
-        )
-        let maxX = movementBounds.maxX - frame.width
-        let maxY = movementBounds.maxY - frame.height
+        let maxX = stickerContainerView.bounds.maxX - frame.width
+        let maxY = stickerContainerView.bounds.maxY - frame.height
 
         return CGRect(
-            x: maxX < movementBounds.minX
-                ? movementBounds.minX
-                : min(max(frame.minX, movementBounds.minX), maxX),
-            y: maxY < movementBounds.minY
-                ? movementBounds.minY
-                : min(max(frame.minY, movementBounds.minY), maxY),
+            x: maxX < stickerContainerView.bounds.minX
+                ? stickerContainerView.bounds.minX
+                : min(max(frame.minX, stickerContainerView.bounds.minX), maxX),
+            y: maxY < stickerContainerView.bounds.minY
+                ? stickerContainerView.bounds.minY
+                : min(max(frame.minY, stickerContainerView.bounds.minY), maxY),
             width: frame.width,
             height: frame.height
         )

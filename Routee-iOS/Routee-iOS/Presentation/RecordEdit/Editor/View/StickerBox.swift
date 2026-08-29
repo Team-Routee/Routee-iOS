@@ -16,11 +16,13 @@ final class StickerBox: BaseUIView {
 
     var onDeleted: (() -> Void)?
     var onMoved: (() -> Void)?
-    var onSelected: (() -> Void)?
-    var movementBounds: CGRect?
     var isSelected: Bool {
         !borderView.isHidden
     }
+    private let resizeHitArea: CGFloat = 24
+    private let minimumScale: CGFloat = 0.01
+    private var activeResizeEdges: UIRectEdge = []
+    private var initialPanFrame: CGRect = .zero
 
     // MARK: - UI Properties
 
@@ -130,8 +132,16 @@ final class StickerBox: BaseUIView {
             return true
         }
 
-        return !closeButton.isHidden
-        && closeButton.frame.insetBy(dx: -8, dy: -8).contains(point)
+        let handleViews = [
+            topLeadingHandleView,
+            bottomLeadingHandleView,
+            bottomTrailingHandleView,
+            closeButton
+        ]
+
+        return handleViews.contains {
+            !$0.isHidden && $0.frame.insetBy(dx: -8, dy: -8).contains(point)
+        }
     }
 
     func setCloseButton(isSelected: Bool) {
@@ -149,59 +159,135 @@ final class StickerBox: BaseUIView {
     // MARK: - Actions
 
     private func setGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleStickerTapped))
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handleStickerPanned(_:)))
 
-        addGestureRecognizer(tapGesture)
         addGestureRecognizer(panGesture)
     }
 
     @objc
-    private func handleStickerTapped() {
-        onSelected?()
-        setCloseButton(isSelected: true)
-    }
-
-    @objc
     private func handleStickerPanned(_ gesture: UIPanGestureRecognizer) {
-        guard let superview else { return }
+        guard isSelected, let superview else { return }
 
         if gesture.state == .began {
-            onSelected?()
+            activeResizeEdges = resizeEdges(for: gesture.location(in: self))
+            initialPanFrame = frame
         }
 
         let translation = gesture.translation(in: superview)
         guard translation != .zero else { return }
 
-        let movedFrame = frame.offsetBy(dx: translation.x, dy: translation.y)
-        let updatedFrame = clampedFrame(movedFrame)
-        guard frame != updatedFrame else {
+        if activeResizeEdges.isEmpty {
+            center = CGPoint(
+                x: center.x + translation.x,
+                y: center.y + translation.y
+            )
             gesture.setTranslation(.zero, in: superview)
-            return
+        } else {
+            resize(with: translation)
         }
 
-        frame = updatedFrame
         onMoved?()
 
-        gesture.setTranslation(.zero, in: superview)
-    }
-
-    private func clampedFrame(_ frame: CGRect) -> CGRect {
-        guard let movementBounds else { return frame }
-
-        let maxX = movementBounds.maxX - frame.width
-        let maxY = movementBounds.maxY - frame.height
-
-        return CGRect(
-            x: min(max(frame.minX, movementBounds.minX), maxX),
-            y: min(max(frame.minY, movementBounds.minY), maxY),
-            width: frame.width,
-            height: frame.height
-        )
+        if gesture.state == .ended || gesture.state == .cancelled || gesture.state == .failed {
+            activeResizeEdges = []
+        }
     }
 
     @objc
     private func closeButtonTapped() {
         onDeleted?()
+    }
+
+    private func resizeEdges(for point: CGPoint) -> UIRectEdge {
+        var edges: UIRectEdge = []
+
+        if point.x <= resizeHitArea {
+            edges.insert(.left)
+        } else if point.x >= bounds.width - resizeHitArea {
+            edges.insert(.right)
+        }
+
+        if point.y <= resizeHitArea {
+            edges.insert(.top)
+        } else if point.y >= bounds.height - resizeHitArea {
+            edges.insert(.bottom)
+        }
+
+        return edges
+    }
+
+    private func resize(with translation: CGPoint) {
+        var targetWidth = initialPanFrame.width
+        var targetHeight = initialPanFrame.height
+
+        if activeResizeEdges.contains(.left) {
+            targetWidth -= translation.x
+        } else if activeResizeEdges.contains(.right) {
+            targetWidth += translation.x
+        }
+
+        if activeResizeEdges.contains(.top) {
+            targetHeight -= translation.y
+        } else if activeResizeEdges.contains(.bottom) {
+            targetHeight += translation.y
+        }
+
+        let widthScale = targetWidth / initialPanFrame.width
+        let heightScale = targetHeight / initialPanFrame.height
+        let isHorizontalResize = activeResizeEdges.contains(.left) || activeResizeEdges.contains(.right)
+        let isVerticalResize = activeResizeEdges.contains(.top) || activeResizeEdges.contains(.bottom)
+
+        let targetScale = scale(
+            widthScale: widthScale,
+            heightScale: heightScale,
+            isHorizontalResize: isHorizontalResize,
+            isVerticalResize: isVerticalResize
+        )
+        let resizedFrame = resizedFrame(scale: targetScale)
+
+        transform = CGAffineTransform(scaleX: targetScale, y: targetScale)
+        center = CGPoint(x: resizedFrame.midX, y: resizedFrame.midY)
+    }
+
+    private func scale(
+        widthScale: CGFloat,
+        heightScale: CGFloat,
+        isHorizontalResize: Bool,
+        isVerticalResize: Bool
+    ) -> CGFloat {
+        let candidateScale: CGFloat
+
+        if isHorizontalResize && isVerticalResize {
+            candidateScale = abs(widthScale - 1) > abs(heightScale - 1) ? widthScale : heightScale
+        } else if isHorizontalResize {
+            candidateScale = widthScale
+        } else {
+            candidateScale = heightScale
+        }
+
+        return max(candidateScale, minimumScale)
+    }
+
+    private func resizedFrame(scale: CGFloat) -> CGRect {
+        let resizedSize = CGSize(
+            width: initialPanFrame.width * scale,
+            height: initialPanFrame.height * scale
+        )
+        let originX: CGFloat
+        let originY: CGFloat
+
+        if activeResizeEdges.contains(.left) {
+            originX = initialPanFrame.maxX - resizedSize.width
+        } else {
+            originX = initialPanFrame.minX
+        }
+
+        if activeResizeEdges.contains(.top) {
+            originY = initialPanFrame.maxY - resizedSize.height
+        } else {
+            originY = initialPanFrame.minY
+        }
+
+        return CGRect(origin: CGPoint(x: originX, y: originY), size: resizedSize)
     }
 }
