@@ -32,7 +32,7 @@ final class MyRouteRow: BaseUIView {
         backgroundColor = .clear
 
         markerImageView.do {
-            $0.image = UIImage(named: "route_marker")
+            $0.image = UIImage.routeMarker
             $0.contentMode = .scaleAspectFit
         }
 
