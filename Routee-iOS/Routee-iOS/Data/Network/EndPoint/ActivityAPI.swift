@@ -19,6 +19,7 @@ enum ActivityAPI {
     case createActivity(header: HeaderType, requestDTO: ActivityCreateRequestDTO)
     case timeLinePresignedURL(header: HeaderType, activityId: Int64, requestDTO: TimeLinePresignedURLRequestDTO)
     case createTimeLine(header: HeaderType, activityId: Int64, requestDTO: CreateTimeLineRequestDTO)
+    case deleteTimeline(header: HeaderType, activityId: Int64, timelineId: Int64)
     case backgroundMapPresignedURL(header: HeaderType, activityId: Int64, requestDTO: BackgroundMapPresignedURLRequestDTO)
     case finishActivity(header: HeaderType, activityId: Int64, requestDTO: FinishActivityRequestDTO)
     case changeActivityStatus(header: HeaderType, activityId: Int64, requestDTO: ChangeActivityStatusRequestDTO)
@@ -39,6 +40,7 @@ extension ActivityAPI: RouteeEndPoint {
              .createActivity,
              .timeLinePresignedURL,
              .createTimeLine,
+             .deleteTimeline,
              .backgroundMapPresignedURL,
              .finishActivity,
              .changeActivityStatus,
@@ -68,6 +70,8 @@ extension ActivityAPI: RouteeEndPoint {
             return "/\(activityId)/image-url"
         case .createTimeLine(_, let activityId, _):
             return "/\(activityId)/timeline"
+        case .deleteTimeline(_, let activityId, let timelineId):
+            return "/\(activityId)/timeline/\(timelineId)"
         case .backgroundMapPresignedURL(_, let activityId, _):
             return "/\(activityId)/map-image-url"
         case .finishActivity(_, let activityId, _):
@@ -91,6 +95,8 @@ extension ActivityAPI: RouteeEndPoint {
             return .put
         case .changeActivityStatus, .updateArchiveActivityTitle:
             return .patch
+        case .deleteTimeline:
+            return .delete
         }
     }
     
@@ -100,6 +106,7 @@ extension ActivityAPI: RouteeEndPoint {
                 .createActivity(let header, _),
                 .timeLinePresignedURL(let header, _, _),
                 .createTimeLine(let header, _, _),
+                .deleteTimeline(let header, _, _),
                 .backgroundMapPresignedURL(let header, _, _),
                 .finishActivity(let header, _, _),
                 .changeActivityStatus(let header, _, _),
@@ -121,7 +128,13 @@ extension ActivityAPI: RouteeEndPoint {
     
     var parameterEncoding: any Alamofire.ParameterEncoding {
         switch self {
-        case .activityRoute, .activityStatistics, .activityTimelineList, .activityCourseList, .recordEditResource, .workoutList:
+        case .activityRoute,
+                .activityStatistics,
+                .activityTimelineList,
+                .activityCourseList,
+                .recordEditResource,
+                .workoutList,
+                .deleteTimeline:
             return URLEncoding.default
         case .createActivity,
                 .timeLinePresignedURL,
@@ -145,6 +158,7 @@ extension ActivityAPI: RouteeEndPoint {
              .createActivity,
              .timeLinePresignedURL,
              .createTimeLine,
+             .deleteTimeline,
              .backgroundMapPresignedURL,
              .finishActivity,
              .changeActivityStatus,
@@ -161,7 +175,13 @@ extension ActivityAPI: RouteeEndPoint {
     
     var bodyParameters: Alamofire.Parameters? {
         switch self {
-        case .activityRoute, .activityStatistics, .activityTimelineList, .activityCourseList, .recordEditResource, .workoutList:
+        case .activityRoute,
+                .activityStatistics,
+                .activityTimelineList,
+                .activityCourseList,
+                .recordEditResource,
+                .workoutList,
+                .deleteTimeline:
             return nil
         case .createActivity(_, let requestDTO):
             return requestDTO.asParameters()

@@ -18,6 +18,7 @@ protocol ActivityRepository {
     func timeLinePresignedURL(activityId: Int64, fileName: String) async throws -> ImagePresignedURLModel
     func uploadTimeLineImage(presignedURL: String, imageData: Data) async throws
     func createTimeLine(activityId: Int64, requestDTO: CreateTimeLineRequestDTO) async throws -> Int64
+    func deleteTimeline(activityId: Int64, timelineId: Int64) async throws
     func backgroundMapPresignedURL(activityId: Int64, requestDTO: BackgroundMapPresignedURLRequestDTO) async throws -> ImagePresignedURLModel
     func finishActivity(activityId: Int64, requestModel: WorkoutRecordFinishModel) async throws
     func changeActivityStatus(activityId: Int64, requestDTO: ChangeActivityStatusRequestDTO) async throws -> ChangeActivityStatusResponseDTO
@@ -236,6 +237,22 @@ struct DefaultActivityRepository: ActivityRepository {
         return response.timelineId
     }
     
+    func deleteTimeline(activityId: Int64, timelineId: Int64) async throws {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.forbidden
+        }
+
+        let endpoint = ActivityAPI.deleteTimeline(
+            header: .withAuthTimeZone(accessToken: accessToken, timeZone: TimeZone.current.identifier),
+            activityId: activityId,
+            timelineId: timelineId
+        )
+
+        return try await service.requestEmpty(endpoint)
+    }
+
     func backgroundMapPresignedURL(activityId: Int64, requestDTO: BackgroundMapPresignedURLRequestDTO) async throws -> ImagePresignedURLModel{
         let accessToken = keychainService.read(.accessToken)
         

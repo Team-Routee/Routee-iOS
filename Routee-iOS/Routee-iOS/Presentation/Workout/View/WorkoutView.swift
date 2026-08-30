@@ -335,10 +335,15 @@ final class WorkoutView: BaseUIView {
         workoutPauseView.setFinishButtonEnabled(isEnabled)
     }
 
-    func showPhotoTimelineModal(image: UIImage, title: String) {
+    func showPhotoTimelineModal(
+        image: UIImage,
+        title: String,
+        deleteButtonAction: (() -> Void)? = nil
+    ) {
         dismissPhotoTimelineModal()
 
         let modal = WorkoutPhotoTimelineModal(image: image, title: title)
+        modal.deleteButtonAction = deleteButtonAction
         modal.closeButtonAction = { [weak self] in
             self?.dismissPhotoTimelineModal()
         }

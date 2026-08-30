@@ -266,7 +266,25 @@ final class WorkoutViewModel {
         )
         photoRecords[index].timelineId = timelineId
     }
-    
+
+    func deleteTimeline(at index: Int) async throws {
+        guard let activityId,
+              photoRecords.indices.contains(index),
+              let timelineId = photoRecords[index].timelineId else {
+            throw RouteeError.noData
+        }
+
+        try await activityRepository.deleteTimeline(
+            activityId: activityId,
+            timelineId: timelineId
+        )
+
+        let deletedPhoto = photoRecords.remove(at: index)
+        if coverImageObjectKey == deletedPhoto.objectKey {
+            coverImageObjectKey = photoRecords.reversed().compactMap(\.objectKey).first
+        }
+    }
+
     func uploadBackgroundMap(image: UIImage) async throws {
         guard let activityId else {
             throw RouteeError.noData

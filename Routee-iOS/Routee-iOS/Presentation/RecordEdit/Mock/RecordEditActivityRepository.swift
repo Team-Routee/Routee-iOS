@@ -161,6 +161,8 @@ struct MockActivityRepository: ActivityRepository {
         1
     }
 
+    func deleteTimeline(activityId: Int64, timelineId: Int64) async throws { }
+
     func backgroundMapPresignedURL(
         activityId: Int64,
         requestDTO: BackgroundMapPresignedURLRequestDTO

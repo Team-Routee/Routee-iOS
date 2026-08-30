@@ -36,6 +36,7 @@ final class WorkoutViewController: BaseUIViewController {
     private var initialLocation = false
     private var lastReverseGeocodingLocation: CLLocation?
     private let hapticManager = HapticManager()
+    private var isDeletingTimeline = false
     
     // MARK: - Life Cycle
     
@@ -422,7 +423,41 @@ final class WorkoutViewController: BaseUIViewController {
         workoutView.showPhotoTimelineModal(
             image: photoRecord.image,
             title: photoRecord.locationTitle ?? ""
-        )
+        ) { [weak self] in
+            self?.deleteTimeline(at: photoIndex)
+        }
+    }
+
+    private func deleteTimeline(at photoIndex: Int) {
+        guard !isDeletingTimeline else { return }
+
+        isDeletingTimeline = true
+        Task { [weak self] in
+            guard let self else { return }
+
+            defer { isDeletingTimeline = false }
+
+            do {
+                try await viewModel.deleteTimeline(at: photoIndex)
+                reloadPhotoMarkers()
+            } catch {
+                RouteeLogger.error(error)
+            }
+        }
+    }
+
+    private func reloadPhotoMarkers() {
+        workoutView.removePhotoMarkers()
+
+        viewModel.photoRecords.enumerated().forEach { photoIndex, photoRecord in
+            guard let routePoint = viewModel.routePoint(matching: photoRecord.pointIndex) else { return }
+
+            workoutView.addPhotoMarker(
+                photoRecord,
+                photoIndex: photoIndex,
+                at: routePoint.coordinate
+            )
+        }
     }
     
     @objc
