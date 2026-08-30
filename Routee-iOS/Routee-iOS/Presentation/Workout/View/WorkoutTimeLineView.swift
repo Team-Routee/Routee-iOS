@@ -128,7 +128,7 @@ final class WorkoutTimeLineView: BaseUIView {
     }
     
     override func setStyle() {
-        navigationBar.setBackButtonEnabled(false)
+        navigationBar.setBackButtonHidden(false)
         timeLineStackView.isHidden = timelineImages.isEmpty
         timeLineCard.isHidden = timelineImages.isEmpty
 
