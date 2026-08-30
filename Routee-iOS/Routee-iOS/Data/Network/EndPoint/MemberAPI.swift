@@ -13,6 +13,7 @@ enum MemberAPI {
     case register(header: HeaderType, requestDTO: RegisterRequestDTO)
     case withdraw(header: HeaderType, requestDTO: WithdrawRequestDTO)
     case getProfile(header: HeaderType)
+    case getMemberProfile(header: HeaderType)
     case updateNickname(header: HeaderType, requestDTO: UpdateNicknameRequestDTO)
     case profileImagePresignedURL(header: HeaderType, requestDTO: ProfileImagePresignedURLRequestDTO)
     case updateProfileImage(header: HeaderType, requestDTO: UpdateProfileImageRequestDTO)
@@ -25,6 +26,7 @@ extension MemberAPI: RouteeEndPoint {
         case .register,
              .withdraw,
              .getProfile,
+             .getMemberProfile,
              .updateNickname,
              .profileImagePresignedURL,
              .updateProfileImage,
@@ -41,6 +43,8 @@ extension MemberAPI: RouteeEndPoint {
             return "/withdraw"
         case .getProfile:
             return "/summary"
+        case .getMemberProfile:
+            return "/profile"
         case .updateNickname:
             return "/nickname"
         case .profileImagePresignedURL:
@@ -60,6 +64,8 @@ extension MemberAPI: RouteeEndPoint {
             return .delete
         case .getProfile:
             return .get
+        case .getMemberProfile:
+            return .get
         case .updateNickname, .updateProfileImage, .updateDefaultProfileImage:
             return .patch
         case .profileImagePresignedURL:
@@ -75,7 +81,9 @@ extension MemberAPI: RouteeEndPoint {
              .profileImagePresignedURL(let header, _),
              .updateProfileImage(let header, _):
             return header
-        case .getProfile(let header), .updateDefaultProfileImage(let header):
+        case .getProfile(let header),
+             .getMemberProfile(let header),
+             .updateDefaultProfileImage(let header):
             return header
         }
     }
@@ -88,7 +96,7 @@ extension MemberAPI: RouteeEndPoint {
              .profileImagePresignedURL,
              .updateProfileImage:
             return JSONEncoding.default
-        case .getProfile, .updateDefaultProfileImage:
+        case .getProfile, .getMemberProfile, .updateDefaultProfileImage:
             return URLEncoding.default
         }
     }
@@ -103,7 +111,7 @@ extension MemberAPI: RouteeEndPoint {
             return dto.asParameters()
         case .withdraw(_, let dto):
             return dto.asParameters()
-        case .getProfile:
+        case .getProfile, .getMemberProfile:
             return nil
         case .updateNickname(_, let dto):
             return dto.asParameters()

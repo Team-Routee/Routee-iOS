@@ -11,6 +11,7 @@ protocol MemberRepository {
     func register(nickname: String, identityToken: String, provider: LoginPlatform) async throws
     func withdraw() async throws
     func getProfile() async throws -> ProfileModel
+    func getMemberProfile() async throws -> MemberProfileModel
     func updateNickname(_ nickname: String) async throws -> String
     func profileImagePresignedURL(fileName: String) async throws -> ImagePresignedURLModel
     func uploadProfileImage(presignedURL: String, imageData: Data) async throws
@@ -82,6 +83,25 @@ struct DefaultMemberRepository: MemberRepository {
         let response = try await service.request(
             endPoint,
             decodingType: ProfileResponseDTO.self
+        )
+
+        return response.toModel()
+    }
+
+    func getMemberProfile() async throws -> MemberProfileModel {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let endPoint = MemberAPI.getMemberProfile(
+            header: .withAuth(accessToken: accessToken)
+        )
+
+        let response = try await service.request(
+            endPoint,
+            decodingType: MemberProfileResponseDTO.self
         )
 
         return response.toModel()
