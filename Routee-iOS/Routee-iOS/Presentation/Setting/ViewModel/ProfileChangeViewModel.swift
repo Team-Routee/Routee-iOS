@@ -44,7 +44,7 @@ final class ProfileChangeViewModel {
 
         guard let profileImage else { return }
 
-        guard let imageData = profileImage.jpegData(compressionQuality: 0.8) else {
+        guard let imageData = profileImage.jpegData(compressionQuality: 1) else {
             throw RouteeError.noData
         }
 
