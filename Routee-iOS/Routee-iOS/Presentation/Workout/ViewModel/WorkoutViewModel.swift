@@ -23,7 +23,7 @@ final class WorkoutViewModel {
     }
     private(set) var activityId: Int64?
     private(set) var activityTitle: String?
-    private(set) var backgroundMapImageURL: String?
+    private(set) var backgroundMapImageObjectKey: String?
     private(set) var coverImageObjectKey: String?
     
     private let reverseGeocodingRepository: ReverseGeocodingRepository
@@ -201,7 +201,7 @@ final class WorkoutViewModel {
     
     func finishRecording(title: String) async throws {
         guard let activityId,
-              let backgroundMapImageURL,
+              let backgroundMapImageObjectKey,
               canFinishRecording else {
             throw RouteeError.noData
         }
@@ -215,7 +215,7 @@ final class WorkoutViewModel {
             distance: Int(totalDistance),
             durationSec: elapsedTimeInSeconds,
             maxAltitude: Int(maximumAltitudeInMeters ?? 0),
-            mapImageUrl: backgroundMapImageURL,
+            mapImageObjectKey: backgroundMapImageObjectKey,
             coverImageObjectKey: normalizedCoverImageObjectKey,
             tracks: routePoints.map {
                 WorkoutRecordFinishModel.Track(
@@ -308,22 +308,7 @@ final class WorkoutViewModel {
             imageData: imageData
         )
         
-        backgroundMapImageURL = try Self.imageURL(from: presigned.presignedURL)
-    }
-    
-    private static func imageURL(from presignedURL: String) throws -> String {
-        guard var components = URLComponents(string: presignedURL) else {
-            throw RouteeError.URLError
-        }
-        
-        components.query = nil
-        components.fragment = nil
-        
-        guard let imageURL = components.string else {
-            throw RouteeError.URLError
-        }
-        
-        return imageURL
+        backgroundMapImageObjectKey = presigned.objectKey
     }
     
     private func createTimeLine(

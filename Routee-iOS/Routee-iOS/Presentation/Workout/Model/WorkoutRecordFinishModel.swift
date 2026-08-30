@@ -12,7 +12,7 @@ struct WorkoutRecordFinishModel {
     let distance: Int
     let durationSec: Int
     let maxAltitude: Int
-    let mapImageUrl: String
+    let mapImageObjectKey: String
     let coverImageObjectKey: String?
     let tracks: [Track]
     let endedAt: String
@@ -32,7 +32,7 @@ extension WorkoutRecordFinishModel {
             distance: distance,
             durationSec: durationSec,
             maxElevation: maxAltitude,
-            mapImageUrl: mapImageUrl,
+            mapImageObjectKey: mapImageObjectKey,
             coverImageObjectKey: coverImageObjectKey,
             track: tracks.map {
                 TrackData(
