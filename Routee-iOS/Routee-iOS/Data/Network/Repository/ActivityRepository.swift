@@ -19,6 +19,7 @@ protocol ActivityRepository {
     func uploadTimeLineImage(presignedURL: String, imageData: Data) async throws
     func createTimeLine(activityId: Int64, requestDTO: CreateTimeLineRequestDTO) async throws -> Int64
     func deleteTimeline(activityId: Int64, timelineId: Int64) async throws
+    func updateTimelineTitle(activityId: Int64, timelineId: Int64, requestDTO: UpdateTimelineTitleRequestDTO) async throws -> UpdateTimelineTitleResponseDTO
     func backgroundMapPresignedURL(activityId: Int64, requestDTO: BackgroundMapPresignedURLRequestDTO) async throws -> ImagePresignedURLModel
     func finishActivity(activityId: Int64, requestModel: WorkoutRecordFinishModel) async throws
     func changeActivityStatus(activityId: Int64, requestDTO: ChangeActivityStatusRequestDTO) async throws -> ChangeActivityStatusResponseDTO
@@ -251,6 +252,23 @@ struct DefaultActivityRepository: ActivityRepository {
         )
 
         return try await service.requestEmpty(endpoint)
+    }
+
+    func updateTimelineTitle(activityId: Int64, timelineId: Int64, requestDTO: UpdateTimelineTitleRequestDTO) async throws -> UpdateTimelineTitleResponseDTO {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.forbidden
+        }
+
+        let endpoint = ActivityAPI.updateTimelineTitle(
+            header: .withAuth(accessToken: accessToken),
+            activityId: activityId,
+            timelineId: timelineId,
+            requestDTO: requestDTO
+        )
+
+        return try await service.request(endpoint, decodingType: UpdateTimelineTitleResponseDTO.self)
     }
 
     func backgroundMapPresignedURL(activityId: Int64, requestDTO: BackgroundMapPresignedURLRequestDTO) async throws -> ImagePresignedURLModel{
