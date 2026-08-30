@@ -23,6 +23,10 @@ final class ProfileChangeView: BaseUIView {
         nicknameTextField.text ?? ""
     }
 
+    var hasNicknameChanged: Bool {
+        nickname != initialNickname
+    }
+
     var selectedProfileImage: UIImage?
 
     private var initialNickname = ""
@@ -141,7 +145,6 @@ final class ProfileChangeView: BaseUIView {
     }
 
     private func updateChangeButtonState() {
-        let hasNicknameChanged = nickname != initialNickname
         let hasProfileImageChanged = selectedProfileImage != nil
         let canSubmit = isNicknameValid && (hasNicknameChanged || hasProfileImageChanged)
 
