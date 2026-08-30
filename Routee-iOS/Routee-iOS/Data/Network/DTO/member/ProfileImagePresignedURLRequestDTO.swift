@@ -8,5 +8,5 @@
 import Foundation
 
 struct ProfileImagePresignedURLRequestDTO: Encodable {
-    let filename: String
+    let fileName: String
 }

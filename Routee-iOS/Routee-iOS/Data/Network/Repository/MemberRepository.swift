@@ -12,7 +12,7 @@ protocol MemberRepository {
     func withdraw() async throws
     func getProfile() async throws -> ProfileModel
     func updateNickname(_ nickname: String) async throws -> String
-    func profileImagePresignedURL(filename: String) async throws -> ImagePresignedURLModel
+    func profileImagePresignedURL(fileName: String) async throws -> ImagePresignedURLModel
     func uploadProfileImage(presignedURL: String, imageData: Data) async throws
     func updateProfileImage(objectKey: String) async throws -> String
 }
@@ -107,14 +107,14 @@ struct DefaultMemberRepository: MemberRepository {
         return response.nickname
     }
 
-    func profileImagePresignedURL(filename: String) async throws -> ImagePresignedURLModel {
+    func profileImagePresignedURL(fileName: String) async throws -> ImagePresignedURLModel {
         let accessToken = keychainService.read(.accessToken)
 
         guard !accessToken.isEmpty else {
             throw RouteeError.noData
         }
 
-        let requestDTO = ProfileImagePresignedURLRequestDTO(filename: filename)
+        let requestDTO = ProfileImagePresignedURLRequestDTO(fileName: fileName)
         let endPoint = MemberAPI.profileImagePresignedURL(
             header: .withAuth(accessToken: accessToken),
             requestDTO: requestDTO
