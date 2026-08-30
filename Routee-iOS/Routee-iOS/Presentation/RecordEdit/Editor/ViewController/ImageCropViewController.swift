@@ -16,6 +16,7 @@ final class ImageCropViewController: BaseUIViewController {
     
     var onCropCompleted: ((UIImage) -> Void)?
     private let cropViewController: CropViewController
+    private let aspectRatioPreset: CGSize
     
     // MARK: - UI Property
     
@@ -23,12 +24,14 @@ final class ImageCropViewController: BaseUIViewController {
     
     // MARK: - Initializer
     
-    init(image: UIImage) {
+    init(image: UIImage, aspectRatioPreset: CGSize = CGSize(width: 343, height: 610)) {
         let cropViewController = CropViewController(image: image)
         
         self.cropViewController = cropViewController
+        self.aspectRatioPreset = aspectRatioPreset
         self.rootView = ImageCropView(cropContentView: cropViewController.view)
         super.init(nibName: nil, bundle: nil)
+        hidesBottomBarWhenPushed = true
     }
     
     required init?(coder: NSCoder) {
@@ -52,7 +55,7 @@ final class ImageCropViewController: BaseUIViewController {
     
     private func setCropViewController() {
         cropViewController.delegate = self
-        cropViewController.aspectRatioPreset = CGSize(width: 343, height: 610)
+        cropViewController.aspectRatioPreset = aspectRatioPreset
         cropViewController.aspectRatioLockEnabled = true
         cropViewController.resetAspectRatioEnabled = false
         cropViewController.hidesNavigationBar = false
