@@ -28,7 +28,7 @@ final class ProfileChangeView: BaseUIView {
     }
 
     var shouldPresentProfileImageModal: Bool {
-        !isDefaultProfileImageApplied && (initialProfileImageUrl != nil || selectedProfileImage != nil)
+        (initialProfileImageUrl != nil || selectedProfileImage != nil) && !isDefaultProfileImageApplied
     }
 
     var shouldApplyDefaultProfileImage: Bool {

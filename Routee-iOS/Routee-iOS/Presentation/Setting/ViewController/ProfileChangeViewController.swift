@@ -83,10 +83,9 @@ final class ProfileChangeViewController: BaseUIViewController {
     private func handleCameraButtonTap() {
         if rootView.shouldPresentProfileImageModal {
             presentProfileImageModal()
-            return
+        } else {
+            presentImagePicker()
         }
-
-        presentImagePicker()
     }
 
     private func applyDefaultProfileImage() {
