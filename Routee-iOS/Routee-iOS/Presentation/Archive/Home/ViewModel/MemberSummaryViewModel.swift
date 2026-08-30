@@ -1,12 +1,12 @@
 //
-//  ProfileViewModel.swift
+//  MemberSummaryViewModel.swift
 //  Routee-iOS
 //
 
 import Foundation
 
 @MainActor
-final class ProfileViewModel {
+final class MemberSummaryViewModel {
 
     // MARK: - Properties
 
@@ -20,7 +20,7 @@ final class ProfileViewModel {
 
     // MARK: - Public Methods
 
-    func fetchProfile() async throws -> ProfileModel {
-        try await memberRepository.getProfile()
+    func fetchSummary() async throws -> MemberSummaryModel {
+        try await memberRepository.getMemberSummary()
     }
 }

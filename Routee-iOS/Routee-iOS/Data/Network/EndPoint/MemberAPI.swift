@@ -12,7 +12,7 @@ import Alamofire
 enum MemberAPI {
     case register(header: HeaderType, requestDTO: RegisterRequestDTO)
     case withdraw(header: HeaderType, requestDTO: WithdrawRequestDTO)
-    case getProfile(header: HeaderType)
+    case getMemberSummary(header: HeaderType)
     case getMemberProfile(header: HeaderType)
     case updateNickname(header: HeaderType, requestDTO: UpdateNicknameRequestDTO)
     case profileImagePresignedURL(header: HeaderType, requestDTO: ProfileImagePresignedURLRequestDTO)
@@ -25,7 +25,7 @@ extension MemberAPI: RouteeEndPoint {
         switch self {
         case .register,
              .withdraw,
-             .getProfile,
+             .getMemberSummary,
              .getMemberProfile,
              .updateNickname,
              .profileImagePresignedURL,
@@ -41,7 +41,7 @@ extension MemberAPI: RouteeEndPoint {
             return "/register"
         case .withdraw:
             return "/withdraw"
-        case .getProfile:
+        case .getMemberSummary:
             return "/summary"
         case .getMemberProfile:
             return "/profile"
@@ -62,7 +62,7 @@ extension MemberAPI: RouteeEndPoint {
             return  .post
         case .withdraw:
             return .delete
-        case .getProfile:
+        case .getMemberSummary:
             return .get
         case .getMemberProfile:
             return .get
@@ -81,7 +81,7 @@ extension MemberAPI: RouteeEndPoint {
              .profileImagePresignedURL(let header, _),
              .updateProfileImage(let header, _):
             return header
-        case .getProfile(let header),
+        case .getMemberSummary(let header),
              .getMemberProfile(let header),
              .updateDefaultProfileImage(let header):
             return header
@@ -96,7 +96,7 @@ extension MemberAPI: RouteeEndPoint {
              .profileImagePresignedURL,
              .updateProfileImage:
             return JSONEncoding.default
-        case .getProfile, .getMemberProfile, .updateDefaultProfileImage:
+        case .getMemberSummary, .getMemberProfile, .updateDefaultProfileImage:
             return URLEncoding.default
         }
     }
@@ -111,7 +111,7 @@ extension MemberAPI: RouteeEndPoint {
             return dto.asParameters()
         case .withdraw(_, let dto):
             return dto.asParameters()
-        case .getProfile, .getMemberProfile:
+        case .getMemberSummary, .getMemberProfile:
             return nil
         case .updateNickname(_, let dto):
             return dto.asParameters()

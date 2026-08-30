@@ -10,7 +10,7 @@ import Foundation
 protocol MemberRepository {
     func register(nickname: String, identityToken: String, provider: LoginPlatform) async throws
     func withdraw() async throws
-    func getProfile() async throws -> ProfileModel
+    func getMemberSummary() async throws -> MemberSummaryModel
     func getMemberProfile() async throws -> MemberProfileModel
     func updateNickname(_ nickname: String) async throws -> String
     func profileImagePresignedURL(fileName: String) async throws -> ImagePresignedURLModel
@@ -66,14 +66,14 @@ struct DefaultMemberRepository: MemberRepository {
         }
     }
 
-    func getProfile() async throws -> ProfileModel {
+    func getMemberSummary() async throws -> MemberSummaryModel {
         let accessToken = keychainService.read(.accessToken)
 
         guard !accessToken.isEmpty else {
             throw RouteeError.noData
         }
 
-        let endPoint = MemberAPI.getProfile(
+        let endPoint = MemberAPI.getMemberSummary(
             header: .withAuthTimeZone(
                 accessToken: accessToken,
                 timeZone: TimeZone.current.identifier
@@ -82,7 +82,7 @@ struct DefaultMemberRepository: MemberRepository {
 
         let response = try await service.request(
             endPoint,
-            decodingType: ProfileResponseDTO.self
+            decodingType: MemberSummaryResponseDTO.self
         )
 
         return response.toModel()
