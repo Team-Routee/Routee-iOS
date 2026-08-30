@@ -27,10 +27,20 @@ final class ProfileChangeView: BaseUIView {
         nickname != initialNickname
     }
 
+    var shouldPresentProfileImageModal: Bool {
+        !isDefaultProfileImageApplied && (initialProfileImageUrl != nil || selectedProfileImage != nil)
+    }
+
+    var shouldApplyDefaultProfileImage: Bool {
+        initialProfileImageUrl != nil && isDefaultProfileImageApplied
+    }
+
     var selectedProfileImage: UIImage?
 
     private var initialNickname = ""
+    private var initialProfileImageUrl: String?
     private var isNicknameValid = false
+    private var isDefaultProfileImageApplied = false
     
     // MARK: - UI Properties
     
@@ -112,7 +122,9 @@ final class ProfileChangeView: BaseUIView {
 
     func configure(with profile: ProfileModel) {
         initialNickname = profile.nickname
+        initialProfileImageUrl = profile.profileImageUrl
         selectedProfileImage = nil
+        isDefaultProfileImageApplied = false
         nicknameTextField.configure(nickname: profile.nickname)
         configureProfileImage(with: profile.profileImageUrl)
         updateChangeButtonState()
@@ -120,7 +132,16 @@ final class ProfileChangeView: BaseUIView {
 
     func updateProfileImage(_ image: UIImage) {
         selectedProfileImage = image
+        isDefaultProfileImageApplied = false
         profileImageView.image = image
+        updateChangeButtonState()
+    }
+
+    func applyDefaultProfileImage() {
+        let defaultProfileImage = UIImage(resource: .profileImgDefault)
+        selectedProfileImage = nil
+        isDefaultProfileImageApplied = true
+        profileImageView.image = defaultProfileImage
         updateChangeButtonState()
     }
 
@@ -145,7 +166,7 @@ final class ProfileChangeView: BaseUIView {
     }
 
     private func updateChangeButtonState() {
-        let hasProfileImageChanged = selectedProfileImage != nil
+        let hasProfileImageChanged = selectedProfileImage != nil || shouldApplyDefaultProfileImage
         let canSubmit = isNicknameValid && (hasNicknameChanged || hasProfileImageChanged)
 
         changeButton.updateType(canSubmit ? .enabled : .disabled)

@@ -30,10 +30,16 @@ final class ProfileChangeViewModel {
     func updateProfile(
         nickname: String,
         hasNicknameChanged: Bool,
+        shouldApplyDefaultProfileImage: Bool,
         profileImage: UIImage?
     ) async throws {
         if hasNicknameChanged {
             _ = try await memberRepository.updateNickname(nickname)
+        }
+
+        if shouldApplyDefaultProfileImage {
+            _ = try await memberRepository.updateProfileImage(objectKey: nil)
+            return
         }
 
         guard let profileImage else { return }
@@ -43,7 +49,7 @@ final class ProfileChangeViewModel {
         }
 
         let presigned = try await memberRepository.profileImagePresignedURL(
-            filename: "\(UUID().uuidString).jpg"
+            fileName: "\(UUID().uuidString).jpg"
         )
 
         try await memberRepository.uploadProfileImage(

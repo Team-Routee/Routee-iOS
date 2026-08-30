@@ -116,16 +116,32 @@ final class ProfileChangeViewController: BaseUIViewController {
                 try await viewModel.updateProfile(
                     nickname: rootView.nickname,
                     hasNicknameChanged: rootView.hasNicknameChanged,
+                    shouldApplyDefaultProfileImage: rootView.shouldApplyDefaultProfileImage,
                     profileImage: rootView.selectedProfileImage
                 )
 
-                navigationController?.popViewController(animated: true)
+                navigateToArchive()
             } catch {
                 guard !Task.isCancelled else { return }
 
                 RouteeLogger.error(error)
             }
         }
+    }
+
+    private func navigateToArchive() {
+        guard let tabBarController = tabBarController as? TabBarViewController,
+              let viewControllers = tabBarController.viewControllers,
+              viewControllers.indices.contains(2),
+              let archiveNavigationController = viewControllers[2] as? UINavigationController
+        else {
+            navigationController?.popToRootViewController(animated: false)
+            return
+        }
+
+        navigationController?.popToRootViewController(animated: false)
+        archiveNavigationController.popToRootViewController(animated: false)
+        tabBarController.selectTab(index: 2)
     }
 
     // MARK: - Actions
@@ -136,7 +152,7 @@ final class ProfileChangeViewController: BaseUIViewController {
         }
 
         rootView.cameraButtonAction = { [weak self] in
-            self?.presentImagePicker()
+            self?.handleCameraButtonTap()
         }
 
         rootView.changeButtonAction = { [weak self] in
