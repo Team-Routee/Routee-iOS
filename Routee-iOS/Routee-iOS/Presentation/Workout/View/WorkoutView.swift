@@ -46,6 +46,8 @@ final class WorkoutView: BaseUIView {
     private var photoTimelineModal: WorkoutPhotoTimelineModal?
     private var photoModalCenterYConstraint: Constraint?
     private var snackbarView: SnackbarView?
+    private var readyLocationBottomConstraint: Constraint?
+    private var recordingLocationBottomConstraint: Constraint?
     var restartButton: UIButton { workoutPauseView.restartButton }
     var finishButton: UIButton { workoutPauseView.finishButton }
     
@@ -250,9 +252,17 @@ final class WorkoutView: BaseUIView {
         
         moveToUserlocationButton.snp.makeConstraints {
             $0.trailing.equalTo(recordButton)
-            $0.bottom.equalTo(recordButton.snp.top).offset(-12)
+            readyLocationBottomConstraint = $0.bottom
+                .equalTo(recordButton.snp.top)
+                .offset(-12)
+                .constraint
+            recordingLocationBottomConstraint = $0.bottom
+                .equalTo(safeAreaLayoutGuide)
+                .inset(103)
+                .constraint
             $0.size.equalTo(44)
         }
+        recordingLocationBottomConstraint?.deactivate()
         
         recordButton.snp.makeConstraints {
             $0.centerX.equalToSuperview()
@@ -483,7 +493,14 @@ extension WorkoutView {
         gradiantHeaderLayer.isHidden = mode == .finishing
         routeeLogo.isHidden = !isReady
         currentLocationStackView.isHidden = !isReady
-        moveToUserlocationButton.isHidden = !isReady
+        moveToUserlocationButton.isHidden = !(isReady || isRecording)
+        if isRecording {
+            readyLocationBottomConstraint?.deactivate()
+            recordingLocationBottomConstraint?.activate()
+        } else {
+            recordingLocationBottomConstraint?.deactivate()
+            readyLocationBottomConstraint?.activate()
+        }
         recordButton.isHidden = !isReady
         recordButton.isEnabled = isReady
         workoutMetric.isHidden = !isRecording
