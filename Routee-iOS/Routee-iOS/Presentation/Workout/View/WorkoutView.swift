@@ -339,14 +339,17 @@ final class WorkoutView: BaseUIView {
     func showPhotoTimelineModal(
         image: UIImage,
         title: String,
-        deleteButtonAction: (() -> Void)? = nil
+        deleteButtonAction: (() -> Void)? = nil,
+        closeButtonAction: ((String) -> Void)? = nil
     ) {
         dismissPhotoTimelineModal()
 
         let modal = WorkoutPhotoTimelineModal(image: image, title: title)
         modal.deleteButtonAction = deleteButtonAction
-        modal.closeButtonAction = { [weak self] in
+        modal.closeButtonAction = { [weak self, weak modal] in
+            let updatedTitle = modal?.titleText ?? title
             self?.dismissPhotoTimelineModal()
+            closeButtonAction?(updatedTitle)
         }
 
         photoTimelineModal = modal

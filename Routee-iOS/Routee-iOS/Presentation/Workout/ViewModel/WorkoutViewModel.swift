@@ -285,6 +285,21 @@ final class WorkoutViewModel {
         }
     }
 
+    func updateTimelineTitle(at index: Int, title: String) async throws {
+        guard let activityId,
+              photoRecords.indices.contains(index),
+              let timelineId = photoRecords[index].timelineId else {
+            throw RouteeError.noData
+        }
+
+        let response = try await activityRepository.updateTimelineTitle(
+            activityId: activityId,
+            timelineId: timelineId,
+            requestDTO: UpdateTimelineTitleRequestDTO(title: title)
+        )
+        photoRecords[index].locationTitle = response.title
+    }
+
     func uploadBackgroundMap(image: UIImage) async throws {
         guard let activityId else {
             throw RouteeError.noData

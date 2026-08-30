@@ -38,6 +38,7 @@ final class WorkoutViewController: BaseUIViewController {
     private let hapticManager = HapticManager()
     private var pendingTimelineDeletionTask: Task<Void, Never>?
     private var photoUploadTasks: [Int: Task<Void, Never>] = [:]
+    private var timelineTitleUpdateTasks: [Int: Task<Void, Never>] = [:]
     
     // MARK: - Life Cycle
     
@@ -424,10 +425,37 @@ final class WorkoutViewController: BaseUIViewController {
         let photoRecord = viewModel.photoRecords[photoIndex]
         workoutView.showPhotoTimelineModal(
             image: photoRecord.image,
-            title: photoRecord.locationTitle ?? ""
-        ) { [weak self] in
-            self?.deleteTimeline(at: photoIndex)
+            title: photoRecord.locationTitle ?? "",
+            deleteButtonAction: { [weak self] in
+                self?.deleteTimeline(at: photoIndex)
+            },
+            closeButtonAction: { [weak self] updatedTitle in
+                self?.updateTimelineTitle(at: photoIndex, title: updatedTitle)
+            }
+        )
+    }
+
+    private func updateTimelineTitle(at photoIndex: Int, title: String) {
+        let normalizedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedTitle.isEmpty,
+              viewModel.photoRecords.indices.contains(photoIndex),
+              viewModel.photoRecords[photoIndex].locationTitle != normalizedTitle else { return }
+
+        let updateTask = Task { [weak self] in
+            guard let self else { return }
+
+            await photoUploadTasks[photoIndex]?.value
+
+            do {
+                try await viewModel.updateTimelineTitle(
+                    at: photoIndex,
+                    title: normalizedTitle
+                )
+            } catch {
+                RouteeLogger.error(error)
+            }
         }
+        timelineTitleUpdateTasks[photoIndex] = updateTask
     }
 
     private func deleteTimeline(at photoIndex: Int) {
@@ -454,6 +482,12 @@ final class WorkoutViewController: BaseUIViewController {
                 await uploadTask.value
             }
             photoUploadTasks.removeAll()
+
+            let titleUpdateTasks = Array(timelineTitleUpdateTasks.values)
+            for titleUpdateTask in titleUpdateTasks {
+                await titleUpdateTask.value
+            }
+            timelineTitleUpdateTasks.removeAll()
 
             do {
                 try await viewModel.deleteTimeline(at: photoIndex)
