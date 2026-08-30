@@ -45,6 +45,7 @@ final class WorkoutView: BaseUIView {
     private let photoModalDimView = UIControl()
     private var photoTimelineModal: WorkoutPhotoTimelineModal?
     private var photoModalCenterYConstraint: Constraint?
+    private var snackbarView: SnackbarView?
     var restartButton: UIButton { workoutPauseView.restartButton }
     var finishButton: UIButton { workoutPauseView.finishButton }
     
@@ -364,6 +365,47 @@ final class WorkoutView: BaseUIView {
         photoTimelineModal = nil
         photoModalCenterYConstraint = nil
         photoModalDimView.isHidden = true
+    }
+
+    func showSnackbar(
+        message: String,
+        buttonTitle: String,
+        buttonAction: @escaping () -> Void
+    ) {
+        removeSnackbarImmediately()
+
+        let snackbarView = SnackbarView(message: message, buttonTitle: buttonTitle)
+        snackbarView.buttonAction = buttonAction
+        self.snackbarView = snackbarView
+        addSubview(snackbarView)
+
+        snackbarView.snp.makeConstraints {
+            $0.centerX.equalToSuperview()
+            $0.bottom.equalTo(safeAreaLayoutGuide).inset(CGFloat.s16)
+        }
+    }
+
+    func dismissSnackbar() async {
+        guard let snackbarView else { return }
+
+        snackbarView.isUserInteractionEnabled = false
+
+        await withCheckedContinuation { continuation in
+            UIView.animate(withDuration: 0.2) {
+                snackbarView.alpha = 0
+            } completion: { [weak self] _ in
+                snackbarView.removeFromSuperview()
+                if self?.snackbarView === snackbarView {
+                    self?.snackbarView = nil
+                }
+                continuation.resume()
+            }
+        }
+    }
+
+    private func removeSnackbarImmediately() {
+        snackbarView?.removeFromSuperview()
+        snackbarView = nil
     }
     
     func updateCurrentLocationAddress(_ address: String) {

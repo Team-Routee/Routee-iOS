@@ -36,7 +36,8 @@ final class WorkoutViewController: BaseUIViewController {
     private var initialLocation = false
     private var lastReverseGeocodingLocation: CLLocation?
     private let hapticManager = HapticManager()
-    private var isDeletingTimeline = false
+    private var pendingTimelineDeletionTask: Task<Void, Never>?
+    private var photoUploadTasks: [Int: Task<Void, Never>] = [:]
     
     // MARK: - Life Cycle
     
@@ -413,6 +414,7 @@ final class WorkoutViewController: BaseUIViewController {
     
     @objc
     private func didTapCameraButton() {
+        guard pendingTimelineDeletionTask == nil else { return }
         requestCameraAccess()
     }
 
@@ -429,27 +431,58 @@ final class WorkoutViewController: BaseUIViewController {
     }
 
     private func deleteTimeline(at photoIndex: Int) {
-        guard !isDeletingTimeline else { return }
+        guard pendingTimelineDeletionTask == nil,
+              viewModel.photoRecords.indices.contains(photoIndex) else { return }
 
-        isDeletingTimeline = true
-        Task { [weak self] in
-            guard let self else { return }
+        workoutView.dismissPhotoTimelineModal()
+        reloadPhotoMarkers(excluding: photoIndex)
+        workoutView.showSnackbar(
+            message: "삭제되었습니다",
+            buttonTitle: "취소"
+        ) { [weak self] in
+            self?.cancelTimelineDeletion()
+        }
 
-            defer { isDeletingTimeline = false }
+        pendingTimelineDeletionTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled, let self else { return }
+
+            await workoutView.dismissSnackbar()
+
+            let uploadTasks = Array(photoUploadTasks.values)
+            for uploadTask in uploadTasks {
+                await uploadTask.value
+            }
+            photoUploadTasks.removeAll()
 
             do {
                 try await viewModel.deleteTimeline(at: photoIndex)
-                reloadPhotoMarkers()
             } catch {
                 RouteeLogger.error(error)
             }
+
+            pendingTimelineDeletionTask = nil
+            reloadPhotoMarkers()
         }
     }
 
-    private func reloadPhotoMarkers() {
+    private func cancelTimelineDeletion() {
+        pendingTimelineDeletionTask?.cancel()
+        pendingTimelineDeletionTask = nil
+
+        Task { [weak self] in
+            guard let self else { return }
+
+            await workoutView.dismissSnackbar()
+            reloadPhotoMarkers()
+        }
+    }
+
+    private func reloadPhotoMarkers(excluding excludedPhotoIndex: Int? = nil) {
         workoutView.removePhotoMarkers()
 
         viewModel.photoRecords.enumerated().forEach { photoIndex, photoRecord in
+            guard photoIndex != excludedPhotoIndex else { return }
             guard let routePoint = viewModel.routePoint(matching: photoRecord.pointIndex) else { return }
 
             workoutView.addPhotoMarker(
@@ -603,12 +636,15 @@ extension WorkoutViewController: UIImagePickerControllerDelegate, UINavigationCo
             at: routePoint.coordinate
         )
 
-        Task {
+        let uploadTask = Task { [weak self] in
+            guard let self else { return }
+
             do {
                 try await viewModel.uploadPhoto(at: photoIndex)
             } catch {
                 RouteeLogger.error(error)
             }
         }
+        photoUploadTasks[photoIndex] = uploadTask
     }
 }
