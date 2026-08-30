@@ -64,6 +64,35 @@ final class ProfileChangeViewController: BaseUIViewController {
         present(picker, animated: true)
     }
 
+    private func presentProfileImageModal() {
+        let modal = ActionVerticalModal(
+            title: "프로필 사진 설정",
+            topButtonTitle: "앨범에서 선택",
+            bottomButtonTitle: "기본 이미지 적용",
+            topButtonAction: { [weak self] in
+                self?.presentImagePicker()
+            },
+            bottomButtonAction: { [weak self] in
+                self?.applyDefaultProfileImage()
+            }
+        )
+
+        present(modal, animated: true)
+    }
+
+    private func handleCameraButtonTap() {
+        if rootView.shouldPresentProfileImageModal {
+            presentProfileImageModal()
+            return
+        }
+
+        presentImagePicker()
+    }
+
+    private func applyDefaultProfileImage() {
+        rootView.applyDefaultProfileImage()
+    }
+
     private func pushProfileImageCropView(with image: UIImage) {
         let imageCropViewController = ImageCropViewController(
             image: image,
