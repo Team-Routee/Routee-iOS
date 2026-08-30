@@ -14,7 +14,7 @@ final class StickerSelector: BaseUIView {
 
     // MARK: - Properties
 
-    enum StickerType {
+    enum StickerType: Hashable {
         case record
         case photoTimeline
         case route
