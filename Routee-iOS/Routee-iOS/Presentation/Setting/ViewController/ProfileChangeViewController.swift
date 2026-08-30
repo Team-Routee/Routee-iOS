@@ -64,6 +64,20 @@ final class ProfileChangeViewController: BaseUIViewController {
         present(picker, animated: true)
     }
 
+    private func pushProfileImageCropView(with image: UIImage) {
+        let imageCropViewController = ImageCropViewController(
+            image: image,
+            aspectRatioPreset: CGSize(width: 1, height: 1)
+        )
+
+        imageCropViewController.onCropCompleted = { [weak self] croppedImage in
+            self?.rootView.updateProfileImage(croppedImage)
+        }
+
+        navigationController?.pushViewController(imageCropViewController, animated: false)
+        navigationController?.navigationBar.isHidden = true
+    }
+
     // MARK: - Actions
 
     override func setAddTarget() {
@@ -73,6 +87,10 @@ final class ProfileChangeViewController: BaseUIViewController {
 
         rootView.cameraButtonAction = { [weak self] in
             self?.presentImagePicker()
+        }
+
+        rootView.changeButtonAction = { [weak self] in
+            self?.updateProfile()
         }
     }
 }
@@ -95,7 +113,7 @@ extension ProfileChangeViewController: PHPickerViewControllerDelegate {
 
             DispatchQueue.main.async {
                 picker.dismiss(animated: true) {
-                    self?.rootView.updateProfileImage(image)
+                    self?.pushProfileImageCropView(with: image)
                 }
             }
         }
