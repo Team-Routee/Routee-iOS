@@ -15,6 +15,7 @@ final class MyRouteRow: BaseUIView {
     // MARK: - UI Properties
 
     private let markerImageView = UIImageView()
+    private let markerNumberLabel = UILabel()
     private let lineView = UIView()
     private let contentView = UIView()
     private let routeNameTextField = UITextField()
@@ -31,7 +32,14 @@ final class MyRouteRow: BaseUIView {
         backgroundColor = .clear
 
         markerImageView.do {
+            $0.image = UIImage.routeMarker
             $0.contentMode = .scaleAspectFit
+        }
+
+        markerNumberLabel.do {
+            $0.font = .label_m_12
+            $0.textColor = .grey_800
+            $0.textAlignment = .center
         }
 
         lineView.do {
@@ -66,7 +74,7 @@ final class MyRouteRow: BaseUIView {
     }
 
     override func setUI() {
-        addSubviews(markerImageView, lineView, contentView)
+        addSubviews(markerImageView, markerNumberLabel, lineView, contentView)
         contentView.addSubviews(routeNameTextField, removeButton)
     }
 
@@ -80,6 +88,11 @@ final class MyRouteRow: BaseUIView {
             $0.leading.equalToSuperview().inset(4)
             $0.width.equalTo(20)
             $0.height.equalTo(24)
+        }
+
+        markerNumberLabel.snp.makeConstraints {
+            $0.top.equalTo(markerImageView).offset(3)
+            $0.centerX.equalTo(markerImageView)
         }
 
         contentView.snp.makeConstraints {
@@ -117,7 +130,7 @@ final class MyRouteRow: BaseUIView {
         isLast: Bool,
         showsRemoveButton: Bool
     ) {
-        markerImageView.image = UIImage(named: "route_marker_\(number)")
+        markerNumberLabel.text = (1...20).contains(number) ? "\(number)" : nil
         routeNameTextField.text = title
         routeNameTextField.isUserInteractionEnabled = showsRemoveButton
         lineView.isHidden = isLast
