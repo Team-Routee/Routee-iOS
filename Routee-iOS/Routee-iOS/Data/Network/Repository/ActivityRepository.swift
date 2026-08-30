@@ -17,7 +17,7 @@ protocol ActivityRepository {
     func createActivity(activityType: String, startedAt: String) async throws -> WorkoutRecordStartModel
     func timeLinePresignedURL(activityId: Int64, fileName: String) async throws -> ImagePresignedURLModel
     func uploadTimeLineImage(presignedURL: String, imageData: Data) async throws
-    func createTimeLine(activityId: Int64, requestDTO: CreateTimeLineRequestDTO) async throws
+    func createTimeLine(activityId: Int64, requestDTO: CreateTimeLineRequestDTO) async throws -> Int64
     func backgroundMapPresignedURL(activityId: Int64, requestDTO: BackgroundMapPresignedURLRequestDTO) async throws -> ImagePresignedURLModel
     func finishActivity(activityId: Int64, requestModel: WorkoutRecordFinishModel) async throws
     func changeActivityStatus(activityId: Int64, requestDTO: ChangeActivityStatusRequestDTO) async throws -> ChangeActivityStatusResponseDTO
@@ -214,7 +214,7 @@ struct DefaultActivityRepository: ActivityRepository {
         try await service.presignedURLUploadData(imageData, to: presignedURL, contentType: "image/jpeg")
     }
     
-    func createTimeLine(activityId: Int64, requestDTO: CreateTimeLineRequestDTO) async throws {
+    func createTimeLine(activityId: Int64, requestDTO: CreateTimeLineRequestDTO) async throws -> Int64 {
         let accessToken = keychainService.read(.accessToken)
         
         guard !accessToken.isEmpty else {
@@ -229,7 +229,11 @@ struct DefaultActivityRepository: ActivityRepository {
             requestDTO: dto
         )
         
-        try await service.requestEmpty(endpoint)
+        let response = try await service.request(
+            endpoint,
+            decodingType: CreateTimeLineResponseDTO.self
+        )
+        return response.timelineId
     }
     
     func backgroundMapPresignedURL(activityId: Int64, requestDTO: BackgroundMapPresignedURLRequestDTO) async throws -> ImagePresignedURLModel{

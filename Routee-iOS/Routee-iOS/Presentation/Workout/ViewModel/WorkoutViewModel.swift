@@ -259,11 +259,12 @@ final class WorkoutViewModel {
         photoRecords[index].objectKey = presigned.objectKey
         coverImageObjectKey = presigned.objectKey
         
-        try await createTimeLine(
+        let timelineId = try await createTimeLine(
             for: photoRecords[index],
             objectKey: presigned.objectKey,
             title: photoRecords[index].locationTitle ?? ""
         )
+        photoRecords[index].timelineId = timelineId
     }
     
     func uploadBackgroundMap(image: UIImage) async throws {
@@ -307,7 +308,11 @@ final class WorkoutViewModel {
         return imageURL
     }
     
-    private func createTimeLine(for photoRecord: WorkoutPhotoRecord, objectKey: String, title: String) async throws {
+    private func createTimeLine(
+        for photoRecord: WorkoutPhotoRecord,
+        objectKey: String,
+        title: String
+    ) async throws -> Int64 {
         guard let activityId,
               let routePoint = routePoint(matching: photoRecord.pointIndex) else {
             throw RouteeError.noData
@@ -326,7 +331,10 @@ final class WorkoutViewModel {
             status: "SUCCESSFUL_CREATED"
         )
         
-        try await activityRepository.createTimeLine(activityId: activityId, requestDTO: timeLine.toDTO())
+        return try await activityRepository.createTimeLine(
+            activityId: activityId,
+            requestDTO: timeLine.toDTO()
+        )
     }
     
     private static let timeLineDateFormatter: DateFormatter = {
