@@ -31,7 +31,7 @@ final class MyRoute: BaseUIView {
     
     // MARK: - Properties
     
-    private let maxPointCount = 12
+    private let maxPointCount = 20
     private let collapsedPointCount = 3
     private var mode: RouteViewMode
     private var routePoint: RoutePointModel
@@ -71,6 +71,8 @@ final class MyRoute: BaseUIView {
         countRouteLabel.do {
             $0.font = .label_m_14
             $0.textColor = .grey_300
+            $0.textAlignment = .right
+            $0.setContentCompressionResistancePriority(.required, for: .horizontal)
         }
         
         toggleButton.do {
@@ -129,7 +131,6 @@ final class MyRoute: BaseUIView {
         countRouteLabel.snp.makeConstraints {
             $0.centerY.equalTo(myRouteLabel.snp.centerY)
             $0.trailing.equalToSuperview()
-            $0.width.equalTo(47)
             $0.height.equalTo(19)
         }
         
