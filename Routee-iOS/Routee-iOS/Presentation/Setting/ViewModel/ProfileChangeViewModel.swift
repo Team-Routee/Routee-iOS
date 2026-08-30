@@ -23,8 +23,8 @@ final class ProfileChangeViewModel {
 
     // MARK: - Public Methods
 
-    func fetchProfile() async throws -> ProfileModel {
-        try await memberRepository.getProfile()
+    func fetchProfile() async throws -> MemberProfileModel {
+        try await memberRepository.getMemberProfile()
     }
 
     func updateProfile(

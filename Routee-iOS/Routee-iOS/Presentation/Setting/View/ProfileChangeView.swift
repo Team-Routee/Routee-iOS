@@ -120,7 +120,7 @@ final class ProfileChangeView: BaseUIView {
 
     // MARK: - Public Methods
 
-    func configure(with profile: ProfileModel) {
+    func configure(with profile: MemberProfileModel) {
         initialNickname = profile.nickname
         initialProfileImageUrl = profile.profileImageUrl
         selectedProfileImage = nil
