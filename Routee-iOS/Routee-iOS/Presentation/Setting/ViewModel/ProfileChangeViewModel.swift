@@ -38,7 +38,7 @@ final class ProfileChangeViewModel {
         }
 
         if shouldApplyDefaultProfileImage {
-            _ = try await memberRepository.updateProfileImage(objectKey: nil)
+            try await memberRepository.updateDefaultProfileImage()
             return
         }
 

@@ -15,6 +15,7 @@ protocol MemberRepository {
     func profileImagePresignedURL(fileName: String) async throws -> ImagePresignedURLModel
     func uploadProfileImage(presignedURL: String, imageData: Data) async throws
     func updateProfileImage(objectKey: String) async throws -> String
+    func updateDefaultProfileImage() async throws
 }
 
 struct DefaultMemberRepository: MemberRepository {
@@ -151,5 +152,19 @@ struct DefaultMemberRepository: MemberRepository {
         )
 
         return response.profileImageUrl
+    }
+
+    func updateDefaultProfileImage() async throws {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let endPoint = MemberAPI.updateDefaultProfileImage(
+            header: .withAuth(accessToken: accessToken)
+        )
+
+        try await service.requestEmpty(endPoint)
     }
 }
