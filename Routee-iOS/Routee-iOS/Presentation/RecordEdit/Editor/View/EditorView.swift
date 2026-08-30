@@ -37,6 +37,7 @@ final class EditorView: BaseUIView {
         var initialBackgroundImageURL = ""
         var trackPoints: [TrackPoint] = TrackPoint.dummyTrackPoints()
         var timelineMarkers: [TimelineMarkerModel] = []
+        var deletedStickerTypes: Set<StickerSelector.StickerType> = []
     }
 
     // MARK: - UI Properties
@@ -309,19 +310,19 @@ final class EditorView: BaseUIView {
         routeTimelineStickerBox.onDeleted = { [weak self] in
             guard let self else { return }
 
-            removeStickerBox(routeTimelineStickerBox)
+            removeStickerBox(routeTimelineStickerBox, stickerType: .photoTimeline)
         }
 
         routeStickerBox.onDeleted = { [weak self] in
             guard let self else { return }
 
-            removeStickerBox(routeStickerBox)
+            removeStickerBox(routeStickerBox, stickerType: .route)
         }
 
         recordInfoStickerBox.onDeleted = { [weak self] in
             guard let self else { return }
 
-            removeStickerBox(recordInfoStickerBox)
+            removeStickerBox(recordInfoStickerBox, stickerType: .record)
         }
 
         routeTimelineStickerBox.onMoved = { [weak self] in
@@ -429,7 +430,11 @@ final class EditorView: BaseUIView {
         }
 
         stickerContainerView.addSubview(recordInfoStickerBox)
-        recordInfoStickerBox.frame = defaultRecordInfoStickerFrame()
+        let defaultFrame = defaultRecordInfoStickerFrame()
+        recordInfoStickerBox.frame = stickerFrame(
+            from: defaultFrame,
+            shouldCenter: state.deletedStickerTypes.remove(.record) != nil
+        )
         recordInfoStickerBox.resetContentLayoutScale()
         state.didSetRecordInfoStickerFrame = true
         markChanged()
@@ -439,7 +444,9 @@ final class EditorView: BaseUIView {
     private func selectTimelineSticker() {
         if routeTimelineStickerBox.superview == nil {
             stickerContainerView.addSubview(routeTimelineStickerBox)
-            updateTimelineFrame()
+            updateTimelineFrame(
+                shouldCenter: state.deletedStickerTypes.remove(.photoTimeline) != nil
+            )
             markChanged()
         }
 
@@ -458,7 +465,11 @@ final class EditorView: BaseUIView {
         routeSticker.updateColor(state.selectedColor)
 
         let stickerSize = stickerBoxSize(for: routeStickerBox)
-        routeStickerBox.frame = defaultRouteStickerFrame(stickerSize: stickerSize)
+        let defaultFrame = defaultRouteStickerFrame(stickerSize: stickerSize)
+        routeStickerBox.frame = stickerFrame(
+            from: defaultFrame,
+            shouldCenter: state.deletedStickerTypes.remove(.route) != nil
+        )
         routeStickerBox.resetContentLayoutScale()
 
         activateStickerBox(routeStickerBox)
@@ -509,7 +520,7 @@ final class EditorView: BaseUIView {
         state.didSetRouteTimelineStickerFrame = true
     }
 
-    private func updateTimelineFrame() {
+    private func updateTimelineFrame(shouldCenter: Bool = false) {
         guard stickerContainerView.bounds.width > 0,
               stickerContainerView.bounds.height > 0
         else {
@@ -550,7 +561,7 @@ final class EditorView: BaseUIView {
         )
 
         routeTimelineDrawingView.updateColor(state.selectedColor)
-        routeTimelineStickerBox.frame = clampedStickerFrame(targetFrame)
+        routeTimelineStickerBox.frame = stickerFrame(from: targetFrame, shouldCenter: shouldCenter)
         routeTimelineStickerBox.resetContentLayoutScale()
     }
 
@@ -579,10 +590,14 @@ final class EditorView: BaseUIView {
         stickerBox.isUserInteractionEnabled = false
     }
 
-    private func removeStickerBox(_ stickerBox: StickerBox) {
+    private func removeStickerBox(
+        _ stickerBox: StickerBox,
+        stickerType: StickerSelector.StickerType
+    ) {
         guard stickerBox.superview != nil else { return }
 
         stickerBox.removeFromSuperview()
+        state.deletedStickerTypes.insert(stickerType)
         markChanged()
     }
 
@@ -612,6 +627,25 @@ final class EditorView: BaseUIView {
         stickerBox.layoutIfNeeded()
 
         return stickerBox.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
+    }
+
+    private func stickerFrame(from frame: CGRect, shouldCenter: Bool) -> CGRect {
+        if shouldCenter {
+            return centeredStickerFrame(size: frame.size)
+        }
+
+        return clampedStickerFrame(frame)
+    }
+
+    private func centeredStickerFrame(size: CGSize) -> CGRect {
+        clampedStickerFrame(
+            CGRect(
+                x: stickerContainerView.bounds.midX - size.width / 2,
+                y: stickerContainerView.bounds.midY - size.height / 2,
+                width: size.width,
+                height: size.height
+            )
+        )
     }
 
     private func clampedStickerFrame(_ frame: CGRect) -> CGRect {
