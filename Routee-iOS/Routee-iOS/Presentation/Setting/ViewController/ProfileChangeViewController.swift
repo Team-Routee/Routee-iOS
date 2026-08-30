@@ -78,6 +78,27 @@ final class ProfileChangeViewController: BaseUIViewController {
         navigationController?.navigationBar.isHidden = true
     }
 
+    private func updateProfile() {
+        profileTask?.cancel()
+        profileTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                try await viewModel.updateProfile(
+                    nickname: rootView.nickname,
+                    hasNicknameChanged: rootView.hasNicknameChanged,
+                    profileImage: rootView.selectedProfileImage
+                )
+
+                navigationController?.popViewController(animated: true)
+            } catch {
+                guard !Task.isCancelled else { return }
+
+                RouteeLogger.error(error)
+            }
+        }
+    }
+
     // MARK: - Actions
 
     override func setAddTarget() {
