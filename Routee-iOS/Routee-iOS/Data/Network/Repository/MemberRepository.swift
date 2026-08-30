@@ -11,6 +11,10 @@ protocol MemberRepository {
     func register(nickname: String, identityToken: String, provider: LoginPlatform) async throws
     func withdraw() async throws
     func getProfile() async throws -> ProfileModel
+    func updateNickname(_ nickname: String) async throws -> String
+    func profileImagePresignedURL(filename: String) async throws -> ImagePresignedURLModel
+    func uploadProfileImage(presignedURL: String, imageData: Data) async throws
+    func updateProfileImage(objectKey: String) async throws -> String
 }
 
 struct DefaultMemberRepository: MemberRepository {
@@ -80,5 +84,72 @@ struct DefaultMemberRepository: MemberRepository {
         )
 
         return response.toModel()
+    }
+
+    func updateNickname(_ nickname: String) async throws -> String {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let requestDTO = UpdateNicknameRequestDTO(nickname: nickname)
+        let endPoint = MemberAPI.updateNickname(
+            header: .withAuth(accessToken: accessToken),
+            requestDTO: requestDTO
+        )
+
+        let response = try await service.request(
+            endPoint,
+            decodingType: UpdateNicknameResponseDTO.self
+        )
+
+        return response.nickname
+    }
+
+    func profileImagePresignedURL(filename: String) async throws -> ImagePresignedURLModel {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let requestDTO = ProfileImagePresignedURLRequestDTO(filename: filename)
+        let endPoint = MemberAPI.profileImagePresignedURL(
+            header: .withAuth(accessToken: accessToken),
+            requestDTO: requestDTO
+        )
+
+        let response = try await service.request(
+            endPoint,
+            decodingType: ProfileImagePresignedURLResponseDTO.self
+        )
+
+        return response.toImagePresignedURLModel()
+    }
+
+    func uploadProfileImage(presignedURL: String, imageData: Data) async throws {
+        try await service.presignedURLUploadData(imageData, to: presignedURL, contentType: "image/jpeg")
+    }
+
+    func updateProfileImage(objectKey: String) async throws -> String {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let requestDTO = UpdateProfileImageRequestDTO(objectKey: objectKey)
+        let endPoint = MemberAPI.updateProfileImage(
+            header: .withAuth(accessToken: accessToken),
+            requestDTO: requestDTO
+        )
+
+        let response = try await service.request(
+            endPoint,
+            decodingType: UpdateProfileImageResponseDTO.self
+        )
+
+        return response.profileImageUrl
     }
 }
