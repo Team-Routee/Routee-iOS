@@ -514,6 +514,8 @@ final class WorkoutViewController: BaseUIViewController {
 
     private func reloadPhotoMarkers(excluding excludedPhotoIndex: Int? = nil) {
         workoutView.removePhotoMarkers()
+        let hiddenPhotoCount = excludedPhotoIndex == nil ? 0 : 1
+        workoutView.updatePhotoCount(viewModel.photoRecords.count - hiddenPhotoCount)
 
         viewModel.photoRecords.enumerated().forEach { photoIndex, photoRecord in
             guard photoIndex != excludedPhotoIndex else { return }
@@ -562,6 +564,7 @@ final class WorkoutViewController: BaseUIViewController {
                     self.workoutMode = .recording
                     self.workoutView.playCountdownAnimation()
                     self.workoutView.updateDistance(self.viewModel.startDistanceTracking())
+                    self.workoutView.updatePhotoCount(0)
                     self.workoutView.updateRoutePath(self.viewModel.routePoints.map(\.latLng))
 
                     if let currentLocation = self.locationManager.location {
@@ -664,6 +667,7 @@ extension WorkoutViewController: UIImagePickerControllerDelegate, UINavigationCo
         guard let routePoint = viewModel.routePoint(matching: photoRecord.pointIndex) else { return }
 
         let photoIndex = viewModel.savePhotoRecord(photoRecord, title: title)
+        workoutView.updatePhotoCount(viewModel.photoRecords.count)
         workoutView.addPhotoMarker(
             photoRecord,
             photoIndex: photoIndex,

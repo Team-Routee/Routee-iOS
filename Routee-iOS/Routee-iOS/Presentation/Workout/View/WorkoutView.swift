@@ -40,6 +40,8 @@ final class WorkoutView: BaseUIView {
     lazy var recordButton = RouteeButton(titleText: "등산 기록", type: .enabled)
     lazy var pauseButton = UIButton()
     lazy var cameraOnButton = UIButton()
+    private let cameraIconImageView = UIImageView()
+    private let cameraCountLabel = UILabel()
     private let activityButtonStackView = UIStackView()
     private let workoutPauseView = WorkoutPauseView()
     private let photoModalDimView = UIControl()
@@ -84,6 +86,7 @@ final class WorkoutView: BaseUIView {
         currentLocationStackView.addArrangedSubviews(currentLocationImage, currentLocationLabel)
         
         activityButtonStackView.addArrangedSubviews(pauseButton, cameraOnButton)
+        cameraOnButton.addSubviews(cameraIconImageView, cameraCountLabel)
     }
     
     override func setStyle() {
@@ -175,10 +178,22 @@ final class WorkoutView: BaseUIView {
         }
         
         cameraOnButton.do {
-            $0.setImage(.icCameraFillBlack, for: .normal)
             $0.backgroundColor = .mint300
             $0.layer.cornerRadius = 30
             $0.clipsToBounds = true
+        }
+
+        cameraIconImageView.do {
+            $0.image = UIImage.icCameraFillBlack.withRenderingMode(.alwaysTemplate)
+            $0.tintColor = .static_black
+            $0.contentMode = .scaleAspectFit
+        }
+
+        cameraCountLabel.do {
+            $0.text = "0/20"
+            $0.font = .label_sb_12
+            $0.textColor = .grey_600
+            $0.textAlignment = .center
         }
         
         activityButtonStackView.do {
@@ -277,6 +292,17 @@ final class WorkoutView: BaseUIView {
         cameraOnButton.snp.makeConstraints {
             $0.size.equalTo(60)
         }
+
+        cameraIconImageView.snp.makeConstraints {
+            $0.top.equalToSuperview().inset(12.5)
+            $0.centerX.equalToSuperview()
+            $0.size.equalTo(24)
+        }
+
+        cameraCountLabel.snp.makeConstraints {
+            $0.top.equalTo(cameraIconImageView.snp.bottom)
+            $0.centerX.equalToSuperview()
+        }
         
         activityButtonStackView.snp.makeConstraints {
             $0.bottom.equalTo(safeAreaLayoutGuide).inset(31)
@@ -344,6 +370,14 @@ final class WorkoutView: BaseUIView {
 
     func setFinishButtonEnabled(_ isEnabled: Bool) {
         workoutPauseView.setFinishButtonEnabled(isEnabled)
+    }
+
+    func updatePhotoCount(_ count: Int) {
+        cameraCountLabel.text = "\(count)/20"
+        let isAtPhotoLimit = count >= 20
+        cameraOnButton.isEnabled = !isAtPhotoLimit
+        cameraOnButton.backgroundColor = isAtPhotoLimit ? .grey200 : .mint300
+        cameraIconImageView.tintColor = isAtPhotoLimit ? .grey400 : .static_black
     }
 
     func showPhotoTimelineModal(
