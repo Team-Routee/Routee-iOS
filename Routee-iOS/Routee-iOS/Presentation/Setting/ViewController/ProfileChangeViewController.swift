@@ -32,12 +32,12 @@ final class ProfileChangeViewController: BaseUIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        fetchProfile()
+        loadProfile()
     }
 
     // MARK: - Private Methods
 
-    private func fetchProfile() {
+    private func loadProfile() {
         profileTask?.cancel()
         profileTask = Task { [weak self] in
             guard let self else { return }
