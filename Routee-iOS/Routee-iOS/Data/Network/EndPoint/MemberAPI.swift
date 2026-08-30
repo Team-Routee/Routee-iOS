@@ -30,7 +30,7 @@ extension MemberAPI: RouteeEndPoint {
         case .withdraw:
             return "/withdraw"
         case .getProfile:
-            return "/profile"
+            return "/summary"
         }
     }
     
