@@ -307,6 +307,10 @@ final class WorkoutViewController: BaseUIViewController {
     // MARK: - Actions
     
     override func setAddTarget() {
+        workoutView.photoMarkerTapAction = { [weak self] photoIndex in
+            self?.showPhotoTimelineModal(at: photoIndex)
+        }
+
         workoutView.recordButton.addTarget(
             self,
             action: #selector(didTapRecordButton),
@@ -409,6 +413,16 @@ final class WorkoutViewController: BaseUIViewController {
     @objc
     private func didTapCameraButton() {
         requestCameraAccess()
+    }
+
+    private func showPhotoTimelineModal(at photoIndex: Int) {
+        guard viewModel.photoRecords.indices.contains(photoIndex) else { return }
+
+        let photoRecord = viewModel.photoRecords[photoIndex]
+        workoutView.showPhotoTimelineModal(
+            image: photoRecord.image,
+            title: photoRecord.locationTitle ?? ""
+        )
     }
     
     @objc
@@ -548,7 +562,11 @@ extension WorkoutViewController: UIImagePickerControllerDelegate, UINavigationCo
         guard let routePoint = viewModel.routePoint(matching: photoRecord.pointIndex) else { return }
 
         let photoIndex = viewModel.savePhotoRecord(photoRecord, title: title)
-        workoutView.addPhotoMarker(photoRecord, at: routePoint.coordinate)
+        workoutView.addPhotoMarker(
+            photoRecord,
+            photoIndex: photoIndex,
+            at: routePoint.coordinate
+        )
 
         Task {
             do {

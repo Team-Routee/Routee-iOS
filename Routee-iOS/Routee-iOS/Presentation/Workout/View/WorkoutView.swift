@@ -20,6 +20,7 @@ final class WorkoutView: BaseUIView {
     var distance = "0.00"
     var time = "00:00"
     var altitude = "0"
+    var photoMarkerTapAction: ((Int) -> Void)?
     
     // MARK: - UI Properties
     
@@ -41,17 +42,30 @@ final class WorkoutView: BaseUIView {
     lazy var cameraOnButton = UIButton()
     private let activityButtonStackView = UIStackView()
     private let workoutPauseView = WorkoutPauseView()
+    private let photoModalDimView = UIControl()
+    private var photoTimelineModal: WorkoutPhotoTimelineModal?
+    private var photoModalCenterYConstraint: Constraint?
     var restartButton: UIButton { workoutPauseView.restartButton }
     var finishButton: UIButton { workoutPauseView.finishButton }
     
     var mapView: NMFMapView { routeeMapView.mapView }
     private let countdownAnimationView = LottieAnimationView(asset: "countdown")
     private lazy var finishAnimationView = LottieAnimationView(dotLottieAsset: "routeefinish")
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
     
     // MARK: - UI Setting
     
     override func setUI() {
-        addSubviews(routeeMapView, countdownAnimationView, finishAnimationView, workoutPauseView)
+        addSubviews(
+            routeeMapView,
+            countdownAnimationView,
+            finishAnimationView,
+            workoutPauseView,
+            photoModalDimView
+        )
         
         routeeMapView.addSubviews(
             routeeLogo,
@@ -171,6 +185,25 @@ final class WorkoutView: BaseUIView {
         }
         
         workoutPauseView.isHidden = true
+
+        photoModalDimView.do {
+            $0.backgroundColor = .dim_secondary
+            $0.isHidden = true
+        }
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillChangeFrame(_:)),
+            name: UIResponder.keyboardWillChangeFrameNotification,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide(_:)),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
     }
     
     override func setLayout() {
@@ -187,6 +220,10 @@ final class WorkoutView: BaseUIView {
         }
         
         workoutPauseView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+
+        photoModalDimView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
         
@@ -296,6 +333,32 @@ final class WorkoutView: BaseUIView {
 
     func setFinishButtonEnabled(_ isEnabled: Bool) {
         workoutPauseView.setFinishButtonEnabled(isEnabled)
+    }
+
+    func showPhotoTimelineModal(image: UIImage, title: String) {
+        dismissPhotoTimelineModal()
+
+        let modal = WorkoutPhotoTimelineModal(image: image, title: title)
+        modal.closeButtonAction = { [weak self] in
+            self?.dismissPhotoTimelineModal()
+        }
+
+        photoTimelineModal = modal
+        photoModalDimView.isHidden = false
+        addSubview(modal)
+
+        modal.snp.makeConstraints {
+            $0.centerX.equalToSuperview()
+            photoModalCenterYConstraint = $0.centerY.equalToSuperview().constraint
+        }
+    }
+
+    func dismissPhotoTimelineModal() {
+        endEditing(true)
+        photoTimelineModal?.removeFromSuperview()
+        photoTimelineModal = nil
+        photoModalCenterYConstraint = nil
+        photoModalDimView.isHidden = true
     }
     
     func updateCurrentLocationAddress(_ address: String) {
@@ -436,7 +499,11 @@ extension WorkoutView {
         workoutPauseView.showFinishGuideToast()
     }
     
-    func addPhotoMarker(_ photoRecord: WorkoutPhotoRecord, at coordinate: CLLocationCoordinate2D) {
+    func addPhotoMarker(
+        _ photoRecord: WorkoutPhotoRecord,
+        photoIndex: Int,
+        at coordinate: CLLocationCoordinate2D
+    ) {
         let markerSize = CGSize(width: 42, height: 42)
         let sourceImage = photoRecord.image
         let pointIndex = photoRecord.pointIndex
@@ -457,14 +524,67 @@ extension WorkoutView {
             marker.width = markerSize.width
             marker.height = markerSize.height
             marker.anchor = CGPoint(x: 0.5, y: 0.5)
+            marker.touchHandler = { [weak self] _ in
+                self?.photoMarkerTapAction?(photoIndex)
+                return true
+            }
             marker.mapView = mapView
             photoMarkers.append(marker)
         }
     }
 
     func removePhotoMarkers() {
+        dismissPhotoTimelineModal()
         photoMarkers.forEach { $0.mapView = nil }
         photoMarkers.removeAll()
+    }
+
+    @objc
+    private func keyboardWillChangeFrame(_ notification: Notification) {
+        guard let modal = photoTimelineModal,
+              containsFirstResponder(in: modal),
+              let keyboardScreenFrame = notification.userInfo?[
+                UIResponder.keyboardFrameEndUserInfoKey
+              ] as? CGRect else { return }
+
+        layoutIfNeeded()
+
+        let keyboardFrame = convert(keyboardScreenFrame, from: nil)
+        let targetModalBottom = min(keyboardFrame.minY, bounds.maxY) - CGFloat.s24
+        let targetCenterY = targetModalBottom - modal.bounds.height / 2
+        let centerOffset = min(0, targetCenterY - bounds.midY)
+
+        updatePhotoModalCenter(offset: centerOffset, notification: notification)
+    }
+
+    @objc
+    private func keyboardWillHide(_ notification: Notification) {
+        guard photoTimelineModal != nil else { return }
+
+        updatePhotoModalCenter(offset: 0, notification: notification)
+    }
+
+    private func updatePhotoModalCenter(offset: CGFloat, notification: Notification) {
+        let duration = notification.userInfo?[
+            UIResponder.keyboardAnimationDurationUserInfoKey
+        ] as? Double ?? 0.25
+        let curveRawValue = notification.userInfo?[
+            UIResponder.keyboardAnimationCurveUserInfoKey
+        ] as? UInt ?? 0
+        let curve = UIView.AnimationOptions(rawValue: curveRawValue << 16)
+
+        photoModalCenterYConstraint?.update(offset: offset)
+        UIView.animate(
+            withDuration: duration,
+            delay: 0,
+            options: [curve, .beginFromCurrentState]
+        ) { [weak self] in
+            self?.layoutIfNeeded()
+        }
+    }
+
+    private func containsFirstResponder(in view: UIView) -> Bool {
+        view.isFirstResponder || view.subviews.contains { containsFirstResponder(in: $0) }
     }
 }
 
