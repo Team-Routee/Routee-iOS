@@ -36,6 +36,9 @@ final class WorkoutViewController: BaseUIViewController {
     private var initialLocation = false
     private var lastReverseGeocodingLocation: CLLocation?
     private let hapticManager = HapticManager()
+    private var pendingTimelineDeletionTask: Task<Void, Never>?
+    private var photoUploadTasks: [Int: Task<Void, Never>] = [:]
+    private var timelineTitleUpdateTasks: [Int: Task<Void, Never>] = [:]
     
     // MARK: - Life Cycle
     
@@ -305,6 +308,10 @@ final class WorkoutViewController: BaseUIViewController {
     // MARK: - Actions
     
     override func setAddTarget() {
+        workoutView.photoMarkerTapAction = { [weak self] photoIndex in
+            self?.showPhotoTimelineModal(at: photoIndex)
+        }
+
         workoutView.recordButton.addTarget(
             self,
             action: #selector(didTapRecordButton),
@@ -406,7 +413,118 @@ final class WorkoutViewController: BaseUIViewController {
     
     @objc
     private func didTapCameraButton() {
+        guard pendingTimelineDeletionTask == nil else { return }
         requestCameraAccess()
+    }
+
+    private func showPhotoTimelineModal(at photoIndex: Int) {
+        guard viewModel.photoRecords.indices.contains(photoIndex) else { return }
+
+        let photoRecord = viewModel.photoRecords[photoIndex]
+        workoutView.showPhotoTimelineModal(
+            image: photoRecord.image,
+            title: photoRecord.locationTitle ?? "",
+            deleteButtonAction: { [weak self] in
+                self?.deleteTimeline(at: photoIndex)
+            },
+            closeButtonAction: { [weak self] updatedTitle in
+                self?.updateTimelineTitle(at: photoIndex, title: updatedTitle)
+            }
+        )
+    }
+
+    private func updateTimelineTitle(at photoIndex: Int, title: String) {
+        let normalizedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedTitle.isEmpty,
+              viewModel.photoRecords.indices.contains(photoIndex),
+              viewModel.photoRecords[photoIndex].locationTitle != normalizedTitle else { return }
+
+        let updateTask = Task { [weak self] in
+            guard let self else { return }
+
+            await photoUploadTasks[photoIndex]?.value
+
+            do {
+                try await viewModel.updateTimelineTitle(
+                    at: photoIndex,
+                    title: normalizedTitle
+                )
+            } catch {
+                RouteeLogger.error(error)
+            }
+        }
+        timelineTitleUpdateTasks[photoIndex] = updateTask
+    }
+
+    private func deleteTimeline(at photoIndex: Int) {
+        guard pendingTimelineDeletionTask == nil,
+              viewModel.photoRecords.indices.contains(photoIndex) else { return }
+
+        workoutView.dismissPhotoTimelineModal()
+        reloadPhotoMarkers(excluding: photoIndex)
+        workoutView.showSnackbar(
+            message: "삭제되었습니다",
+            buttonTitle: "취소"
+        ) { [weak self] in
+            self?.cancelTimelineDeletion()
+        }
+
+        pendingTimelineDeletionTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled, let self else { return }
+
+            await workoutView.dismissSnackbar()
+
+            let uploadTasks = Array(photoUploadTasks.values)
+            for uploadTask in uploadTasks {
+                await uploadTask.value
+            }
+            photoUploadTasks.removeAll()
+
+            let titleUpdateTasks = Array(timelineTitleUpdateTasks.values)
+            for titleUpdateTask in titleUpdateTasks {
+                await titleUpdateTask.value
+            }
+            timelineTitleUpdateTasks.removeAll()
+
+            do {
+                try await viewModel.deleteTimeline(at: photoIndex)
+            } catch {
+                RouteeLogger.error(error)
+            }
+
+            pendingTimelineDeletionTask = nil
+            reloadPhotoMarkers()
+        }
+    }
+
+    private func cancelTimelineDeletion() {
+        pendingTimelineDeletionTask?.cancel()
+        pendingTimelineDeletionTask = nil
+
+        Task { [weak self] in
+            guard let self else { return }
+
+            await workoutView.dismissSnackbar()
+            reloadPhotoMarkers()
+        }
+    }
+
+    private func reloadPhotoMarkers(excluding excludedPhotoIndex: Int? = nil) {
+        workoutView.removePhotoMarkers()
+        let hiddenPhotoCount = excludedPhotoIndex == nil ? 0 : 1
+        workoutView.updatePhotoCount(viewModel.photoRecords.count - hiddenPhotoCount)
+
+        viewModel.photoRecords.enumerated().forEach { photoIndex, photoRecord in
+            guard photoIndex != excludedPhotoIndex else { return }
+            guard let routePoint = viewModel.routePoint(matching: photoRecord.pointIndex) else { return }
+
+            workoutView.addPhotoMarker(
+                photoRecord,
+                photoIndex: photoIndex,
+                at: routePoint.coordinate
+            )
+        }
     }
     
     @objc
@@ -444,6 +562,7 @@ final class WorkoutViewController: BaseUIViewController {
                     self.workoutMode = .recording
                     self.workoutView.playCountdownAnimation()
                     self.workoutView.updateDistance(self.viewModel.startDistanceTracking())
+                    self.workoutView.updatePhotoCount(0)
                     self.workoutView.updateRoutePath(self.viewModel.routePoints.map(\.latLng))
 
                     if let currentLocation = self.locationManager.location {
@@ -546,14 +665,22 @@ extension WorkoutViewController: UIImagePickerControllerDelegate, UINavigationCo
         guard let routePoint = viewModel.routePoint(matching: photoRecord.pointIndex) else { return }
 
         let photoIndex = viewModel.savePhotoRecord(photoRecord, title: title)
-        workoutView.addPhotoMarker(photoRecord, at: routePoint.coordinate)
+        workoutView.updatePhotoCount(viewModel.photoRecords.count)
+        workoutView.addPhotoMarker(
+            photoRecord,
+            photoIndex: photoIndex,
+            at: routePoint.coordinate
+        )
 
-        Task {
+        let uploadTask = Task { [weak self] in
+            guard let self else { return }
+
             do {
                 try await viewModel.uploadPhoto(at: photoIndex)
             } catch {
                 RouteeLogger.error(error)
             }
         }
+        photoUploadTasks[photoIndex] = uploadTask
     }
 }
