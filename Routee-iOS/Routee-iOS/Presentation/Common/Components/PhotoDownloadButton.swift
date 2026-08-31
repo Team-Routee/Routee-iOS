@@ -81,7 +81,7 @@ final class PhotoDownloadButton: BaseUIView {
 
     private func saveImageToPhotoLibrary() {
         guard let image = imageProvider?() else {
-            showToast?("갤러리 저장에 실패했습니다.")
+            showToast?(ToastMessage.failedToDownload)
             return
         }
 
@@ -112,7 +112,7 @@ final class PhotoDownloadButton: BaseUIView {
     }
 
     private func handleSaveSuccess() {
-        showToast?("갤러리에 저장되었습니다.")
+        showToast?(ToastMessage.successToDownload)
         downloadButton.isUserInteractionEnabled = false
         downloadButton.setImage(.icSuccessWhite, for: .normal)
 
@@ -125,12 +125,12 @@ final class PhotoDownloadButton: BaseUIView {
     }
 
     private func handleSaveFailure() {
-        showToast?("갤러리 저장에 실패했습니다.")
+        showToast?(ToastMessage.failedToDownload)
         enableButtonAfterToast()
     }
 
     private func handleAuthorizationFailure() {
-        showToast?("사진 접근 권한이 없습니다.")
+        showToast?(ToastMessage.noPhotoPermission)
         enableButtonAfterToast()
     }
 

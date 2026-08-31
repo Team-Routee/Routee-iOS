@@ -53,7 +53,7 @@ final class EditorImageCropViewController: BaseUIViewController {
     
     private func setCropViewController() {
         cropViewController.delegate = self
-        cropViewController.aspectRatioPreset = CGSize(width: 343, height: 610)
+        cropViewController.aspectRatioPreset = CGSize(width: 9, height: 16)
         cropViewController.aspectRatioLockEnabled = true
         cropViewController.resetAspectRatioEnabled = false
         cropViewController.hidesNavigationBar = false
