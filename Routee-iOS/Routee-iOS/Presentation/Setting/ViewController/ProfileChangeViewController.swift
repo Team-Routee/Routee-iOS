@@ -130,11 +130,10 @@ final class ProfileChangeViewController: BaseUIViewController {
                 try await loadLatestProfile()
 
                 await MainActor.run {
-                    self.rootView.showToast(title: "변경이 저장되었습니다.")
+                    self.rootView.showToast(title: ToastMessage.profileChangeSaved)
                 }
             } catch {
                 guard !Task.isCancelled else { return }
-
                 RouteeLogger.error(error)
             }
         }

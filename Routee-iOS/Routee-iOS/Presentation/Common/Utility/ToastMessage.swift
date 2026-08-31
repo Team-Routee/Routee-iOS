@@ -7,4 +7,5 @@
 
 enum ToastMessage {
     static let emailCopied = "이메일이 복사되었습니다."
+    static let profileChangeSaved = "변경이 저장되었습니다."
 }
