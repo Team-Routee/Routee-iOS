@@ -21,6 +21,7 @@ final class EditorView: BaseUIView {
     private let timelineStickerBottomOffset: CGFloat = 36
     private let routeStickerLeadingOffset: CGFloat = 24
     private let routeStickerTopOffset: CGFloat = 255
+    private let editorAspectRatio: CGFloat = 16.0 / 9.0
     private let recordInfoContentSize = CGSize(width: 120, height: 164)
     private let resetButtonSize: CGFloat = 36
     private let resetButtonLeadingOffset: CGFloat = 32
@@ -137,15 +138,16 @@ final class EditorView: BaseUIView {
         }
 
         backgroundOpacityView.snp.makeConstraints {
-            $0.top.equalTo(topNavigationBar.snp.bottom).offset(12)
-            $0.bottom.equalTo(recordEditTabBar.snp.top)
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.edges.equalTo(backgroundImageView)
         }
 
         backgroundImageView.snp.makeConstraints {
-            $0.top.equalTo(topNavigationBar.snp.bottom).offset(12)
             $0.bottom.equalTo(recordEditTabBar.snp.top)
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.centerX.equalToSuperview()
+            $0.top.greaterThanOrEqualTo(topNavigationBar.snp.bottom).offset(12)
+            $0.width.lessThanOrEqualToSuperview().offset(-32)
+            $0.width.equalToSuperview().offset(-32).priority(.high)
+            $0.height.equalTo(backgroundImageView.snp.width).multipliedBy(editorAspectRatio)
         }
 
         stickerContainerView.snp.makeConstraints {
