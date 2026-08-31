@@ -83,7 +83,7 @@ final class EditCompleteViewController: BaseUIViewController {
             } completionHandler: { success, _ in
                 DispatchQueue.main.async {
                     if success {
-                        self.rootView.showToast(title: "갤러리에 저장되었습니다.")
+                        self.rootView.showToast(title: ToastMessage.successToDownload)
                     } else {
                         self.rootView.showToast(title: ToastMessage.failedToDownload)
                     }
