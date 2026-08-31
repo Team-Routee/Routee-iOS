@@ -31,7 +31,7 @@ final class WorkoutPhotoTimelineModal: BaseUIView {
     private let photoImageView = UIImageView()
     private let titleTextField = RouteeTextField(
         placeholder: "현재 위치를 남겨주세요.",
-        trailingIcon: UIImage(named: "ic_edit_sm_line_white"),
+        trailingIcon: UIImage.icEditSmLineWhite,
         height: 44
     )
     private let titleCountLabel = UILabel()
@@ -51,13 +51,13 @@ final class WorkoutPhotoTimelineModal: BaseUIView {
         clipsToBounds = true
 
         deleteButton.do {
-            $0.setImage(UIImage(named: "ic_delete_lg"), for: .normal)
+            $0.setImage(.icDeleteLg, for: .normal)
             $0.backgroundColor = .grey_900
             $0.layer.cornerRadius = .r16
         }
 
         closeButton.do {
-            $0.setImage(UIImage(named: "ic_cancel_sm_outline"), for: .normal)
+            $0.setImage(.icCancelSmOutline, for: .normal)
             $0.backgroundColor = .white_10
             $0.layer.cornerRadius = .r16
         }
