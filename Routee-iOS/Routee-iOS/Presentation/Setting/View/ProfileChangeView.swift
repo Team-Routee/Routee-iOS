@@ -11,7 +11,7 @@ import Kingfisher
 import SnapKit
 import Then
 
-final class ProfileChangeView: BaseUIView {
+final class ProfileChangeView: BaseUIView, SettingTabToastPresentable {
     
     // MARK: - Properties
     
