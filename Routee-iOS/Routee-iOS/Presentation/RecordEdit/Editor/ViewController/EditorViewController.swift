@@ -151,7 +151,7 @@ final class EditorViewController: BaseUIViewController {
     }
 
     private func pushCropView(with image: UIImage) {
-        let imageCropViewController = ImageCropViewController(image: image)
+        let imageCropViewController = EditorImageCropViewController(image: image)
 
         imageCropViewController.onCropCompleted = { [weak self] croppedImage in
             self?.rootView.updateBackgroundImage(croppedImage)

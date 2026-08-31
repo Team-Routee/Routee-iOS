@@ -93,10 +93,7 @@ final class ProfileChangeViewController: BaseUIViewController {
     }
 
     private func pushProfileImageCropView(with image: UIImage) {
-        let imageCropViewController = ImageCropViewController(
-            image: image,
-            aspectRatioPreset: CGSize(width: 1, height: 1)
-        )
+        let imageCropViewController = ProfileImageCropViewController(image: image)
 
         imageCropViewController.onCropCompleted = { [weak self] croppedImage in
             self?.rootView.updateProfileImage(croppedImage)
