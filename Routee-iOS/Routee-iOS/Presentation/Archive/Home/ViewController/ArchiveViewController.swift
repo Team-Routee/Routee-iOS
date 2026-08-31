@@ -15,7 +15,7 @@ final class ArchiveViewController: BaseUIViewController {
     private var month = Calendar.current.component(.month, from: Date())
     private let rootView = ArchiveView()
     private let viewModel = ArchiveViewModel()
-    private let profileViewModel = ProfileViewModel()
+    private let summaryViewModel = MemberSummaryViewModel()
     private var dimView: UIView?
     private var joinDate: String?
     private var archiveTask: Task<Void, Never>?
@@ -35,7 +35,7 @@ final class ArchiveViewController: BaseUIViewController {
         super.viewWillAppear(animated)
 
         loadArchive()
-        loadProfile()
+        loadSummary()
     }
 
     override func setView() {
@@ -92,19 +92,19 @@ final class ArchiveViewController: BaseUIViewController {
         }
     }
 
-    private func loadProfile() {
+    private func loadSummary() {
         profileTask?.cancel()
         profileTask = Task { [weak self] in
             guard let self else { return }
 
             do {
-                let profile = try await profileViewModel.fetchProfile()
+                let summary = try await summaryViewModel.fetchSummary()
 
                 guard !Task.isCancelled else { return }
 
                 await MainActor.run {
-                    self.joinDate = profile.joinDate
-                    self.rootView.configureProfile(with: profile)
+                    self.joinDate = summary.joinDate
+                    self.rootView.configureProfile(with: summary)
                     self.configureMonthSelector(year: self.year, month: self.month)
                 }
             } catch {
