@@ -20,6 +20,7 @@ final class EditCompleteView: BaseUIView {
     private let buttonStackView = UIStackView()
     private let downloadButton = UIButton()
     private let exportButton = UIButton()
+    private let editedImageAspectRatio: CGFloat = 16.0 / 9.0
     
     // MARK: - UI Setting
     
@@ -76,7 +77,7 @@ final class EditCompleteView: BaseUIView {
             $0.top.equalTo(topNavigationBar.snp.bottom).offset(24)
             $0.centerX.equalToSuperview()
             $0.horizontalEdges.equalToSuperview().inset(35)
-            $0.bottom.equalTo(safeAreaLayoutGuide).inset(125)
+            $0.height.equalTo(backgroundImageView.snp.width).multipliedBy(editedImageAspectRatio)
         }
         
         buttonStackView.snp.makeConstraints {
