@@ -21,6 +21,7 @@ final class WorkoutTitleEditor: BaseUIView {
 
     private let maxTitleLength = 16
     private var currentTitle = ""
+    var titleEditingDidEnd: ((String) -> Void)?
     private var editState: EditState = .display {
         didSet {
             updateEditState()
@@ -187,9 +188,14 @@ final class WorkoutTitleEditor: BaseUIView {
     }
 
     private func endTitleEditing() {
+        let previousTitle = currentTitle
         currentTitle = titleTextField.text ?? ""
         editState = .display
         updateTitleDisplay()
+
+        if previousTitle != currentTitle {
+            titleEditingDidEnd?(currentTitle)
+        }
     }
 
     // MARK: - Actions

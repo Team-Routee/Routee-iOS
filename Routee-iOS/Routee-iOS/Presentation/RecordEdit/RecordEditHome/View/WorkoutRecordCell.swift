@@ -16,6 +16,7 @@ final class WorkoutRecordCell: UICollectionViewCell {
     
     static let identifier = "WorkoutRecordCell"
     var onThumbnailTap: (() -> Void)?
+    var onTitleEditingDidEnd: ((String) -> Void)?
 
     private let formatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -48,8 +49,9 @@ final class WorkoutRecordCell: UICollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         
-        onThumbnailTap = nil
         workoutTitleEditor.endEditingIfNeeded()
+        onThumbnailTap = nil
+        onTitleEditingDidEnd = nil
         workoutRecordThumbnail.configure(imageNames: [])
         workoutRecordThumbnail.configure(imageURLs: [])
     }
@@ -115,6 +117,10 @@ final class WorkoutRecordCell: UICollectionViewCell {
             action: #selector(didTapThumbnail)
         )
         workoutRecordThumbnail.addGestureRecognizer(thumbnailTapGesture)
+
+        workoutTitleEditor.titleEditingDidEnd = { [weak self] title in
+            self?.onTitleEditingDidEnd?(title)
+        }
     }
 
     // MARK: - Actions

@@ -19,6 +19,7 @@ final class RecordEditViewController: BaseUIViewController {
     private let profileViewModel = ProfileViewModel()
     private var records: [WorkoutListModel] = []
     private var selectedMonth = Date().startOfMonth
+    private var titleUpdateTask: Task<Void, Never>?
     private let joinedDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.calendar = Calendar(identifier: .gregorian)
@@ -119,6 +120,51 @@ final class RecordEditViewController: BaseUIViewController {
         let editorViewController = EditorViewController(activityId: activityId)
         navigationController?.pushViewController(editorViewController, animated: false)
     }
+
+    private func updateWorkoutTitle(
+        activityId: Int64,
+        title: String
+    ) {
+        titleUpdateTask?.cancel()
+        titleUpdateTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                let response = try await viewModel.updateWorkoutTitle(
+                    activityId: activityId,
+                    title: title
+                )
+
+                guard !Task.isCancelled else { return }
+
+                await MainActor.run {
+                    self.updateRecordTitle(
+                        activityId: response.activityId,
+                        title: response.title
+                    )
+                }
+            } catch {
+                guard !Task.isCancelled else { return }
+
+                RouteeLogger.error(error)
+            }
+        }
+    }
+
+    private func updateRecordTitle(
+        activityId: Int64,
+        title: String
+    ) {
+        guard let index = records.firstIndex(where: { $0.activityId == activityId }) else { return }
+
+        let record = records[index]
+        records[index] = WorkoutListModel(
+            activityId: record.activityId,
+            title: title,
+            activityDate: record.activityDate,
+            timelineImageUrls: record.timelineImageUrls
+        )
+    }
 }
 
 extension RecordEditViewController: UICollectionViewDataSource {
@@ -145,6 +191,12 @@ extension RecordEditViewController: UICollectionViewDataSource {
         cell.configure(with: record)
         cell.onThumbnailTap = { [weak self] in
             self?.pushEditorViewController(activityId: record.activityId)
+        }
+        cell.onTitleEditingDidEnd = { [weak self] title in
+            self?.updateWorkoutTitle(
+                activityId: record.activityId,
+                title: title
+            )
         }
 
         return cell

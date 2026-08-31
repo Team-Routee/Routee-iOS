@@ -29,4 +29,37 @@ final class RecordEditViewModel {
             month: month
         )
     }
+
+    func updateWorkoutTitle(
+        activityId: Int64,
+        title: String
+    ) async throws -> UpdateArchiveActivityTitleResponseDTO {
+        let requestDTO = UpdateArchiveActivityTitleRequestDTO(title: title)
+        let response = try await activityRepository.updateArchiveActivityTitle(
+            activityId: activityId,
+            requestDTO: requestDTO
+        )
+
+        updateRecordTitle(
+            activityId: response.activityId,
+            title: response.title
+        )
+
+        return response
+    }
+
+    private func updateRecordTitle(
+        activityId: Int64,
+        title: String
+    ) {
+        guard let index = records.firstIndex(where: { $0.activityId == activityId }) else { return }
+
+        let record = records[index]
+        records[index] = WorkoutListModel(
+            activityId: record.activityId,
+            title: title,
+            activityDate: record.activityDate,
+            timelineImageUrls: record.timelineImageUrls
+        )
+    }
 }
