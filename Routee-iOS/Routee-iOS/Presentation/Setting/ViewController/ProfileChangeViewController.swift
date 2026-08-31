@@ -14,6 +14,7 @@ final class ProfileChangeViewController: BaseUIViewController {
 
     private let viewModel = ProfileChangeViewModel()
     private var profileTask: Task<Void, Never>?
+    private var updateTask: Task<Void, Never>?
 
     // MARK: - UI Properties
 
@@ -23,6 +24,7 @@ final class ProfileChangeViewController: BaseUIViewController {
 
     deinit {
         profileTask?.cancel()
+        updateTask?.cancel()
     }
 
     override func loadView() {
@@ -43,13 +45,22 @@ final class ProfileChangeViewController: BaseUIViewController {
             guard let self else { return }
 
             do {
-                let profile = try await viewModel.fetchProfile()
-                rootView.configure(with: profile)
+                try await loadLatestProfile()
             } catch {
                 guard !Task.isCancelled else { return }
 
                 RouteeLogger.error(error)
             }
+        }
+    }
+
+    private func loadLatestProfile() async throws {
+        let profile = try await viewModel.fetchProfile()
+
+        guard !Task.isCancelled else { return }
+
+        await MainActor.run {
+            rootView.configure(with: profile)
         }
     }
 
@@ -104,8 +115,8 @@ final class ProfileChangeViewController: BaseUIViewController {
     }
 
     private func updateProfile() {
-        profileTask?.cancel()
-        profileTask = Task { [weak self] in
+        updateTask?.cancel()
+        updateTask = Task { [weak self] in
             guard let self else { return }
 
             do {
@@ -116,28 +127,16 @@ final class ProfileChangeViewController: BaseUIViewController {
                     profileImage: rootView.selectedProfileImage
                 )
 
-                navigateToArchive()
+                try await loadLatestProfile()
+
+                await MainActor.run {
+                    self.rootView.showToast(title: ToastMessage.profileChangeSaved)
+                }
             } catch {
                 guard !Task.isCancelled else { return }
-
                 RouteeLogger.error(error)
             }
         }
-    }
-
-    private func navigateToArchive() {
-        guard let tabBarController = tabBarController as? TabBarViewController,
-              let viewControllers = tabBarController.viewControllers,
-              viewControllers.indices.contains(2),
-              let archiveNavigationController = viewControllers[2] as? UINavigationController
-        else {
-            navigationController?.popToRootViewController(animated: false)
-            return
-        }
-
-        navigationController?.popToRootViewController(animated: false)
-        archiveNavigationController.popToRootViewController(animated: false)
-        tabBarController.selectTab(index: 2)
     }
 
     // MARK: - Actions
