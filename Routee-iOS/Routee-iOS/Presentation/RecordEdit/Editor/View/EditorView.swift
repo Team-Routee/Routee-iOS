@@ -37,6 +37,7 @@ final class EditorView: BaseUIView {
         var initialBackgroundImageURL = ""
         var trackPoints: [TrackPoint] = []
         var timelineMarkers: [TimelineMarkerModel] = []
+        var hasRouteData = false
         var deletedStickerTypes: Set<StickerSelector.StickerType> = []
     }
 
@@ -196,7 +197,9 @@ final class EditorView: BaseUIView {
             durationSec: model.durationSec,
             maxElevation: model.maxElevation
         )
-        routeSticker.configure(with: model.routes.sorted { $0.sequence < $1.sequence }.map(\.name))
+        let routeTitles = model.routes.sorted { $0.sequence < $1.sequence }.map(\.name)
+        state.hasRouteData = !routeTitles.isEmpty
+        routeSticker.configure(with: routeTitles)
         state.initialBackgroundImageURL = model.mapImageURL
         configureBackgroundImage(with: model.mapImageURL)
     }
@@ -454,6 +457,15 @@ final class EditorView: BaseUIView {
     }
 
     private func showRouteSticker() {
+        guard state.hasRouteData else {
+            ToastMessageView.show(
+                title: ToastMessage.noRoute,
+                in: self,
+                bottomAnchor: recordEditTabBar.snp.top
+            )
+            return
+        }
+
         guard routeStickerBox.superview == nil else {
             activateStickerBox(routeStickerBox)
             return

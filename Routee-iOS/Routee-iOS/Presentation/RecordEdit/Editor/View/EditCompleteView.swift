@@ -100,35 +100,11 @@ final class EditCompleteView: BaseUIView {
     }
     
     func showToast(title: String) {
-        subviews
-            .filter { $0 is ToastMessageView }
-            .forEach { $0.removeFromSuperview() }
-        
-        let toastMessageView = ToastMessageView(title: title)
-        
-        addSubview(toastMessageView)
-        layoutIfNeeded()
-        
-        let toastWidth = min(
-            toastMessageView.titleLabel.intrinsicContentSize.width + 32,
-            bounds.width - 48
+        ToastMessageView.show(
+            title: title,
+            in: self,
+            bottomAnchor: backgroundImageView.snp.bottom
         )
-        
-        toastMessageView.snp.makeConstraints {
-            $0.centerX.equalToSuperview()
-            $0.bottom.equalTo(backgroundImageView.snp.bottom).offset(-15)
-            $0.width.equalTo(toastWidth)
-            $0.height.equalTo(37)
-        }
-        
-        toastMessageView.layer.cornerRadius = 12
-        toastMessageView.clipsToBounds = true
-        
-        UIView.animate(withDuration: 1.5) {
-            toastMessageView.alpha = 0
-        } completion: { _ in
-            toastMessageView.removeFromSuperview()
-        }
     }
     
     // MARK: - Actions
