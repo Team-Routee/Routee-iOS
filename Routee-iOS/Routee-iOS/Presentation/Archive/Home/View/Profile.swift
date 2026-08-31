@@ -138,7 +138,7 @@ final class Profile: BaseUIView {
 
     // MARK: - Public Methods
 
-    func configure(with model: ProfileModel) {
+    func configure(with model: MemberSummaryModel) {
         configureProfileImage(with: model.profileImageUrl)
 
         nameLabel.text = model.nickname
