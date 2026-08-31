@@ -157,7 +157,22 @@ struct MockActivityRepository: ActivityRepository {
 
     func uploadTimeLineImage(presignedURL: String, imageData: Data) async throws { }
 
-    func createTimeLine(activityId: Int64, requestDTO: CreateTimeLineRequestDTO) async throws { }
+    func createTimeLine(activityId: Int64, requestDTO: CreateTimeLineRequestDTO) async throws -> Int64 {
+        1
+    }
+
+    func deleteTimeline(activityId: Int64, timelineId: Int64) async throws { }
+
+    func updateTimelineTitle(
+        activityId: Int64,
+        timelineId: Int64,
+        requestDTO: UpdateTimelineTitleRequestDTO
+    ) async throws -> UpdateTimelineTitleResponseDTO {
+        UpdateTimelineTitleResponseDTO(
+            timelineId: timelineId,
+            title: requestDTO.title
+        )
+    }
 
     func backgroundMapPresignedURL(
         activityId: Int64,

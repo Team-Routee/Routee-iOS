@@ -20,6 +20,7 @@ final class WorkoutView: BaseUIView {
     var distance = "0.00"
     var time = "00:00"
     var altitude = "0"
+    var photoMarkerTapAction: ((Int) -> Void)?
     
     // MARK: - UI Properties
     
@@ -39,19 +40,37 @@ final class WorkoutView: BaseUIView {
     lazy var recordButton = RouteeButton(titleText: "운동 기록", type: .enabled)
     lazy var pauseButton = UIButton()
     lazy var cameraOnButton = UIButton()
+    private let cameraIconImageView = UIImageView()
+    private let cameraCountLabel = UILabel()
     private let activityButtonStackView = UIStackView()
     private let workoutPauseView = WorkoutPauseView()
+    private let photoModalDimView = UIControl()
+    private var photoTimelineModal: WorkoutPhotoTimelineModal?
+    private var photoModalCenterYConstraint: Constraint?
+    private var snackbarView: SnackbarView?
+    private var readyLocationBottomConstraint: Constraint?
+    private var recordingLocationBottomConstraint: Constraint?
     var restartButton: UIButton { workoutPauseView.restartButton }
     var finishButton: UIButton { workoutPauseView.finishButton }
     
     var mapView: NMFMapView { routeeMapView.mapView }
     private let countdownAnimationView = LottieAnimationView(asset: "countdown")
     private lazy var finishAnimationView = LottieAnimationView(dotLottieAsset: "routeefinish")
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
     
     // MARK: - UI Setting
     
     override func setUI() {
-        addSubviews(routeeMapView, countdownAnimationView, finishAnimationView, workoutPauseView)
+        addSubviews(
+            routeeMapView,
+            countdownAnimationView,
+            finishAnimationView,
+            workoutPauseView,
+            photoModalDimView
+        )
         
         routeeMapView.addSubviews(
             routeeLogo,
@@ -67,6 +86,7 @@ final class WorkoutView: BaseUIView {
         currentLocationStackView.addArrangedSubviews(currentLocationImage, currentLocationLabel)
         
         activityButtonStackView.addArrangedSubviews(pauseButton, cameraOnButton)
+        cameraOnButton.addSubviews(cameraIconImageView, cameraCountLabel)
     }
     
     override func setStyle() {
@@ -158,10 +178,22 @@ final class WorkoutView: BaseUIView {
         }
         
         cameraOnButton.do {
-            $0.setImage(.icCameraFillBlack, for: .normal)
             $0.backgroundColor = .mint300
             $0.layer.cornerRadius = 30
             $0.clipsToBounds = true
+        }
+
+        cameraIconImageView.do {
+            $0.image = UIImage.icCameraFillBlack.withRenderingMode(.alwaysTemplate)
+            $0.tintColor = .static_black
+            $0.contentMode = .scaleAspectFit
+        }
+
+        cameraCountLabel.do {
+            $0.text = "0/20"
+            $0.font = .label_sb_12
+            $0.textColor = .grey_600
+            $0.textAlignment = .center
         }
         
         activityButtonStackView.do {
@@ -171,6 +203,25 @@ final class WorkoutView: BaseUIView {
         }
         
         workoutPauseView.isHidden = true
+
+        photoModalDimView.do {
+            $0.backgroundColor = .dim_secondary
+            $0.isHidden = true
+        }
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillChangeFrame(_:)),
+            name: UIResponder.keyboardWillChangeFrameNotification,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide(_:)),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
     }
     
     override func setLayout() {
@@ -187,6 +238,10 @@ final class WorkoutView: BaseUIView {
         }
         
         workoutPauseView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+
+        photoModalDimView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
         
@@ -212,9 +267,17 @@ final class WorkoutView: BaseUIView {
         
         moveToUserlocationButton.snp.makeConstraints {
             $0.trailing.equalTo(recordButton)
-            $0.bottom.equalTo(recordButton.snp.top).offset(-12)
+            readyLocationBottomConstraint = $0.bottom
+                .equalTo(recordButton.snp.top)
+                .offset(-12)
+                .constraint
+            recordingLocationBottomConstraint = $0.bottom
+                .equalTo(safeAreaLayoutGuide)
+                .inset(103)
+                .constraint
             $0.size.equalTo(44)
         }
+        recordingLocationBottomConstraint?.deactivate()
         
         recordButton.snp.makeConstraints {
             $0.centerX.equalToSuperview()
@@ -228,6 +291,17 @@ final class WorkoutView: BaseUIView {
         
         cameraOnButton.snp.makeConstraints {
             $0.size.equalTo(60)
+        }
+
+        cameraIconImageView.snp.makeConstraints {
+            $0.top.equalToSuperview().inset(12.5)
+            $0.centerX.equalToSuperview()
+            $0.size.equalTo(24)
+        }
+
+        cameraCountLabel.snp.makeConstraints {
+            $0.top.equalTo(cameraIconImageView.snp.bottom)
+            $0.centerX.equalToSuperview()
         }
         
         activityButtonStackView.snp.makeConstraints {
@@ -296,6 +370,89 @@ final class WorkoutView: BaseUIView {
 
     func setFinishButtonEnabled(_ isEnabled: Bool) {
         workoutPauseView.setFinishButtonEnabled(isEnabled)
+    }
+
+    func updatePhotoCount(_ count: Int) {
+        cameraCountLabel.text = "\(count)/20"
+        let isAtPhotoLimit = count >= 20
+        cameraOnButton.isEnabled = !isAtPhotoLimit
+        cameraOnButton.backgroundColor = isAtPhotoLimit ? .grey200 : .mint300
+        cameraIconImageView.tintColor = isAtPhotoLimit ? .grey400 : .static_black
+    }
+
+    func showPhotoTimelineModal(
+        image: UIImage,
+        title: String,
+        deleteButtonAction: (() -> Void)? = nil,
+        closeButtonAction: ((String) -> Void)? = nil
+    ) {
+        dismissPhotoTimelineModal()
+
+        let modal = WorkoutPhotoTimelineModal(image: image, title: title)
+        modal.deleteButtonAction = deleteButtonAction
+        modal.closeButtonAction = { [weak self, weak modal] in
+            let updatedTitle = modal?.titleText ?? title
+            self?.dismissPhotoTimelineModal()
+            closeButtonAction?(updatedTitle)
+        }
+
+        photoTimelineModal = modal
+        photoModalDimView.isHidden = false
+        addSubview(modal)
+
+        modal.snp.makeConstraints {
+            $0.centerX.equalToSuperview()
+            photoModalCenterYConstraint = $0.centerY.equalToSuperview().constraint
+        }
+    }
+
+    func dismissPhotoTimelineModal() {
+        endEditing(true)
+        photoTimelineModal?.removeFromSuperview()
+        photoTimelineModal = nil
+        photoModalCenterYConstraint = nil
+        photoModalDimView.isHidden = true
+    }
+
+    func showSnackbar(
+        message: String,
+        buttonTitle: String,
+        buttonAction: @escaping () -> Void
+    ) {
+        removeSnackbarImmediately()
+
+        let snackbarView = SnackbarView(message: message, buttonTitle: buttonTitle)
+        snackbarView.buttonAction = buttonAction
+        self.snackbarView = snackbarView
+        addSubview(snackbarView)
+
+        snackbarView.snp.makeConstraints {
+            $0.centerX.equalToSuperview()
+            $0.bottom.equalTo(safeAreaLayoutGuide).inset(CGFloat.s16)
+        }
+    }
+
+    func dismissSnackbar() async {
+        guard let snackbarView else { return }
+
+        snackbarView.isUserInteractionEnabled = false
+
+        await withCheckedContinuation { continuation in
+            UIView.animate(withDuration: 0.2) {
+                snackbarView.alpha = 0
+            } completion: { [weak self] _ in
+                snackbarView.removeFromSuperview()
+                if self?.snackbarView === snackbarView {
+                    self?.snackbarView = nil
+                }
+                continuation.resume()
+            }
+        }
+    }
+
+    private func removeSnackbarImmediately() {
+        snackbarView?.removeFromSuperview()
+        snackbarView = nil
     }
     
     func updateCurrentLocationAddress(_ address: String) {
@@ -370,7 +527,14 @@ extension WorkoutView {
         gradiantHeaderLayer.isHidden = mode == .finishing
         routeeLogo.isHidden = !isReady
         currentLocationStackView.isHidden = !isReady
-        moveToUserlocationButton.isHidden = !isReady
+        moveToUserlocationButton.isHidden = !(isReady || isRecording)
+        if isRecording {
+            readyLocationBottomConstraint?.deactivate()
+            recordingLocationBottomConstraint?.activate()
+        } else {
+            recordingLocationBottomConstraint?.deactivate()
+            readyLocationBottomConstraint?.activate()
+        }
         recordButton.isHidden = !isReady
         recordButton.isEnabled = isReady
         workoutMetric.isHidden = !isRecording
@@ -436,7 +600,11 @@ extension WorkoutView {
         workoutPauseView.showFinishGuideToast()
     }
     
-    func addPhotoMarker(_ photoRecord: WorkoutPhotoRecord, at coordinate: CLLocationCoordinate2D) {
+    func addPhotoMarker(
+        _ photoRecord: WorkoutPhotoRecord,
+        photoIndex: Int,
+        at coordinate: CLLocationCoordinate2D
+    ) {
         let markerSize = CGSize(width: 42, height: 42)
         let sourceImage = photoRecord.image
         let pointIndex = photoRecord.pointIndex
@@ -457,14 +625,67 @@ extension WorkoutView {
             marker.width = markerSize.width
             marker.height = markerSize.height
             marker.anchor = CGPoint(x: 0.5, y: 0.5)
+            marker.touchHandler = { [weak self] _ in
+                self?.photoMarkerTapAction?(photoIndex)
+                return true
+            }
             marker.mapView = mapView
             photoMarkers.append(marker)
         }
     }
 
     func removePhotoMarkers() {
+        dismissPhotoTimelineModal()
         photoMarkers.forEach { $0.mapView = nil }
         photoMarkers.removeAll()
+    }
+
+    @objc
+    private func keyboardWillChangeFrame(_ notification: Notification) {
+        guard let modal = photoTimelineModal,
+              containsFirstResponder(in: modal),
+              let keyboardScreenFrame = notification.userInfo?[
+                UIResponder.keyboardFrameEndUserInfoKey
+              ] as? CGRect else { return }
+
+        layoutIfNeeded()
+
+        let keyboardFrame = convert(keyboardScreenFrame, from: nil)
+        let targetModalBottom = min(keyboardFrame.minY, bounds.maxY) - CGFloat.s24
+        let targetCenterY = targetModalBottom - modal.bounds.height / 2
+        let centerOffset = min(0, targetCenterY - bounds.midY)
+
+        updatePhotoModalCenter(offset: centerOffset, notification: notification)
+    }
+
+    @objc
+    private func keyboardWillHide(_ notification: Notification) {
+        guard photoTimelineModal != nil else { return }
+
+        updatePhotoModalCenter(offset: 0, notification: notification)
+    }
+
+    private func updatePhotoModalCenter(offset: CGFloat, notification: Notification) {
+        let duration = notification.userInfo?[
+            UIResponder.keyboardAnimationDurationUserInfoKey
+        ] as? Double ?? 0.25
+        let curveRawValue = notification.userInfo?[
+            UIResponder.keyboardAnimationCurveUserInfoKey
+        ] as? UInt ?? 0
+        let curve = UIView.AnimationOptions(rawValue: curveRawValue << 16)
+
+        photoModalCenterYConstraint?.update(offset: offset)
+        UIView.animate(
+            withDuration: duration,
+            delay: 0,
+            options: [curve, .beginFromCurrentState]
+        ) { [weak self] in
+            self?.layoutIfNeeded()
+        }
+    }
+
+    private func containsFirstResponder(in view: UIView) -> Bool {
+        view.isFirstResponder || view.subviews.contains { containsFirstResponder(in: $0) }
     }
 }
 

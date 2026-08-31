@@ -29,6 +29,7 @@ final class TabBarViewController: UITabBarController {
     ]
 
     private var didSetInitialSelection = false
+    private var isExplicitlyHidden = false
 
     // MARK: - UI Properties
 
@@ -186,7 +187,8 @@ final class TabBarViewController: UITabBarController {
     // MARK: - Public Methods
 
     func setCustomTabBarHidden(_ isHidden: Bool) {
-        customTabBar.isHidden = isHidden
+        isExplicitlyHidden = isHidden
+        updateCustomTabBarVisibility()
     }
 
     func selectTab(index: Int) {
@@ -234,12 +236,17 @@ final class TabBarViewController: UITabBarController {
         }
     }
 
-    private func updateCustomTabBarVisibility() {
-        guard let navigationController = viewControllers?[selectedIndex] as? UINavigationController else {
-            return
+    private func updateCustomTabBarVisibility(for viewController: UIViewController? = nil) {
+        let targetViewController: UIViewController?
+
+        if let viewController {
+            targetViewController = viewController
+        } else {
+            let navigationController = viewControllers?[selectedIndex] as? UINavigationController
+            targetViewController = navigationController?.topViewController
         }
 
-        customTabBar.isHidden = shouldHideCustomTabBar(for: navigationController.topViewController)
+        customTabBar.isHidden = isExplicitlyHidden || shouldHideCustomTabBar(for: targetViewController)
     }
 
     // MARK: - Actions
@@ -256,6 +263,6 @@ extension TabBarViewController: UINavigationControllerDelegate {
         willShow viewController: UIViewController,
         animated: Bool
     ) {
-        customTabBar.isHidden = shouldHideCustomTabBar(for: viewController)
+        updateCustomTabBarVisibility(for: viewController)
     }
 }

@@ -254,13 +254,47 @@ final class WorkoutViewModel {
         photoRecords[index].objectKey = presigned.objectKey
         coverImageObjectKey = presigned.objectKey
         
-        try await createTimeLine(
+        let timelineId = try await createTimeLine(
             for: photoRecords[index],
             objectKey: presigned.objectKey,
             title: photoRecords[index].locationTitle ?? ""
         )
+        photoRecords[index].timelineId = timelineId
     }
-    
+
+    func deleteTimeline(at index: Int) async throws {
+        guard let activityId,
+              photoRecords.indices.contains(index),
+              let timelineId = photoRecords[index].timelineId else {
+            throw RouteeError.noData
+        }
+
+        try await activityRepository.deleteTimeline(
+            activityId: activityId,
+            timelineId: timelineId
+        )
+
+        let deletedPhoto = photoRecords.remove(at: index)
+        if coverImageObjectKey == deletedPhoto.objectKey {
+            coverImageObjectKey = photoRecords.reversed().compactMap(\.objectKey).first
+        }
+    }
+
+    func updateTimelineTitle(at index: Int, title: String) async throws {
+        guard let activityId,
+              photoRecords.indices.contains(index),
+              let timelineId = photoRecords[index].timelineId else {
+            throw RouteeError.noData
+        }
+
+        let response = try await activityRepository.updateTimelineTitle(
+            activityId: activityId,
+            timelineId: timelineId,
+            requestDTO: UpdateTimelineTitleRequestDTO(title: title)
+        )
+        photoRecords[index].locationTitle = response.title
+    }
+
     func uploadBackgroundMap(image: UIImage) async throws {
         guard let activityId else {
             throw RouteeError.noData
@@ -287,7 +321,11 @@ final class WorkoutViewModel {
         mapImageObjectKey = presigned.objectKey
     }
     
-    private func createTimeLine(for photoRecord: WorkoutPhotoRecord, objectKey: String, title: String) async throws {
+    private func createTimeLine(
+        for photoRecord: WorkoutPhotoRecord,
+        objectKey: String,
+        title: String
+    ) async throws -> Int64 {
         guard let activityId,
               let routePoint = routePoint(matching: photoRecord.pointIndex) else {
             throw RouteeError.noData
@@ -306,7 +344,10 @@ final class WorkoutViewModel {
             status: "SUCCESSFUL_CREATED"
         )
         
-        try await activityRepository.createTimeLine(activityId: activityId, requestDTO: timeLine.toDTO())
+        return try await activityRepository.createTimeLine(
+            activityId: activityId,
+            requestDTO: timeLine.toDTO()
+        )
     }
     
     private static let timeLineDateFormatter: DateFormatter = {

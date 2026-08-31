@@ -10,19 +10,29 @@ import UIKit
 import SnapKit
 
 final class RouteeTextField: UITextField {
-        
+
+    var trailingIconAction: (() -> Void)?
+
     private let textInsets = UIEdgeInsets(top: 0, left: .s12, bottom: 0, right: .s12)
     private let iconSize: CGFloat = 24
     private let iconTextSpacing: CGFloat = 8
     private let focusedBorderColor = UIColor.statusInfo
     private let unfocusedBorderColor = UIColor.white30
+    private let fieldHeight: CGFloat
 
-    init(placeholder: String = "닉네임을 입력해주세요", icon: UIImage? = nil) {
+    init(
+        placeholder: String = "닉네임을 입력해주세요",
+        icon: UIImage? = nil,
+        trailingIcon: UIImage? = nil,
+        height: CGFloat = 56
+    ) {
+        fieldHeight = height
         super.init(frame: .zero)
 
         setStyle()
         setPlaceholder(placeholder)
         if let icon { setLeadingIcon(icon) }
+        if let trailingIcon { setTrailingIcon(trailingIcon) }
     }
 
     required init?(coder: NSCoder) {
@@ -46,11 +56,23 @@ final class RouteeTextField: UITextField {
         )
     }
 
-    private var textAreaInsets: UIEdgeInsets {
-        guard leftView != nil else { return textInsets }
+    override func rightViewRect(forBounds bounds: CGRect) -> CGRect {
+        CGRect(
+            x: bounds.width - textInsets.right - iconSize,
+            y: (bounds.height - iconSize) / 2,
+            width: iconSize,
+            height: iconSize
+        )
+    }
 
+    private var textAreaInsets: UIEdgeInsets {
         var insets = textInsets
-        insets.left += iconSize + iconTextSpacing
+        if leftView != nil {
+            insets.left += iconSize + iconTextSpacing
+        }
+        if rightView != nil {
+            insets.right += iconSize + iconTextSpacing
+        }
         return insets
     }
 
@@ -59,6 +81,14 @@ final class RouteeTextField: UITextField {
         imageView.contentMode = .scaleAspectFit
         leftView = imageView
         leftViewMode = .always
+    }
+
+    private func setTrailingIcon(_ icon: UIImage) {
+        let button = UIButton()
+        button.setImage(icon, for: .normal)
+        button.addTarget(self, action: #selector(didTapTrailingIcon), for: .touchUpInside)
+        rightView = button
+        rightViewMode = .always
     }
         
     func setPlaceholder(_ placeholder: String) {
@@ -87,8 +117,13 @@ final class RouteeTextField: UITextField {
         addTarget(self, action: #selector(didEndEditing), for: .editingDidEnd)
         
         self.snp.makeConstraints {
-            $0.height.equalTo(50)
+            $0.height.equalTo(fieldHeight)
         }
+    }
+
+    @objc
+    private func didTapTrailingIcon() {
+        trailingIconAction?()
     }
     
     @objc

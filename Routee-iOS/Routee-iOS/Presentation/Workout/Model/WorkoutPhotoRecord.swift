@@ -13,4 +13,5 @@ struct WorkoutPhotoRecord {
     let createdAt: Date = Date()
     var locationTitle: String?
     var objectKey: String?
+    var timelineId: Int64?
 }
