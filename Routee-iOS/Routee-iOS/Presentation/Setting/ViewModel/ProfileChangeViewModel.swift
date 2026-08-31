@@ -44,7 +44,7 @@ final class ProfileChangeViewModel {
 
         guard let profileImage else { return }
 
-        guard let imageData = profileImage.jpegData(compressionQuality: 1) else {
+        guard let imageData = await Self.encodeProfileImage(profileImage) else {
             throw RouteeError.noData
         }
 
@@ -58,5 +58,11 @@ final class ProfileChangeViewModel {
         )
 
         _ = try await memberRepository.updateProfileImage(objectKey: presigned.objectKey)
+    }
+
+    private nonisolated static func encodeProfileImage(_ image: UIImage) async -> Data? {
+        await Task.detached(priority: .userInitiated) {
+            image.jpegData(compressionQuality: 1)
+        }.value
     }
 }
