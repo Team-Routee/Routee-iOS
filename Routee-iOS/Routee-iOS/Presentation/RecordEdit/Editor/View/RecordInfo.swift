@@ -119,9 +119,9 @@ final class RecordInfo: BaseUIView {
 
     func configure(distance: Int, durationSec: Int, maxElevation: Int) {
         let distanceInKm = Double(distance) / 1000.0
-        distanceDataLabel.text = String(format: "%.2fkm", distanceInKm)
-        timeDataLabel.text = "\(durationSec / 3600)h \((durationSec % 3600) / 60)m"
-        altitudeDataLabel.text = "\(maxElevation)m"
+        distanceDataLabel.text = distance == 0 ? "" : String(format: "%.2fkm", distanceInKm)
+        timeDataLabel.text = durationSec == 0 ? "" : "\(durationSec / 3600)h \((durationSec % 3600) / 60)m"
+        altitudeDataLabel.text = maxElevation == 0 ? "" : "\(maxElevation)m"
     }
     
     func updateColor(_ color: UIColor) {

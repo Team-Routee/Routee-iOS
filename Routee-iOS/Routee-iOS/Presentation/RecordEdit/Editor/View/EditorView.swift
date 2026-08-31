@@ -35,7 +35,7 @@ final class EditorView: BaseUIView {
         var didSetRecordInfoStickerFrame = false
         var didSetRouteTimelineStickerFrame = false
         var initialBackgroundImageURL = ""
-        var trackPoints: [TrackPoint] = TrackPoint.dummyTrackPoints()
+        var trackPoints: [TrackPoint] = []
         var timelineMarkers: [TimelineMarkerModel] = []
         var deletedStickerTypes: Set<StickerSelector.StickerType> = []
     }
