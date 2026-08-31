@@ -227,7 +227,7 @@ final class WorkoutPauseView: BaseUIView {
             .forEach { $0.removeFromSuperview() }
 
         let toastMessageView = ToastMessageView(
-            title: "종료 버튼을 길게 누르면 기록이 종료됩니다"
+            title: ToastMessage.finishGuide
         )
 
         addSubview(toastMessageView)
