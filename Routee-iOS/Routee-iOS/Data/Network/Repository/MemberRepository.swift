@@ -10,7 +10,13 @@ import Foundation
 protocol MemberRepository {
     func register(nickname: String, identityToken: String, provider: LoginPlatform) async throws
     func withdraw() async throws
-    func getProfile() async throws -> ProfileModel
+    func getMemberSummary() async throws -> MemberSummaryModel
+    func getMemberProfile() async throws -> MemberProfileModel
+    func updateNickname(_ nickname: String) async throws -> String
+    func profileImagePresignedURL(fileName: String) async throws -> ImagePresignedURLModel
+    func uploadProfileImage(presignedURL: String, imageData: Data) async throws
+    func updateProfileImage(objectKey: String) async throws -> String
+    func updateDefaultProfileImage() async throws
 }
 
 struct DefaultMemberRepository: MemberRepository {
@@ -60,14 +66,14 @@ struct DefaultMemberRepository: MemberRepository {
         }
     }
 
-    func getProfile() async throws -> ProfileModel {
+    func getMemberSummary() async throws -> MemberSummaryModel {
         let accessToken = keychainService.read(.accessToken)
 
         guard !accessToken.isEmpty else {
             throw RouteeError.noData
         }
 
-        let endPoint = MemberAPI.getProfile(
+        let endPoint = MemberAPI.getMemberSummary(
             header: .withAuthTimeZone(
                 accessToken: accessToken,
                 timeZone: TimeZone.current.identifier
@@ -76,9 +82,109 @@ struct DefaultMemberRepository: MemberRepository {
 
         let response = try await service.request(
             endPoint,
-            decodingType: ProfileResponseDTO.self
+            decodingType: MemberSummaryResponseDTO.self
         )
 
         return response.toModel()
+    }
+
+    func getMemberProfile() async throws -> MemberProfileModel {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let endPoint = MemberAPI.getMemberProfile(
+            header: .withAuth(accessToken: accessToken)
+        )
+
+        let response = try await service.request(
+            endPoint,
+            decodingType: MemberProfileResponseDTO.self
+        )
+
+        return response.toModel()
+    }
+
+    func updateNickname(_ nickname: String) async throws -> String {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let requestDTO = UpdateNicknameRequestDTO(nickname: nickname)
+        let endPoint = MemberAPI.updateNickname(
+            header: .withAuth(accessToken: accessToken),
+            requestDTO: requestDTO
+        )
+
+        let response = try await service.request(
+            endPoint,
+            decodingType: UpdateNicknameResponseDTO.self
+        )
+
+        return response.nickname
+    }
+
+    func profileImagePresignedURL(fileName: String) async throws -> ImagePresignedURLModel {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let requestDTO = ProfileImagePresignedURLRequestDTO(fileName: fileName)
+        let endPoint = MemberAPI.profileImagePresignedURL(
+            header: .withAuth(accessToken: accessToken),
+            requestDTO: requestDTO
+        )
+
+        let response = try await service.request(
+            endPoint,
+            decodingType: ProfileImagePresignedURLResponseDTO.self
+        )
+
+        return response.toImagePresignedURLModel()
+    }
+
+    func uploadProfileImage(presignedURL: String, imageData: Data) async throws {
+        try await service.presignedURLUploadData(imageData, to: presignedURL, contentType: "image/jpeg")
+    }
+
+    func updateProfileImage(objectKey: String) async throws -> String {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let requestDTO = UpdateProfileImageRequestDTO(objectKey: objectKey)
+        let endPoint = MemberAPI.updateProfileImage(
+            header: .withAuth(accessToken: accessToken),
+            requestDTO: requestDTO
+        )
+
+        let response = try await service.request(
+            endPoint,
+            decodingType: UpdateProfileImageResponseDTO.self
+        )
+
+        return response.profileImageUrl
+    }
+
+    func updateDefaultProfileImage() async throws {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.noData
+        }
+
+        let endPoint = MemberAPI.updateDefaultProfileImage(
+            header: .withAuth(accessToken: accessToken)
+        )
+
+        try await service.requestEmpty(endPoint)
     }
 }

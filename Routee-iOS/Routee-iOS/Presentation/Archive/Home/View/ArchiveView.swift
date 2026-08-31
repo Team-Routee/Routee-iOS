@@ -96,7 +96,7 @@ final class ArchiveView: BaseUIView {
 
     // MARK: - Public Methods
 
-    func configureProfile(with model: ProfileModel) {
+    func configureProfile(with model: MemberSummaryModel) {
         profileView.configure(with: model)
     }
 

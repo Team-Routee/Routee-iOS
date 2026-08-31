@@ -16,7 +16,7 @@ final class RecordEditViewController: BaseUIViewController {
 
     var onMonthChanged: ((Date) -> Void)?
     private let viewModel = RecordEditViewModel()
-    private let profileViewModel = ProfileViewModel()
+    private let summaryViewModel = MemberSummaryViewModel()
     private var records: [WorkoutListModel] = []
     private var selectedMonth = Date().startOfMonth
     private let joinedDateFormatter: DateFormatter = {
@@ -48,7 +48,7 @@ final class RecordEditViewController: BaseUIViewController {
         super.viewWillAppear(animated)
         
         (tabBarController as? TabBarViewController)?.setCustomTabBarHidden(false)
-        loadProfile()
+        loadSummary()
         fetchRecords(for: selectedMonth)
     }
 
@@ -70,13 +70,13 @@ final class RecordEditViewController: BaseUIViewController {
         }
     }
 
-    private func loadProfile() {
+    private func loadSummary() {
         Task { [weak self] in
             guard let self else { return }
 
             do {
-                let profile = try await profileViewModel.fetchProfile()
-                let joinDateText = String(profile.joinDate.prefix(10))
+                let summary = try await summaryViewModel.fetchSummary()
+                let joinDateText = String(summary.joinDate.prefix(10))
                 let joinDate = joinedDateFormatter.date(from: joinDateText)
 
                 await MainActor.run {
