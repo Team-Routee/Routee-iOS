@@ -43,13 +43,22 @@ final class ProfileChangeViewController: BaseUIViewController {
             guard let self else { return }
 
             do {
-                let profile = try await viewModel.fetchProfile()
-                rootView.configure(with: profile)
+                try await loadLatestProfile()
             } catch {
                 guard !Task.isCancelled else { return }
 
                 RouteeLogger.error(error)
             }
+        }
+    }
+
+    private func loadLatestProfile() async throws {
+        let profile = try await viewModel.fetchProfile()
+
+        guard !Task.isCancelled else { return }
+
+        await MainActor.run {
+            rootView.configure(with: profile)
         }
     }
 
