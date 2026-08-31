@@ -51,3 +51,42 @@ final class ToastMessageView: BaseUIView {
         }
     }
 }
+
+extension ToastMessageView {
+    static func show(
+        title: String,
+        in parentView: UIView,
+        bottomAnchor: ConstraintItem,
+        bottomOffset: CGFloat = -15
+    ) {
+        parentView.subviews
+            .filter { $0 is ToastMessageView }
+            .forEach { $0.removeFromSuperview() }
+
+        let toastMessageView = ToastMessageView(title: title)
+
+        parentView.addSubview(toastMessageView)
+        parentView.layoutIfNeeded()
+
+        let toastWidth = min(
+            toastMessageView.titleLabel.intrinsicContentSize.width + 32,
+            parentView.bounds.width - 48
+        )
+
+        toastMessageView.snp.makeConstraints {
+            $0.centerX.equalToSuperview()
+            $0.bottom.equalTo(bottomAnchor).offset(bottomOffset)
+            $0.width.equalTo(toastWidth)
+            $0.height.equalTo(37)
+        }
+
+        toastMessageView.layer.cornerRadius = 12
+        toastMessageView.clipsToBounds = true
+
+        UIView.animate(withDuration: 1.5) {
+            toastMessageView.alpha = 0
+        } completion: { _ in
+            toastMessageView.removeFromSuperview()
+        }
+    }
+}

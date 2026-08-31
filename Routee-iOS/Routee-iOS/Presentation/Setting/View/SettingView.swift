@@ -100,7 +100,7 @@ final class SettingView: BaseUIView {
 
         contentStackView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.top.equalTo(titleLabel.snp.bottom).offset(40)
+            $0.top.equalTo(titleLabel.snp.bottom).offset(33)
             $0.width.equalTo(343)
         }
     }
