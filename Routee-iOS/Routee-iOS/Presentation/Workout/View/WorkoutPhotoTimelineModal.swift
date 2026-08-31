@@ -105,31 +105,31 @@ final class WorkoutPhotoTimelineModal: BaseUIView {
         }
 
         deleteButton.snp.makeConstraints {
-            $0.top.equalToSuperview().inset(CGFloat.s20)
-            $0.leading.equalToSuperview().inset(CGFloat.s24)
+            $0.top.equalToSuperview().inset(20)
+            $0.leading.equalToSuperview().inset(24)
             $0.size.equalTo(32)
         }
 
         closeButton.snp.makeConstraints {
-            $0.top.equalToSuperview().inset(CGFloat.s20)
-            $0.trailing.equalToSuperview().inset(CGFloat.s24)
+            $0.top.equalToSuperview().inset(20)
+            $0.trailing.equalToSuperview().inset(24)
             $0.size.equalTo(32)
         }
 
         photoImageView.snp.makeConstraints {
             $0.top.equalToSuperview().inset(64)
-            $0.horizontalEdges.equalToSuperview().inset(CGFloat.s24)
+            $0.horizontalEdges.equalToSuperview().inset(24)
             $0.height.equalTo(264)
         }
 
         titleTextField.snp.makeConstraints {
-            $0.top.equalTo(photoImageView.snp.bottom).offset(CGFloat.s12)
-            $0.horizontalEdges.equalToSuperview().inset(CGFloat.s24)
+            $0.top.equalTo(photoImageView.snp.bottom).offset(12)
+            $0.horizontalEdges.equalToSuperview().inset(24)
         }
 
         titleCountLabel.snp.makeConstraints {
-            $0.top.equalTo(titleTextField.snp.bottom).offset(CGFloat.s2)
-            $0.trailing.equalToSuperview().inset(CGFloat.s24)
+            $0.top.equalTo(titleTextField.snp.bottom).offset(2)
+            $0.trailing.equalToSuperview().inset(24)
             $0.height.equalTo(20)
         }
     }
