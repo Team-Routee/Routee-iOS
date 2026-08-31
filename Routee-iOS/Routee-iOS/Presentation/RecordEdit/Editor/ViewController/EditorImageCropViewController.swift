@@ -29,7 +29,6 @@ final class EditorImageCropViewController: BaseUIViewController {
         self.cropViewController = cropViewController
         self.rootView = ImageCropView(cropContentView: cropViewController.view)
         super.init(nibName: nil, bundle: nil)
-        hidesBottomBarWhenPushed = true
     }
     
     required init?(coder: NSCoder) {
