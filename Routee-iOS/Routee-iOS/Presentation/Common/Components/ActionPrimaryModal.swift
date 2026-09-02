@@ -12,10 +12,16 @@ import Then
 
 final class ActionPrimaryModal: UIViewController {
 
+    enum ActionCount {
+        case single
+        case double
+    }
+
     // MARK: - Properties
 
     private let titleText: String
     private let descriptionText: String?
+    private let actionCount: ActionCount
     private let leftButtonTitle: String
     private let rightButtonTitle: String
     private let dismissOnAction: Bool
@@ -42,14 +48,16 @@ final class ActionPrimaryModal: UIViewController {
     init(
         title: String,
         description: String? = nil,
-        leftButtonTitle: String,
-        rightButtonTitle: String,
+        actionCount: ActionCount = .double,
+        leftButtonTitle: String = "",
+        rightButtonTitle: String = "",
         dismissOnAction: Bool = true,
         leftButtonAction: (() -> Void)? = nil,
         rightButtonAction: (() -> Void)? = nil
     ) {
         self.titleText = title
         self.descriptionText = description
+        self.actionCount = actionCount
         self.leftButtonTitle = leftButtonTitle
         self.rightButtonTitle = rightButtonTitle
         self.dismissOnAction = dismissOnAction
@@ -154,17 +162,17 @@ final class ActionPrimaryModal: UIViewController {
 
         if hasDescription {
             textStackView.addArrangedSubview(descriptionLabel)
-            contentStackView.setCustomSpacing(0, after: textStackView)
-        } else {
-            contentStackView.setCustomSpacing(
-                .s16,
-                after: textStackView
-            )
         }
 
         contentStackView.addArrangedSubview(buttonStackView)
-        buttonStackView.addArrangedSubview(leftButton)
-        buttonStackView.addArrangedSubview(rightButton)
+
+        switch actionCount {
+        case .single:
+            buttonStackView.addArrangedSubview(leftButton)
+        case .double:
+            buttonStackView.addArrangedSubview(leftButton)
+            buttonStackView.addArrangedSubview(rightButton)
+        }
     }
 
     private func setLayout() {
@@ -181,16 +189,8 @@ final class ActionPrimaryModal: UIViewController {
         }
 
         contentStackView.snp.makeConstraints {
-            $0.horizontalEdges.equalToSuperview()
-                .inset(CGFloat.s24)
-            $0.verticalEdges.equalToSuperview()
-                .inset(CGFloat.s24)
-        }
-
-        if hasDescription {
-            textStackView.snp.makeConstraints {
-                $0.height.equalTo(77)
-            }
+            $0.horizontalEdges.equalToSuperview().inset(CGFloat.s24)
+            $0.verticalEdges.equalToSuperview().inset(CGFloat.s24)
         }
 
         leftButton.snp.makeConstraints {
