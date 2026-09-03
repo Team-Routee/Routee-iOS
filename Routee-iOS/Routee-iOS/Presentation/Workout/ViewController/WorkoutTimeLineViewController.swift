@@ -64,15 +64,24 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
 
     private func completeTimeLine() {
         Task {
-            do {
-                try await uploadCourseList()
-            } catch {
-                RouteeLogger.error(error)
-            }
-            await finishRecordingIfNeeded()
+            await saveRecording()
             await MainActor.run {
                 _ = self.navigationController?.popToRootViewController(animated: true)
             }
+        }
+    }
+
+    private func saveRecording() async {
+        await LoadingOverlayManager.shared.perform(
+            message: "데이터를 불러오고 있어요"
+        ) {
+            do {
+                try await self.uploadCourseList()
+            } catch {
+                RouteeLogger.error(error)
+            }
+
+            await self.finishRecordingIfNeeded()
         }
     }
 
@@ -117,12 +126,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     @objc
     private func didTapGoToEditButton() {
         Task {
-            do {
-                try await uploadCourseList()
-            } catch {
-                RouteeLogger.error(error)
-            }
-            await finishRecordingIfNeeded()
+            await saveRecording()
             await MainActor.run {
                 self.navigationController?.pushViewController(
                     EditorViewController(activityId: self.activityId),
