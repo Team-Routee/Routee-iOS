@@ -195,7 +195,10 @@ final class EditorViewController: BaseUIViewController {
               let navigationController else { return }
 
         let editedImage = rootView.makeEditedImage()
-        let editCompleteViewController = EditCompleteViewController(editedImage: editedImage)
+        let editCompleteViewController = EditCompleteViewController(
+            activityId: activityId,
+            editedImage: editedImage
+        )
 
         hasCompleted = true
         navigationController.pushViewController(editCompleteViewController, animated: false)
