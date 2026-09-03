@@ -27,8 +27,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         #if DEVELOPMENT
             let mixpanel = Mixpanel.mainInstance()
             mixpanel.loggingEnabled = true
-            mixpanel.track(event: "debug_mixpanel_connected")
-            mixpanel.flush()
         #endif
 
             return true
