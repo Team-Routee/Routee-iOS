@@ -122,7 +122,11 @@ final class EditorViewController: BaseUIViewController {
 
         guard currentNavigationController !== recordEditNavigationController else { return }
 
-        currentNavigationController?.popToRootViewController(animated: false)
+        DispatchQueue.main.async { [weak currentNavigationController] in
+            guard let rootViewController = currentNavigationController?.viewControllers.first else { return }
+
+            currentNavigationController?.setViewControllers([rootViewController], animated: false)
+        }
     }
 
     private func handleBackButtonTap() {
