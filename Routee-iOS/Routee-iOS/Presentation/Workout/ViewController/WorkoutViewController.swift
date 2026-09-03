@@ -562,24 +562,27 @@ final class WorkoutViewController: BaseUIViewController {
                     startedAt: startedAt
                 )
 
-                AnalyticsTracker.track(
-                    .workoutStarted,
-                    properties: [
-                        "activity_id": String(activity.activityId),
-                        "activity_type": "HIKING"
-                    ]
-                )
-
                 RouteeLogger.debug("운동 기록 시작 완료 (activityId: \(activity.activityId))")
                 await MainActor.run {
-                    self.workoutMode = .recording
-                    self.workoutView.playCountdownAnimation()
-                    self.workoutView.updateDistance(self.viewModel.startDistanceTracking())
-                    self.workoutView.updatePhotoCount(0)
-                    self.workoutView.updateRoutePath(self.viewModel.routePoints.map(\.latLng))
+                    self.workoutView.playCountdownAnimation { [weak self] in
+                        guard let self else { return }
 
-                    if let currentLocation = self.locationManager.location {
-                        self.appendRouteLocationIfNeeded(currentLocation)
+                        workoutMode = .recording
+                        workoutView.updateDistance(viewModel.startDistanceTracking())
+                        workoutView.updatePhotoCount(0)
+                        workoutView.updateRoutePath(viewModel.routePoints.map(\.latLng))
+
+                        AnalyticsTracker.track(
+                            .workoutStarted,
+                            properties: [
+                                "activity_id": String(activity.activityId),
+                                "activity_type": "HIKING"
+                            ]
+                        )
+
+                        if let currentLocation = locationManager.location {
+                            appendRouteLocationIfNeeded(currentLocation)
+                        }
                     }
                 }
             } catch {

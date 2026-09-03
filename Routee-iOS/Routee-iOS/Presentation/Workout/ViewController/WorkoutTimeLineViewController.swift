@@ -15,6 +15,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     private let showFailureModalOnAppear: Bool
     private var isCompletingTimeline = false
     private var didShowFailureModal = false
+    private var didTrackRecordingEnded = false
 
     // MARK: - Initializer
 
@@ -63,6 +64,17 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
         super.viewDidAppear(animated)
 
         workoutTimelineView.fitTrackMapToRoute()
+
+        if let activityId, !didTrackRecordingEnded {
+            didTrackRecordingEnded = true
+            AnalyticsTracker.track(
+                .workoutRecordingEnded,
+                properties: [
+                    "activity_id": String(activityId),
+                    "activity_type": "HIKING"
+                ]
+            )
+        }
 
         guard showFailureModalOnAppear,
               !didShowFailureModal else { return }
@@ -134,6 +146,16 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     // MARK: - Private Method
 
     private func presentFinishRecordingFailureModal() {
+        if let activityId {
+            AnalyticsTracker.track(
+                .workoutCompleteFailed,
+                properties: [
+                    "activity_id": String(activityId),
+                    "activity_type": "HIKING"
+                ]
+            )
+        }
+
         let confirmAction: () -> Void = { [weak self] in
             self?.navigationController?.popToRootViewController(animated: true)
         }
