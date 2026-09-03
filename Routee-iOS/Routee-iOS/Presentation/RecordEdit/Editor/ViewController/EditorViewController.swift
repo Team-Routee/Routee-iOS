@@ -17,6 +17,16 @@ final class EditorViewController: BaseUIViewController {
     private let viewModel = EditorViewModel()
     private let recordEditResourceViewModel = RecordEditResourceViewModel()
     private let activityId: Int64?
+    private let entryPoint: EntryPoint
+
+    enum EntryPoint {
+        case recordEditHome
+        case workoutCompletion
+    }
+
+    private enum TabIndex {
+        static let recordEdit = 1
+    }
 
     // MARK: - UI Properties
 
@@ -24,8 +34,12 @@ final class EditorViewController: BaseUIViewController {
 
     // MARK: - Initializer
 
-    init(activityId: Int64? = nil) {
+    init(
+        activityId: Int64? = nil,
+        entryPoint: EntryPoint = .recordEditHome
+    ) {
         self.activityId = activityId
+        self.entryPoint = entryPoint
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -97,7 +111,28 @@ final class EditorViewController: BaseUIViewController {
     }
 
     private func popViewController() {
-        navigationController?.popViewController(animated: false)
+        guard entryPoint == .workoutCompletion else {
+            navigationController?.popViewController(animated: false)
+            return
+        }
+
+        navigateToRecordEditHome()
+    }
+
+    private func navigateToRecordEditHome() {
+        guard let tabBarController = tabBarController as? TabBarViewController,
+              let viewControllers = tabBarController.viewControllers,
+              viewControllers.indices.contains(TabIndex.recordEdit),
+              let recordEditNavigationController = viewControllers[TabIndex.recordEdit] as? UINavigationController
+        else {
+            navigationController?.popViewController(animated: false)
+            return
+        }
+
+        navigationController?.popToRootViewController(animated: false)
+        recordEditNavigationController.popToRootViewController(animated: false)
+        tabBarController.setCustomTabBarHidden(false)
+        tabBarController.selectTab(index: TabIndex.recordEdit)
     }
 
     private func handleBackButtonTap() {
