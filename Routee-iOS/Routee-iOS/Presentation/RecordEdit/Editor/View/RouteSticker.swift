@@ -35,6 +35,8 @@ final class RouteSticker: BaseUIView {
             $0.axis = .vertical
             $0.spacing = 6
             $0.alignment = .leading
+            $0.isLayoutMarginsRelativeArrangement = true
+            $0.layoutMargins = UIEdgeInsets(top: 0, left: 4, bottom: 0, right: 0)
             $0.tintColor = .recapMint
         }
     }
@@ -53,6 +55,7 @@ final class RouteSticker: BaseUIView {
         routeTitleStackView.snp.makeConstraints {
             $0.top.equalTo(routeIconImageView.snp.bottom).offset(6)
             $0.horizontalEdges.bottom.equalToSuperview()
+            $0.width.greaterThanOrEqualTo(routeIconImageView.snp.width)
         }
     }
     
