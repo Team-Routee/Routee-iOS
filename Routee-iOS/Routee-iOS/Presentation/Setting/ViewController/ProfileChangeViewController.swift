@@ -45,7 +45,11 @@ final class ProfileChangeViewController: BaseUIViewController {
             guard let self else { return }
 
             do {
-                try await loadLatestProfile()
+                try await LoadingOverlayManager.shared.perform(
+                    message: "데이터를 불러오고 있어요"
+                ) {
+                    try await self.loadLatestProfile()
+                }
             } catch {
                 guard !Task.isCancelled else { return }
 
@@ -120,14 +124,18 @@ final class ProfileChangeViewController: BaseUIViewController {
             guard let self else { return }
 
             do {
-                try await viewModel.updateProfile(
-                    nickname: rootView.nickname,
-                    hasNicknameChanged: rootView.hasNicknameChanged,
-                    shouldApplyDefaultProfileImage: rootView.shouldApplyDefaultProfileImage,
-                    profileImage: rootView.selectedProfileImage
-                )
+                try await LoadingOverlayManager.shared.perform(
+                    message: "데이터를 불러오고 있어요"
+                ) {
+                    try await self.viewModel.updateProfile(
+                        nickname: self.rootView.nickname,
+                        hasNicknameChanged: self.rootView.hasNicknameChanged,
+                        shouldApplyDefaultProfileImage: self.rootView.shouldApplyDefaultProfileImage,
+                        profileImage: self.rootView.selectedProfileImage
+                    )
 
-                try await loadLatestProfile()
+                    try await self.loadLatestProfile()
+                }
 
                 await MainActor.run {
                     self.rootView.showToast(title: ToastMessage.profileChangeSaved)
