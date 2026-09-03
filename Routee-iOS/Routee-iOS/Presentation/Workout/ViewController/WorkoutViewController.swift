@@ -132,7 +132,6 @@ final class WorkoutViewController: BaseUIViewController {
     private func pauseRecordingRoute() {
         workoutMode = .paused
         viewModel.pauseDistanceTracking()
-        workoutView.setFinishButtonEnabled(viewModel.canFinishRecording)
         changeActivityStatus(to: "ACTIVITY_PAUSED")
     }
 
@@ -142,10 +141,7 @@ final class WorkoutViewController: BaseUIViewController {
     }
     
     private func finishRecordingRoute() {
-        guard
-            workoutMode != .finishing,
-            viewModel.canFinishRecording
-        else { return }
+        guard workoutMode != .finishing else { return }
         workoutMode = .finishing
 
         let backgroundMapTask = Task {

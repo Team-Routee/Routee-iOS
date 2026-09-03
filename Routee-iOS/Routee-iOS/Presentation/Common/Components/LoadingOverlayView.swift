@@ -47,7 +47,7 @@ final class LoadingOverlayView: BaseUIView {
     override func setLayout() {
         loadingAnimationView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.bottom.equalTo(messageLabel.snp.bottom).offset(37)
+            $0.bottom.equalTo(messageLabel.snp.bottom)
             $0.size.equalTo(276)
         }
 

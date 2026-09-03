@@ -18,9 +18,6 @@ final class WorkoutViewModel {
     private(set) var routePoints: [WorkoutRoutePoint] = []
     private(set) var photoRecords: [WorkoutPhotoRecord] = []
 
-    var canFinishRecording: Bool {
-        routePoints.count > 1
-    }
     private(set) var activityId: Int64?
     private(set) var activityTitle: String?
     private(set) var mapImageObjectKey: String?
@@ -201,8 +198,7 @@ final class WorkoutViewModel {
     
     func finishRecording(title: String) async throws {
         guard let activityId,
-              let mapImageObjectKey,
-              canFinishRecording else {
+              let mapImageObjectKey else {
             throw RouteeError.noData
         }
         
