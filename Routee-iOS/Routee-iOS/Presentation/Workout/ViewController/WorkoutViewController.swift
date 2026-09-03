@@ -151,12 +151,14 @@ final class WorkoutViewController: BaseUIViewController {
         let backgroundMapTask = Task {
             guard let mapImage = await workoutView.captureBackgroundMapImage(
                 fitting: viewModel.routePoints.map(\.latLng)
-            ) else { return }
+            ) else { return false }
 
             do {
                 try await viewModel.uploadBackgroundMap(image: mapImage)
+                return true
             } catch {
                 RouteeLogger.error(error)
+                return false
             }
         }
 
@@ -164,15 +166,17 @@ final class WorkoutViewController: BaseUIViewController {
             guard let self else { return }
 
             Task {
-                await backgroundMapTask.value
+                let didUploadBackgroundMap = await backgroundMapTask.value
                 await MainActor.run {
-                    self.pushWorkoutTimeLineViewController()
+                    self.pushWorkoutTimeLineViewController(
+                        showFailureModalOnAppear: !didUploadBackgroundMap
+                    )
                 }
             }
         }
     }
 
-    private func pushWorkoutTimeLineViewController() {
+    private func pushWorkoutTimeLineViewController(showFailureModalOnAppear: Bool) {
         let viewController = WorkoutTimeLineViewController(
             activityId: viewModel.activityId,
             title: viewModel.activityTitle ?? "",
@@ -185,7 +189,8 @@ final class WorkoutViewController: BaseUIViewController {
             photoRecords: viewModel.photoRecords,
             finishRecording: { [viewModel] title in
                 try await viewModel.finishRecording(title: title)
-            }
+            },
+            showFailureModalOnAppear: showFailureModalOnAppear
         )
         navigationController?.pushViewController(viewController, animated: true)
     }
@@ -555,6 +560,14 @@ final class WorkoutViewController: BaseUIViewController {
                 let activity = try await viewModel.startRecording(
                     activityType: "HIKING",
                     startedAt: startedAt
+                )
+
+                AnalyticsTracker.track(
+                    .workoutStarted,
+                    properties: [
+                        "activity_id": String(activity.activityId),
+                        "activity_type": "HIKING"
+                    ]
                 )
 
                 RouteeLogger.debug("운동 기록 시작 완료 (activityId: \(activity.activityId))")
