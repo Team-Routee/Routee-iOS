@@ -117,7 +117,10 @@ final class RecordEditViewController: BaseUIViewController {
     }
 
     private func pushEditorViewController(activityId: Int64) {
-        let editorViewController = EditorViewController(activityId: activityId)
+        let editorViewController = EditorViewController(
+            activityId: activityId,
+            entryPoint: .recordEditTab
+        )
         navigationController?.pushViewController(editorViewController, animated: false)
     }
 

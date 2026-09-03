@@ -17,6 +17,8 @@ final class EditorViewController: BaseUIViewController {
     private let viewModel = EditorViewModel()
     private let recordEditResourceViewModel = RecordEditResourceViewModel()
     private let activityId: Int64?
+    private let entryPoint: RecapEditorEntryPoint
+    private var didTrackEditorOpened = false
 
     // MARK: - UI Properties
 
@@ -24,8 +26,9 @@ final class EditorViewController: BaseUIViewController {
 
     // MARK: - Initializer
 
-    init(activityId: Int64? = nil) {
+    init(activityId: Int64?, entryPoint: RecapEditorEntryPoint) {
         self.activityId = activityId
+        self.entryPoint = entryPoint
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -52,6 +55,22 @@ final class EditorViewController: BaseUIViewController {
         super.viewWillAppear(animated)
 
         (tabBarController as? TabBarViewController)?.setCustomTabBarHidden(true)
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        guard let activityId,
+              !didTrackEditorOpened else { return }
+
+        didTrackEditorOpened = true
+        AnalyticsTracker.track(
+            .recapEditorOpened,
+            properties: [
+                "activity_id": String(activityId),
+                "entry_point": entryPoint.rawValue
+            ]
+        )
     }
 
     // MARK: - Private Methods

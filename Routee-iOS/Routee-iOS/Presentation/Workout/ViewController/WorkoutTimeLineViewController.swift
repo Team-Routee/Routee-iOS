@@ -198,7 +198,10 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
             do {
                 try await saveWorkoutRecord()
                 navigationController?.pushViewController(
-                    EditorViewController(activityId: activityId),
+                    EditorViewController(
+                        activityId: activityId,
+                        entryPoint: .postWorkout
+                    ),
                     animated: true
                 )
             } catch {

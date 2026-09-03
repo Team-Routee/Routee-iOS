@@ -23,3 +23,8 @@ enum AnalyticsEvent: String {
     case recapSaved = "recap_saved"
     case recapShared = "recap_shared"
 }
+
+enum RecapEditorEntryPoint: String {
+    case postWorkout = "post_workout"
+    case recordEditTab = "record_edit_tab"
+}
