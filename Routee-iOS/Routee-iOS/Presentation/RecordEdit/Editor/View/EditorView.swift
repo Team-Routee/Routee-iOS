@@ -15,6 +15,8 @@ final class EditorView: BaseUIView {
 
     // MARK: - Properties
 
+    var onFirstChange: (() -> Void)?
+
     private let recordInfoStickerInsets = UIEdgeInsets(top: 15, left: 17, bottom: 12, right: 23)
     private let timelineStickerInsets = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
     private let routeStickerInsets = UIEdgeInsets(top: 16, left: 14, bottom: 13, right: 9)
@@ -709,6 +711,8 @@ final class EditorView: BaseUIView {
 
         state.hasChanges = true
         updateResetButtonState()
+        onFirstChange?()
+        onFirstChange = nil
     }
 
     private func updateResetButtonState() {

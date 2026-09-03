@@ -19,6 +19,7 @@ final class EditorViewController: BaseUIViewController {
     private let activityId: Int64?
     private let entryPoint: RecapEditorEntryPoint
     private var didTrackEditorOpened = false
+    private var hasCompleted = false
 
     // MARK: - UI Properties
 
@@ -116,6 +117,17 @@ final class EditorViewController: BaseUIViewController {
     }
 
     private func popViewController() {
+        if let activityId,
+           !hasCompleted {
+            AnalyticsTracker.track(
+                .recapAbandoned,
+                properties: [
+                    "activity_id": String(activityId),
+                    "has_edit": rootView.hasChanges
+                ]
+            )
+        }
+
         navigationController?.popViewController(animated: false)
     }
 
@@ -179,11 +191,25 @@ final class EditorViewController: BaseUIViewController {
     }
 
     private func pushCompleteView() {
+        guard !hasCompleted,
+              let navigationController else { return }
+
         let editedImage = rootView.makeEditedImage()
         let editCompleteViewController = EditCompleteViewController(editedImage: editedImage)
 
-        navigationController?.pushViewController(editCompleteViewController, animated: false)
-        navigationController?.navigationBar.isHidden = true
+        hasCompleted = true
+        navigationController.pushViewController(editCompleteViewController, animated: false)
+        navigationController.navigationBar.isHidden = true
+
+        if let activityId {
+            AnalyticsTracker.track(
+                .recapCompleted,
+                properties: [
+                    "activity_id": String(activityId),
+                    "has_edit": rootView.hasChanges
+                ]
+            )
+        }
     }
 
     // MARK: - Actions
@@ -192,6 +218,15 @@ final class EditorViewController: BaseUIViewController {
         rootView.setGesture()
         rootView.setAddTarget()
         rootView.setInitialState()
+
+        rootView.onFirstChange = { [weak self] in
+            guard let activityId = self?.activityId else { return }
+
+            AnalyticsTracker.track(
+                .recapEdited,
+                properties: ["activity_id": String(activityId)]
+            )
+        }
 
         rootView.topNavigationBar.backButtonAction = { [weak self] in
             self?.handleBackButtonTap()
