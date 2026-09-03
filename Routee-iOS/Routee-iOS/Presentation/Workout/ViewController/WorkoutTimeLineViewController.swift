@@ -125,10 +125,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
             await finishRecordingIfNeeded()
             await MainActor.run {
                 self.navigationController?.pushViewController(
-                    EditorViewController(
-                        activityId: self.activityId,
-                        entryPoint: .workoutCompletion
-                    ),
+                    EditorViewController(activityId: self.activityId),
                     animated: true
                 )
             }

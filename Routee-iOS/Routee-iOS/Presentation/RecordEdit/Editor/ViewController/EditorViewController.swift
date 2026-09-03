@@ -17,12 +17,6 @@ final class EditorViewController: BaseUIViewController {
     private let viewModel = EditorViewModel()
     private let recordEditResourceViewModel = RecordEditResourceViewModel()
     private let activityId: Int64?
-    private let entryPoint: EntryPoint
-
-    enum EntryPoint {
-        case recordEditHome
-        case workoutCompletion
-    }
 
     private enum TabIndex {
         static let recordEdit = 1
@@ -34,12 +28,8 @@ final class EditorViewController: BaseUIViewController {
 
     // MARK: - Initializer
 
-    init(
-        activityId: Int64? = nil,
-        entryPoint: EntryPoint = .recordEditHome
-    ) {
+    init(activityId: Int64? = nil) {
         self.activityId = activityId
-        self.entryPoint = entryPoint
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -111,11 +101,6 @@ final class EditorViewController: BaseUIViewController {
     }
 
     private func popViewController() {
-        guard entryPoint == .workoutCompletion else {
-            navigationController?.popViewController(animated: false)
-            return
-        }
-
         navigateToRecordEditHome()
     }
 
@@ -129,10 +114,15 @@ final class EditorViewController: BaseUIViewController {
             return
         }
 
-        navigationController?.popToRootViewController(animated: false)
+        let currentNavigationController = navigationController
+
         recordEditNavigationController.popToRootViewController(animated: false)
         tabBarController.setCustomTabBarHidden(false)
         tabBarController.selectTab(index: TabIndex.recordEdit)
+
+        guard currentNavigationController !== recordEditNavigationController else { return }
+
+        currentNavigationController?.popToRootViewController(animated: false)
     }
 
     private func handleBackButtonTap() {
