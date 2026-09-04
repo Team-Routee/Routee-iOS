@@ -15,6 +15,8 @@ final class EditorView: BaseUIView {
 
     // MARK: - Properties
 
+    var onFirstChange: (() -> Void)?
+
     private let recordInfoStickerInsets = UIEdgeInsets(top: 15, left: 17, bottom: 12, right: 23)
     private let timelineStickerInsets = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
     private let routeStickerInsets = UIEdgeInsets(top: 16, left: 14, bottom: 13, right: 9)
@@ -22,7 +24,6 @@ final class EditorView: BaseUIView {
     private let routeStickerLeadingOffset: CGFloat = 24
     private let routeStickerTopOffset: CGFloat = 255
     private let editorAspectRatio: CGFloat = 16.0 / 9.0
-    private let recordInfoContentSize = CGSize(width: 120, height: 164)
     private let resetButtonSize: CGFloat = 36
     private let resetButtonLeadingOffset: CGFloat = 32
     private let resetButtonBottomOffset: CGFloat = 18
@@ -505,11 +506,13 @@ final class EditorView: BaseUIView {
     }
 
     private func defaultRecordInfoStickerFrame() -> CGRect {
-        CGRect(
+        let stickerSize = stickerBoxSize(for: recordInfoStickerBox)
+
+        return CGRect(
             x: 32 - recordInfoStickerInsets.left,
             y: 80 - recordInfoStickerInsets.top,
-            width: recordInfoContentSize.width + recordInfoStickerInsets.left + recordInfoStickerInsets.right,
-            height: recordInfoContentSize.height + recordInfoStickerInsets.top + recordInfoStickerInsets.bottom
+            width: stickerSize.width,
+            height: stickerSize.height
         )
     }
 
@@ -709,6 +712,8 @@ final class EditorView: BaseUIView {
 
         state.hasChanges = true
         updateResetButtonState()
+        onFirstChange?()
+        onFirstChange = nil
     }
 
     private func updateResetButtonState() {
