@@ -8,7 +8,7 @@
 import Foundation
 
 protocol MemberRepository {
-    func register(nickname: String, identityToken: String, provider: LoginPlatform) async throws
+    func register(registerInfo: RegisterInfoModel) async throws
     func withdraw() async throws
     func getMemberSummary() async throws -> MemberSummaryModel
     func getMemberProfile() async throws -> MemberProfileModel
@@ -31,16 +31,23 @@ struct DefaultMemberRepository: MemberRepository {
         self.keychainService = keychainService
     }
     
-    func register(nickname: String, identityToken: String, provider: LoginPlatform) async throws {
-        let dto = RegisterRequestDTO(
-            nickname: nickname,
-            idToken: identityToken,
-            provider: provider.mixpanelKey
+    func register(registerInfo: RegisterInfoModel) async throws {
+        let requestDTO = RegisterRequestDTO(
+            nickname: registerInfo.nickname,
+            idToken: registerInfo.identityToken,
+            provider: registerInfo.provider.mixpanelKey,
+            agreements: RegisterRequestDTO.Agreements(
+                serviceTerms: registerInfo.agreements.serviceTerms,
+                privacyPolicy: registerInfo.agreements.privacyPolicy,
+                locationServiceTerms: registerInfo.agreements.locationServiceTerms,
+                over14: registerInfo.agreements.over14,
+                marketingConsent: registerInfo.agreements.marketingConsent
+            )
         )
-        
+
         let endPoint = MemberAPI.register(
-            header: .basic,
-            requestDTO: dto
+            header: .basicTimeZone(timeZone: TimeZone.current.identifier),
+            requestDTO: requestDTO
         )
         
         try await service.requestEmpty(endPoint)

@@ -23,13 +23,16 @@ final class OnboardingViewModel {
         platform: LoginPlatform,
         identityToken: String,
         appleUserID: String,
-        nickname: String
+        nickname: String,
+        agreements: RegisterInfoModel.Agreements
     ) async throws {
-        try await memberRepository.register(
+        let registerInfo = RegisterInfoModel(
             nickname: nickname,
             identityToken: identityToken,
-            provider: platform
+            provider: platform,
+            agreements: agreements
         )
+        try await memberRepository.register(registerInfo: registerInfo)
 
         AnalyticsTracker.track(
             .signUpCompleted,

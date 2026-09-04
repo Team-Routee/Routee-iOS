@@ -73,6 +73,16 @@ final class TermsAgreementView: BaseUIView {
         requiredAgreementButtons.allSatisfy(\.isChecked)
     }
 
+    var agreements: RegisterInfoModel.Agreements {
+        RegisterInfoModel.Agreements(
+            serviceTerms: serviceTermsButton.isChecked,
+            privacyPolicy: privacyPolicyButton.isChecked,
+            locationServiceTerms: locationTermsButton.isChecked,
+            over14: ageRequirementButton.isChecked,
+            marketingConsent: marketingConsentButton.isChecked
+        )
+    }
+
     private var individualAgreementButtons: [CheckBoxButton] {
         [
             serviceTermsButton,
