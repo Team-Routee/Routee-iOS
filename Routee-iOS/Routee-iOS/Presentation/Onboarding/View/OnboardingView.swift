@@ -74,7 +74,8 @@ final class OnboardingView: BaseUIView {
         
         startButton.snp.makeConstraints {
             $0.bottom.equalTo(safeAreaLayoutGuide).inset(75)
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.centerX.equalToSuperview()
+            $0.width.equalTo(343)
         }
     }
 
