@@ -167,7 +167,9 @@ final class NicknameTextField: UITextField {
     
     @objc
     private func didEndEditing() {
-        updateState(for: text ?? "", isEditing: false)
+        let trimmedText = text?.trimmingCharacters(in: .whitespaces) ?? ""
+        text = trimmedText
+        updateState(for: trimmedText, isEditing: false)
     }
 
     @objc
