@@ -149,7 +149,6 @@ final class MyRoute: BaseUIView {
             $0.top.equalTo(routeStackView.snp.bottom).offset(24)
             $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(48)
-            $0.bottom.equalToSuperview()
         }
     }
     
@@ -193,6 +192,7 @@ final class MyRoute: BaseUIView {
                 toggleButton.layoutIfNeeded()
             }
             addRouteButton.isHidden = true
+            updateRouteBottomLayout()
             
         case .write:
             countRouteLabel.text = "(\(pointCount)/\(maxPointCount))"
@@ -201,6 +201,37 @@ final class MyRoute: BaseUIView {
             addRouteButton.isHidden = pointCount >= maxPointCount
             addRouteButton.isEnabled = pointCount < maxPointCount
             addRouteButton.alpha = 1
+            updateRouteBottomLayout()
+        }
+    }
+
+    private func updateRouteBottomLayout() {
+        switch mode {
+        case .read:
+            routeStackView.snp.remakeConstraints {
+                $0.top.equalTo(myRouteLabel.snp.bottom).offset(24)
+                $0.horizontalEdges.equalToSuperview()
+                $0.bottom.equalToSuperview()
+            }
+
+            addRouteButton.snp.remakeConstraints {
+                $0.top.equalTo(routeStackView.snp.bottom).offset(24)
+                $0.horizontalEdges.equalToSuperview()
+                $0.height.equalTo(48)
+            }
+
+        case .write:
+            routeStackView.snp.remakeConstraints {
+                $0.top.equalTo(myRouteLabel.snp.bottom).offset(24)
+                $0.horizontalEdges.equalToSuperview()
+            }
+
+            addRouteButton.snp.remakeConstraints {
+                $0.top.equalTo(routeStackView.snp.bottom).offset(24)
+                $0.horizontalEdges.equalToSuperview()
+                $0.height.equalTo(48)
+                $0.bottom.equalToSuperview()
+            }
         }
     }
     

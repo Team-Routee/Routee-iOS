@@ -211,7 +211,7 @@ final class TimeLineView: BaseUIView {
             $0.top.equalTo(timelineCard.snp.bottom).offset(82)
             $0.centerX.equalTo(scrollView.frameLayoutGuide)
             $0.width.equalTo(343)
-            $0.bottom.equalToSuperview().inset(64)
+            $0.bottom.equalToSuperview().inset(88)
         }
 
         emptyStateLabel.snp.makeConstraints {
@@ -263,7 +263,7 @@ final class TimeLineView: BaseUIView {
             $0.width.equalTo(343)
 
             if showsMyRouteSection {
-                $0.bottom.equalToSuperview().inset(64)
+                $0.bottom.equalToSuperview().inset(88)
             } else if showsTimeLineSection {
                 $0.height.equalTo(0)
                 $0.bottom.equalToSuperview().inset(64)
