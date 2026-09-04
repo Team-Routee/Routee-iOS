@@ -95,6 +95,11 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
 
     private func completeTimeLine() {
         guard !isCompletingTimeline else { return }
+        guard hasRecordedRoute else {
+            presentMissingRouteFailureModal()
+            return
+        }
+
         isCompletingTimeline = true
 
         Task {
@@ -217,6 +222,11 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     @objc
     private func didTapGoToEditButton() {
         guard !isCompletingTimeline else { return }
+        guard hasRecordedRoute else {
+            presentMissingRouteFailureModal()
+            return
+        }
+
         isCompletingTimeline = true
 
         Task {
