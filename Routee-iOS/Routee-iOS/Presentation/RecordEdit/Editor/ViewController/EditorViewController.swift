@@ -21,6 +21,10 @@ final class EditorViewController: BaseUIViewController {
     private var didTrackEditorOpened = false
     private var hasCompleted = false
 
+    private enum TabIndex {
+        static let recordEdit = 1
+    }
+
     // MARK: - UI Properties
 
     private let rootView = EditorView()
@@ -128,7 +132,32 @@ final class EditorViewController: BaseUIViewController {
             )
         }
 
-        navigationController?.popViewController(animated: false)
+        navigateToRecordEditHome()
+    }
+
+    private func navigateToRecordEditHome() {
+        guard let tabBarController = tabBarController as? TabBarViewController,
+              let viewControllers = tabBarController.viewControllers,
+              viewControllers.indices.contains(TabIndex.recordEdit),
+              let recordEditNavigationController = viewControllers[TabIndex.recordEdit] as? UINavigationController
+        else {
+            navigationController?.popViewController(animated: false)
+            return
+        }
+
+        let currentNavigationController = navigationController
+
+        recordEditNavigationController.popToRootViewController(animated: false)
+        tabBarController.setCustomTabBarHidden(false)
+        tabBarController.selectTab(index: TabIndex.recordEdit)
+
+        guard currentNavigationController !== recordEditNavigationController else { return }
+
+        DispatchQueue.main.async { [weak currentNavigationController] in
+            guard let rootViewController = currentNavigationController?.viewControllers.first else { return }
+
+            currentNavigationController?.setViewControllers([rootViewController], animated: false)
+        }
     }
 
     private func handleBackButtonTap() {

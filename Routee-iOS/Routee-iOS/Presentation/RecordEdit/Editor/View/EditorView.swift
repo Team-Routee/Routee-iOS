@@ -24,7 +24,6 @@ final class EditorView: BaseUIView {
     private let routeStickerLeadingOffset: CGFloat = 24
     private let routeStickerTopOffset: CGFloat = 255
     private let editorAspectRatio: CGFloat = 16.0 / 9.0
-    private let recordInfoContentSize = CGSize(width: 120, height: 164)
     private let resetButtonSize: CGFloat = 36
     private let resetButtonLeadingOffset: CGFloat = 32
     private let resetButtonBottomOffset: CGFloat = 18
@@ -507,11 +506,13 @@ final class EditorView: BaseUIView {
     }
 
     private func defaultRecordInfoStickerFrame() -> CGRect {
-        CGRect(
+        let stickerSize = stickerBoxSize(for: recordInfoStickerBox)
+
+        return CGRect(
             x: 32 - recordInfoStickerInsets.left,
             y: 80 - recordInfoStickerInsets.top,
-            width: recordInfoContentSize.width + recordInfoStickerInsets.left + recordInfoStickerInsets.right,
-            height: recordInfoContentSize.height + recordInfoStickerInsets.top + recordInfoStickerInsets.bottom
+            width: stickerSize.width,
+            height: stickerSize.height
         )
     }
 
