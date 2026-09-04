@@ -211,8 +211,7 @@ final class WorkoutTimeLineView: BaseUIView {
         
         timeLineCard.snp.makeConstraints {
             $0.top.equalTo(timeLineStackView.snp.bottom).offset(16)
-            $0.centerX.equalTo(scrollView.frameLayoutGuide)
-            $0.width.equalTo(343)
+            $0.horizontalEdges.equalToSuperview()
         }
         
         myRoute.snp.makeConstraints {
