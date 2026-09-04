@@ -17,6 +17,9 @@ final class EditorViewController: BaseUIViewController {
     private let viewModel = EditorViewModel()
     private let recordEditResourceViewModel = RecordEditResourceViewModel()
     private let activityId: Int64?
+    private let entryPoint: RecapEditorEntryPoint
+    private var didTrackEditorOpened = false
+    private var hasCompleted = false
 
     private enum TabIndex {
         static let recordEdit = 1
@@ -28,8 +31,9 @@ final class EditorViewController: BaseUIViewController {
 
     // MARK: - Initializer
 
-    init(activityId: Int64? = nil) {
+    init(activityId: Int64?, entryPoint: RecapEditorEntryPoint) {
         self.activityId = activityId
+        self.entryPoint = entryPoint
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -56,6 +60,22 @@ final class EditorViewController: BaseUIViewController {
         super.viewWillAppear(animated)
 
         (tabBarController as? TabBarViewController)?.setCustomTabBarHidden(true)
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        guard let activityId,
+              !didTrackEditorOpened else { return }
+
+        didTrackEditorOpened = true
+        AnalyticsTracker.track(
+            .recapEditorOpened,
+            properties: [
+                "activity_id": String(activityId),
+                "entry_point": entryPoint.rawValue
+            ]
+        )
     }
 
     // MARK: - Private Methods
@@ -101,6 +121,17 @@ final class EditorViewController: BaseUIViewController {
     }
 
     private func popViewController() {
+        if let activityId,
+           !hasCompleted {
+            AnalyticsTracker.track(
+                .recapAbandoned,
+                properties: [
+                    "activity_id": String(activityId),
+                    "has_edit": rootView.hasChanges
+                ]
+            )
+        }
+
         navigateToRecordEditHome()
     }
 
@@ -189,11 +220,28 @@ final class EditorViewController: BaseUIViewController {
     }
 
     private func pushCompleteView() {
-        let editedImage = rootView.makeEditedImage()
-        let editCompleteViewController = EditCompleteViewController(editedImage: editedImage)
+        guard !hasCompleted,
+              let navigationController else { return }
 
-        navigationController?.pushViewController(editCompleteViewController, animated: false)
-        navigationController?.navigationBar.isHidden = true
+        let editedImage = rootView.makeEditedImage()
+        let editCompleteViewController = EditCompleteViewController(
+            activityId: activityId,
+            editedImage: editedImage
+        )
+
+        hasCompleted = true
+        navigationController.pushViewController(editCompleteViewController, animated: false)
+        navigationController.navigationBar.isHidden = true
+
+        if let activityId {
+            AnalyticsTracker.track(
+                .recapCompleted,
+                properties: [
+                    "activity_id": String(activityId),
+                    "has_edit": rootView.hasChanges
+                ]
+            )
+        }
     }
 
     // MARK: - Actions
@@ -202,6 +250,15 @@ final class EditorViewController: BaseUIViewController {
         rootView.setGesture()
         rootView.setAddTarget()
         rootView.setInitialState()
+
+        rootView.onFirstChange = { [weak self] in
+            guard let activityId = self?.activityId else { return }
+
+            AnalyticsTracker.track(
+                .recapEdited,
+                properties: ["activity_id": String(activityId)]
+            )
+        }
 
         rootView.topNavigationBar.backButtonAction = { [weak self] in
             self?.handleBackButtonTap()

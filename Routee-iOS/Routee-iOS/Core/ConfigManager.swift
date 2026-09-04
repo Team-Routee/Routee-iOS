@@ -12,6 +12,7 @@ enum ConfigKey: String {
     case naverMapBaseURL = "NAVER_MAP_BASE_URL"
     case naverMapClientID = "NAVER_MAP_CLIENT_ID"
     case naverMapClientSecret = "NAVER_MAP_CLIENT_SECRET"
+    case mixpanelToken = "MIXPANEL_TOKEN"
 }
 
 struct ConfigManager {
@@ -28,4 +29,5 @@ struct ConfigManager {
     static var naverMapBaseURL: String { toString(for: .naverMapBaseURL) }
     static var naverMapClientID: String { toString(for: .naverMapClientID) }
     static var naverMapClientSecret: String { toString(for: .naverMapClientSecret) }
+    static var mixpanelToken: String { toString(for: .mixpanelToken) }
 }

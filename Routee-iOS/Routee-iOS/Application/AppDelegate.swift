@@ -7,14 +7,29 @@
 
 import UIKit
 
+import Mixpanel
+
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
-
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
-        return true
+        let token = ConfigManager.mixpanelToken
+
+            guard !token.isEmpty else {
+                RouteeLogger.error(RouteeError.configError)
+                return true
+            }
+
+            Mixpanel.initialize(
+                token: token,
+                trackAutomaticEvents: false
+            )
+
+        #if DEVELOPMENT
+            let mixpanel = Mixpanel.mainInstance()
+            mixpanel.loggingEnabled = true
+        #endif
+
+            return true
     }
 
     // MARK: UISceneSession Lifecycle

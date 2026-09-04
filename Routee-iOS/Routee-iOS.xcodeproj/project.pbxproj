@@ -15,6 +15,7 @@
 		4F324DE82FF37BF800B7B9F9 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 4F324DE72FF37BF800B7B9F9 /* Alamofire */; };
 		4F519CCF3002C49200530799 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 4F519CCE3002C49200530799 /* Lottie */; };
 		4F51A2713004194600530799 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 4F51A2703004194600530799 /* Kingfisher */; };
+		4F51D6353047C1B000E304D8 /* Mixpanel in Frameworks */ = {isa = PBXBuildFile; productRef = 4F51D6343047C1B000E304D8 /* Mixpanel */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +55,7 @@
 				4F324C442FEF454C00B7B9F9 /* Then in Frameworks */,
 				4F51A2713004194600530799 /* Kingfisher in Frameworks */,
 				3B84571530010C70003912FD /* CropViewController in Frameworks */,
+				4F51D6353047C1B000E304D8 /* Mixpanel in Frameworks */,
 				3B84571730010C70003912FD /* TOCropViewController in Frameworks */,
 				4F324C412FEE6F1000B7B9F9 /* SnapKit in Frameworks */,
 			);
@@ -108,6 +110,7 @@
 				3B84571430010C70003912FD /* CropViewController */,
 				3B84571630010C70003912FD /* TOCropViewController */,
 				4F51A2703004194600530799 /* Kingfisher */,
+				4F51D6343047C1B000E304D8 /* Mixpanel */,
 			);
 			productName = "Routee-iOS";
 			productReference = 4F324B982FE931BB00B7B9F9 /* Routee-iOS.app */;
@@ -145,6 +148,7 @@
 				4F519CCD3002C49100530799 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 				3B84571330010C70003912FD /* XCRemoteSwiftPackageReference "TOCropViewController" */,
 				4F51A26F3004194600530799 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				4F51D6333047C1B000E304D8 /* XCRemoteSwiftPackageReference "mixpanel-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4F324B992FE931BB00B7B9F9 /* Products */;
@@ -713,6 +717,14 @@
 				minimumVersion = 8.10.0;
 			};
 		};
+		4F51D6333047C1B000E304D8 /* XCRemoteSwiftPackageReference "mixpanel-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mixpanel/mixpanel-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.5.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -755,6 +767,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4F51A26F3004194600530799 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
+		};
+		4F51D6343047C1B000E304D8 /* Mixpanel */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4F51D6333047C1B000E304D8 /* XCRemoteSwiftPackageReference "mixpanel-swift" */;
+			productName = Mixpanel;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
