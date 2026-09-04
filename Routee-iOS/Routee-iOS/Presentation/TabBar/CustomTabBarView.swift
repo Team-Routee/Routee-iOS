@@ -45,7 +45,7 @@ final class CustomTabBarView: UIView {
 
     private func setStyle() {
         backgroundColor = .grey900
-        layer.cornerRadius = 31
+        layer.cornerRadius = 32
         layer.masksToBounds = true
 
         selectionView.do {
