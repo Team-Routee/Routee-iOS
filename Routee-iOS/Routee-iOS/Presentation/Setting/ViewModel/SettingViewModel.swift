@@ -19,14 +19,6 @@ final class SettingViewModel {
         self.authRepository = authRepository
     }
     
-    func register(nickname: String, identityToken: String, provider: LoginPlatform) async throws {
-        try await memberRepository.register(
-            nickname: nickname,
-            identityToken: identityToken,
-            provider: provider
-        )
-    }
-    
     func withdraw() async throws {
         try await memberRepository.withdraw()
     }

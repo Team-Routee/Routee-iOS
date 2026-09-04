@@ -10,10 +10,16 @@ import UIKit
 final class OnboardingViewController: BaseUIViewController {
     private var identityToken: String?
     private var appleUserID: String?
+    private let agreements: RegisterInfoModel.Agreements
 
-    init(identityToken: String?, appleUserID: String?) {
+    init(
+        identityToken: String?,
+        appleUserID: String?,
+        agreements: RegisterInfoModel.Agreements
+    ) {
         self.identityToken = identityToken
         self.appleUserID = appleUserID
+        self.agreements = agreements
 
         super.init(nibName: nil, bundle: nil)
     }
@@ -62,7 +68,8 @@ final class OnboardingViewController: BaseUIViewController {
                     platform: .APPLE,
                     identityToken: identityToken,
                     appleUserID: appleUserID,
-                    nickname: nickname
+                    nickname: nickname,
+                    agreements: agreements
                 )
 
                 await MainActor.run {

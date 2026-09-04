@@ -49,6 +49,7 @@ extension EndPoint {
 
 enum HeaderType {
     case basic
+    case basicTimeZone(timeZone: String)
     case withAuth(accessToken: String)
     case withAuthTimeZone(accessToken: String, timeZone: String)
     case appleLoginHeader(identityToken: String, authorizationCode: String)
@@ -59,6 +60,11 @@ enum HeaderType {
         switch self {
         case .basic:
             return ["Content-Type": "application/json"]
+        case .basicTimeZone(let timeZone):
+            return [
+                "Content-Type": "application/json",
+                "Time-Zone": timeZone
+            ]
         case .withAuth(let accessToken):
             return [
                 "Content-Type": "application/json",

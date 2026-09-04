@@ -13,6 +13,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     private let activityRepository: ActivityRepository
     private let finishRecording: (String) async throws -> Void
     private let showFailureModalOnAppear: Bool
+    private let hasRecordedRoute: Bool
     private var isCompletingTimeline = false
     private var didShowFailureModal = false
     private var didTrackRecordingEnded = false
@@ -35,6 +36,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
         self.activityRepository = activityRepository
         self.finishRecording = finishRecording
         self.showFailureModalOnAppear = showFailureModalOnAppear
+        hasRecordedRoute = !trackPoints.isEmpty
         workoutTimelineView = WorkoutTimeLineView(
             title: title,
             distanceInMeters: distanceInMeters,
@@ -76,17 +78,28 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
             )
         }
 
-        guard showFailureModalOnAppear,
-              !didShowFailureModal else { return }
+        guard !didShowFailureModal else { return }
 
+        guard hasRecordedRoute else {
+            didShowFailureModal = true
+            presentMissingRouteFailureModal()
+            return
+        }
+
+        guard showFailureModalOnAppear else { return }
         didShowFailureModal = true
-        presentFinishRecordingFailureModal()
+        presentMissingNetworkFailureModal()
     }
 
     // MARK: - Network
 
     private func completeTimeLine() {
         guard !isCompletingTimeline else { return }
+        guard hasRecordedRoute else {
+            presentMissingRouteFailureModal()
+            return
+        }
+
         isCompletingTimeline = true
 
         Task {
@@ -96,7 +109,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
             } catch {
                 isCompletingTimeline = false
                 RouteeLogger.error(error)
-                presentFinishRecordingFailureModal()
+                presentMissingNetworkFailureModal()
             }
         }
     }
@@ -148,7 +161,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
 
     // MARK: - Private Method
 
-    private func presentFinishRecordingFailureModal() {
+    private func presentMissingNetworkFailureModal() {
         if let activityId {
             AnalyticsTracker.track(
                 .workoutCompleteFailed,
@@ -180,6 +193,26 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
         present(modal, animated: true)
     }
 
+    private func presentMissingRouteFailureModal() {
+        let confirmAction: () -> Void = { [weak self] in
+            self?.navigationController?.popToRootViewController(animated: true)
+        }
+
+        let modal = ActionPrimaryModal(
+            title: "기록 등록 실패",
+            description: """
+            운동 경로를 확인할 수 없어
+            기록이 등록되지 않았어요.
+            위치 정보를 확인한 후 다시 시도해주세요.
+            """,
+            actionCount: .single,
+            leftButtonTitle: "확인",
+            leftButtonAction: confirmAction
+        )
+
+        present(modal, animated: true)
+    }
+
     // MARK: - Actions
 
     override func setAddTarget() {
@@ -189,6 +222,11 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     @objc
     private func didTapGoToEditButton() {
         guard !isCompletingTimeline else { return }
+        guard hasRecordedRoute else {
+            presentMissingRouteFailureModal()
+            return
+        }
+
         isCompletingTimeline = true
 
         Task {
@@ -205,7 +243,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
             } catch {
                 isCompletingTimeline = false
                 RouteeLogger.error(error)
-                presentFinishRecordingFailureModal()
+                presentMissingNetworkFailureModal()
             }
         }
     }
