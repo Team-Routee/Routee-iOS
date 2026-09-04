@@ -26,17 +26,6 @@ final class RecordEditView: BaseUIView {
         collectionViewLayout: flowLayout
     )
 
-    // MARK: - Life Cycle
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-
-        let bottomInset = safeAreaInsets.bottom + TabBarViewController.customTabBarHeight + 20
-
-        workoutRecordCollectionView.contentInset.bottom = bottomInset
-        workoutRecordCollectionView.verticalScrollIndicatorInsets.bottom = bottomInset
-    }
-    
     // MARK: - UI Setting
     
     override func setStyle() {
@@ -76,7 +65,8 @@ final class RecordEditView: BaseUIView {
         workoutRecordCollectionView.do {
             $0.backgroundColor = .clear
             $0.showsVerticalScrollIndicator = false
-            $0.contentInsetAdjustmentBehavior = .never
+            $0.contentInset.bottom = 20
+            $0.contentInsetAdjustmentBehavior = .automatic
         }
     }
     

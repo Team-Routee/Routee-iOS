@@ -54,17 +54,16 @@ final class EditCompleteViewController: BaseUIViewController {
     }
 
     private func navigateToWorkout() {
-        guard let tabBarController = tabBarController as? TabBarViewController,
-              let viewControllers = tabBarController.viewControllers,
-              let workoutNavigationController = viewControllers.first as? UINavigationController
-        else {
+        guard let tabRouter = tabBarController as? AppTabRouting else {
             navigationController?.popToRootViewController(animated: false)
             return
         }
 
-        navigationController?.popToRootViewController(animated: false)
-        workoutNavigationController.popToRootViewController(animated: false)
-        tabBarController.selectTab(index: 0)
+        tabRouter.select(
+            .workout,
+            reset: .currentAndDestination,
+            animated: false
+        )
     }
 
     private func saveImageToPhotoLibrary() {

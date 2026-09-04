@@ -281,7 +281,7 @@ final class WorkoutView: BaseUIView {
         
         recordButton.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.bottom.equalTo(routeeMapView.safeAreaLayoutGuide).inset(78)
+            $0.bottom.equalTo(safeAreaLayoutGuide).inset(16)
         }
         
         pauseButton.snp.makeConstraints {

@@ -12,6 +12,10 @@ import UIKit
 
 final class EditorViewController: BaseUIViewController {
 
+    override var preferredTabBarVisibility: TabBarVisibility {
+        .hidden
+    }
+
     // MARK: - Properties
 
     private let viewModel = EditorViewModel()
@@ -46,12 +50,6 @@ final class EditorViewController: BaseUIViewController {
 
         loadActivityEditorData()
         loadRecordEditResourceData()
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-
-        (tabBarController as? TabBarViewController)?.setCustomTabBarHidden(true)
     }
 
     // MARK: - Private Methods

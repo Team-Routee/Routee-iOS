@@ -19,6 +19,10 @@ enum WorkoutMode: Equatable {
 }
 
 final class WorkoutViewController: BaseUIViewController {
+
+    override var preferredTabBarVisibility: TabBarVisibility {
+        workoutMode == .ready ? .visible : .hidden
+    }
     
     // MARK: - Properties
     
@@ -68,7 +72,7 @@ final class WorkoutViewController: BaseUIViewController {
     
     private func updateUI(for mode: WorkoutMode) {
         workoutView.configure(for: mode)
-        (tabBarController as? TabBarViewController)?.setCustomTabBarHidden(mode != .ready)
+        setNeedsTabBarAppearanceUpdate()
     }
     
     private func requestCurrentLocationAuthorization() {
