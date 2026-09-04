@@ -124,6 +124,28 @@ final class WorkoutViewModel {
         }
         return routePoints[arrayIndex]
     }
+
+    func routePointForPhoto(fallbackLocation: CLLocation?) -> WorkoutRoutePoint? {
+        if let lastRoutePoint = routePoints.last {
+            return lastRoutePoint
+        }
+
+        guard let fallbackLocation,
+              CLLocationCoordinate2DIsValid(fallbackLocation.coordinate) else {
+            return nil
+        }
+
+        recordMaximumAltitude(at: fallbackLocation)
+
+        let routePoint = WorkoutRoutePoint(
+            pointIndex: 1,
+            coordinate: fallbackLocation.coordinate,
+            altitude: fallbackLocation.altitude
+        )
+        routePoints.append(routePoint)
+        lastRecordedLocation = fallbackLocation
+        return routePoint
+    }
     
     private func recordMaximumAltitude(at location: CLLocation) {
         guard location.verticalAccuracy > 0,

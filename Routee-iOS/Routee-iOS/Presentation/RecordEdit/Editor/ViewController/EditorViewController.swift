@@ -12,6 +12,10 @@ import UIKit
 
 final class EditorViewController: BaseUIViewController {
 
+    override var preferredTabBarVisibility: TabBarVisibility {
+        .hidden
+    }
+
     // MARK: - Properties
 
     private let viewModel = EditorViewModel()
@@ -20,10 +24,6 @@ final class EditorViewController: BaseUIViewController {
     private let entryPoint: RecapEditorEntryPoint
     private var didTrackEditorOpened = false
     private var hasCompleted = false
-
-    private enum TabIndex {
-        static let recordEdit = 1
-    }
 
     // MARK: - UI Properties
 
@@ -54,12 +54,6 @@ final class EditorViewController: BaseUIViewController {
 
         loadActivityEditorData()
         loadRecordEditResourceData()
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-
-        (tabBarController as? TabBarViewController)?.setCustomTabBarHidden(true)
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -136,28 +130,16 @@ final class EditorViewController: BaseUIViewController {
     }
 
     private func navigateToRecordEditHome() {
-        guard let tabBarController = tabBarController as? TabBarViewController,
-              let viewControllers = tabBarController.viewControllers,
-              viewControllers.indices.contains(TabIndex.recordEdit),
-              let recordEditNavigationController = viewControllers[TabIndex.recordEdit] as? UINavigationController
-        else {
+        guard let tabRouter = tabBarController as? AppTabRouting else {
             navigationController?.popViewController(animated: false)
             return
         }
 
-        let currentNavigationController = navigationController
-
-        recordEditNavigationController.popToRootViewController(animated: false)
-        tabBarController.setCustomTabBarHidden(false)
-        tabBarController.selectTab(index: TabIndex.recordEdit)
-
-        guard currentNavigationController !== recordEditNavigationController else { return }
-
-        DispatchQueue.main.async { [weak currentNavigationController] in
-            guard let rootViewController = currentNavigationController?.viewControllers.first else { return }
-
-            currentNavigationController?.setViewControllers([rootViewController], animated: false)
-        }
+        tabRouter.select(
+            .recordEdit,
+            reset: .currentAndDestination,
+            animated: false
+        )
     }
 
     private func handleBackButtonTap() {

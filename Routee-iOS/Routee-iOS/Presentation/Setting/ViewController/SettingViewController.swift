@@ -23,29 +23,20 @@ final class SettingViewController: BaseUIViewController {
         view = rootView
     }
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-
-        (tabBarController as? TabBarViewController)?.setCustomTabBarHidden(false)
-    }
-    
     // MARK: - Private Methods
     
     private func navigateToProfileChangeViewController() {
         let profileChangeViewController = ProfileChangeViewController()
-        (tabBarController as? TabBarViewController)?.setCustomTabBarHidden(true)
         navigationController?.pushViewController(profileChangeViewController, animated: true)
     }
 
     private func navigateToWithdrawViewController() {
         let withdrawViewController = WithdrawViewController()
-        (tabBarController as? TabBarViewController)?.setCustomTabBarHidden(true)
         navigationController?.pushViewController(withdrawViewController, animated: true)
     }
 
     private func navigateToContactViewController() {
         let contactViewController = ContactViewController()
-        (tabBarController as? TabBarViewController)?.setCustomTabBarHidden(true)
         navigationController?.pushViewController(contactViewController, animated: true)
     }
 
