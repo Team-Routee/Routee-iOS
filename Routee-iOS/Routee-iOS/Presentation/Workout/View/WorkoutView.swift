@@ -320,6 +320,8 @@ final class WorkoutView: BaseUIView {
             width: bounds.width,
             height: 141
         )
+
+        updateReadyMapLogoMargin()
     }
     
     private func mapSetting() {
@@ -512,6 +514,19 @@ final class WorkoutView: BaseUIView {
     private func applyLocationOverlayStyle() {
         mapView.locationOverlay.icon = userLocationIcon
     }
+
+    private func updateReadyMapLogoMargin() {
+        guard !recordButton.isHidden,
+              !recordButton.frame.isEmpty else { return }
+
+        mapView.logoAlign = .leftBottom
+        mapView.logoMargin = UIEdgeInsets(
+            top: 0,
+            left: recordButton.frame.minX + 7,
+            bottom: 82,
+            right: 0
+        )
+    }
     
 }
 
@@ -542,12 +557,7 @@ extension WorkoutView {
             pathOverlay.mapView = nil
             removePhotoMarkers()
             mapView.logoAlign = .leftBottom
-            mapView.logoMargin = UIEdgeInsets(
-                top: 0,
-                left: 30,
-                bottom: 144,
-                right: 0
-            )
+            updateReadyMapLogoMargin()
         } else {
             mapView.logoAlign = .rightBottom
             mapView.logoMargin = .zero
