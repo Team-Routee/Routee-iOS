@@ -39,8 +39,6 @@ final class WorkoutTimeLineView: BaseUIView {
     private let photoRecords: [WorkoutPhotoRecord]
     private let timelineImages: [UIImage]
     private let timelineLocations: [String?]
-    private let myRouteBottomContentInset: CGFloat = 114
-
     // MARK: - Initializer
 
     init(
@@ -223,7 +221,7 @@ final class WorkoutTimeLineView: BaseUIView {
             }
             $0.centerX.equalTo(scrollView.frameLayoutGuide)
             $0.width.equalTo(343)
-            $0.bottom.equalTo(scrollView.contentLayoutGuide).inset(myRouteBottomContentInset)
+            $0.bottom.equalTo(scrollView.contentLayoutGuide).inset(114)
         }
         
         goToEditButton.snp.makeConstraints {
