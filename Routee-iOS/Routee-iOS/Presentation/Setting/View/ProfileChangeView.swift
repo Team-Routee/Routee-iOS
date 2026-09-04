@@ -68,8 +68,11 @@ final class ProfileChangeView: BaseUIView, SettingTabToastPresentable {
         }
 
         nicknameTextField.validationChanged = { [weak self] isValid in
-            self?.isNicknameValid = isValid
-            self?.updateChangeButtonState()
+            guard let self else { return }
+
+            isNicknameValid = isValid
+            updateChangeButtonState()
+            updateNicknameStatusIconIfNeeded()
         }
     }
 
@@ -125,7 +128,7 @@ final class ProfileChangeView: BaseUIView, SettingTabToastPresentable {
         initialProfileImageUrl = profile.profileImageUrl
         selectedProfileImage = nil
         isDefaultProfileImageApplied = false
-        nicknameTextField.configure(nickname: profile.nickname)
+        nicknameTextField.configure(nickname: profile.nickname, showsEditIcon: true)
         configureProfileImage(with: profile.profileImageUrl)
         updateChangeButtonState()
     }
@@ -170,6 +173,13 @@ final class ProfileChangeView: BaseUIView, SettingTabToastPresentable {
         let canSubmit = isNicknameValid && (hasNicknameChanged || hasProfileImageChanged)
 
         changeButton.updateType(canSubmit ? .enabled : .disabled)
+    }
+
+    private func updateNicknameStatusIconIfNeeded() {
+        guard isNicknameValid,
+              !hasNicknameChanged else { return }
+
+        nicknameTextField.showEditIconIfValid()
     }
 
     // MARK: - Actions

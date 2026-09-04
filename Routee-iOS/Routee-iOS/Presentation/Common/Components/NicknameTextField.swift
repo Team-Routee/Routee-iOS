@@ -184,9 +184,22 @@ final class NicknameTextField: UITextField {
 
     // MARK: - Public Methods
 
-    func configure(nickname: String) {
+    func configure(nickname: String, showsEditIcon: Bool = false) {
         text = nickname
         updateState(for: nickname, isEditing: isEditing)
+
+        guard showsEditIcon,
+              fieldCase == .profile,
+              validationState(for: nickname) == .valid else { return }
+
+        showStatusIcon(.icEditSmLineWhite, size: editIconSize)
+    }
+
+    func showEditIconIfValid() {
+        guard fieldCase == .profile,
+              validationState(for: text ?? "") == .valid else { return }
+
+        showStatusIcon(.icEditSmLineWhite, size: editIconSize)
     }
 
     // MARK: - Private Methods
@@ -286,7 +299,7 @@ extension NicknameTextField: UITextFieldDelegate {
               let textRange = Range(range, in: currentText) else {
             return false
         }
-
+        
         let updatedText = currentText.replacingCharacters(in: textRange, with: string)
         guard updatedText.count <= 12 else { return false }
         guard !updatedText.hasPrefix(" ") else { return false }
