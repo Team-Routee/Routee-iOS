@@ -69,7 +69,7 @@ final class OnboardingView: BaseUIView {
         
         nicknameTextField.snp.makeConstraints {
             $0.top.equalTo(settingGuideLabel.snp.bottom).offset(86)
-            $0.horizontalEdges.equalToSuperview().inset(CGFloat.s32)
+            $0.horizontalEdges.equalToSuperview().inset(32)
         }
         
         startButton.snp.makeConstraints {

@@ -25,8 +25,6 @@ final class EditorView: BaseUIView {
     private let routeStickerTopOffset: CGFloat = 255
     private let editorAspectRatio: CGFloat = 16.0 / 9.0
     private let resetButtonSize: CGFloat = 36
-    private let resetButtonLeadingOffset: CGFloat = 32
-    private let resetButtonBottomOffset: CGFloat = 18
     private var state = EditorState()
 
     private struct EditorState {
@@ -156,8 +154,8 @@ final class EditorView: BaseUIView {
         }
 
         resetButton.snp.makeConstraints {
-            $0.leading.equalToSuperview().offset(resetButtonLeadingOffset)
-            $0.bottom.equalTo(recordEditTabBar.snp.top).offset(-resetButtonBottomOffset)
+            $0.leading.equalTo(backgroundImageView).offset(16)
+            $0.bottom.equalTo(backgroundImageView).offset(-16)
             $0.size.equalTo(resetButtonSize)
         }
 
@@ -258,7 +256,10 @@ final class EditorView: BaseUIView {
     func resetEditingContent() {
         recordEditTabBar.hideOptionView()
         removeStickerBoxWithoutMarkingChange(routeStickerBox)
+        restoreRecordInfoStickerBox()
         restoreRouteTimelineStickerBox()
+        state.deletedStickerTypes.removeAll()
+        deactivateStickerBox(recordInfoStickerBox)
         deactivateStickerBox(routeTimelineStickerBox)
         resetBackground()
         resetEditorColor()
@@ -624,9 +625,24 @@ final class EditorView: BaseUIView {
         stickerBox.removeFromSuperview()
     }
 
+    private func restoreRecordInfoStickerBox() {
+        if recordInfoStickerBox.superview == nil {
+            if routeTimelineStickerBox.superview != nil {
+                stickerContainerView.insertSubview(recordInfoStickerBox, belowSubview: routeTimelineStickerBox)
+            } else {
+                stickerContainerView.addSubview(recordInfoStickerBox)
+            }
+        }
+
+        layoutIfNeeded()
+        recordInfoStickerBox.frame = defaultRecordInfoStickerFrame()
+        recordInfoStickerBox.resetContentLayoutScale()
+        state.didSetRecordInfoStickerFrame = true
+    }
+
     private func restoreRouteTimelineStickerBox() {
         if routeTimelineStickerBox.superview == nil {
-            stickerContainerView.insertSubview(routeTimelineStickerBox, belowSubview: recordInfoStickerBox)
+            stickerContainerView.insertSubview(routeTimelineStickerBox, aboveSubview: recordInfoStickerBox)
         }
 
         layoutIfNeeded()

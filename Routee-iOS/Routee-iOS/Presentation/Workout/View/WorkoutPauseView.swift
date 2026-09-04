@@ -106,7 +106,7 @@ final class WorkoutPauseView: BaseUIView {
         }
         
         altitudeLabel.do {
-            $0.text = "최고고도"
+            $0.text = "최고 고도"
         }
         
         altitudeDataLabel.do {

@@ -320,6 +320,8 @@ final class WorkoutView: BaseUIView {
             width: bounds.width,
             height: 141
         )
+
+        updateReadyMapLogoMargin()
     }
     
     private func mapSetting() {
@@ -425,7 +427,7 @@ final class WorkoutView: BaseUIView {
 
         snackbarView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.bottom.equalTo(safeAreaLayoutGuide).inset(CGFloat.s16)
+            $0.bottom.equalTo(safeAreaLayoutGuide).inset(16)
         }
     }
 
@@ -512,6 +514,19 @@ final class WorkoutView: BaseUIView {
     private func applyLocationOverlayStyle() {
         mapView.locationOverlay.icon = userLocationIcon
     }
+
+    private func updateReadyMapLogoMargin() {
+        guard !recordButton.isHidden,
+              !recordButton.frame.isEmpty else { return }
+
+        mapView.logoAlign = .leftBottom
+        mapView.logoMargin = UIEdgeInsets(
+            top: 0,
+            left: recordButton.frame.minX + 7,
+            bottom: 82,
+            right: 0
+        )
+    }
     
 }
 
@@ -542,12 +557,7 @@ extension WorkoutView {
             pathOverlay.mapView = nil
             removePhotoMarkers()
             mapView.logoAlign = .leftBottom
-            mapView.logoMargin = UIEdgeInsets(
-                top: 0,
-                left: 30,
-                bottom: 144,
-                right: 0
-            )
+            updateReadyMapLogoMargin()
         } else {
             mapView.logoAlign = .rightBottom
             mapView.logoMargin = .zero
@@ -651,7 +661,7 @@ extension WorkoutView {
         layoutIfNeeded()
 
         let keyboardFrame = convert(keyboardScreenFrame, from: nil)
-        let targetModalBottom = min(keyboardFrame.minY, bounds.maxY) - CGFloat.s24
+        let targetModalBottom = min(keyboardFrame.minY, bounds.maxY) - 24
         let targetCenterY = targetModalBottom - modal.bounds.height / 2
         let centerOffset = min(0, targetCenterY - bounds.midY)
 

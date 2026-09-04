@@ -123,7 +123,7 @@ final class ArchiveCalendarCell: UICollectionViewCell {
 
         case .multiple(let count):
             configureMultipleActivity(imageUrl: date.coverImageUrl)
-            badgeBackgroundImageView.image = UIImage(named: "\(count)")
+            configureBadgeImage(count: count)
             badgeBackgroundImageView.isHidden = false
         }
     }
@@ -139,6 +139,17 @@ final class ArchiveCalendarCell: UICollectionViewCell {
         badgeBackgroundImageView.isHidden = true
         dayLabel.text = nil
         dayLabel.textColor = .static_white
+    }
+
+    private func configureBadgeImage(count: Int) {
+        let isOverMaximumCount = count >= 10
+        let badgeImageName = isOverMaximumCount ? "9+" : "\(count)"
+        let badgeSize = isOverMaximumCount ? CGSize(width: 24, height: 16) : CGSize(width: 16, height: 16)
+
+        badgeBackgroundImageView.image = UIImage(named: badgeImageName)
+        badgeBackgroundImageView.snp.updateConstraints {
+            $0.size.equalTo(badgeSize)
+        }
     }
 
     private func configureSingleActivity(imageUrl: String?) {

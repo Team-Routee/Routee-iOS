@@ -108,12 +108,12 @@ final class ActionPrimaryModal: UIViewController {
         textStackView.do {
             $0.axis = .vertical
             $0.alignment = .fill
-            $0.spacing = .s8
+            $0.spacing = 8
             $0.layoutMargins = UIEdgeInsets(
-                top: .s8,
-                left: .s8,
-                bottom: .s16,
-                right: .s8
+                top: 8,
+                left: 8,
+                bottom: 16,
+                right: 8
             )
             $0.isLayoutMarginsRelativeArrangement = true
         }
@@ -137,7 +137,7 @@ final class ActionPrimaryModal: UIViewController {
 
         buttonStackView.do {
             $0.axis = .horizontal
-            $0.spacing = .s8
+            $0.spacing = 8
             $0.distribution = .fillEqually
         }
 
@@ -183,14 +183,14 @@ final class ActionPrimaryModal: UIViewController {
         modalView.snp.makeConstraints {
             $0.center.equalToSuperview()
             $0.width.equalToSuperview()
-                .offset(-(CGFloat.s24 * 2))
+                .offset(-48)
                 .priority(.high)
             $0.width.lessThanOrEqualTo(318)
         }
 
         contentStackView.snp.makeConstraints {
-            $0.horizontalEdges.equalToSuperview().inset(CGFloat.s24)
-            $0.verticalEdges.equalToSuperview().inset(CGFloat.s24)
+            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.verticalEdges.equalToSuperview().inset(24)
         }
 
         leftButton.snp.makeConstraints {

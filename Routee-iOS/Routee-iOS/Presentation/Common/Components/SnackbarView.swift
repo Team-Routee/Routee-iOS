@@ -69,13 +69,13 @@ final class SnackbarView: BaseUIView {
         }
 
         messageLabel.snp.makeConstraints {
-            $0.leading.equalToSuperview().inset(CGFloat.s16)
+            $0.leading.equalToSuperview().inset(16)
             $0.centerY.equalToSuperview()
-            $0.trailing.lessThanOrEqualTo(actionButton.snp.leading).offset(-CGFloat.s12)
+            $0.trailing.lessThanOrEqualTo(actionButton.snp.leading).offset(-12)
         }
 
         actionButton.snp.makeConstraints {
-            $0.trailing.equalToSuperview().inset(CGFloat.s18)
+            $0.trailing.equalToSuperview().inset(18)
             $0.centerY.equalToSuperview()
         }
     }

@@ -43,7 +43,7 @@ final class WorkoutTitleEditor: BaseUIView {
         titleDisplayStackView.do {
             $0.axis = .horizontal
             $0.alignment = .center
-            $0.spacing = .s2
+            $0.spacing = 2
         }
 
         titleLabel.do {
@@ -130,9 +130,9 @@ final class WorkoutTitleEditor: BaseUIView {
         }
 
         titleTextField.snp.makeConstraints {
-            $0.leading.equalTo(titleUnderlineView).offset(CGFloat.s4)
-            $0.trailing.lessThanOrEqualTo(titleUnderlineView).inset(CGFloat.s4)
-            $0.bottom.equalTo(titleUnderlineView.snp.top).offset(-CGFloat.s2)
+            $0.leading.equalTo(titleUnderlineView).offset(4)
+            $0.trailing.lessThanOrEqualTo(titleUnderlineView).inset(4)
+            $0.bottom.equalTo(titleUnderlineView.snp.top).offset(-2)
             $0.width.equalTo(120)
             $0.height.equalTo(ceil(UIFont.body_sb_14.lineHeight))
         }

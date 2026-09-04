@@ -36,7 +36,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
         self.activityRepository = activityRepository
         self.finishRecording = finishRecording
         self.showFailureModalOnAppear = showFailureModalOnAppear
-        hasRecordedRoute = !trackPoints.isEmpty
+        hasRecordedRoute = trackPoints.count >= 2
         workoutTimelineView = WorkoutTimeLineView(
             title: title,
             distanceInMeters: distanceInMeters,
