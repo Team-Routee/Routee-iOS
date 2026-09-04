@@ -13,6 +13,7 @@ import NMapsMap
 
 enum WorkoutMode: Equatable {
     case ready
+    case countdown
     case recording
     case paused
     case finishing
@@ -72,7 +73,7 @@ final class WorkoutViewController: BaseUIViewController {
     
     private func updateUI(for mode: WorkoutMode) {
         workoutView.configure(for: mode)
-        setNeedsTabBarAppearanceUpdate()
+        setNeedsTabBarAppearanceUpdate(animated: mode != .countdown)
     }
     
     private func requestCurrentLocationAuthorization() {
@@ -568,8 +569,10 @@ final class WorkoutViewController: BaseUIViewController {
 
                 RouteeLogger.debug("운동 기록 시작 완료 (activityId: \(activity.activityId))")
                 await MainActor.run {
+                    self.workoutMode = .countdown
                     self.workoutView.playCountdownAnimation { [weak self] in
                         guard let self else { return }
+                        guard workoutMode == .countdown else { return }
 
                         workoutMode = .recording
                         workoutView.updateDistance(viewModel.startDistanceTracking())
@@ -607,7 +610,7 @@ extension WorkoutViewController {
 
     private func updateElapsedTimeTracking(from oldMode: WorkoutMode, to newMode: WorkoutMode) {
         switch (oldMode, newMode) {
-        case (.ready, .recording):
+        case (.ready, .recording), (.countdown, .recording):
             viewModel.startElapsedTimeTracking()
         case (.paused, .recording):
             viewModel.resumeElapsedTimeTracking()

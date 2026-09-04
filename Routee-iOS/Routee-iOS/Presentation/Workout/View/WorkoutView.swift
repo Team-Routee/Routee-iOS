@@ -552,7 +552,7 @@ extension WorkoutView {
             mapView.logoMargin = .zero
         }
         
-        if !isRecording {
+        if mode != .countdown {
             countdownAnimationView.stop()
             countdownAnimationView.isHidden = true
         }
@@ -562,14 +562,13 @@ extension WorkoutView {
         countdownAnimationView.alpha = 1
         countdownAnimationView.currentProgress = 0
         countdownAnimationView.isHidden = false
-        countdownAnimationView.play { [weak self] isFinished in
+        countdownAnimationView.play { [weak self] _ in
             guard let self else { return }
 
             UIView.animate(withDuration: 0.3) { [weak self] in
                 self?.countdownAnimationView.alpha = 0
             } completion: { _ in
                 self.countdownAnimationView.isHidden = true
-                guard isFinished else { return }
                 completion()
             }
         }
