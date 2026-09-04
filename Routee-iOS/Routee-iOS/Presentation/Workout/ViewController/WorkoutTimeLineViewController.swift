@@ -204,6 +204,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
                     ),
                     animated: true
                 )
+                isCompletingTimeline = false
             } catch {
                 isCompletingTimeline = false
                 RouteeLogger.error(error)
