@@ -96,6 +96,7 @@ final class TermsAgreementView: BaseUIView {
 
     override func setStyle() {
         backgroundColor = .bgPrimary
+        topNavigationBar.setBackButtonHidden(false)
         dividerView.backgroundColor = .grey600
         
         titleLabel.do {
