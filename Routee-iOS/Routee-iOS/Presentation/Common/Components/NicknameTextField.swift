@@ -287,6 +287,7 @@ extension NicknameTextField: UITextFieldDelegate {
 
         let updatedText = currentText.replacingCharacters(in: textRange, with: string)
         guard updatedText.count <= 12 else { return false }
+        guard !updatedText.hasPrefix(" ") else { return false }
         guard !updatedText.contains("  ") else { return false }
 
         return true
