@@ -72,7 +72,7 @@ final class ProfileChangeView: BaseUIView, SettingTabToastPresentable {
 
             isNicknameValid = isValid
             updateChangeButtonState()
-            updateNicknameStatusIconIfNeeded()
+            setNicknameTextFieldEditIcon()
         }
     }
 
@@ -175,9 +175,8 @@ final class ProfileChangeView: BaseUIView, SettingTabToastPresentable {
         changeButton.updateType(canSubmit ? .enabled : .disabled)
     }
 
-    private func updateNicknameStatusIconIfNeeded() {
-        guard isNicknameValid,
-              !hasNicknameChanged else { return }
+    private func setNicknameTextFieldEditIcon() {
+        guard !hasNicknameChanged else { return }
 
         nicknameTextField.showEditIconIfValid()
     }
