@@ -132,7 +132,6 @@ final class WorkoutViewController: BaseUIViewController {
     private func pauseRecordingRoute() {
         workoutMode = .paused
         viewModel.pauseDistanceTracking()
-        workoutView.setFinishButtonEnabled(viewModel.canFinishRecording)
         changeActivityStatus(to: "ACTIVITY_PAUSED")
     }
 
@@ -142,10 +141,7 @@ final class WorkoutViewController: BaseUIViewController {
     }
     
     private func finishRecordingRoute() {
-        guard
-            workoutMode != .finishing,
-            viewModel.canFinishRecording
-        else { return }
+        guard workoutMode != .finishing else { return }
         workoutMode = .finishing
 
         let backgroundMapTask = Task {
@@ -557,10 +553,14 @@ final class WorkoutViewController: BaseUIViewController {
 
         Task {
             do {
-                let activity = try await viewModel.startRecording(
-                    activityType: "HIKING",
-                    startedAt: startedAt
-                )
+                let activity = try await LoadingOverlayManager.shared.perform(
+                    message: "데이터를 불러오고 있어요"
+                ) {
+                    try await self.viewModel.startRecording(
+                        activityType: "HIKING",
+                        startedAt: startedAt
+                    )
+                }
 
                 RouteeLogger.debug("운동 기록 시작 완료 (activityId: \(activity.activityId))")
                 await MainActor.run {

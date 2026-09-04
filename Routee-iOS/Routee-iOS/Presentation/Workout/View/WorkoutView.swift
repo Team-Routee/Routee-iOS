@@ -368,10 +368,6 @@ final class WorkoutView: BaseUIView {
         workoutPauseView.updateAltitude(formattedAltitude)
     }
 
-    func setFinishButtonEnabled(_ isEnabled: Bool) {
-        workoutPauseView.setFinishButtonEnabled(isEnabled)
-    }
-
     func updatePhotoCount(_ count: Int) {
         cameraCountLabel.text = "\(count)/20"
         let isAtPhotoLimit = count >= 20
@@ -492,14 +488,14 @@ final class WorkoutView: BaseUIView {
     }
 
     func captureBackgroundMapImage(fitting coordinates: [NMGLatLng]) async -> UIImage? {
-        guard !coordinates.isEmpty else { return nil }
-
         hideLocationOverlay()
         pathOverlay.mapView = nil
         removePhotoMarkers()
 
-        let bounds = NMGLatLngBounds(latLngs: coordinates)
-        await mapView.moveCamera(NMFCameraUpdate(fit: bounds, padding: 48))
+        if !coordinates.isEmpty {
+            let bounds = NMGLatLngBounds(latLngs: coordinates)
+            await mapView.moveCamera(NMFCameraUpdate(fit: bounds, padding: 48))
+        }
 
         try? await Task.sleep(for: .milliseconds(800))
 

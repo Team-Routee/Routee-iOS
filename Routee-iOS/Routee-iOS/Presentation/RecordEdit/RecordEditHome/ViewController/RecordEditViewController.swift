@@ -76,11 +76,11 @@ final class RecordEditViewController: BaseUIViewController {
             guard let self else { return }
 
             do {
-                let summary = try await summaryViewModel.fetchSummary()
-                let joinDateText = String(summary.joinDate.prefix(10))
-                let joinDate = joinedDateFormatter.date(from: joinDateText)
+                try await LoadingOverlayManager.shared.perform {
+                    let summary = try await self.summaryViewModel.fetchSummary()
+                    let joinDateText = String(summary.joinDate.prefix(10))
+                    let joinDate = self.joinedDateFormatter.date(from: joinDateText)
 
-                await MainActor.run {
                     self.rootView.configureMinimumMonth(joinDate)
                 }
             } catch {
@@ -98,13 +98,13 @@ final class RecordEditViewController: BaseUIViewController {
                 guard let year = components.year,
                       let month = components.month else { return }
 
-                try await viewModel.fetchWorkoutList(
-                    year: year,
-                    month: month
-                )
+                try await LoadingOverlayManager.shared.perform {
+                    try await self.viewModel.fetchWorkoutList(
+                        year: year,
+                        month: month
+                    )
 
-                let fetchedRecords = viewModel.records
-                await MainActor.run {
+                    let fetchedRecords = self.viewModel.records
                     self.records = fetchedRecords
                     self.rootView.updateView(isEmpty: fetchedRecords.isEmpty)
                     self.rootView.workoutRecordCollectionView.reloadData()

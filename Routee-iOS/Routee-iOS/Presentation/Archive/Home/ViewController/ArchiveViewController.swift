@@ -53,10 +53,12 @@ final class ArchiveViewController: BaseUIViewController {
             guard let self else { return }
 
             do {
-                let records = try await viewModel.fetchArchive(
-                    year: requestedYear,
-                    month: requestedMonth
-                )
+                let records = try await LoadingOverlayManager.shared.perform {
+                    try await self.viewModel.fetchArchive(
+                        year: requestedYear,
+                        month: requestedMonth
+                    )
+                }
 
                 guard !Task.isCancelled else { return }
 
@@ -98,7 +100,9 @@ final class ArchiveViewController: BaseUIViewController {
             guard let self else { return }
 
             do {
-                let summary = try await summaryViewModel.fetchSummary()
+                let summary = try await LoadingOverlayManager.shared.perform {
+                    try await self.summaryViewModel.fetchSummary()
+                }
 
                 guard !Task.isCancelled else { return }
 
