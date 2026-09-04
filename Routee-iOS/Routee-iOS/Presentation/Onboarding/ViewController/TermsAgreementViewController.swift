@@ -102,7 +102,8 @@ final class TermsAgreementViewController: BaseUIViewController {
 
         let viewController = OnboardingViewController(
             identityToken: identityToken,
-            appleUserID: appleUserID
+            appleUserID: appleUserID,
+            agreements: termsAgreementView.agreements
         )
         navigationController?.setViewControllers([viewController], animated: true)
     }

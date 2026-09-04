@@ -73,6 +73,16 @@ final class TermsAgreementView: BaseUIView {
         requiredAgreementButtons.allSatisfy(\.isChecked)
     }
 
+    var agreements: RegisterInfoModel.Agreements {
+        RegisterInfoModel.Agreements(
+            serviceTerms: serviceTermsButton.isChecked,
+            privacyPolicy: privacyPolicyButton.isChecked,
+            locationServiceTerms: locationTermsButton.isChecked,
+            over14: ageRequirementButton.isChecked,
+            marketingConsent: marketingConsentButton.isChecked
+        )
+    }
+
     private var individualAgreementButtons: [CheckBoxButton] {
         [
             serviceTermsButton,
@@ -96,6 +106,7 @@ final class TermsAgreementView: BaseUIView {
 
     override func setStyle() {
         backgroundColor = .bgPrimary
+        topNavigationBar.setBackButtonHidden(false)
         dividerView.backgroundColor = .grey600
         
         titleLabel.do {
@@ -170,7 +181,8 @@ final class TermsAgreementView: BaseUIView {
         
         nextButton.snp.makeConstraints {
             $0.bottom.equalTo(safeAreaLayoutGuide).inset(75)
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.centerX.equalToSuperview()
+            $0.width.equalTo(343)
         }
     }
 

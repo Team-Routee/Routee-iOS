@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum LoginPlatform {
+enum LoginPlatform: Sendable {
     case APPLE
 }
 

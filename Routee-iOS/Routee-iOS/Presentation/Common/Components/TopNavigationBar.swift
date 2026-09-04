@@ -21,8 +21,10 @@ final class TopNavigationBar: BaseUIView {
     
     // MARK: - UI Properties
     
+    private let buttonStackView = UIStackView()
     private let backButton = UIButton()
     private let titleLabel = UILabel()
+    private let buttonSpacerView = UIView()
     private let rightButton = UIButton()
     
     // MARK: - Initializer
@@ -42,6 +44,13 @@ final class TopNavigationBar: BaseUIView {
     override func setStyle() {
         backButton.do {
             $0.setImage(UIImage(named: "ic_arrow_left_sm_white"), for: .normal)
+            $0.contentHorizontalAlignment = .leading
+        }
+
+        buttonStackView.do {
+            $0.axis = .horizontal
+            $0.alignment = .center
+            $0.distribution = .fill
         }
 
         titleLabel.do {
@@ -56,13 +65,15 @@ final class TopNavigationBar: BaseUIView {
             $0.setTitle(rightTitle, for: .normal)
             $0.setTitleColor(.staticWhite, for: .normal)
             $0.titleLabel?.font = .label_sb_18
+            $0.contentHorizontalAlignment = .trailing
             $0.isHidden = rightTitle == nil
             $0.isUserInteractionEnabled = rightTitle != nil
         }
     }
     
     override func setUI() {
-        addSubviews(backButton, titleLabel, rightButton)
+        addSubviews(buttonStackView, titleLabel)
+        buttonStackView.addArrangedSubviews(backButton, buttonSpacerView, rightButton)
         
         setActions()
     }
@@ -71,10 +82,14 @@ final class TopNavigationBar: BaseUIView {
         snp.makeConstraints {
             $0.height.equalTo(44)
         }
+
+        buttonStackView.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.width.equalTo(343)
+            $0.height.equalTo(44)
+        }
         
         backButton.snp.makeConstraints {
-            $0.leading.equalToSuperview().inset(4)
-            $0.centerY.equalToSuperview()
             $0.size.equalTo(44)
         }
 
@@ -83,8 +98,6 @@ final class TopNavigationBar: BaseUIView {
         }
         
         rightButton.snp.makeConstraints {
-            $0.trailing.equalToSuperview().inset(4)
-            $0.centerY.equalToSuperview()
             $0.height.equalTo(42)
             $0.width.equalTo(63)
         }

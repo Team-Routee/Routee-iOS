@@ -23,6 +23,8 @@ final class MyRouteRow: BaseUIView {
 
     // MARK: - Properties
 
+    private let maxRouteNameLength = 16
+
     var onTitleChange: ((String) -> Void)?
     var onRemoveTap: (() -> Void)?
 
@@ -151,6 +153,20 @@ final class MyRouteRow: BaseUIView {
 }
 
 extension MyRouteRow: UITextFieldDelegate {
+
+    func textField(
+        _ textField: UITextField,
+        shouldChangeCharactersIn range: NSRange,
+        replacementString string: String
+    ) -> Bool {
+        guard let currentText = textField.text,
+              let textRange = Range(range, in: currentText) else {
+            return true
+        }
+
+        let updatedText = currentText.replacingCharacters(in: textRange, with: string)
+        return updatedText.count <= maxRouteNameLength
+    }
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()

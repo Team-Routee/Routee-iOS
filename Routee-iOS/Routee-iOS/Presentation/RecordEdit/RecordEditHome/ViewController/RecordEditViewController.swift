@@ -47,8 +47,7 @@ final class RecordEditViewController: BaseUIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        (tabBarController as? TabBarViewController)?.setCustomTabBarHidden(false)
+
         loadSummary()
         fetchRecords(for: selectedMonth)
     }

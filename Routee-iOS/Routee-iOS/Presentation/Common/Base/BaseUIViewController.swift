@@ -7,7 +7,12 @@
 
 import UIKit
 
-class BaseUIViewController: UIViewController, UIGestureRecognizerDelegate {
+class BaseUIViewController: UIViewController, TabBarAppearanceProviding, UIGestureRecognizerDelegate {
+
+    var preferredTabBarVisibility: TabBarVisibility {
+        .automatic
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -50,6 +55,11 @@ class BaseUIViewController: UIViewController, UIGestureRecognizerDelegate {
         }
 
         return true
+    }
+
+    func setNeedsTabBarAppearanceUpdate(animated: Bool = true) {
+        (tabBarController as? TabBarAppearanceUpdating)?
+            .updateTabBarAppearance(animated: animated)
     }
     
     func setView() { }

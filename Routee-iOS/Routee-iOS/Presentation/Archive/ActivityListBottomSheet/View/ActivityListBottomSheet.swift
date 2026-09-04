@@ -73,7 +73,8 @@ final class ActivityListBottomSheet: BaseUIView {
         
         dateLabel.snp.makeConstraints {
             $0.top.equalTo(handleView.snp.bottom).offset(20)
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.centerX.equalToSuperview()
+            $0.width.equalTo(343)
             $0.height.equalTo(20)
         }
         
@@ -89,7 +90,8 @@ final class ActivityListBottomSheet: BaseUIView {
         
         recordStackView.snp.makeConstraints {
             $0.top.equalToSuperview()
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.centerX.equalToSuperview()
+            $0.width.equalTo(343)
             $0.bottom.equalToSuperview().inset(16)
         }
     }
