@@ -661,13 +661,22 @@ extension WorkoutViewController: UIImagePickerControllerDelegate, UINavigationCo
         _ picker: UIImagePickerController,
         didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]
     ) {
-        guard let image = info[.originalImage] as? UIImage,
-              let pointIndex = viewModel.routePoints.last?.pointIndex else {
+        guard let image = info[.originalImage] as? UIImage else {
             picker.dismiss(animated: true)
             return
         }
 
-        let photoRecord = WorkoutPhotoRecord(image: image, pointIndex: pointIndex)
+        guard let routePoint = viewModel.routePointForPhoto(
+            fallbackLocation: locationManager.location
+        ) else {
+            picker.dismiss(animated: true)
+            return
+        }
+
+        let photoRecord = WorkoutPhotoRecord(
+            image: image,
+            pointIndex: routePoint.pointIndex
+        )
         picker.dismiss(animated: true) { [weak self] in
             self?.pushPhotoLocationViewController(photoRecord: photoRecord)
         }
