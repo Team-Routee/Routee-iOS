@@ -425,7 +425,7 @@ final class WorkoutView: BaseUIView {
 
         snackbarView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.bottom.equalTo(safeAreaLayoutGuide).inset(CGFloat.s16)
+            $0.bottom.equalTo(safeAreaLayoutGuide).inset(16)
         }
     }
 
@@ -651,7 +651,7 @@ extension WorkoutView {
         layoutIfNeeded()
 
         let keyboardFrame = convert(keyboardScreenFrame, from: nil)
-        let targetModalBottom = min(keyboardFrame.minY, bounds.maxY) - CGFloat.s24
+        let targetModalBottom = min(keyboardFrame.minY, bounds.maxY) - 24
         let targetCenterY = targetModalBottom - modal.bounds.height / 2
         let centerOffset = min(0, targetCenterY - bounds.midY)
 

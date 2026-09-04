@@ -70,7 +70,7 @@ final class WithdrawView: BaseUIView, SettingTabToastPresentable {
         warningHeaderStackView.do {
             $0.axis = .horizontal
             $0.alignment = .center
-            $0.spacing = .s6
+            $0.spacing = 6
         }
 
         warningIconImageView.do {
@@ -86,7 +86,7 @@ final class WithdrawView: BaseUIView, SettingTabToastPresentable {
 
         warningDescriptionStackView.do {
             $0.axis = .vertical
-            $0.spacing = .s8
+            $0.spacing = 8
         }
 
         warningPrimaryDescriptionLabel.do {

@@ -106,7 +106,7 @@ final class ActionVerticalModal: UIViewController {
 
         buttonStackView.do {
             $0.axis = .vertical
-            $0.spacing = .s10
+            $0.spacing = 10
             $0.distribution = .fill
         }
 
@@ -131,37 +131,37 @@ final class ActionVerticalModal: UIViewController {
         modalView.snp.makeConstraints {
             $0.center.equalToSuperview()
             $0.width.equalToSuperview()
-                .offset(-(CGFloat.s24 * 2))
+                .offset(-48)
                 .priority(.high)
             $0.width.lessThanOrEqualTo(318)
             $0.height.equalTo(211)
         }
 
         closeButton.snp.makeConstraints {
-            $0.top.equalToSuperview().inset(CGFloat.s20)
-            $0.trailing.equalToSuperview().inset(CGFloat.s24)
-            $0.size.equalTo(CGFloat.s24)
+            $0.top.equalToSuperview().inset(20)
+            $0.trailing.equalToSuperview().inset(24)
+            $0.size.equalTo(24)
         }
 
         titleContainerView.snp.makeConstraints {
             $0.top.equalTo(closeButton.snp.bottom)
             $0.horizontalEdges.equalToSuperview()
-                .inset(CGFloat.s24)
+                .inset(24)
             $0.height.equalTo(41)
         }
 
         titleLabel.snp.makeConstraints {
             $0.top.equalToSuperview()
             $0.horizontalEdges.equalToSuperview()
-                .inset(CGFloat.s16)
-            $0.bottom.equalToSuperview().inset(CGFloat.s16)
+                .inset(16)
+            $0.bottom.equalToSuperview().inset(16)
         }
 
         buttonStackView.snp.makeConstraints {
             $0.top.equalTo(titleContainerView.snp.bottom)
             $0.horizontalEdges.equalToSuperview()
-                .inset(CGFloat.s24)
-            $0.bottom.equalToSuperview().inset(CGFloat.s24)
+                .inset(24)
+            $0.bottom.equalToSuperview().inset(24)
         }
 
         topButton.snp.makeConstraints {

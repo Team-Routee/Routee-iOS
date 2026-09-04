@@ -27,7 +27,7 @@ final class NicknameTextField: UITextField {
         case invalid
     }
 
-    private let textInsets = UIEdgeInsets(top: 0, left: .s12, bottom: 0, right: .s12)
+    private let textInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 12)
     private let iconSize: CGFloat = 24
     private let editIconSize: CGFloat = 26
     private let focusedBorderColor = UIColor.statusInfo

@@ -84,7 +84,7 @@ final class WorkoutRecordCell: UICollectionViewCell {
         }
         
         workoutTitleEditor.snp.makeConstraints {
-            $0.top.equalTo(workoutRecordThumbnail.snp.bottom).offset(CGFloat.s16)
+            $0.top.equalTo(workoutRecordThumbnail.snp.bottom).offset(16)
             $0.horizontalEdges.equalTo(contentView)
         }
         

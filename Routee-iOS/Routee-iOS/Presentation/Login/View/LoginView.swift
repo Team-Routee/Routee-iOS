@@ -101,17 +101,17 @@ final class LoginView: BaseUIView {
         
         signInButton.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.bottom.equalTo(serviceAgreeLabel.snp.top).offset(-CGFloat.s24)
+            $0.bottom.equalTo(serviceAgreeLabel.snp.top).offset(-24)
         }
         
         serviceAgreeLabel.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.bottom.equalTo(privacyPolicyLabel.snp.top).offset(-CGFloat.s2)
+            $0.bottom.equalTo(privacyPolicyLabel.snp.top).offset(-2)
         }
         
         privacyPolicyLabel.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.bottom.equalTo(safeAreaLayoutGuide).inset(CGFloat.s16)
+            $0.bottom.equalTo(safeAreaLayoutGuide).inset(16)
         }
     }
 }

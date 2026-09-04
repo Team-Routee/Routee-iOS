@@ -13,7 +13,7 @@ final class RouteeTextField: UITextField {
 
     var trailingIconAction: (() -> Void)?
 
-    private let textInsets = UIEdgeInsets(top: 0, left: .s12, bottom: 0, right: .s12)
+    private let textInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 12)
     private let iconSize: CGFloat = 24
     private let iconTextSpacing: CGFloat = 8
     private let focusedBorderColor = UIColor.statusInfo
