@@ -258,7 +258,8 @@ final class WorkoutView: BaseUIView {
         
         workoutMetric.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide).offset(20)
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.centerX.equalToSuperview()
+            $0.width.equalTo(343)
         }
         
         currentLocationImage.snp.makeConstraints {
