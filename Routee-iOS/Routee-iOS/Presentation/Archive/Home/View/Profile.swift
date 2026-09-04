@@ -130,7 +130,8 @@ final class Profile: BaseUIView {
             $0.size.equalTo(24)
         }
         pointView.snp.makeConstraints {
-            $0.top.trailing.equalToSuperview().inset(8)
+            $0.top.equalToSuperview().inset(8)
+            $0.trailing.equalToSuperview().offset(2)
             $0.leading.equalTo(pointImage.snp.leading).offset(-8)
             $0.height.equalTo(28)
         }
