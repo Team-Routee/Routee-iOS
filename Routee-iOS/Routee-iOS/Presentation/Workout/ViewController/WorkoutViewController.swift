@@ -28,6 +28,9 @@ final class WorkoutViewController: BaseUIViewController {
     // MARK: - Properties
     
     let workoutView = WorkoutView()
+    private var hasValidRoute: Bool {
+        viewModel.routePoints.count >= 2
+    }
     private var workoutMode: WorkoutMode = .ready {
         didSet {
             guard oldValue != workoutMode else { return }
@@ -150,6 +153,7 @@ final class WorkoutViewController: BaseUIViewController {
         workoutMode = .finishing
 
         let backgroundMapTask = Task {
+            guard self.hasValidRoute else { return false }
             guard let mapImage = await workoutView.captureBackgroundMapImage(
                 fitting: viewModel.routePoints.map(\.latLng)
             ) else { return false }
@@ -170,7 +174,7 @@ final class WorkoutViewController: BaseUIViewController {
                 let didUploadBackgroundMap = await backgroundMapTask.value
                 await MainActor.run {
                     self.pushWorkoutTimeLineViewController(
-                        showFailureModalOnAppear: !didUploadBackgroundMap
+                        showFailureModalOnAppear: self.hasValidRoute && !didUploadBackgroundMap
                     )
                 }
             }
