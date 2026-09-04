@@ -258,7 +258,10 @@ final class EditorView: BaseUIView {
     func resetEditingContent() {
         recordEditTabBar.hideOptionView()
         removeStickerBoxWithoutMarkingChange(routeStickerBox)
+        restoreRecordInfoStickerBox()
         restoreRouteTimelineStickerBox()
+        state.deletedStickerTypes.removeAll()
+        deactivateStickerBox(recordInfoStickerBox)
         deactivateStickerBox(routeTimelineStickerBox)
         resetBackground()
         resetEditorColor()
@@ -624,9 +627,24 @@ final class EditorView: BaseUIView {
         stickerBox.removeFromSuperview()
     }
 
+    private func restoreRecordInfoStickerBox() {
+        if recordInfoStickerBox.superview == nil {
+            if routeTimelineStickerBox.superview != nil {
+                stickerContainerView.insertSubview(recordInfoStickerBox, belowSubview: routeTimelineStickerBox)
+            } else {
+                stickerContainerView.addSubview(recordInfoStickerBox)
+            }
+        }
+
+        layoutIfNeeded()
+        recordInfoStickerBox.frame = defaultRecordInfoStickerFrame()
+        recordInfoStickerBox.resetContentLayoutScale()
+        state.didSetRecordInfoStickerFrame = true
+    }
+
     private func restoreRouteTimelineStickerBox() {
         if routeTimelineStickerBox.superview == nil {
-            stickerContainerView.insertSubview(routeTimelineStickerBox, belowSubview: recordInfoStickerBox)
+            stickerContainerView.insertSubview(routeTimelineStickerBox, aboveSubview: recordInfoStickerBox)
         }
 
         layoutIfNeeded()
