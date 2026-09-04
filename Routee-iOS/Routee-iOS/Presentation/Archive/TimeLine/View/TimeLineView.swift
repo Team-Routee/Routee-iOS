@@ -175,25 +175,29 @@ final class TimeLineView: BaseUIView {
 
         workoutMetric.snp.makeConstraints {
             $0.top.equalTo(titleTextField.snp.bottom).offset(8)
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.centerX.equalTo(scrollView.frameLayoutGuide)
+            $0.width.equalTo(343)
             $0.height.equalTo(91)
         }
 
         trackMap.snp.makeConstraints {
             $0.top.equalTo(workoutMetric.snp.bottom).offset(7)
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.centerX.equalTo(scrollView.frameLayoutGuide)
+            $0.width.equalTo(343)
             $0.height.equalTo(480)
         }
 
         timelineTitleLabel.snp.makeConstraints {
             $0.top.equalTo(trackMap.snp.bottom).offset(48)
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.centerX.equalTo(scrollView.frameLayoutGuide)
+            $0.width.equalTo(343)
             $0.height.equalTo(25)
         }
 
         timelineDateLabel.snp.makeConstraints {
             $0.top.equalTo(timelineTitleLabel.snp.bottom).offset(4)
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.centerX.equalTo(scrollView.frameLayoutGuide)
+            $0.width.equalTo(343)
             $0.height.equalTo(17)
         }
 
@@ -205,7 +209,8 @@ final class TimeLineView: BaseUIView {
 
         myRoute.snp.makeConstraints {
             $0.top.equalTo(timelineCard.snp.bottom).offset(82)
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.centerX.equalTo(scrollView.frameLayoutGuide)
+            $0.width.equalTo(343)
             $0.bottom.equalToSuperview().inset(64)
         }
 
@@ -254,7 +259,8 @@ final class TimeLineView: BaseUIView {
             } else {
                 $0.top.equalTo(trackMap.snp.bottom).offset(28)
             }
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.centerX.equalTo(scrollView.frameLayoutGuide)
+            $0.width.equalTo(343)
 
             if showsMyRouteSection {
                 $0.bottom.equalToSuperview().inset(64)

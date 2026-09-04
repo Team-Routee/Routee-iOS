@@ -89,7 +89,8 @@ final class ArchiveView: BaseUIView {
 
         calendarView.snp.makeConstraints {
             $0.top.equalTo(mountainMapView.snp.bottom).offset(32)
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.centerX.equalToSuperview()
+            $0.width.equalTo(343)
             $0.height.equalTo(337)
         }
     }
