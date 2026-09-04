@@ -75,7 +75,7 @@ final class SnackbarView: BaseUIView {
         }
 
         actionButton.snp.makeConstraints {
-            $0.trailing.equalToSuperview().inset(CGFloat.s6)
+            $0.trailing.equalToSuperview().inset(CGFloat.s18)
             $0.centerY.equalToSuperview()
         }
     }
