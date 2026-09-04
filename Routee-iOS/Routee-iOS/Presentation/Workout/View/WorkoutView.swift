@@ -368,10 +368,6 @@ final class WorkoutView: BaseUIView {
         workoutPauseView.updateAltitude(formattedAltitude)
     }
 
-    func setFinishButtonEnabled(_ isEnabled: Bool) {
-        workoutPauseView.setFinishButtonEnabled(isEnabled)
-    }
-
     func updatePhotoCount(_ count: Int) {
         cameraCountLabel.text = "\(count)/20"
         let isAtPhotoLimit = count >= 20
@@ -492,14 +488,14 @@ final class WorkoutView: BaseUIView {
     }
 
     func captureBackgroundMapImage(fitting coordinates: [NMGLatLng]) async -> UIImage? {
-        guard !coordinates.isEmpty else { return nil }
-
         hideLocationOverlay()
         pathOverlay.mapView = nil
         removePhotoMarkers()
 
-        let bounds = NMGLatLngBounds(latLngs: coordinates)
-        await mapView.moveCamera(NMFCameraUpdate(fit: bounds, padding: 48))
+        if !coordinates.isEmpty {
+            let bounds = NMGLatLngBounds(latLngs: coordinates)
+            await mapView.moveCamera(NMFCameraUpdate(fit: bounds, padding: 48))
+        }
 
         try? await Task.sleep(for: .milliseconds(800))
 
@@ -562,15 +558,19 @@ extension WorkoutView {
         }
     }
     
-    func playCountdownAnimation() {
+    func playCountdownAnimation(completion: @escaping () -> Void) {
         countdownAnimationView.alpha = 1
         countdownAnimationView.currentProgress = 0
         countdownAnimationView.isHidden = false
-        countdownAnimationView.play { _ in
-            UIView.animate(withDuration: 0.3) {
-                self.countdownAnimationView.alpha = 0
+        countdownAnimationView.play { [weak self] isFinished in
+            guard let self else { return }
+
+            UIView.animate(withDuration: 0.3) { [weak self] in
+                self?.countdownAnimationView.alpha = 0
             } completion: { _ in
                 self.countdownAnimationView.isHidden = true
+                guard isFinished else { return }
+                completion()
             }
         }
     }

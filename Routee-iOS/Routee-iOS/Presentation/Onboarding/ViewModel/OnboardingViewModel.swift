@@ -31,10 +31,20 @@ final class OnboardingViewModel {
             provider: platform
         )
 
+        AnalyticsTracker.track(
+            .signUpCompleted,
+            properties: ["login_provider": platform.mixpanelKey]
+        )
+
         try await authRepository.login(
             platform: platform,
             identityToken: identityToken,
             appleUserID: appleUserID
+        )
+
+        AnalyticsTracker.track(
+            .onboardingCompleted,
+            properties: ["login_provider": platform.mixpanelKey]
         )
     }
 }

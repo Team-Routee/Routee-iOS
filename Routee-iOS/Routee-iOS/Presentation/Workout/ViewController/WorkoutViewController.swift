@@ -136,7 +136,6 @@ final class WorkoutViewController: BaseUIViewController {
     private func pauseRecordingRoute() {
         workoutMode = .paused
         viewModel.pauseDistanceTracking()
-        workoutView.setFinishButtonEnabled(viewModel.canFinishRecording)
         changeActivityStatus(to: "ACTIVITY_PAUSED")
     }
 
@@ -146,21 +145,20 @@ final class WorkoutViewController: BaseUIViewController {
     }
     
     private func finishRecordingRoute() {
-        guard
-            workoutMode != .finishing,
-            viewModel.canFinishRecording
-        else { return }
+        guard workoutMode != .finishing else { return }
         workoutMode = .finishing
 
         let backgroundMapTask = Task {
             guard let mapImage = await workoutView.captureBackgroundMapImage(
                 fitting: viewModel.routePoints.map(\.latLng)
-            ) else { return }
+            ) else { return false }
 
             do {
                 try await viewModel.uploadBackgroundMap(image: mapImage)
+                return true
             } catch {
                 RouteeLogger.error(error)
+                return false
             }
         }
 
@@ -168,15 +166,17 @@ final class WorkoutViewController: BaseUIViewController {
             guard let self else { return }
 
             Task {
-                await backgroundMapTask.value
+                let didUploadBackgroundMap = await backgroundMapTask.value
                 await MainActor.run {
-                    self.pushWorkoutTimeLineViewController()
+                    self.pushWorkoutTimeLineViewController(
+                        showFailureModalOnAppear: !didUploadBackgroundMap
+                    )
                 }
             }
         }
     }
 
-    private func pushWorkoutTimeLineViewController() {
+    private func pushWorkoutTimeLineViewController(showFailureModalOnAppear: Bool) {
         let viewController = WorkoutTimeLineViewController(
             activityId: viewModel.activityId,
             title: viewModel.activityTitle ?? "",
@@ -189,7 +189,8 @@ final class WorkoutViewController: BaseUIViewController {
             photoRecords: viewModel.photoRecords,
             finishRecording: { [viewModel] title in
                 try await viewModel.finishRecording(title: title)
-            }
+            },
+            showFailureModalOnAppear: showFailureModalOnAppear
         )
         navigationController?.pushViewController(viewController, animated: true)
     }
@@ -556,21 +557,36 @@ final class WorkoutViewController: BaseUIViewController {
 
         Task {
             do {
-                let activity = try await viewModel.startRecording(
-                    activityType: "HIKING",
-                    startedAt: startedAt
-                )
+                let activity = try await LoadingOverlayManager.shared.perform(
+                    message: "데이터를 불러오고 있어요"
+                ) {
+                    try await self.viewModel.startRecording(
+                        activityType: "HIKING",
+                        startedAt: startedAt
+                    )
+                }
 
                 RouteeLogger.debug("운동 기록 시작 완료 (activityId: \(activity.activityId))")
                 await MainActor.run {
-                    self.workoutMode = .recording
-                    self.workoutView.playCountdownAnimation()
-                    self.workoutView.updateDistance(self.viewModel.startDistanceTracking())
-                    self.workoutView.updatePhotoCount(0)
-                    self.workoutView.updateRoutePath(self.viewModel.routePoints.map(\.latLng))
+                    self.workoutView.playCountdownAnimation { [weak self] in
+                        guard let self else { return }
 
-                    if let currentLocation = self.locationManager.location {
-                        self.appendRouteLocationIfNeeded(currentLocation)
+                        workoutMode = .recording
+                        workoutView.updateDistance(viewModel.startDistanceTracking())
+                        workoutView.updatePhotoCount(0)
+                        workoutView.updateRoutePath(viewModel.routePoints.map(\.latLng))
+
+                        AnalyticsTracker.track(
+                            .workoutStarted,
+                            properties: [
+                                "activity_id": String(activity.activityId),
+                                "activity_type": "HIKING"
+                            ]
+                        )
+
+                        if let currentLocation = locationManager.location {
+                            appendRouteLocationIfNeeded(currentLocation)
+                        }
                     }
                 }
             } catch {

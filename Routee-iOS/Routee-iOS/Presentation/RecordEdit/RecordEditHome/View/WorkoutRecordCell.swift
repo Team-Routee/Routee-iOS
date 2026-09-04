@@ -89,7 +89,7 @@ final class WorkoutRecordCell: UICollectionViewCell {
         }
         
         dateLabel.snp.makeConstraints {
-            $0.top.equalTo(workoutTitleEditor.snp.bottom).offset(2)
+            $0.top.equalTo(workoutTitleEditor.snp.bottom).offset(4)
             $0.horizontalEdges.equalTo(contentView)
             $0.bottom.lessThanOrEqualTo(contentView)
         }

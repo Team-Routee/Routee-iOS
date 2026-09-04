@@ -18,6 +18,8 @@ final class EditCompleteViewController: BaseUIViewController {
         static let bottomOffset: CGFloat = 20
         static let size = CGSize(width: 74, height: 10)
     }
+
+    private let activityId: Int64?
     private let watermarkedImage: UIImage
 
     // MARK: - UI Properties
@@ -26,7 +28,8 @@ final class EditCompleteViewController: BaseUIViewController {
 
     // MARK: - Initializer
 
-    init(editedImage: UIImage) {
+    init(activityId: Int64?, editedImage: UIImage) {
+        self.activityId = activityId
         self.watermarkedImage = Self.makeWatermarkedImage(from: editedImage)
         super.init(nibName: nil, bundle: nil)
     }
@@ -67,6 +70,13 @@ final class EditCompleteViewController: BaseUIViewController {
     }
 
     private func saveImageToPhotoLibrary() {
+        if let activityId {
+            AnalyticsTracker.track(
+                .recapSaved,
+                properties: ["activity_id": String(activityId)]
+            )
+        }
+
         PHPhotoLibrary.requestAuthorization(for: .addOnly) { [weak self] status in
             guard let self else { return }
 
@@ -92,6 +102,13 @@ final class EditCompleteViewController: BaseUIViewController {
     }
 
     private func exportImage() {
+        if let activityId {
+            AnalyticsTracker.track(
+                .recapShared,
+                properties: ["activity_id": String(activityId)]
+            )
+        }
+
         let activityViewController = UIActivityViewController(
             activityItems: [watermarkedImage],
             applicationActivities: nil
