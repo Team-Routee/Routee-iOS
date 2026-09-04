@@ -58,8 +58,9 @@ final class WorkoutPhotoLocationView: BaseUIView {
 
         photoImageView.do {
             $0.contentMode = .scaleAspectFill
-            $0.layer.cornerRadius = 12
             $0.clipsToBounds = true
+            $0.layer.cornerRadius = .r12
+            $0.layer.masksToBounds = true
         }
         
         locationTextField.returnKeyType = .done
@@ -89,7 +90,8 @@ final class WorkoutPhotoLocationView: BaseUIView {
 
         photoImageView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(25)
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.centerX.equalToSuperview()
+            $0.width.equalTo(343)
             $0.height.equalTo(468)
         }
         

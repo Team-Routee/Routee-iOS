@@ -39,7 +39,6 @@ final class WorkoutTimeLineView: BaseUIView {
     private let photoRecords: [WorkoutPhotoRecord]
     private let timelineImages: [UIImage]
     private let timelineLocations: [String?]
-
     // MARK: - Initializer
 
     init(
@@ -183,21 +182,22 @@ final class WorkoutTimeLineView: BaseUIView {
         
         workoutMetric.snp.makeConstraints {
             $0.top.equalTo(titleTextField.snp.bottom).offset(8)
-            $0.horizontalEdges.equalToSuperview().inset(16)
-            $0.width.greaterThanOrEqualTo(343)
+            $0.centerX.equalTo(scrollView.frameLayoutGuide)
+            $0.width.equalTo(343)
             $0.height.equalTo(91)
         }
         
         trackMap.snp.makeConstraints {
             $0.top.equalTo(workoutMetric.snp.bottom).offset(8)
-            $0.horizontalEdges.equalToSuperview().inset(16)
-            $0.width.greaterThanOrEqualTo(343)
+            $0.centerX.equalTo(scrollView.frameLayoutGuide)
+            $0.width.equalTo(343)
             $0.height.equalTo(481)
         }
         
         timeLineStackView.snp.makeConstraints {
             $0.top.equalTo(trackMap.snp.bottom).offset(48)
-            $0.horizontalEdges.equalTo(scrollView.contentLayoutGuide).inset(16)
+            $0.centerX.equalTo(scrollView.frameLayoutGuide)
+            $0.width.equalTo(343)
         }
         
         timeLineLabel.snp.makeConstraints {
@@ -210,24 +210,24 @@ final class WorkoutTimeLineView: BaseUIView {
         
         timeLineCard.snp.makeConstraints {
             $0.top.equalTo(timeLineStackView.snp.bottom).offset(16)
-            $0.centerX.equalToSuperview()
-            $0.width.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview()
         }
         
         myRoute.snp.makeConstraints {
             if timelineImages.isEmpty {
                 $0.top.equalTo(trackMap.snp.bottom).offset(48)
             } else {
-                $0.top.equalTo(timeLineCard.snp.bottom).offset(61)
+                $0.top.equalTo(timeLineCard.snp.bottom).offset(48)
             }
-            $0.horizontalEdges.equalToSuperview().inset(16)
-            $0.bottom.equalTo(scrollView.contentLayoutGuide).inset(140)
+            $0.centerX.equalTo(scrollView.frameLayoutGuide)
+            $0.width.equalTo(343)
+            $0.bottom.equalTo(scrollView.contentLayoutGuide).inset(114)
         }
         
         goToEditButton.snp.makeConstraints {
             $0.bottom.equalTo(safeAreaLayoutGuide).inset(28)
             $0.centerX.equalToSuperview()
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.width.equalTo(343)
         }
     }
 
