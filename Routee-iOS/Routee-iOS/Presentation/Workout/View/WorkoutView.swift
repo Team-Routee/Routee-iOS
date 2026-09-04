@@ -562,15 +562,19 @@ extension WorkoutView {
         }
     }
     
-    func playCountdownAnimation() {
+    func playCountdownAnimation(completion: @escaping () -> Void) {
         countdownAnimationView.alpha = 1
         countdownAnimationView.currentProgress = 0
         countdownAnimationView.isHidden = false
-        countdownAnimationView.play { _ in
-            UIView.animate(withDuration: 0.3) {
-                self.countdownAnimationView.alpha = 0
+        countdownAnimationView.play { [weak self] isFinished in
+            guard let self else { return }
+
+            UIView.animate(withDuration: 0.3) { [weak self] in
+                self?.countdownAnimationView.alpha = 0
             } completion: { _ in
                 self.countdownAnimationView.isHidden = true
+                guard isFinished else { return }
+                completion()
             }
         }
     }

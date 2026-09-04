@@ -12,6 +12,10 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     private let activityId: Int64?
     private let activityRepository: ActivityRepository
     private let finishRecording: (String) async throws -> Void
+    private let showFailureModalOnAppear: Bool
+    private var isCompletingTimeline = false
+    private var didShowFailureModal = false
+    private var didTrackRecordingEnded = false
 
     // MARK: - Initializer
 
@@ -24,11 +28,13 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
         trackPoints: [TrackPoint],
         photoRecords: [WorkoutPhotoRecord],
         finishRecording: @escaping (String) async throws -> Void,
+        showFailureModalOnAppear: Bool,
         activityRepository: ActivityRepository = DefaultActivityRepository()
     ) {
         self.activityId = activityId
         self.activityRepository = activityRepository
         self.finishRecording = finishRecording
+        self.showFailureModalOnAppear = showFailureModalOnAppear
         workoutTimelineView = WorkoutTimeLineView(
             title: title,
             distanceInMeters: distanceInMeters,
@@ -58,33 +64,62 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
         super.viewDidAppear(animated)
 
         workoutTimelineView.fitTrackMapToRoute()
+
+        if let activityId, !didTrackRecordingEnded {
+            didTrackRecordingEnded = true
+            AnalyticsTracker.track(
+                .workoutRecordingEnded,
+                properties: [
+                    "activity_id": String(activityId),
+                    "activity_type": "HIKING"
+                ]
+            )
+        }
+
+        guard showFailureModalOnAppear,
+              !didShowFailureModal else { return }
+
+        didShowFailureModal = true
+        presentFinishRecordingFailureModal()
     }
 
     // MARK: - Network
 
     private func completeTimeLine() {
+        guard !isCompletingTimeline else { return }
+        isCompletingTimeline = true
+
         Task {
             do {
                 try await uploadCourseList()
             } catch {
                 RouteeLogger.error(error)
             }
-            await finishRecordingIfNeeded()
-            await MainActor.run {
-                _ = self.navigationController?.popToRootViewController(animated: true)
+
+            do {
+                try await saveWorkoutRecord()
+                _ = navigationController?.popToRootViewController(animated: true)
+            } catch {
+                isCompletingTimeline = false
+                RouteeLogger.error(error)
+                presentFinishRecordingFailureModal()
             }
         }
     }
 
-    private func finishRecordingIfNeeded() async {
-        do {
-            let title = await MainActor.run {
-                self.workoutTimelineView.endEditing(true)
-                return self.workoutTimelineView.activityTitle
-            }
-            try await finishRecording(title)
-        } catch {
-            RouteeLogger.error(error)
+    private func saveWorkoutRecord() async throws {
+        workoutTimelineView.endEditing(true)
+        let title = workoutTimelineView.activityTitle
+        try await finishRecording(title)
+
+        if let activityId {
+            AnalyticsTracker.track(
+                .workoutCompleted,
+                properties: [
+                    "activity_id": String(activityId),
+                    "activity_type": "HIKING"
+                ]
+            )
         }
     }
 
@@ -108,6 +143,40 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
         )
     }
 
+    // MARK: - Private Method
+
+    private func presentFinishRecordingFailureModal() {
+        if let activityId {
+            AnalyticsTracker.track(
+                .workoutCompleteFailed,
+                properties: [
+                    "activity_id": String(activityId),
+                    "activity_type": "HIKING"
+                ]
+            )
+        }
+
+        let confirmAction: () -> Void = { [weak self] in
+            self?.navigationController?.popToRootViewController(animated: true)
+        }
+
+        let modal = ActionPrimaryModal(
+            title: "기록 등록 실패",
+            description: """
+            인터넷 연결이 불안정해서
+            기록이 등록되지 않았어요.
+            연결이 안정되면 다시 기록해주세요.
+
+            (인터넷 연결 오프라인 상태)
+            """,
+            actionCount: .single,
+            leftButtonTitle: "확인",
+            leftButtonAction: confirmAction
+        )
+
+        present(modal, animated: true)
+    }
+
     // MARK: - Actions
 
     override func setAddTarget() {
@@ -116,18 +185,30 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
 
     @objc
     private func didTapGoToEditButton() {
+        guard !isCompletingTimeline else { return }
+        isCompletingTimeline = true
+
         Task {
             do {
                 try await uploadCourseList()
             } catch {
                 RouteeLogger.error(error)
             }
-            await finishRecordingIfNeeded()
-            await MainActor.run {
-                self.navigationController?.pushViewController(
-                    EditorViewController(activityId: self.activityId),
+
+            do {
+                try await saveWorkoutRecord()
+                navigationController?.pushViewController(
+                    EditorViewController(
+                        activityId: activityId,
+                        entryPoint: .postWorkout
+                    ),
                     animated: true
                 )
+                isCompletingTimeline = false
+            } catch {
+                isCompletingTimeline = false
+                RouteeLogger.error(error)
+                presentFinishRecordingFailureModal()
             }
         }
     }
