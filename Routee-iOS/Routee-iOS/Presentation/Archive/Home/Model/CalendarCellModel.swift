@@ -32,7 +32,7 @@ extension CalendarCellModel.RecordState {
         } else if activityCount == 1 {
             self = .single
         } else {
-            self = .multiple(min(activityCount, 9))
+            self = .multiple(activityCount)
         }
     }
 }
