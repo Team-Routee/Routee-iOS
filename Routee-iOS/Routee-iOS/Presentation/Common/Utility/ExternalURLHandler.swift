@@ -7,6 +7,7 @@
 
 import UIKit
 
+@MainActor
 enum ExternalURLHandler {
 
     private static let kakaoChannelURL = "http://pf.kakao.com/_ExkxgSX"

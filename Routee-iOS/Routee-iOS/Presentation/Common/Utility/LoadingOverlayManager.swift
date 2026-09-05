@@ -46,14 +46,29 @@ final class LoadingOverlayManager {
         overlayView.removeFromSuperview()
     }
 
-    func perform<T>(
+    nonisolated func perform<T>(
         message: String = "데이터를 불러오고 있어요",
         operation: () async throws -> T
     ) async rethrows -> T {
-        show(message: message)
-        defer { hide() }
+        await MainActor.run {
+            show(message: message)
+        }
 
-        return try await operation()
+        do {
+            let result = try await operation()
+
+            await MainActor.run {
+                hide()
+            }
+
+            return result
+        } catch {
+            await MainActor.run {
+                hide()
+            }
+
+            throw error
+        }
     }
 
     private var keyWindow: UIWindow? {
