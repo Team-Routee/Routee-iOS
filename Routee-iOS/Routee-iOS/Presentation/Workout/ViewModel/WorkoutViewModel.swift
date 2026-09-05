@@ -8,6 +8,7 @@
 import CoreLocation
 import UIKit
 
+@MainActor
 final class WorkoutViewModel {
     var elapsedTimeDidChange: ((TimeInterval) -> Void)?
     var maximumAltitudeDidChange: ((CLLocationDistance?) -> Void)?
@@ -40,7 +41,7 @@ final class WorkoutViewModel {
         self.activityRepository = activityRepository
     }
     
-    deinit {
+    isolated deinit {
         elapsedTimeTimer?.invalidate()
     }
     
@@ -162,7 +163,9 @@ final class WorkoutViewModel {
     private func startElapsedTimeTimer() {
         elapsedTimeTimer?.invalidate()
         let timer = Timer(timeInterval: 1, repeats: true) { [weak self] _ in
-            self?.publishElapsedTime()
+            Task { @MainActor [weak self] in
+                self?.publishElapsedTime()
+            }
         }
         elapsedTimeTimer = timer
         RunLoop.main.add(timer, forMode: .common)
