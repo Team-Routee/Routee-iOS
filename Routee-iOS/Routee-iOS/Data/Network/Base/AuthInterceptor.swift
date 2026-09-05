@@ -40,7 +40,7 @@ final class AuthInterceptor: RequestInterceptor {
         _ request: Request,
         for session: Session,
         dueTo error: any Error,
-        completion: @escaping (RetryResult) -> Void
+        completion: @escaping @Sendable (RetryResult) -> Void
     ) {
         guard
             request.response?.statusCode == 401,
