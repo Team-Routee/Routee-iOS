@@ -480,7 +480,7 @@ final class WorkoutViewController: BaseUIViewController {
         }
 
         pendingTimelineDeletionTask = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(2))
+            try? await Task.sleep(for: .milliseconds(3_500))
             guard !Task.isCancelled, let self else { return }
 
             await workoutView.dismissSnackbar()
