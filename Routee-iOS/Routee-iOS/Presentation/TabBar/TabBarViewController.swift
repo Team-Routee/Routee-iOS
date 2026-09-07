@@ -53,6 +53,7 @@ final class TabBarViewController: UITabBarController {
     private func configureCustomTabBar() {
         customTabBarView.onSelectTab = { [weak self] tab in
             self?.select(tab, reset: .none, animated: true)
+            self?.resetCurrentMonthIfNeeded(for: tab)
         }
     }
 
@@ -127,6 +128,16 @@ final class TabBarViewController: UITabBarController {
 
         isCustomTabBarHidden = shouldHide
         customTabBarView.setHidden(shouldHide, animated: animated)
+    }
+
+    private func resetCurrentMonthIfNeeded(for tab: AppTab) {
+        guard tab == .recordEdit || tab == .archive,
+              let rootViewController = navigationControllers[tab]?.viewControllers.first
+                as? CurrentMonthResettable else {
+            return
+        }
+
+        rootViewController.resetToCurrentMonth()
     }
 }
 
