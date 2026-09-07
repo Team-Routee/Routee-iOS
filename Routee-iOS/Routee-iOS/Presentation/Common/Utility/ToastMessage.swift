@@ -13,4 +13,5 @@ enum ToastMessage {
     static let successToDownload = "갤러리에 저장되었습니다."
     static let failedToDownload = "갤러리 저장에 실패했습니다."
     static let finishGuide = "종료 버튼을 길게 누르면 기록이 종료됩니다"
+    static let checkNetworkConnection = "네트워크 연결을 확인해주세요."
 }
