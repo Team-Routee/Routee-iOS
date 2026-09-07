@@ -9,7 +9,7 @@ import UIKit
 
 import SnapKit
 
-final class ArchiveView: BaseUIView {
+final class ArchiveView: BaseUIView, ToastPresentable {
 
     // MARK: - UI Properties
 
