@@ -13,6 +13,13 @@ import Then
 
 final class LoginView: BaseUIView {
     
+    // MARK: - Properties
+
+    var serviceTermsTapAction: (() -> Void)?
+    var privacyPolicyTapAction: (() -> Void)?
+    private var serviceAgreeLinkRange = NSRange(location: NSNotFound, length: 0)
+    private var privacyPolicyLinkRange = NSRange(location: NSNotFound, length: 0)
+
     // MARK: - UI Properties
     
     private let backgroundImageView = UIImageView()
