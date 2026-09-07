@@ -41,7 +41,6 @@ final class RecordInfo: BaseUIView {
         }
         
         [distanceDataLabel, timeDataLabel, altitudeDataLabel].forEach {
-            $0.font = .display_26
             $0.textColor = .recapMint
             $0.setContentCompressionResistancePriority(.required, for: .horizontal)
             $0.setContentHuggingPriority(.required, for: .horizontal)
@@ -54,9 +53,8 @@ final class RecordInfo: BaseUIView {
         }
         
         distanceDataLabel.do {
-            $0.font = .display_26
             $0.textColor = .recapMint
-            $0.text = "15.50km"
+            $0.setDisplayText("15.50km", font: .display_26)
         }
         
         timeLabel.do {
@@ -66,9 +64,8 @@ final class RecordInfo: BaseUIView {
         }
         
         timeDataLabel.do {
-            $0.font = .display_26
             $0.textColor = .recapMint
-            $0.text = "3h 20m"
+            $0.setDisplayText("3h 20m", font: .display_26)
         }
         
         altitudeLabel.do {
@@ -78,9 +75,8 @@ final class RecordInfo: BaseUIView {
         }
         
         altitudeDataLabel.do {
-            $0.font = .display_26
             $0.textColor = .recapMint
-            $0.text = "2132m"
+            $0.setDisplayText("2132m", font: .display_26)
         }
     }
     
@@ -119,9 +115,18 @@ final class RecordInfo: BaseUIView {
 
     func configure(distance: Int, durationSec: Int, maxElevation: Int) {
         let distanceInKm = Double(distance) / 1000.0
-        distanceDataLabel.text = distance == 0 ? "" : String(format: "%.2fkm", distanceInKm)
-        timeDataLabel.text = durationSec == 0 ? "" : "\(durationSec / 3600)h \((durationSec % 3600) / 60)m"
-        altitudeDataLabel.text = maxElevation == 0 ? "" : "\(maxElevation)m"
+        distanceDataLabel.setDisplayText(
+            distance == 0 ? "" : String(format: "%.2fkm", distanceInKm),
+            font: .display_26
+        )
+        timeDataLabel.setDisplayText(
+            durationSec == 0 ? "" : "\(durationSec / 3600)h \((durationSec % 3600) / 60)m",
+            font: .display_26
+        )
+        altitudeDataLabel.setDisplayText(
+            maxElevation == 0 ? "" : "\(maxElevation)m",
+            font: .display_26
+        )
     }
     
     func updateColor(_ color: UIColor) {
