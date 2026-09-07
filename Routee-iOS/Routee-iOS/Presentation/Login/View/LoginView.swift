@@ -97,4 +97,54 @@ final class LoginView: BaseUIView {
             $0.bottom.equalTo(safeAreaLayoutGuide).inset(16)
         }
     }
+
+    // MARK: - Private Methods
+
+    private func configurePolicyLabel(
+        _ label: UILabel,
+        text: String,
+        linkedText: String
+    ) -> NSRange {
+        let font = UIFont.pretendard(.regular, size: 10)
+        let attributedString = NSMutableAttributedString(
+            string: text,
+            attributes: [
+                .font: font,
+                .foregroundColor: UIColor.white60
+            ]
+        )
+        let range = (text as NSString).range(of: linkedText)
+
+        if range.location != NSNotFound {
+            attributedString.addAttribute(
+                .underlineStyle,
+                value: NSUnderlineStyle.single.rawValue,
+                range: range
+            )
+        }
+
+        label.attributedText = attributedString
+        label.textAlignment = .center
+        label.isUserInteractionEnabled = true
+
+        return range
+    }
+
+    // MARK: - Actions
+
+    @objc
+    private func didTapServiceAgreeLabel(_ gesture: UITapGestureRecognizer) {
+        let point = gesture.location(in: serviceAgreeLabel)
+        guard serviceAgreeLabel.containsTap(in: serviceAgreeLinkRange, at: point) else { return }
+
+        serviceTermsTapAction?()
+    }
+
+    @objc
+    private func didTapPrivacyPolicyLabel(_ gesture: UITapGestureRecognizer) {
+        let point = gesture.location(in: privacyPolicyLabel)
+        guard privacyPolicyLabel.containsTap(in: privacyPolicyLinkRange, at: point) else { return }
+
+        privacyPolicyTapAction?()
+    }
 }
