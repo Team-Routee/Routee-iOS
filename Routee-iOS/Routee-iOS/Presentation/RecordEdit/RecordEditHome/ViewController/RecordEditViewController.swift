@@ -72,7 +72,7 @@ final class RecordEditViewController: BaseUIViewController {
     private func setMonthSelector() {
         rootView.setMonthChangedHandler { [weak self] date in
             self?.selectedMonth = date
-            self?.fetchRecords(for: date)
+            self?.fetchRecords(for: date, showErrorToast: true)
         }
     }
 
@@ -94,7 +94,10 @@ final class RecordEditViewController: BaseUIViewController {
         }
     }
 
-    private func fetchRecords(for month: Date) {
+    private func fetchRecords(
+        for month: Date,
+        showErrorToast: Bool = false
+    ) {
         Task { [weak self] in
             guard let self else { return }
 
@@ -117,6 +120,15 @@ final class RecordEditViewController: BaseUIViewController {
                 }
             } catch {
                 RouteeLogger.error(error)
+                await MainActor.run {
+                    self.records.removeAll()
+                    self.rootView.updateView(isEmpty: true)
+                    self.rootView.workoutRecordCollectionView.reloadData()
+                    self.rootView.scrollToTop()
+                    if showErrorToast {
+                        self.rootView.showToast(title: ToastMessage.checkNetworkConnection)
+                    }
+                }
             }
         }
     }

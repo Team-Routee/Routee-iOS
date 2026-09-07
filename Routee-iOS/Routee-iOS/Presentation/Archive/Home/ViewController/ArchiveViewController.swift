@@ -42,7 +42,7 @@ final class ArchiveViewController: BaseUIViewController {
         view = rootView
     }
 
-    private func loadArchive() {
+    private func loadArchive(showErrorToast: Bool = false) {
         let requestedYear = year
         let requestedMonth = month
 
@@ -89,6 +89,9 @@ final class ArchiveViewController: BaseUIViewController {
                         year: requestedYear,
                         month: requestedMonth
                     )
+                    if showErrorToast {
+                        self.rootView.showToast(title: ToastMessage.checkNetworkConnection)
+                    }
                 }
             }
         }
@@ -165,7 +168,7 @@ final class ArchiveViewController: BaseUIViewController {
             month -= 1
         }
 
-        loadArchive()
+        loadArchive(showErrorToast: true)
     }
 
     private func moveToNextMonth() {
@@ -178,7 +181,7 @@ final class ArchiveViewController: BaseUIViewController {
             month += 1
         }
 
-        loadArchive()
+        loadArchive(showErrorToast: true)
     }
 
     private func route(to day: CalendarCellModel) {
