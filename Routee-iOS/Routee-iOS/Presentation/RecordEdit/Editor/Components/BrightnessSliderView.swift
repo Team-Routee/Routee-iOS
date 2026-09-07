@@ -182,24 +182,27 @@ final class BrightnessSliderView: BaseUIView {
 
 private final class BrightnessTrackingSlider: UISlider {
 
+    private var previousTouchX: CGFloat = 0
+
     override func beginTracking(_ touch: UITouch, with event: UIEvent?) -> Bool {
-        updateValue(with: touch)
+        previousTouchX = touch.location(in: self).x
         return true
     }
 
     override func continueTracking(_ touch: UITouch, with event: UIEvent?) -> Bool {
-        updateValue(with: touch)
-        return true
-    }
+        let touchX = touch.location(in: self).x
+        let translationX = touchX - previousTouchX
+        previousTouchX = touchX
 
-    private func updateValue(with touch: UITouch) {
-        guard bounds.width > 0 else { return }
+        guard bounds.width > 0 else { return true }
 
-        let touchRatio = touch.location(in: self).x / bounds.width
-        let clampedRatio = min(max(touchRatio, 0), 1)
+        let valueChange = Float(translationX / bounds.width) * (maximumValue - minimumValue)
+        let newValue = min(max(value + valueChange, minimumValue), maximumValue)
+        guard newValue != value else { return true }
 
-        value = minimumValue + Float(clampedRatio) * (maximumValue - minimumValue)
+        value = newValue
         sendActions(for: .valueChanged)
+        return true
     }
 }
 
