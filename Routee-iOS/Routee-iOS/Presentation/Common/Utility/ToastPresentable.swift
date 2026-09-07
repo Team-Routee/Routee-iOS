@@ -1,5 +1,5 @@
 //
-//  SettingTabToastPresentable.swift
+//  ToastPresentable.swift
 //  Routee-iOS
 //
 //  Created by 초긍정행운의포춘쿠키 on 8/26/26.
@@ -9,11 +9,11 @@ import UIKit
 
 import SnapKit
 
-protocol SettingTabToastPresentable where Self: UIView {
+protocol ToastPresentable where Self: UIView {
     func showToast(title: String)
 }
 
-extension SettingTabToastPresentable {
+extension ToastPresentable {
     func showToast(title: String) {
         subviews
             .filter { $0 is ToastMessageView }
