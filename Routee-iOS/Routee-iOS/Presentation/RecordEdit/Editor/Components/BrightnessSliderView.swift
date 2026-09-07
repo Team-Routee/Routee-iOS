@@ -18,7 +18,6 @@ final class BrightnessSliderView: BaseUIView {
 
     private enum Layout {
         static let tickSpacing: CGFloat = 8
-        static let tickMarkWidthMultiplier: CGFloat = 2
         static let tickMarkHeight: CGFloat = 12
         static let indicatorWidth: CGFloat = 2
         static let indicatorHeight: CGFloat = 26
@@ -93,7 +92,7 @@ final class BrightnessSliderView: BaseUIView {
         tickMarkView.snp.makeConstraints {
             tickMarkCenterXConstraint = $0.centerX.equalToSuperview().constraint
             $0.top.equalToSuperview().offset(13)
-            $0.width.equalToSuperview().multipliedBy(Layout.tickMarkWidthMultiplier)
+            $0.width.equalToSuperview()
             $0.height.equalTo(Layout.tickMarkHeight)
         }
 
@@ -146,8 +145,10 @@ final class BrightnessSliderView: BaseUIView {
 
     private func updateTickMarkPosition() {
         let sliderValue = CGFloat(slider.value)
-        let tickMarkCenterOffset = (0.5 - sliderValue) * bounds.width
+        let tickRangeWidth = tickMarkView.tickRangeWidth
+        let tickMarkCenterOffset = (0.5 - sliderValue) * tickRangeWidth
 
+        slider.dragRangeWidth = tickRangeWidth
         tickMarkCenterXConstraint?.update(offset: tickMarkCenterOffset)
     }
 
@@ -182,6 +183,7 @@ final class BrightnessSliderView: BaseUIView {
 
 private final class BrightnessTrackingSlider: UISlider {
 
+    var dragRangeWidth: CGFloat = 0
     private var previousTouchX: CGFloat = 0
 
     override func beginTracking(_ touch: UITouch, with event: UIEvent?) -> Bool {
@@ -194,9 +196,9 @@ private final class BrightnessTrackingSlider: UISlider {
         let translationX = touchX - previousTouchX
         previousTouchX = touchX
 
-        guard bounds.width > 0 else { return true }
+        guard dragRangeWidth > 0 else { return true }
 
-        let valueChange = Float(translationX / bounds.width) * (maximumValue - minimumValue)
+        let valueChange = Float(translationX / dragRangeWidth) * (maximumValue - minimumValue)
         let newValue = min(max(value + valueChange, minimumValue), maximumValue)
         guard newValue != value else { return true }
 
@@ -215,6 +217,15 @@ private final class BrightnessTickMarkView: UIView {
     }
     private let tickSpacing: CGFloat
 
+    private var tickCount: Int {
+        guard tickSpacing > 0 else { return 0 }
+        return Int(max(0, bounds.width - Layout.lineWidth) / tickSpacing)
+    }
+
+    var tickRangeWidth: CGFloat {
+        CGFloat(tickCount) * tickSpacing
+    }
+
     // MARK: - Initializer
 
     init(tickSpacing: CGFloat) {
@@ -222,6 +233,7 @@ private final class BrightnessTickMarkView: UIView {
         super.init(frame: .zero)
 
         backgroundColor = .clear
+        contentMode = .redraw
         isUserInteractionEnabled = false
     }
 
@@ -235,10 +247,10 @@ private final class BrightnessTickMarkView: UIView {
         guard tickSpacing > 0 else { return }
 
         let context = UIGraphicsGetCurrentContext()
-        let tickCount = Int(ceil(bounds.width / tickSpacing))
+        let firstTickX = (bounds.width - tickRangeWidth) / 2
 
         for index in 0...tickCount {
-            let tickPositionX = CGFloat(index) * tickSpacing
+            let tickPositionX = firstTickX + CGFloat(index) * tickSpacing
             let isAccentTick = index.isMultiple(of: 10)
 
             context?.setStrokeColor(
