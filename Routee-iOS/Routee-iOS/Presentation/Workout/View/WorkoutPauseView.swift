@@ -131,7 +131,7 @@ final class WorkoutPauseView: BaseUIView {
             $0.setTitleColor(.lime400, for: .normal)
             $0.backgroundColor = .staticBlack
             $0.layer.cornerRadius = 30
-            $0.clipsToBounds = true
+            $0.clipsToBounds = false
         }
 
         endingAnimationView.do {
@@ -183,7 +183,9 @@ final class WorkoutPauseView: BaseUIView {
         }
 
         endingAnimationView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.center.equalToSuperview()
+            $0.width.equalToSuperview().multipliedBy(2.2)
+            $0.height.equalTo(endingAnimationView.snp.width).multipliedBy(73.0 / 129.0)
         }
     }
     
