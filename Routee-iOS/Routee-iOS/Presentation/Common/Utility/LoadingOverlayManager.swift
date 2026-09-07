@@ -9,6 +9,10 @@ import UIKit
 
 import SnapKit
 
+private enum LoadingOverlayMessage {
+    static let defaultText = "로딩 중"
+}
+
 @MainActor
 final class LoadingOverlayManager {
 
