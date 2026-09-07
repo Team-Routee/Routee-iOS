@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class RecordEditView: BaseUIView {
+final class RecordEditView: BaseUIView, ToastPresentable {
     
     // MARK: - UI Properties
     

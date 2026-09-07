@@ -16,10 +16,12 @@ final class RecordEditViewController: BaseUIViewController {
 
     var onMonthChanged: ((Date) -> Void)?
     private let viewModel = RecordEditViewModel()
+    private let editorViewModel = EditorViewModel()
     private let summaryViewModel = MemberSummaryViewModel()
     private var records: [WorkoutListModel] = []
     private var selectedMonth = Date().startOfMonth
     private var titleUpdateTask: Task<Void, Never>?
+    private var recordTapTask: Task<Void, Never>?
     private let joinedDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.calendar = Calendar(identifier: .gregorian)
@@ -43,6 +45,10 @@ final class RecordEditViewController: BaseUIViewController {
 
         setCollectionView()
         setMonthSelector()
+    }
+
+    deinit {
+        recordTapTask?.cancel()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -123,6 +129,30 @@ final class RecordEditViewController: BaseUIViewController {
         navigationController?.pushViewController(editorViewController, animated: false)
     }
 
+    private func handleRecordTap(activityId: Int64) {
+        recordTapTask?.cancel()
+        recordTapTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                try await editorViewModel.fetchActivityEditorData(activityId: activityId)
+
+                guard !Task.isCancelled else { return }
+
+                await MainActor.run {
+                    self.pushEditorViewController(activityId: activityId)
+                }
+            } catch {
+                guard !Task.isCancelled else { return }
+
+                RouteeLogger.error(error)
+                await MainActor.run {
+                    self.rootView.showToast(title: ToastMessage.checkNetworkConnection)
+                }
+            }
+        }
+    }
+
     private func updateWorkoutTitle(
         activityId: Int64,
         title: String
@@ -192,7 +222,7 @@ extension RecordEditViewController: UICollectionViewDataSource {
 
         cell.configure(with: record)
         cell.onThumbnailTap = { [weak self] in
-            self?.pushEditorViewController(activityId: record.activityId)
+            self?.handleRecordTap(activityId: record.activityId)
         }
         cell.onTitleEditingDidEnd = { [weak self] title in
             self?.updateWorkoutTitle(
