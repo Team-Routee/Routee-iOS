@@ -54,3 +54,7 @@ protocol AppTabRouting: AnyObject {
         animated: Bool
     )
 }
+
+protocol CurrentMonthResettable: AnyObject {
+    func resetToCurrentMonth()
+}
