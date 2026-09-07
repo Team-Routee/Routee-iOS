@@ -52,6 +52,9 @@ final class ProfileChangeViewController: BaseUIViewController {
                 guard !Task.isCancelled else { return }
 
                 RouteeLogger.error(error)
+                await MainActor.run {
+                    self.rootView.showToast(title: ToastMessage.checkNetworkConnection)
+                }
             }
         }
     }
