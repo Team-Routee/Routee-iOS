@@ -90,7 +90,7 @@ final class ArchiveViewController: BaseUIViewController {
                         month: requestedMonth
                     )
                     if showErrorToast {
-                        self.rootView.showToast(title: ToastMessage.checkNetworkConnection)
+                        self.rootView.showNetworkErrorToast()
                     }
                 }
             }
@@ -214,7 +214,7 @@ final class ArchiveViewController: BaseUIViewController {
 
                 RouteeLogger.error(error)
                 await MainActor.run {
-                    self.rootView.showToast(title: ToastMessage.checkNetworkConnection)
+                    self.rootView.showNetworkErrorToast()
                 }
             }
         }

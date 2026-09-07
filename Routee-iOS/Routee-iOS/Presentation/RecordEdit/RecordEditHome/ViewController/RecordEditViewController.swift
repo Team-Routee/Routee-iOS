@@ -131,7 +131,7 @@ final class RecordEditViewController: BaseUIViewController {
                     self.rootView.workoutRecordCollectionView.reloadData()
                     self.rootView.scrollToTop()
                     if showErrorToast {
-                        self.rootView.showToast(title: ToastMessage.checkNetworkConnection)
+                        self.rootView.showNetworkErrorToast()
                     }
                 }
             }
@@ -164,7 +164,7 @@ final class RecordEditViewController: BaseUIViewController {
 
                 RouteeLogger.error(error)
                 await MainActor.run {
-                    self.rootView.showToast(title: ToastMessage.checkNetworkConnection)
+                    self.rootView.showNetworkErrorToast()
                 }
             }
         }

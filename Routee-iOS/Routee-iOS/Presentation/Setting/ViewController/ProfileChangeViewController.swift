@@ -53,7 +53,7 @@ final class ProfileChangeViewController: BaseUIViewController {
 
                 RouteeLogger.error(error)
                 await MainActor.run {
-                    self.rootView.showToast(title: ToastMessage.checkNetworkConnection)
+                    self.rootView.showNetworkErrorToast()
                 }
             }
         }
