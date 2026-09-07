@@ -20,6 +20,7 @@ final class RecordEditViewController: BaseUIViewController {
     private let summaryViewModel = MemberSummaryViewModel()
     private var records: [WorkoutListModel] = []
     private var selectedMonth = Date().startOfMonth
+    private var recordListTask: Task<Void, Never>?
     private var titleUpdateTask: Task<Void, Never>?
     private var recordTapTask: Task<Void, Never>?
     private let joinedDateFormatter: DateFormatter = {
@@ -48,6 +49,7 @@ final class RecordEditViewController: BaseUIViewController {
     }
 
     deinit {
+        recordListTask?.cancel()
         recordTapTask?.cancel()
     }
     
@@ -98,7 +100,8 @@ final class RecordEditViewController: BaseUIViewController {
         for month: Date,
         showErrorToast: Bool = false
     ) {
-        Task { [weak self] in
+        recordListTask?.cancel()
+        recordListTask = Task { [weak self] in
             guard let self else { return }
 
             do {
@@ -119,6 +122,8 @@ final class RecordEditViewController: BaseUIViewController {
                     self.rootView.scrollToTop()
                 }
             } catch {
+                guard !Task.isCancelled else { return }
+
                 RouteeLogger.error(error)
                 await MainActor.run {
                     self.records.removeAll()
@@ -208,6 +213,14 @@ final class RecordEditViewController: BaseUIViewController {
             activityDate: record.activityDate,
             timelineImageUrls: record.timelineImageUrls
         )
+    }
+}
+
+extension RecordEditViewController: CurrentMonthResettable {
+    func resetToCurrentMonth() {
+        let currentMonth = Date().startOfMonth
+        selectedMonth = currentMonth
+        rootView.resetToCurrentMonth()
     }
 }
 

@@ -137,4 +137,8 @@ final class RecordEditView: BaseUIView, ToastPresentable {
     func configureMinimumMonth(_ date: Date?) {
         monthSelector.configureMinimumDate(date)
     }
+
+    func resetToCurrentMonth() {
+        monthSelector.resetToCurrentMonth()
+    }
 }
