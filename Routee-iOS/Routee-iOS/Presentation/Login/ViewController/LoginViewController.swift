@@ -64,6 +64,12 @@ final class LoginViewController: BaseUIViewController {
     
     override func setAddTarget() {
         rootView.signInButton.addTarget(self, action: #selector(didTapSignIn), for: .touchUpInside)
+        rootView.serviceTermsTapAction = {
+            ExternalURLHandler.openTermsOfService()
+        }
+        rootView.privacyPolicyTapAction = {
+            ExternalURLHandler.openPrivacyPolicy()
+        }
     }
     
     @objc
