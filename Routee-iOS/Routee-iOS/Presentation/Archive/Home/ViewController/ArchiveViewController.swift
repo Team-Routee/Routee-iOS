@@ -304,6 +304,11 @@ final class ArchiveViewController: BaseUIViewController {
         monthStart(year: year, month: month) < monthStart(from: Date())
     }
 
+    private func configureCurrentMonth() {
+        year = Calendar.current.component(.year, from: Date())
+        month = Calendar.current.component(.month, from: Date())
+    }
+
     private func monthStart(from joinedDate: String) -> Date {
         let date = joinedDateFormatter.date(from: joinedDate) ?? Date()
         return monthStart(from: date)
@@ -334,5 +339,12 @@ extension ArchiveViewController: UIAdaptivePresentationControllerDelegate {
 
     func presentationControllerWillDismiss(_ presentationController: UIPresentationController) {
         hideDimView()
+    }
+}
+
+extension ArchiveViewController: CurrentMonthResettable {
+    func resetToCurrentMonth() {
+        configureCurrentMonth()
+        loadArchive(showErrorToast: true)
     }
 }
