@@ -14,6 +14,10 @@ protocol ToastPresentable where Self: UIView {
 }
 
 extension ToastPresentable {
+    func showNetworkErrorToast() {
+        showToast(title: ToastMessage.checkNetworkConnection)
+    }
+
     func showToast(title: String) {
         subviews
             .filter { $0 is ToastMessageView }
