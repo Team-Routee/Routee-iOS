@@ -209,7 +209,7 @@ final class WorkoutViewModel {
         activityTitle = activity.title
         return activity
     }
-    
+    로
     func changeActivityStatus(_ status: String) async throws {
         guard let activityId else {
             throw RouteeError.noData

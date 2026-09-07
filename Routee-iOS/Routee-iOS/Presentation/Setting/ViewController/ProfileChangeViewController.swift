@@ -45,9 +45,7 @@ final class ProfileChangeViewController: BaseUIViewController {
             guard let self else { return }
 
             do {
-                try await LoadingOverlayManager.shared.perform(
-                    message: "데이터를 불러오고 있어요"
-                ) {
+                try await LoadingOverlayManager.shared.perform {
                     try await self.loadLatestProfile()
                 }
             } catch {
@@ -124,9 +122,7 @@ final class ProfileChangeViewController: BaseUIViewController {
             guard let self else { return }
 
             do {
-                try await LoadingOverlayManager.shared.perform(
-                    message: "데이터를 불러오고 있어요"
-                ) {
+                try await LoadingOverlayManager.shared.perform {
                     try await self.viewModel.updateProfile(
                         nickname: self.rootView.nickname,
                         hasNicknameChanged: self.rootView.hasNicknameChanged,

@@ -562,9 +562,7 @@ final class WorkoutViewController: BaseUIViewController {
 
         Task {
             do {
-                let activity = try await LoadingOverlayManager.shared.perform(
-                    message: "데이터를 불러오고 있어요"
-                ) {
+                let activity = try await LoadingOverlayManager.shared.perform {
                     try await self.viewModel.startRecording(
                         activityType: "HIKING",
                         startedAt: startedAt
