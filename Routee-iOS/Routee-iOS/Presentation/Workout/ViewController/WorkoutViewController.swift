@@ -192,12 +192,29 @@ final class WorkoutViewController: BaseUIViewController {
                 TrackPoint(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude)
             },
             photoRecords: viewModel.photoRecords,
-            finishRecording: { [viewModel] title in
-                try await viewModel.finishRecording(title: title)
+            finishRecording: { [weak self] title in
+                guard let self else { throw RouteeError.noData }
+                try await saveFinishedRecording(title: title)
             },
             showFailureModalOnAppear: showFailureModalOnAppear
         )
         navigationController?.pushViewController(viewController, animated: true)
+    }
+
+    private func saveFinishedRecording(title: String) async throws {
+        let uploadTasks = Array(photoUploadTasks.values)
+        for uploadTask in uploadTasks {
+            await uploadTask.value
+        }
+        photoUploadTasks.removeAll()
+
+        let titleUpdateTasks = Array(timelineTitleUpdateTasks.values)
+        for titleUpdateTask in titleUpdateTasks {
+            await titleUpdateTask.value
+        }
+        timelineTitleUpdateTasks.removeAll()
+
+        try await viewModel.finishRecording(title: title)
     }
     
     private func requestCameraAccess() {
