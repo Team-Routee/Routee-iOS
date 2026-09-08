@@ -192,12 +192,29 @@ final class WorkoutViewController: BaseUIViewController {
                 TrackPoint(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude)
             },
             photoRecords: viewModel.photoRecords,
-            finishRecording: { [viewModel] title in
-                try await viewModel.finishRecording(title: title)
+            finishRecording: { [weak self] title in
+                guard let self else { throw RouteeError.noData }
+                try await saveFinishedRecording(title: title)
             },
             showFailureModalOnAppear: showFailureModalOnAppear
         )
         navigationController?.pushViewController(viewController, animated: true)
+    }
+
+    private func saveFinishedRecording(title: String) async throws {
+        let uploadTasks = Array(photoUploadTasks.values)
+        for uploadTask in uploadTasks {
+            await uploadTask.value
+        }
+        photoUploadTasks.removeAll()
+
+        let titleUpdateTasks = Array(timelineTitleUpdateTasks.values)
+        for titleUpdateTask in titleUpdateTasks {
+            await titleUpdateTask.value
+        }
+        timelineTitleUpdateTasks.removeAll()
+
+        try await viewModel.finishRecording(title: title)
     }
     
     private func requestCameraAccess() {
@@ -480,7 +497,7 @@ final class WorkoutViewController: BaseUIViewController {
         }
 
         pendingTimelineDeletionTask = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(2))
+            try? await Task.sleep(for: .milliseconds(3_500))
             guard !Task.isCancelled, let self else { return }
 
             await workoutView.dismissSnackbar()
@@ -562,14 +579,10 @@ final class WorkoutViewController: BaseUIViewController {
 
         Task {
             do {
-                let activity = try await LoadingOverlayManager.shared.perform(
-                    message: "데이터를 불러오고 있어요"
-                ) {
-                    try await self.viewModel.startRecording(
-                        activityType: "HIKING",
-                        startedAt: startedAt
-                    )
-                }
+                let activity = try await viewModel.startRecording(
+                    activityType: "HIKING",
+                    startedAt: startedAt
+                )
 
                 RouteeLogger.debug("운동 기록 시작 완료 (activityId: \(activity.activityId))")
                 await MainActor.run {
