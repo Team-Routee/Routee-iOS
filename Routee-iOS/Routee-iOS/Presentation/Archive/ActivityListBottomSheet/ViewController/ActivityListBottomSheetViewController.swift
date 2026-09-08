@@ -13,6 +13,8 @@ final class ActivityListBottomSheetViewController: BaseUIViewController {
     
     private let rootView = ActivityListBottomSheet()
     private var viewModel: ActivityListViewModel
+    private let timeLineViewModel = TimeLineViewModel()
+    private var navigationTask: Task<Void, Never>?
     private var sheetHeight: CGFloat {
         viewModel.isCompactHeight ? 247 : 344
     }
@@ -27,6 +29,10 @@ final class ActivityListBottomSheetViewController: BaseUIViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
+    deinit {
+        navigationTask?.cancel()
+    }
     
     // MARK: - Life Cycle
     
@@ -39,10 +45,7 @@ final class ActivityListBottomSheetViewController: BaseUIViewController {
 
         rootView.configure(with: viewModel)
         rootView.onRecordChevronTap = { [weak self] index in
-            guard let self,
-                  let record = viewModel.record(at: index) else { return }
-
-            navigateToTimeLineView(record: record)
+            self?.handleActivityTap(at: index)
         }
         configureSheet()
     }
@@ -63,6 +66,32 @@ final class ActivityListBottomSheetViewController: BaseUIViewController {
         sheet.prefersGrabberVisible = false
         sheet.preferredCornerRadius = 24
         sheet.prefersScrollingExpandsWhenScrolledToEdge = false
+    }
+
+    private func handleActivityTap(at index: Int) {
+        guard let record = viewModel.record(at: index) else { return }
+
+        navigationTask?.cancel()
+        navigationTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                _ = try await timeLineViewModel.fetchActivityStatistics(activityId: record.activityId)
+
+                guard !Task.isCancelled else { return }
+
+                await MainActor.run {
+                    self.navigateToTimeLineView(record: record)
+                }
+            } catch {
+                guard !Task.isCancelled else { return }
+
+                RouteeLogger.error(error)
+                await MainActor.run {
+                    self.rootView.showNetworkErrorToast()
+                }
+            }
+        }
     }
 
     private func navigateToTimeLineView(record: ActivityListModel) {

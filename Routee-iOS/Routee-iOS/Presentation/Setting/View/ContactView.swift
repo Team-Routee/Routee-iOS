@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class ContactView: BaseUIView, SettingTabToastPresentable {
+final class ContactView: BaseUIView, ToastPresentable {
     
     // MARK: - Properties
     

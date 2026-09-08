@@ -38,6 +38,17 @@ final class NicknameTextField: UITextField {
     private let initialNickname: String?
     private let placeholderText: String
 
+    private var isComposingText: Bool {
+        markedTextRange != nil
+    }
+
+    private var composingHangeulSet: CharacterSet {
+        CharacterSet(charactersIn: "\u{1100}"..."\u{11FF}")
+            .union(CharacterSet(charactersIn: "\u{3130}"..."\u{318F}"))
+            .union(CharacterSet(charactersIn: "\u{A960}"..."\u{A97F}"))
+            .union(CharacterSet(charactersIn: "\u{D7B0}"..."\u{D7FF}"))
+    }
+
     private var textAreaInsets: UIEdgeInsets {
         var insets = textInsets
         if rightViewMode == .always {
@@ -174,6 +185,11 @@ final class NicknameTextField: UITextField {
 
     @objc
     private func didChangeText() {
+        guard !isComposingText else {
+            updateComposingState()
+            return
+        }
+
         updateState(for: text ?? "", isEditing: isEditing)
     }
 
@@ -218,7 +234,7 @@ final class NicknameTextField: UITextField {
     }
 
     private func updateState(for text: String, isEditing: Bool) {
-        let validationState = validationState(for: text)
+        let validationState = validationState(for: text, isEditing: isEditing)
 
         switch validationState {
         case .guide:
@@ -238,6 +254,13 @@ final class NicknameTextField: UITextField {
         }
 
         validationChanged?(validationState == .valid)
+    }
+
+    private func updateComposingState() {
+        layer.borderColor = focusedBorderColor.cgColor
+        setGuideLabel(color: .white60)
+        hideStatusIcon()
+        validationChanged?(false)
     }
 
     private func setGuideLabel(color: UIColor) {
@@ -282,6 +305,17 @@ final class NicknameTextField: UITextField {
             return .invalid
         }
         return .valid
+    }
+
+    private func validationState(for text: String, isEditing: Bool) -> NicknameValidationState {
+        let validationState = validationState(for: text)
+        guard isEditing,
+              validationState == .invalid,
+              text.rangeOfCharacter(from: composingHangeulSet) != nil else {
+            return validationState
+        }
+
+        return .guide
     }
 }
 

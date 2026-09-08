@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class RecordEditView: BaseUIView {
+final class RecordEditView: BaseUIView, ToastPresentable {
     
     // MARK: - UI Properties
     
@@ -136,5 +136,9 @@ final class RecordEditView: BaseUIView {
 
     func configureMinimumMonth(_ date: Date?) {
         monthSelector.configureMinimumDate(date)
+    }
+
+    func resetToCurrentMonth() {
+        monthSelector.resetToCurrentMonth()
     }
 }

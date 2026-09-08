@@ -184,12 +184,15 @@ final class MonthSelector: BaseUIView {
         updateMonthState()
     }
 
+    func resetToCurrentMonth() {
+        currentDate = Date().startOfMonth
+    }
+
     private func configureButton(_ button: UIButton, normalImage: UIImage, disabledImage: UIImage) {
         var configuration = UIButton.Configuration.plain()
         configuration.contentInsets = .zero
         configuration.image = normalImage
         button.configuration = configuration
-        button.adjustsImageWhenDisabled = false
 
         button.configurationUpdateHandler = { button in
             var updatedConfiguration = button.configuration

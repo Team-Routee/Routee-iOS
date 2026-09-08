@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class ActivityListBottomSheet: BaseUIView {
+final class ActivityListBottomSheet: BaseUIView, ToastPresentable {
     
     // MARK: - UI Properties
     

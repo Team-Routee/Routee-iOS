@@ -1,5 +1,5 @@
 //
-//  SettingTabToastPresentable.swift
+//  ToastPresentable.swift
 //  Routee-iOS
 //
 //  Created by 초긍정행운의포춘쿠키 on 8/26/26.
@@ -9,12 +9,36 @@ import UIKit
 
 import SnapKit
 
-protocol SettingTabToastPresentable where Self: UIView {
-    func showToast(title: String)
+private enum Layout {
+    static let bottomOffset: CGFloat = -16
 }
 
-extension SettingTabToastPresentable {
+protocol ToastPresentable where Self: UIView {
+    var toastBottomAnchor: ConstraintItem { get }
+}
+
+extension ToastPresentable {
+    var toastBottomAnchor: ConstraintItem {
+        safeAreaLayoutGuide.snp.bottom
+    }
+
+    func showNetworkErrorToast() {
+        showToast(title: ToastMessage.checkNetworkConnection)
+    }
+
     func showToast(title: String) {
+        showToast(
+            title: title,
+            bottomAnchor: toastBottomAnchor,
+            bottomOffset: Layout.bottomOffset
+        )
+    }
+
+    func showToast(
+        title: String,
+        bottomAnchor: ConstraintItem,
+        bottomOffset: CGFloat = Layout.bottomOffset
+    ) {
         subviews
             .filter { $0 is ToastMessageView }
             .forEach { $0.removeFromSuperview() }
@@ -31,7 +55,7 @@ extension SettingTabToastPresentable {
 
         toastMessageView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.bottom.equalTo(safeAreaLayoutGuide).inset(16)
+            $0.bottom.equalTo(bottomAnchor).offset(bottomOffset)
             $0.width.equalTo(toastWidth)
             $0.height.equalTo(37)
         }

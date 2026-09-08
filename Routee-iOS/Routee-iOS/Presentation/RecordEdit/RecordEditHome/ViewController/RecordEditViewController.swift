@@ -16,10 +16,13 @@ final class RecordEditViewController: BaseUIViewController {
 
     var onMonthChanged: ((Date) -> Void)?
     private let viewModel = RecordEditViewModel()
+    private let editorViewModel = EditorViewModel()
     private let summaryViewModel = MemberSummaryViewModel()
     private var records: [WorkoutListModel] = []
     private var selectedMonth = Date().startOfMonth
+    private var recordListTask: Task<Void, Never>?
     private var titleUpdateTask: Task<Void, Never>?
+    private var recordTapTask: Task<Void, Never>?
     private let joinedDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.calendar = Calendar(identifier: .gregorian)
@@ -44,6 +47,11 @@ final class RecordEditViewController: BaseUIViewController {
         setCollectionView()
         setMonthSelector()
     }
+
+    deinit {
+        recordListTask?.cancel()
+        recordTapTask?.cancel()
+    }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -66,7 +74,7 @@ final class RecordEditViewController: BaseUIViewController {
     private func setMonthSelector() {
         rootView.setMonthChangedHandler { [weak self] date in
             self?.selectedMonth = date
-            self?.fetchRecords(for: date)
+            self?.fetchRecords(for: date, showErrorToast: true)
         }
     }
 
@@ -88,8 +96,12 @@ final class RecordEditViewController: BaseUIViewController {
         }
     }
 
-    private func fetchRecords(for month: Date) {
-        Task { [weak self] in
+    private func fetchRecords(
+        for month: Date,
+        showErrorToast: Bool = false
+    ) {
+        recordListTask?.cancel()
+        recordListTask = Task { [weak self] in
             guard let self else { return }
 
             do {
@@ -110,7 +122,18 @@ final class RecordEditViewController: BaseUIViewController {
                     self.rootView.scrollToTop()
                 }
             } catch {
+                guard !Task.isCancelled else { return }
+
                 RouteeLogger.error(error)
+                await MainActor.run {
+                    self.records.removeAll()
+                    self.rootView.updateView(isEmpty: true)
+                    self.rootView.workoutRecordCollectionView.reloadData()
+                    self.rootView.scrollToTop()
+                    if showErrorToast {
+                        self.rootView.showNetworkErrorToast()
+                    }
+                }
             }
         }
     }
@@ -121,6 +144,30 @@ final class RecordEditViewController: BaseUIViewController {
             entryPoint: .recordEditTab
         )
         navigationController?.pushViewController(editorViewController, animated: false)
+    }
+
+    private func handleRecordTap(activityId: Int64) {
+        recordTapTask?.cancel()
+        recordTapTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                try await editorViewModel.fetchActivityEditorData(activityId: activityId)
+
+                guard !Task.isCancelled else { return }
+
+                await MainActor.run {
+                    self.pushEditorViewController(activityId: activityId)
+                }
+            } catch {
+                guard !Task.isCancelled else { return }
+
+                RouteeLogger.error(error)
+                await MainActor.run {
+                    self.rootView.showNetworkErrorToast()
+                }
+            }
+        }
     }
 
     private func updateWorkoutTitle(
@@ -169,6 +216,14 @@ final class RecordEditViewController: BaseUIViewController {
     }
 }
 
+extension RecordEditViewController: CurrentMonthResettable {
+    func resetToCurrentMonth() {
+        let currentMonth = Date().startOfMonth
+        selectedMonth = currentMonth
+        rootView.resetToCurrentMonth()
+    }
+}
+
 extension RecordEditViewController: UICollectionViewDataSource {
     func collectionView(
         _ collectionView: UICollectionView,
@@ -192,7 +247,7 @@ extension RecordEditViewController: UICollectionViewDataSource {
 
         cell.configure(with: record)
         cell.onThumbnailTap = { [weak self] in
-            self?.pushEditorViewController(activityId: record.activityId)
+            self?.handleRecordTap(activityId: record.activityId)
         }
         cell.onTitleEditingDidEnd = { [weak self] title in
             self?.updateWorkoutTitle(

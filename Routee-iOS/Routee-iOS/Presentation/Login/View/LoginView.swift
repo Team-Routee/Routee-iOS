@@ -13,6 +13,13 @@ import Then
 
 final class LoginView: BaseUIView {
     
+    // MARK: - Properties
+
+    var serviceTermsTapAction: (() -> Void)?
+    var privacyPolicyTapAction: (() -> Void)?
+    private var serviceAgreeLinkRange = NSRange(location: NSNotFound, length: 0)
+    private var privacyPolicyLinkRange = NSRange(location: NSNotFound, length: 0)
+
     // MARK: - UI Properties
     
     private let backgroundImageView = UIImageView()
@@ -45,52 +52,28 @@ final class LoginView: BaseUIView {
         
         serviceAgreeLabel.do {
             let text = "계속 진행하면 Routee의 서비스 이용약관에 동의하게 됩니다."
-            let font = UIFont.pretendard(.regular, size: 10)
-            
-            let attributedString = NSMutableAttributedString(
-                string: text,
-                attributes: [
-                    .font: font,
-                    .foregroundColor: UIColor.white60
-                ]
-            )
-            
-            let range = (text as NSString).range(of: "이용약관에 동의")
 
-            attributedString.addAttribute(
-                .underlineStyle,
-                value: NSUnderlineStyle.single.rawValue,
-                range: range
+            serviceAgreeLinkRange = configurePolicyLabel(
+                $0,
+                text: text,
+                linkedText: "이용약관에 동의"
             )
-
-            $0.attributedText = attributedString
-            
-            $0.textAlignment = .center
+            $0.addGestureRecognizer(
+                UITapGestureRecognizer(target: self, action: #selector(didTapServiceAgreeLabel))
+            )
         }
         
         privacyPolicyLabel.do {
             let text = "개인정보 처리 방식은 개인정보 처리방침에서 확인할 수 있습니다."
-            let font = UIFont.pretendard(.regular, size: 10)
-            
-            let attributedString = NSMutableAttributedString(
-                string: text,
-                attributes: [
-                    .font: font,
-                    .foregroundColor: UIColor.white60
-                ]
-            )
-            
-            let range = (text as NSString).range(of: "개인정보 처리방침")
 
-            attributedString.addAttribute(
-                .underlineStyle,
-                value: NSUnderlineStyle.single.rawValue,
-                range: range
+            privacyPolicyLinkRange = configurePolicyLabel(
+                $0,
+                text: text,
+                linkedText: "개인정보 처리방침"
             )
-
-            $0.attributedText = attributedString
-            
-            $0.textAlignment = .center
+            $0.addGestureRecognizer(
+                UITapGestureRecognizer(target: self, action: #selector(didTapPrivacyPolicyLabel))
+            )
         }
     }
     
@@ -113,5 +96,55 @@ final class LoginView: BaseUIView {
             $0.centerX.equalToSuperview()
             $0.bottom.equalTo(safeAreaLayoutGuide).inset(16)
         }
+    }
+
+    // MARK: - Private Methods
+
+    private func configurePolicyLabel(
+        _ label: UILabel,
+        text: String,
+        linkedText: String
+    ) -> NSRange {
+        let font = UIFont.pretendard(.regular, size: 10)
+        let attributedString = NSMutableAttributedString(
+            string: text,
+            attributes: [
+                .font: font,
+                .foregroundColor: UIColor.white60
+            ]
+        )
+        let range = (text as NSString).range(of: linkedText)
+
+        if range.location != NSNotFound {
+            attributedString.addAttribute(
+                .underlineStyle,
+                value: NSUnderlineStyle.single.rawValue,
+                range: range
+            )
+        }
+
+        label.attributedText = attributedString
+        label.textAlignment = .center
+        label.isUserInteractionEnabled = true
+
+        return range
+    }
+
+    // MARK: - Actions
+
+    @objc
+    private func didTapServiceAgreeLabel(_ gesture: UITapGestureRecognizer) {
+        let point = gesture.location(in: serviceAgreeLabel)
+        guard serviceAgreeLabel.containsTap(in: serviceAgreeLinkRange, at: point) else { return }
+
+        serviceTermsTapAction?()
+    }
+
+    @objc
+    private func didTapPrivacyPolicyLabel(_ gesture: UITapGestureRecognizer) {
+        let point = gesture.location(in: privacyPolicyLabel)
+        guard privacyPolicyLabel.containsTap(in: privacyPolicyLinkRange, at: point) else { return }
+
+        privacyPolicyTapAction?()
     }
 }

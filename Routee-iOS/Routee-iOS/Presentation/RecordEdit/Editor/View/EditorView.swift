@@ -11,7 +11,7 @@ import Kingfisher
 import SnapKit
 import Then
 
-final class EditorView: BaseUIView {
+final class EditorView: BaseUIView, ToastPresentable {
 
     // MARK: - Properties
 
@@ -94,7 +94,6 @@ final class EditorView: BaseUIView {
             $0.backgroundColor = .bgPrimary
             $0.layer.cornerRadius = resetButtonSize / 2
             $0.clipsToBounds = true
-            $0.adjustsImageWhenDisabled = false
             $0.imageView?.contentMode = .scaleAspectFit
             $0.setImage(.icResetSmWhite.withRenderingMode(.alwaysOriginal), for: .normal)
             $0.setImage(.icResetSmGrey.withRenderingMode(.alwaysOriginal), for: .disabled)
@@ -466,10 +465,9 @@ final class EditorView: BaseUIView {
 
     private func showRouteSticker() {
         guard state.hasRouteData else {
-            ToastMessageView.show(
+            showToast(
                 title: ToastMessage.noRoute,
-                in: self,
-                bottomAnchor: recordEditTabBar.snp.top
+                bottomAnchor: recordEditTabBar.toastBottomAnchor
             )
             return
         }

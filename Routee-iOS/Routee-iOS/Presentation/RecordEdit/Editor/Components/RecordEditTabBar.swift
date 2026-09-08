@@ -127,6 +127,10 @@ final class RecordEditTabBar: BaseUIView {
     }
     
     // MARK: - Public Methods
+
+    var toastBottomAnchor: ConstraintItem {
+        stickerSelector.toastBottomAnchor
+    }
     
     func hideOptionView() {
         hideOptionViews()

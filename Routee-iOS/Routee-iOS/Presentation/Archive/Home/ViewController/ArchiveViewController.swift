@@ -42,7 +42,7 @@ final class ArchiveViewController: BaseUIViewController {
         view = rootView
     }
 
-    private func loadArchive() {
+    private func loadArchive(showErrorToast: Bool = false) {
         let requestedYear = year
         let requestedMonth = month
 
@@ -89,6 +89,9 @@ final class ArchiveViewController: BaseUIViewController {
                         year: requestedYear,
                         month: requestedMonth
                     )
+                    if showErrorToast {
+                        self.rootView.showNetworkErrorToast()
+                    }
                 }
             }
         }
@@ -165,7 +168,7 @@ final class ArchiveViewController: BaseUIViewController {
             month -= 1
         }
 
-        loadArchive()
+        loadArchive(showErrorToast: true)
     }
 
     private func moveToNextMonth() {
@@ -178,7 +181,7 @@ final class ArchiveViewController: BaseUIViewController {
             month += 1
         }
 
-        loadArchive()
+        loadArchive(showErrorToast: true)
     }
 
     private func route(to day: CalendarCellModel) {
@@ -210,6 +213,9 @@ final class ArchiveViewController: BaseUIViewController {
                 guard !Task.isCancelled else { return }
 
                 RouteeLogger.error(error)
+                await MainActor.run {
+                    self.rootView.showNetworkErrorToast()
+                }
             }
         }
     }
@@ -298,6 +304,11 @@ final class ArchiveViewController: BaseUIViewController {
         monthStart(year: year, month: month) < monthStart(from: Date())
     }
 
+    private func configureCurrentMonth() {
+        year = Calendar.current.component(.year, from: Date())
+        month = Calendar.current.component(.month, from: Date())
+    }
+
     private func monthStart(from joinedDate: String) -> Date {
         let date = joinedDateFormatter.date(from: joinedDate) ?? Date()
         return monthStart(from: date)
@@ -328,5 +339,12 @@ extension ArchiveViewController: UIAdaptivePresentationControllerDelegate {
 
     func presentationControllerWillDismiss(_ presentationController: UIPresentationController) {
         hideDimView()
+    }
+}
+
+extension ArchiveViewController: CurrentMonthResettable {
+    func resetToCurrentMonth() {
+        configureCurrentMonth()
+        loadArchive(showErrorToast: true)
     }
 }

@@ -9,6 +9,10 @@ import UIKit
 
 import SnapKit
 
+private enum LoadingOverlayMessage {
+    static let defaultText = "로딩 중"
+}
+
 @MainActor
 final class LoadingOverlayManager {
 
@@ -19,7 +23,7 @@ final class LoadingOverlayManager {
 
     private init() { }
 
-    func show(message: String = "데이터를 불러오고 있어요") {
+    func show(message: String = LoadingOverlayMessage.defaultText) {
         guard let window = keyWindow else { return }
 
         presentationCount += 1
@@ -47,7 +51,7 @@ final class LoadingOverlayManager {
     }
 
     nonisolated func perform<T>(
-        message: String = "데이터를 불러오고 있어요",
+        message: String = LoadingOverlayMessage.defaultText,
         operation: () async throws -> T
     ) async rethrows -> T {
         await MainActor.run {

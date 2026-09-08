@@ -115,9 +115,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     }
 
     private func saveRecording() async throws {
-        try await LoadingOverlayManager.shared.perform(
-            message: "데이터를 불러오고 있어요"
-        ) {
+        try await LoadingOverlayManager.shared.perform {
             try await self.uploadCourseList()
             try await self.saveWorkoutRecord()
         }

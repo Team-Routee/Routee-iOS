@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class EditCompleteView: BaseUIView {
+final class EditCompleteView: BaseUIView, ToastPresentable {
     
     // MARK: - UI Properties
     
@@ -21,6 +21,10 @@ final class EditCompleteView: BaseUIView {
     private let downloadButton = UIButton()
     private let exportButton = UIButton()
     private let editedImageAspectRatio: CGFloat = 16.0 / 9.0
+
+    var toastBottomAnchor: ConstraintItem {
+        backgroundImageView.snp.bottom
+    }
     
     // MARK: - UI Setting
     
@@ -98,14 +102,6 @@ final class EditCompleteView: BaseUIView {
     
     func updateImage(_ image: UIImage) {
         backgroundImageView.image = image
-    }
-    
-    func showToast(title: String) {
-        ToastMessageView.show(
-            title: title,
-            in: self,
-            bottomAnchor: backgroundImageView.snp.bottom
-        )
     }
     
     // MARK: - Actions
