@@ -133,6 +133,10 @@ final class RecordEditTabBar: BaseUIView {
         tabItems.forEach { $0.isSelected = false }
     }
 
+    func deselectSticker() {
+        stickerSelector.deselectAll()
+    }
+
     func setBrightnessValue(_ value: CGFloat) {
         brightnessSliderView.setValue(value)
     }
