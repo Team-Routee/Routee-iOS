@@ -9,7 +9,7 @@ import UIKit
 
 import SnapKit
 
-private enum ToastLayout {
+private enum Layout {
     static let bottomOffset: CGFloat = -16
 }
 
@@ -30,14 +30,14 @@ extension ToastPresentable {
         showToast(
             title: title,
             bottomAnchor: toastBottomAnchor,
-            bottomOffset: ToastLayout.bottomOffset
+            bottomOffset: Layout.bottomOffset
         )
     }
 
     func showToast(
         title: String,
         bottomAnchor: ConstraintItem,
-        bottomOffset: CGFloat = ToastLayout.bottomOffset
+        bottomOffset: CGFloat = Layout.bottomOffset
     ) {
         subviews
             .filter { $0 is ToastMessageView }
