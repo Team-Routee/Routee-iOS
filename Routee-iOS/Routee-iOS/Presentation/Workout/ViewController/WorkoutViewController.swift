@@ -182,26 +182,33 @@ final class WorkoutViewController: BaseUIViewController {
     }
 
     private func pushWorkoutTimeLineViewController(showFailureModalOnAppear: Bool) {
+        let routePointsSnapshot = viewModel.routePoints
         let viewController = WorkoutTimeLineViewController(
             activityId: viewModel.activityId,
             title: viewModel.activityTitle ?? "",
             distanceInMeters: viewModel.totalDistance,
             durationInSeconds: viewModel.elapsedTimeInSeconds,
             maxAltitudeInMeters: viewModel.maximumAltitudeInMeters,
-            trackPoints: viewModel.routePoints.map {
+            trackPoints: routePointsSnapshot.map {
                 TrackPoint(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude)
             },
             photoRecords: viewModel.photoRecords,
-            finishRecording: { [weak self] title in
+            finishRecording: { [weak self, routePointsSnapshot] title in
                 guard let self else { throw RouteeError.noData }
-                try await saveFinishedRecording(title: title)
+                try await saveFinishedRecording(
+                    title: title,
+                    routePointsSnapshot: routePointsSnapshot
+                )
             },
             showFailureModalOnAppear: showFailureModalOnAppear
         )
         navigationController?.pushViewController(viewController, animated: true)
     }
 
-    private func saveFinishedRecording(title: String) async throws {
+    private func saveFinishedRecording(
+        title: String,
+        routePointsSnapshot: [WorkoutRoutePoint]
+    ) async throws {
         let uploadTasks = Array(photoUploadTasks.values)
         for uploadTask in uploadTasks {
             await uploadTask.value
@@ -214,7 +221,10 @@ final class WorkoutViewController: BaseUIViewController {
         }
         timelineTitleUpdateTasks.removeAll()
 
-        try await viewModel.finishRecording(title: title)
+        try await viewModel.finishRecording(
+            title: title,
+            routePointsSnapshot: routePointsSnapshot
+        )
     }
     
     private func requestCameraAccess() {

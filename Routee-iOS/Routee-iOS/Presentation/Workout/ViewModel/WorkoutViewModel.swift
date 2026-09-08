@@ -221,7 +221,10 @@ final class WorkoutViewModel {
         )
     }
     
-    func finishRecording(title: String) async throws {
+    func finishRecording(
+        title: String,
+        routePointsSnapshot: [WorkoutRoutePoint]
+    ) async throws {
         guard let activityId,
               let mapImageObjectKey else {
             throw RouteeError.noData
@@ -235,7 +238,7 @@ final class WorkoutViewModel {
             durationSec: elapsedTimeInSeconds,
             maxAltitude: Int(maximumAltitudeInMeters ?? 0),
             mapImageObjectKey: mapImageObjectKey,
-            tracks: routePoints.map {
+            tracks: routePointsSnapshot.map {
                 WorkoutRecordFinishModel.Track(
                     latitude: $0.coordinate.latitude,
                     longitude: $0.coordinate.longitude,
