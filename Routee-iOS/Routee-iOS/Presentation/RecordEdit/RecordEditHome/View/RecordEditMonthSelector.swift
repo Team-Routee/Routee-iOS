@@ -193,7 +193,6 @@ final class MonthSelector: BaseUIView {
         configuration.contentInsets = .zero
         configuration.image = normalImage
         button.configuration = configuration
-        button.adjustsImageWhenDisabled = false
 
         button.configurationUpdateHandler = { button in
             var updatedConfiguration = button.configuration

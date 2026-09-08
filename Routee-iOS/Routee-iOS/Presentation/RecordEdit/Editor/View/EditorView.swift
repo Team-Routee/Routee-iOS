@@ -94,7 +94,6 @@ final class EditorView: BaseUIView, ToastPresentable {
             $0.backgroundColor = .bgPrimary
             $0.layer.cornerRadius = resetButtonSize / 2
             $0.clipsToBounds = true
-            $0.adjustsImageWhenDisabled = false
             $0.imageView?.contentMode = .scaleAspectFit
             $0.setImage(.icResetSmWhite.withRenderingMode(.alwaysOriginal), for: .normal)
             $0.setImage(.icResetSmGrey.withRenderingMode(.alwaysOriginal), for: .disabled)
