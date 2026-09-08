@@ -21,6 +21,10 @@ final class EditCompleteView: BaseUIView, ToastPresentable {
     private let downloadButton = UIButton()
     private let exportButton = UIButton()
     private let editedImageAspectRatio: CGFloat = 16.0 / 9.0
+
+    var toastBottomAnchor: ConstraintItem {
+        backgroundImageView.snp.bottom
+    }
     
     // MARK: - UI Setting
     
@@ -98,13 +102,6 @@ final class EditCompleteView: BaseUIView, ToastPresentable {
     
     func updateImage(_ image: UIImage) {
         backgroundImageView.image = image
-    }
-    
-    func showToast(title: String) {
-        showToast(
-            title: title,
-            bottomAnchor: backgroundImageView.snp.bottom
-        )
     }
     
     // MARK: - Actions

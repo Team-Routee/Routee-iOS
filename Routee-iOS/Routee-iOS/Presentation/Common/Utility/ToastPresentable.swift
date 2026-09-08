@@ -14,10 +14,14 @@ private enum ToastLayout {
 }
 
 protocol ToastPresentable where Self: UIView {
-    func showToast(title: String)
+    var toastBottomAnchor: ConstraintItem { get }
 }
 
 extension ToastPresentable {
+    var toastBottomAnchor: ConstraintItem {
+        safeAreaLayoutGuide.snp.bottom
+    }
+
     func showNetworkErrorToast() {
         showToast(title: ToastMessage.checkNetworkConnection)
     }
@@ -25,7 +29,7 @@ extension ToastPresentable {
     func showToast(title: String) {
         showToast(
             title: title,
-            bottomAnchor: safeAreaLayoutGuide.snp.bottom,
+            bottomAnchor: toastBottomAnchor,
             bottomOffset: ToastLayout.bottomOffset
         )
     }
