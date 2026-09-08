@@ -12,9 +12,9 @@ enum ExternalURLHandler {
 
     private static let kakaoChannelURL = "http://pf.kakao.com/_ExkxgSX"
     private static let instagramURL = "https://www.instagram.com/routee_official/?hl=ko"
-    private static let termsOfServiceURL = "https://app.notion.com/p/395999c4e13b80f088a3c6ff365b0177?source=copy_link"
-    private static let privacyPolicyURL = "https://app.notion.com/p/395999c4e13b80e38b45c4fe81688642?source=copy_link"
-    private static let locationTermsURL = "https://app.notion.com/p/395999c4e13b80ebb999d285fdfaaffd?source=copy_link"
+    private static let termsOfServiceURL = "https://acoustic-boat-573.notion.site/3d57d9beca1d8037bafdfb57414e9c65"
+    private static let privacyPolicyURL = "https://acoustic-boat-573.notion.site/3d57d9beca1d800cbacdf28bf6006257"
+    private static let locationTermsURL = "https://acoustic-boat-573.notion.site/3d57d9beca1d80e1b6d4e7e4750b94e6"
 
     static func openKakaoChannel() {
         openURL(kakaoChannelURL)
