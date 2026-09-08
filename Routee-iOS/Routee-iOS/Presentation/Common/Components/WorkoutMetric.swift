@@ -41,15 +41,15 @@ final class WorkoutMetric: BaseUIView {
     }
 
     func updateDistance(_ distance: String) {
-        distanceDataLabel.text = distance
+        distanceDataLabel.setDisplayText(distance, font: .display_30)
     }
 
     func updateTime(_ time: String) {
-        timeDataLabel.text = time
+        timeDataLabel.setDisplayText(time, font: .display_30)
     }
 
     func updateMaximumAltitude(_ altitude: String) {
-        highestAltitudeDataLabel.text = altitude
+        highestAltitudeDataLabel.setDisplayText(altitude, font: .display_30)
     }
     
     override func setUI() {
@@ -84,7 +84,7 @@ final class WorkoutMetric: BaseUIView {
         }
         
         [distanceDataLabel, timeDataLabel, highestAltitudeDataLabel].forEach {
-            $0.font = .display_30
+            $0.setDisplayText($0.text, font: .display_30)
             $0.textColor = .mint300
             $0.textAlignment = .center
         }

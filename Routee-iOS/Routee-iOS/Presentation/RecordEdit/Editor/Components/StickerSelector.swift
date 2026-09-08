@@ -114,7 +114,7 @@ final class StickerSelector: BaseUIView {
         }
 
         recordIconImageView.snp.makeConstraints {
-            $0.leading.equalToSuperview().inset(12)
+            $0.leading.equalToSuperview().inset(8)
             $0.centerY.equalToSuperview()
             $0.size.equalTo(24)
         }
@@ -126,7 +126,7 @@ final class StickerSelector: BaseUIView {
         }
 
         photoTimelineIconImageView.snp.makeConstraints {
-            $0.leading.equalToSuperview().inset(12)
+            $0.leading.equalToSuperview().inset(8)
             $0.centerY.equalToSuperview()
             $0.size.equalTo(24)
         }
@@ -138,7 +138,7 @@ final class StickerSelector: BaseUIView {
         }
 
         routeIconImageView.snp.makeConstraints {
-            $0.leading.equalToSuperview().inset(12)
+            $0.leading.equalToSuperview().inset(8)
             $0.centerY.equalToSuperview()
             $0.size.equalTo(24)
         }

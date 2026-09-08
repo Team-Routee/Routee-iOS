@@ -198,6 +198,9 @@ final class EditorView: BaseUIView, ToastPresentable {
             durationSec: model.durationSec,
             maxElevation: model.maxElevation
         )
+        state.didSetRecordInfoStickerFrame = false
+        setNeedsLayout()
+
         let routeTitles = model.routes.sorted { $0.sequence < $1.sequence }.map(\.name)
         state.hasRouteData = !routeTitles.isEmpty
         routeSticker.configure(with: routeTitles)
@@ -244,6 +247,7 @@ final class EditorView: BaseUIView, ToastPresentable {
     }
 
     func setGesture() {
+        hideOptionViewTapGesture.delegate = self
         hideOptionViewTapGesture.cancelsTouchesInView = false
         addGestureRecognizer(hideOptionViewTapGesture)
     }
@@ -613,7 +617,9 @@ final class EditorView: BaseUIView, ToastPresentable {
     ) {
         guard stickerBox.superview != nil else { return }
 
+        deactivateStickerBox(stickerBox)
         stickerBox.removeFromSuperview()
+        recordEditTabBar.deselectSticker()
         state.deletedStickerTypes.insert(stickerType)
         markChanged()
     }
@@ -735,4 +741,22 @@ final class EditorView: BaseUIView, ToastPresentable {
         resetButton.isEnabled = state.hasChanges
     }
 
+}
+
+extension EditorView: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        guard gestureRecognizer === hideOptionViewTapGesture else { return true }
+
+        var touchedView = touch.view
+        while let view = touchedView {
+            if view is UIControl,
+               [recordInfoStickerBox, routeTimelineStickerBox, routeStickerBox].contains(where: {
+                   view.isDescendant(of: $0)
+               }) {
+                return false
+            }
+            touchedView = view.superview
+        }
+        return true
+    }
 }
