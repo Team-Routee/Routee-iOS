@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class EditCompleteView: BaseUIView {
+final class EditCompleteView: BaseUIView, ToastPresentable {
     
     // MARK: - UI Properties
     
@@ -101,9 +101,8 @@ final class EditCompleteView: BaseUIView {
     }
     
     func showToast(title: String) {
-        ToastMessageView.show(
+        showToast(
             title: title,
-            in: self,
             bottomAnchor: backgroundImageView.snp.bottom
         )
     }

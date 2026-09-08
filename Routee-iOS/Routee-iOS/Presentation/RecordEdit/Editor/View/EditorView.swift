@@ -11,7 +11,7 @@ import Kingfisher
 import SnapKit
 import Then
 
-final class EditorView: BaseUIView {
+final class EditorView: BaseUIView, ToastPresentable {
 
     // MARK: - Properties
 
@@ -462,10 +462,9 @@ final class EditorView: BaseUIView {
 
     private func showRouteSticker() {
         guard state.hasRouteData else {
-            ToastMessageView.show(
+            showToast(
                 title: ToastMessage.noRoute,
-                in: self,
-                bottomAnchor: recordEditTabBar.snp.top
+                bottomAnchor: recordEditTabBar.toastBottomAnchor
             )
             return
         }

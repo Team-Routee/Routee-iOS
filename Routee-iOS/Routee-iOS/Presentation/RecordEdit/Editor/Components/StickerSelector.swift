@@ -152,6 +152,10 @@ final class StickerSelector: BaseUIView {
 
     // MARK: - Public Methods
 
+    var toastBottomAnchor: ConstraintItem {
+        backgroundView.snp.top
+    }
+
     func deselectAll() {
         recordButton.backgroundColor = .clear
         photoTimelineButton.backgroundColor = .clear
