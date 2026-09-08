@@ -226,6 +226,8 @@ final class WorkoutViewModel {
               let mapImageObjectKey else {
             throw RouteeError.noData
         }
+
+        try await retryFailedPhotoUploads()
         
         let finishModel = WorkoutRecordFinishModel(
             title: title,
@@ -252,48 +254,73 @@ final class WorkoutViewModel {
               photoRecords.indices.contains(index) else {
             throw RouteeError.noData
         }
-        
-        let image = photoRecords[index].image
-        let imageData = await Task.detached(priority: .userInitiated) {
-            image.jpegData(compressionQuality: 0.8)
-        }.value
-        
-        guard let imageData else {
-            throw RouteeError.noData
+
+        guard photoRecords[index].timelineId == nil else { return }
+
+        let objectKey: String
+        if let uploadedObjectKey = photoRecords[index].objectKey {
+            objectKey = uploadedObjectKey
+        } else {
+            let image = photoRecords[index].image
+            let imageData = await Task.detached(priority: .userInitiated) {
+                image.jpegData(compressionQuality: 0.8)
+            }.value
+
+            guard let imageData else {
+                throw RouteeError.noData
+            }
+
+            let fileName = "\(UUID().uuidString).jpg"
+            let presigned = try await activityRepository.timeLinePresignedURL(
+                activityId: activityId,
+                fileName: fileName
+            )
+            try await activityRepository.uploadTimeLineImage(
+                presignedURL: presigned.presignedURL,
+                imageData: imageData
+            )
+
+            photoRecords[index].objectKey = presigned.objectKey
+            coverImageObjectKey = presigned.objectKey
+            objectKey = presigned.objectKey
         }
-        
-        let fileName = "\(UUID().uuidString).jpg"
-        let presigned = try await activityRepository.timeLinePresignedURL(
-            activityId: activityId,
-            fileName: fileName
-        )
-        try await activityRepository.uploadTimeLineImage(
-            presignedURL: presigned.presignedURL,
-            imageData: imageData
-        )
-        
-        photoRecords[index].objectKey = presigned.objectKey
-        coverImageObjectKey = presigned.objectKey
-        
+
         let timelineId = try await createTimeLine(
             for: photoRecords[index],
-            objectKey: presigned.objectKey,
+            objectKey: objectKey,
             title: photoRecords[index].locationTitle ?? ""
         )
         photoRecords[index].timelineId = timelineId
     }
 
+    private func retryFailedPhotoUploads() async throws {
+        var firstError: Error?
+
+        for index in photoRecords.indices where photoRecords[index].timelineId == nil {
+            do {
+                try await uploadPhoto(at: index)
+            } catch {
+                firstError = firstError ?? error
+            }
+        }
+
+        if let firstError {
+            throw firstError
+        }
+    }
+
     func deleteTimeline(at index: Int) async throws {
         guard let activityId,
-              photoRecords.indices.contains(index),
-              let timelineId = photoRecords[index].timelineId else {
+              photoRecords.indices.contains(index) else {
             throw RouteeError.noData
         }
 
-        try await activityRepository.deleteTimeline(
-            activityId: activityId,
-            timelineId: timelineId
-        )
+        if let timelineId = photoRecords[index].timelineId {
+            try await activityRepository.deleteTimeline(
+                activityId: activityId,
+                timelineId: timelineId
+            )
+        }
 
         let deletedPhoto = photoRecords.remove(at: index)
         if coverImageObjectKey == deletedPhoto.objectKey {
@@ -303,10 +330,13 @@ final class WorkoutViewModel {
 
     func updateTimelineTitle(at index: Int, title: String) async throws {
         guard let activityId,
-              photoRecords.indices.contains(index),
-              let timelineId = photoRecords[index].timelineId else {
+              photoRecords.indices.contains(index) else {
             throw RouteeError.noData
         }
+
+        photoRecords[index].locationTitle = title
+
+        guard let timelineId = photoRecords[index].timelineId else { return }
 
         let response = try await activityRepository.updateTimelineTitle(
             activityId: activityId,
