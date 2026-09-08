@@ -9,6 +9,10 @@ import UIKit
 
 import SnapKit
 
+private enum ToastLayout {
+    static let bottomOffset: CGFloat = -16
+}
+
 protocol ToastPresentable where Self: UIView {
     func showToast(title: String)
 }
@@ -19,6 +23,18 @@ extension ToastPresentable {
     }
 
     func showToast(title: String) {
+        showToast(
+            title: title,
+            bottomAnchor: safeAreaLayoutGuide.snp.bottom,
+            bottomOffset: ToastLayout.bottomOffset
+        )
+    }
+
+    func showToast(
+        title: String,
+        bottomAnchor: ConstraintItem,
+        bottomOffset: CGFloat = ToastLayout.bottomOffset
+    ) {
         subviews
             .filter { $0 is ToastMessageView }
             .forEach { $0.removeFromSuperview() }
@@ -35,7 +51,7 @@ extension ToastPresentable {
 
         toastMessageView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.bottom.equalTo(safeAreaLayoutGuide).inset(16)
+            $0.bottom.equalTo(bottomAnchor).offset(bottomOffset)
             $0.width.equalTo(toastWidth)
             $0.height.equalTo(37)
         }
