@@ -335,6 +335,24 @@ final class EditorView: BaseUIView, ToastPresentable {
             removeStickerBox(recordInfoStickerBox, stickerType: .record)
         }
 
+        routeTimelineStickerBox.onTapped = { [weak self] in
+            guard let self else { return }
+
+            selectStickerBox(routeTimelineStickerBox, stickerType: .photoTimeline)
+        }
+
+        routeStickerBox.onTapped = { [weak self] in
+            guard let self else { return }
+
+            selectStickerBox(routeStickerBox, stickerType: .route)
+        }
+
+        recordInfoStickerBox.onTapped = { [weak self] in
+            guard let self else { return }
+
+            selectStickerBox(recordInfoStickerBox, stickerType: .record)
+        }
+
         routeTimelineStickerBox.onMoved = { [weak self] in
             self?.markChanged()
         }
@@ -352,28 +370,15 @@ final class EditorView: BaseUIView, ToastPresentable {
     @objc
     private func handleViewTapped(_ gesture: UITapGestureRecognizer) {
         let point = gesture.location(in: recordEditTabBar)
-        let recordInfoStickerPoint = gesture.location(in: recordInfoStickerBox)
-        let routeTimelineStickerPoint = gesture.location(in: routeTimelineStickerBox)
-        let routeStickerPoint = gesture.location(in: routeStickerBox)
 
         guard !recordEditTabBar.containsInteractivePoint(point) else { return }
 
-        if recordInfoStickerBox.superview != nil,
-           recordInfoStickerBox.isSelected,
-           !recordInfoStickerBox.point(inside: recordInfoStickerPoint, with: nil) {
-            deactivateStickerBox(recordInfoStickerBox)
-        }
-
-        if routeTimelineStickerBox.superview != nil,
-           routeTimelineStickerBox.isSelected,
-           !routeTimelineStickerBox.point(inside: routeTimelineStickerPoint, with: nil) {
-            deactivateStickerBox(routeTimelineStickerBox)
-        }
-
-        if routeStickerBox.superview != nil,
-           routeStickerBox.isSelected,
-           !routeStickerBox.point(inside: routeStickerPoint, with: nil) {
-            deactivateStickerBox(routeStickerBox)
+        [
+            recordInfoStickerBox,
+            routeTimelineStickerBox,
+            routeStickerBox
+        ].forEach {
+            deactivateStickerBox($0)
         }
 
         recordEditTabBar.hideOptionView()
@@ -615,7 +620,6 @@ final class EditorView: BaseUIView, ToastPresentable {
 
     private func deactivateStickerBox(_ stickerBox: StickerBox) {
         stickerBox.setCloseButton(isSelected: false)
-        stickerBox.isUserInteractionEnabled = false
     }
 
     private func removeStickerBox(
@@ -756,10 +760,9 @@ extension EditorView: UIGestureRecognizerDelegate {
 
         var touchedView = touch.view
         while let view = touchedView {
-            if view is UIControl,
-               [recordInfoStickerBox, routeTimelineStickerBox, routeStickerBox].contains(where: {
-                   view.isDescendant(of: $0)
-               }) {
+            if [recordInfoStickerBox, routeTimelineStickerBox, routeStickerBox].contains(where: {
+                view.isDescendant(of: $0)
+            }) {
                 return false
             }
             touchedView = view.superview
