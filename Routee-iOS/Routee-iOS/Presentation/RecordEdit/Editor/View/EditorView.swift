@@ -587,6 +587,14 @@ final class EditorView: BaseUIView, ToastPresentable {
 
     // MARK: - Sticker Helpers
 
+    private func selectStickerBox(
+        _ stickerBox: StickerBox,
+        stickerType: StickerSelector.StickerType
+    ) {
+        activateStickerBox(stickerBox)
+        recordEditTabBar.selectSticker(stickerType)
+    }
+
     private func activateStickerBox(_ stickerBox: StickerBox) {
         deactivateStickerBoxes(except: stickerBox)
         stickerBox.isUserInteractionEnabled = true
