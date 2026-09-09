@@ -15,6 +15,7 @@ final class StickerBox: BaseUIView {
     // MARK: - Properties
 
     var onDeleted: (() -> Void)?
+    var onTapped: (() -> Void)?
     var onMoved: (() -> Void)?
     var isSelected: Bool {
         !borderView.isHidden
@@ -184,9 +185,16 @@ final class StickerBox: BaseUIView {
     // MARK: - Actions
 
     private func setGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleStickerTapped))
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handleStickerPanned(_:)))
 
+        addGestureRecognizer(tapGesture)
         addGestureRecognizer(panGesture)
+    }
+
+    @objc
+    private func handleStickerTapped() {
+        onTapped?()
     }
 
     @objc
