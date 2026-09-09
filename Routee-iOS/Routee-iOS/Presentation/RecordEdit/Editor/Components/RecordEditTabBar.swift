@@ -141,6 +141,10 @@ final class RecordEditTabBar: BaseUIView {
         stickerSelector.deselectAll()
     }
 
+    func selectSticker(_ stickerType: StickerSelector.StickerType) {
+        stickerSelector.selectSticker(stickerType)
+    }
+
     func setBrightnessValue(_ value: CGFloat) {
         brightnessSliderView.setValue(value)
     }
