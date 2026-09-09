@@ -11,7 +11,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     private let workoutTimelineView: WorkoutTimeLineView
     private let activityId: Int64?
     private let activityRepository: ActivityRepository
-    private let finishRecording: (String) async throws -> Void
+    private let finishRecording: @MainActor (String) async throws -> Void
     private let showFailureModalOnAppear: Bool
     private let hasRecordedRoute: Bool
     private var isCompletingTimeline = false
@@ -28,7 +28,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
         maxAltitudeInMeters: Double?,
         trackPoints: [TrackPoint],
         photoRecords: [WorkoutPhotoRecord],
-        finishRecording: @escaping (String) async throws -> Void,
+        finishRecording: @escaping @MainActor (String) async throws -> Void,
         showFailureModalOnAppear: Bool,
         activityRepository: ActivityRepository = DefaultActivityRepository()
     ) {
@@ -102,7 +102,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
 
         isCompletingTimeline = true
 
-        Task {
+        Task { @MainActor in
             do {
                 try await saveRecording()
                 _ = navigationController?.popToRootViewController(animated: true)
@@ -227,7 +227,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
 
         isCompletingTimeline = true
 
-        Task {
+        Task { @MainActor in
             do {
                 try await saveRecording()
                 navigationController?.pushViewController(
