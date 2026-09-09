@@ -170,6 +170,17 @@ final class StickerSelector: BaseUIView {
         routeTitleLabel.textColor = .grey200
     }
 
+    func selectSticker(_ stickerType: StickerType) {
+        switch stickerType {
+        case .record:
+            selectRecord()
+        case .photoTimeline:
+            selectPhotoTimeline()
+        case .route:
+            selectRoute()
+        }
+    }
+
     // MARK: - Private Methods
 
     private func setActions() {
@@ -224,19 +235,19 @@ final class StickerSelector: BaseUIView {
 
     @objc
     private func recordButtonTapped() {
-        selectRecord()
+        selectSticker(.record)
         onStickerSelected?(.record)
     }
 
     @objc
     private func photoTimelineButtonTapped() {
-        selectPhotoTimeline()
+        selectSticker(.photoTimeline)
         onStickerSelected?(.photoTimeline)
     }
 
     @objc
     private func routeButtonTapped() {
-        selectRoute()
+        selectSticker(.route)
         onStickerSelected?(.route)
     }
 }
