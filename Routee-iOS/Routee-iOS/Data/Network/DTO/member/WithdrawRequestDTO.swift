@@ -9,4 +9,5 @@ import Foundation
 
 struct WithdrawRequestDTO: Encodable {
     let refreshToken: String
+    let authorizationCode: String
 }
