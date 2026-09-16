@@ -8,6 +8,27 @@
 import UIKit
 
 extension UILabel {
+    func setLineHeightText(
+        _ text: String,
+        font: UIFont,
+        lineHeightRatio: CGFloat
+    ) {
+        self.font = font
+
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.minimumLineHeight = font.pointSize * lineHeightRatio
+        paragraphStyle.maximumLineHeight = font.pointSize * lineHeightRatio
+
+        attributedText = NSAttributedString(
+            string: text,
+            attributes: [
+                .font: font,
+                .foregroundColor: textColor as Any,
+                .paragraphStyle: paragraphStyle
+            ]
+        )
+    }
+
     func setDisplayText(_ text: String?, font: UIFont) {
         self.font = font
 
