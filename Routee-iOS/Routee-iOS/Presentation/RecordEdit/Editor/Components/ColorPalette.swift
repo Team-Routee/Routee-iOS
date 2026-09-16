@@ -73,6 +73,12 @@ final class ColorPalette: BaseUIView {
         }
     }
     
+    // MARK: - Public Methods
+
+    func deselectAll() {
+        colorButtons.forEach { $0.setSelected(false) }
+    }
+
     // MARK: - Private Methods
     
     private func makeButtons() {
@@ -103,9 +109,7 @@ final class ColorPalette: BaseUIView {
     
     @objc
     private func colorButtonTapped(_ sender: ColorCircleButton) {
-        colorButtons.forEach {
-            $0.setSelected(false)
-        }
+        deselectAll()
         
         sender.setSelected(true)
         onColorSelected?(sender.color)
