@@ -9,7 +9,7 @@ import Foundation
 
 protocol MemberRepository {
     func register(registerInfo: RegisterInfoModel) async throws
-    func withdraw(authorizationCode: String) async throws
+    func withdraw() async throws
     func getMemberSummary() async throws -> MemberSummaryModel
     func getMemberProfile() async throws -> MemberProfileModel
     func updateNickname(_ nickname: String) async throws -> String
@@ -53,11 +53,7 @@ struct DefaultMemberRepository: MemberRepository {
         try await service.requestEmpty(endPoint)
     }
     
-    func withdraw(authorizationCode: String) async throws {
-        guard !authorizationCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            throw RouteeError.noData
-        }
-
+    func withdraw() async throws {
         let accessToken = keychainService.read(.accessToken)
         let refreshToken = keychainService.read(.refreshToken)
 
@@ -65,10 +61,7 @@ struct DefaultMemberRepository: MemberRepository {
             throw RouteeError.noData
         }
 
-        let requestDTO = WithdrawRequestDTO(
-            refreshToken: refreshToken,
-            authorizationCode: authorizationCode
-        )
+        let requestDTO = WithdrawRequestDTO(refreshToken: refreshToken)
         let endPoint = MemberAPI.withdraw(
             header: .withAuth(accessToken: accessToken),
             requestDTO: requestDTO
