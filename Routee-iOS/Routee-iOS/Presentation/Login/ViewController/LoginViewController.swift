@@ -21,7 +21,7 @@ final class LoginViewController: BaseUIViewController {
     
     // MARK: - Private Methods
     
-    private func login(identityToken: String, appleUserID: String) {
+    private func login(identityToken: String, authorizationCode: String, appleUserID: String) {
         Task { [weak self] in
             guard let self else { return }
 
@@ -29,6 +29,7 @@ final class LoginViewController: BaseUIViewController {
                 try await viewModel.login(
                     platform: .APPLE,
                     identityToken: identityToken,
+                    authorizationCode: authorizationCode,
                     appleUserID: appleUserID
                 )
                 await MainActor.run {
@@ -38,6 +39,7 @@ final class LoginViewController: BaseUIViewController {
                 await MainActor.run {
                     self.goToRegister(
                         identityToken: identityToken,
+                        authorizationCode: authorizationCode,
                         appleUserID: appleUserID
                     )
                 }
@@ -47,9 +49,10 @@ final class LoginViewController: BaseUIViewController {
         }
     }
 
-    private func goToRegister(identityToken: String, appleUserID: String) {
+    private func goToRegister(identityToken: String, authorizationCode: String, appleUserID: String) {
         let viewController = TermsAgreementViewController(
             identityToken: identityToken,
+            authorizationCode: authorizationCode,
             appleUserID: appleUserID
         )
         navigationController?.pushViewController(viewController, animated: true)
@@ -111,7 +114,10 @@ extension LoginViewController: ASAuthorizationControllerDelegate {
             
             guard
                 let identityTokenData = appleIdCredential.identityToken,
-                let identityToken = String(data: identityTokenData, encoding: .utf8)
+                let identityToken = String(data: identityTokenData, encoding: .utf8),
+                let authorizationCodeData = appleIdCredential.authorizationCode,
+                let authorizationCode = String(data: authorizationCodeData, encoding: .utf8),
+                !authorizationCode.isEmpty
             else {
                 print("Token 변환 실패")
                 return
@@ -122,7 +128,11 @@ extension LoginViewController: ASAuthorizationControllerDelegate {
             print("전체 이름: \(fullName?.givenName ?? "") \(fullName?.familyName ?? "")")
             print("이메일: \(email ?? "")")
             
-            login(identityToken: identityToken, appleUserID: userIdentifier)
+            login(
+                identityToken: identityToken,
+                authorizationCode: authorizationCode,
+                appleUserID: userIdentifier
+            )
             
         case let passwordCredential as ASPasswordCredential:
             let userIdentifier = passwordCredential.user
