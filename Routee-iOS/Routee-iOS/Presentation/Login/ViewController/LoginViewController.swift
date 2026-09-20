@@ -66,11 +66,7 @@ final class LoginViewController: BaseUIViewController {
                 }
             } catch RouteeError.notFound {
                 await MainActor.run {
-                    self.goToRegister(
-                        identityToken: identityToken,
-                        authorizationCode: authorizationCode,
-                        appleUserID: appleUserID
-                    )
+                    self.goToRegister(identityToken: identityToken)
                 }
             } catch {
                 RouteeLogger.error(error)
@@ -78,12 +74,8 @@ final class LoginViewController: BaseUIViewController {
         }
     }
 
-    private func goToRegister(identityToken: String, authorizationCode: String, appleUserID: String) {
-        let viewController = TermsAgreementViewController(
-            identityToken: identityToken,
-            authorizationCode: authorizationCode,
-            appleUserID: appleUserID
-        )
+    private func goToRegister(identityToken: String) {
+        let viewController = TermsAgreementViewController(identityToken: identityToken)
         navigationController?.pushViewController(viewController, animated: true)
     }
     
