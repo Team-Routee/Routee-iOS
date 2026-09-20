@@ -14,12 +14,41 @@ final class LoginViewController: BaseUIViewController {
     
     private let viewModel = LoginViewModel()
     private let rootView = LoginView()
+    private var shouldShowSignUpCompletionModal: Bool
+
+    init(showSignUpCompletionModal: Bool = false) {
+        self.shouldShowSignUpCompletionModal = showSignUpCompletionModal
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func loadView() {
         view = rootView
     }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        guard shouldShowSignUpCompletionModal else { return }
+        shouldShowSignUpCompletionModal = false
+        presentSignUpCompletionModal()
+    }
     
     // MARK: - Private Methods
+
+    private func presentSignUpCompletionModal() {
+        let modal = ActionPrimaryModal(
+            title: "Welcome to Routee!",
+            description: "회원가입이 완료되었습니다.",
+            actionCount: .single,
+            leftButtonTitle: "확인"
+        )
+
+        present(modal, animated: true)
+    }
     
     private func login(identityToken: String, authorizationCode: String, appleUserID: String) {
         Task { [weak self] in
