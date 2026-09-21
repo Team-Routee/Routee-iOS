@@ -2,12 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
-	<key>MIXPANEL_TOKEN</key>
-	<string>$(MIXPANEL_TOKEN)</string>
 	<key>BASE_URL</key>
 	<string>$(BASE_URL)</string>
+	<key>MIXPANEL_TOKEN</key>
+	<string>$(MIXPANEL_TOKEN)</string>
 	<key>NAVER_MAP_BASE_URL</key>
 	<string>$(NAVER_MAP_BASE_URL)</string>
 	<key>NAVER_MAP_CLIENT_ID</key>
@@ -57,5 +55,7 @@
 	</array>
 	<key>UIDesignRequiresCompatibility</key>
 	<true/>
+	<key>isEncription</key>
+	<string></string>
 </dict>
 </plist>
