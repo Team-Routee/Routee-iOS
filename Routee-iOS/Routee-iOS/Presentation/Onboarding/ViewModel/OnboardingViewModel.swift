@@ -8,46 +8,23 @@
 import Foundation
 
 final class OnboardingViewModel {
-    private let authRepository: AuthRepository
     private let memberRepository: MemberRepository
 
-    init(
-        authRepository: AuthRepository = DefaultAuthRepository(),
-        memberRepository: MemberRepository = DefaultMemberRepository()
-    ) {
-        self.authRepository = authRepository
+    init(memberRepository: MemberRepository = DefaultMemberRepository()) {
         self.memberRepository = memberRepository
     }
 
-    func registerAndLogin(
-        platform: LoginPlatform,
-        identityToken: String,
-        appleUserID: String,
-        nickname: String,
-        agreements: RegisterInfoModel.Agreements
-    ) async throws {
-        let registerInfo = RegisterInfoModel(
-            nickname: nickname,
-            identityToken: identityToken,
-            provider: platform,
-            agreements: agreements
-        )
+    func register(registerInfo: RegisterInfoModel) async throws {
         try await memberRepository.register(registerInfo: registerInfo)
 
         AnalyticsTracker.track(
             .signUpCompleted,
-            properties: ["login_provider": platform.mixpanelKey]
-        )
-
-        try await authRepository.login(
-            platform: platform,
-            identityToken: identityToken,
-            appleUserID: appleUserID
+            properties: ["login_provider": registerInfo.provider.mixpanelKey]
         )
 
         AnalyticsTracker.track(
             .onboardingCompleted,
-            properties: ["login_provider": platform.mixpanelKey]
+            properties: ["login_provider": registerInfo.provider.mixpanelKey]
         )
     }
 }

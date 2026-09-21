@@ -14,14 +14,43 @@ final class LoginViewController: BaseUIViewController {
     
     private let viewModel = LoginViewModel()
     private let rootView = LoginView()
+    private var shouldShowSignUpCompletionModal: Bool
+
+    init(showSignUpCompletionModal: Bool = false) {
+        self.shouldShowSignUpCompletionModal = showSignUpCompletionModal
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func loadView() {
         view = rootView
     }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        guard shouldShowSignUpCompletionModal else { return }
+        shouldShowSignUpCompletionModal = false
+        presentSignUpCompletionModal()
+    }
     
     // MARK: - Private Methods
+
+    private func presentSignUpCompletionModal() {
+        let modal = ActionPrimaryModal(
+            title: "Welcome to Routee!",
+            description: "회원가입이 완료되었습니다.",
+            actionCount: .single,
+            leftButtonTitle: "확인"
+        )
+
+        present(modal, animated: true)
+    }
     
-    private func login(identityToken: String, appleUserID: String) {
+    private func login(identityToken: String, authorizationCode: String, appleUserID: String) {
         Task { [weak self] in
             guard let self else { return }
 
@@ -29,6 +58,7 @@ final class LoginViewController: BaseUIViewController {
                 try await viewModel.login(
                     platform: .APPLE,
                     identityToken: identityToken,
+                    authorizationCode: authorizationCode,
                     appleUserID: appleUserID
                 )
                 await MainActor.run {
@@ -36,10 +66,7 @@ final class LoginViewController: BaseUIViewController {
                 }
             } catch RouteeError.notFound {
                 await MainActor.run {
-                    self.goToRegister(
-                        identityToken: identityToken,
-                        appleUserID: appleUserID
-                    )
+                    self.goToRegister(identityToken: identityToken)
                 }
             } catch {
                 RouteeLogger.error(error)
@@ -47,11 +74,8 @@ final class LoginViewController: BaseUIViewController {
         }
     }
 
-    private func goToRegister(identityToken: String, appleUserID: String) {
-        let viewController = TermsAgreementViewController(
-            identityToken: identityToken,
-            appleUserID: appleUserID
-        )
+    private func goToRegister(identityToken: String) {
+        let viewController = TermsAgreementViewController(identityToken: identityToken)
         navigationController?.pushViewController(viewController, animated: true)
     }
     
@@ -111,7 +135,10 @@ extension LoginViewController: ASAuthorizationControllerDelegate {
             
             guard
                 let identityTokenData = appleIdCredential.identityToken,
-                let identityToken = String(data: identityTokenData, encoding: .utf8)
+                let identityToken = String(data: identityTokenData, encoding: .utf8),
+                let authorizationCodeData = appleIdCredential.authorizationCode,
+                let authorizationCode = String(data: authorizationCodeData, encoding: .utf8),
+                !authorizationCode.isEmpty
             else {
                 print("Token 변환 실패")
                 return
@@ -122,7 +149,11 @@ extension LoginViewController: ASAuthorizationControllerDelegate {
             print("전체 이름: \(fullName?.givenName ?? "") \(fullName?.familyName ?? "")")
             print("이메일: \(email ?? "")")
             
-            login(identityToken: identityToken, appleUserID: userIdentifier)
+            login(
+                identityToken: identityToken,
+                authorizationCode: authorizationCode,
+                appleUserID: userIdentifier
+            )
             
         case let passwordCredential as ASPasswordCredential:
             let userIdentifier = passwordCredential.user

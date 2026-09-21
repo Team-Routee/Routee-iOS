@@ -38,17 +38,14 @@ struct TermsAgreementURLs {
 
 final class TermsAgreementViewController: BaseUIViewController {
     private let identityToken: String
-    private let appleUserID: String
     private let termsURLs: TermsAgreementURLs
     private let termsAgreementView = TermsAgreementView()
 
     init(
         identityToken: String,
-        appleUserID: String,
         termsURLs: TermsAgreementURLs = .routee
     ) {
         self.identityToken = identityToken
-        self.appleUserID = appleUserID
         self.termsURLs = termsURLs
 
         super.init(nibName: nil, bundle: nil)
@@ -102,7 +99,6 @@ final class TermsAgreementViewController: BaseUIViewController {
 
         let viewController = OnboardingViewController(
             identityToken: identityToken,
-            appleUserID: appleUserID,
             agreements: termsAgreementView.agreements
         )
         navigationController?.setViewControllers([viewController], animated: true)
