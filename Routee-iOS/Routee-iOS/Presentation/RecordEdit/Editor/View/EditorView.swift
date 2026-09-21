@@ -734,6 +734,7 @@ final class EditorView: BaseUIView, ToastPresentable {
 
     private func resetEditorColor() {
         state.selectedColor = .recapMint
+        recordEditTabBar.resetColorSelection()
         dataInfo.updateColor(state.selectedColor)
         routeTimelineDrawingView.updateColor(state.selectedColor)
         routeSticker.updateColor(state.selectedColor)
