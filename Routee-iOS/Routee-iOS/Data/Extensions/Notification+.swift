@@ -9,4 +9,5 @@ import Foundation
 
 extension Notification.Name {
     static let navigateLoginViewController = Notification.Name("navigateLoginViewController")
+    static let signUpCompleted = Notification.Name("signUpCompleted")
 }

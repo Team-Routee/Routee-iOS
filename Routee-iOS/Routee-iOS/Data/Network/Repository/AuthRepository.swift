@@ -8,7 +8,12 @@
 import Foundation
 
 protocol AuthRepository {
-    func login(platform: LoginPlatform, identityToken: String, appleUserID: String) async throws
+    func login(
+        platform: LoginPlatform,
+        identityToken: String,
+        authorizationCode: String,
+        appleUserID: String
+    ) async throws
     func logout() async throws
 }
 
@@ -20,10 +25,20 @@ struct DefaultAuthRepository: AuthRepository {
         self.service = service
     }
     
-    func login(platform: LoginPlatform, identityToken: String, appleUserID: String) async throws {
+    func login(
+        platform: LoginPlatform,
+        identityToken: String,
+        authorizationCode: String,
+        appleUserID: String
+    ) async throws {
+        guard !authorizationCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw RouteeError.noData
+        }
+
         let dto = LoginRequestDTO(
             provider: platform.mixpanelKey,
-            idToken: identityToken
+            idToken: identityToken,
+            authorizationCode: authorizationCode
         )
         
         let endpoint = AuthAPI.login(
