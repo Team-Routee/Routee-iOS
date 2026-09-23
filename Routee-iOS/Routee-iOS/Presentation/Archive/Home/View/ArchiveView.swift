@@ -15,6 +15,8 @@ final class ArchiveView: BaseUIView, ToastPresentable {
 
     private let backgroundGradientView = RouteeEllipseBackground()
     private let archiveHeaderView = ArchiveHeader()
+    private let scrollView = UIScrollView()
+    private let contentView = UIView()
     private let profileView = Profile()
     private let monthSelector = ArchiveMonthSelector()
     private let mountainMapView = MountainMap()
@@ -42,12 +44,18 @@ final class ArchiveView: BaseUIView, ToastPresentable {
 
     override func setStyle() {
         backgroundColor = .bg_primary
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.contentInsetAdjustmentBehavior = .never
     }
 
     override func setUI() {
         addSubviews(
             backgroundGradientView,
             archiveHeaderView,
+            scrollView
+        )
+        scrollView.addSubview(contentView)
+        contentView.addSubviews(
             profileView,
             monthSelector,
             mountainMapView,
@@ -62,12 +70,23 @@ final class ArchiveView: BaseUIView, ToastPresentable {
         
         archiveHeaderView.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide)
-            $0.leading.equalTo(mountainMapView.snp.leading)
-            $0.trailing.equalTo(mountainMapView.snp.trailing)
+            $0.centerX.equalToSuperview()
+            $0.width.equalTo(347)
+        }
+
+        scrollView.snp.makeConstraints {
+            $0.top.equalTo(archiveHeaderView.snp.bottom)
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalTo(safeAreaLayoutGuide)
+        }
+
+        contentView.snp.makeConstraints {
+            $0.edges.equalTo(scrollView.contentLayoutGuide)
+            $0.width.equalTo(scrollView.frameLayoutGuide)
         }
 
         profileView.snp.makeConstraints {
-            $0.top.equalTo(archiveHeaderView.snp.bottom)
+            $0.top.equalToSuperview()
             $0.centerX.equalToSuperview()
             $0.width.equalTo(343)
             $0.height.equalTo(74)
@@ -92,6 +111,7 @@ final class ArchiveView: BaseUIView, ToastPresentable {
             $0.centerX.equalToSuperview()
             $0.width.equalTo(343)
             $0.height.equalTo(337)
+            $0.bottom.equalToSuperview().inset(16)
         }
     }
 
