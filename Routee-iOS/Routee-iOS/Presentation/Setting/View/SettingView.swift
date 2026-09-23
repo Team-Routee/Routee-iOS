@@ -27,6 +27,8 @@ final class SettingView: BaseUIView {
 
     private let backgroundGradientView = RouteeEllipseBackground()
     private let titleLabel = UILabel()
+    private let scrollView = UIScrollView()
+    private let contentView = UIView()
     private let contentStackView = UIStackView()
     private let routeeSectionView = SettingSection()
     private let policySectionView = SettingSection()
@@ -36,6 +38,10 @@ final class SettingView: BaseUIView {
 
     override func setStyle() {
         backgroundColor = .bgPrimary
+
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.alwaysBounceVertical = true
+        scrollView.contentInsetAdjustmentBehavior = .never
 
         titleLabel.do {
             $0.text = "설정"
@@ -77,7 +83,9 @@ final class SettingView: BaseUIView {
     }
 
     override func setUI() {
-        addSubviews(backgroundGradientView, titleLabel, contentStackView)
+        addSubviews(backgroundGradientView, titleLabel, scrollView)
+        scrollView.addSubview(contentView)
+        contentView.addSubview(contentStackView)
 
         contentStackView.addArrangedSubviews(
             routeeSectionView,
@@ -95,13 +103,26 @@ final class SettingView: BaseUIView {
 
         titleLabel.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide).offset(16)
-            $0.leading.equalTo(contentStackView.snp.leading)
+            $0.centerX.equalToSuperview()
+            $0.width.equalTo(343)
+        }
+
+        scrollView.snp.makeConstraints {
+            $0.top.equalTo(titleLabel.snp.bottom)
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalTo(safeAreaLayoutGuide)
+        }
+
+        contentView.snp.makeConstraints {
+            $0.edges.equalTo(scrollView.contentLayoutGuide)
+            $0.width.equalTo(scrollView.frameLayoutGuide)
         }
 
         contentStackView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.top.equalTo(titleLabel.snp.bottom).offset(33)
+            $0.top.equalToSuperview().offset(33)
             $0.width.equalTo(343)
+            $0.bottom.equalToSuperview().inset(16)
         }
     }
 
