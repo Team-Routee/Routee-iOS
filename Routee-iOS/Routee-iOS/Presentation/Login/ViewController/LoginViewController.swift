@@ -130,8 +130,6 @@ extension LoginViewController: ASAuthorizationControllerDelegate {
         switch authorization.credential {
         case let appleIdCredential as ASAuthorizationAppleIDCredential:
             let userIdentifier = appleIdCredential.user
-            let fullName = appleIdCredential.fullName
-            let email = appleIdCredential.email
             
             guard
                 let identityTokenData = appleIdCredential.identityToken,
@@ -144,10 +142,6 @@ extension LoginViewController: ASAuthorizationControllerDelegate {
                 return
             }
             
-            print("Apple ID 로그인에 성공하였습니다.")
-            print("사용자 ID: \(userIdentifier)")
-            print("전체 이름: \(fullName?.givenName ?? "") \(fullName?.familyName ?? "")")
-            print("이메일: \(email ?? "")")
             
             login(
                 identityToken: identityToken,
@@ -155,14 +149,7 @@ extension LoginViewController: ASAuthorizationControllerDelegate {
                 appleUserID: userIdentifier
             )
             
-        case let passwordCredential as ASPasswordCredential:
-            let userIdentifier = passwordCredential.user
-            let password = passwordCredential.password
-            
-            print("암호 기반 인증에 성공하였습니다.")
-            print("사용자 이름: \(userIdentifier)")
-            print("비밀번호: \(password)")
-            
+        case is ASPasswordCredential:
             let mainVC = SampleViewController()
             mainVC.modalPresentationStyle = .fullScreen
             present(mainVC, animated: true)
