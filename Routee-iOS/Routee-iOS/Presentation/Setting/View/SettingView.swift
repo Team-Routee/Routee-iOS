@@ -78,7 +78,8 @@ final class SettingView: BaseUIView {
                 (title: "버전정보", trailingText: appVersionText),
                 (title: "로그아웃", trailingText: nil),
                 (title: "회원탈퇴", trailingText: nil)
-            ]
+            ],
+            hidesChevronAt: [0]
         )
     }
 
