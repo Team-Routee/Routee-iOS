@@ -82,7 +82,11 @@ final class SettingSection: UIView {
         )
     }
 
-    func configure(title: String, items: [(title: String, trailingText: String?)]) {
+    func configure(
+        title: String,
+        items: [(title: String, trailingText: String?)],
+        hidesChevronAt indices: Set<Int> = []
+    ) {
         sectionTitleLabel.text = title
 
         itemViews.forEach {
@@ -90,8 +94,12 @@ final class SettingSection: UIView {
             $0.removeFromSuperview()
         }
 
-        itemViews = items.map {
-            SettingItem(title: $0.title, trailingText: $0.trailingText)
+        itemViews = items.enumerated().map { index, item in
+            SettingItem(
+                title: item.title,
+                trailingText: item.trailingText,
+                showsChevron: !indices.contains(index)
+            )
         }
 
         itemViews.forEach {

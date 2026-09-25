@@ -17,10 +17,12 @@ final class SettingItem: UIView {
     private let titleLabel = UILabel()
     private let trailingLabel = UILabel()
     private let chevronButton = UIButton()
+    private let showsChevron: Bool
 
     // MARK: - Initializer
 
-    init(title: String, trailingText: String? = nil) {
+    init(title: String, trailingText: String? = nil, showsChevron: Bool = true) {
+        self.showsChevron = showsChevron
         super.init(frame: .zero)
 
         titleLabel.text = title
@@ -53,6 +55,7 @@ final class SettingItem: UIView {
             $0.setImage(UIImage(named: "ic_chevron_right_sm_grey"), for: .highlighted)
             $0.imageView?.contentMode = .scaleAspectFit
             $0.isUserInteractionEnabled = false
+            $0.isHidden = !showsChevron
         }
     }
 
@@ -72,7 +75,11 @@ final class SettingItem: UIView {
 
         trailingLabel.snp.makeConstraints {
             $0.centerY.equalToSuperview()
-            $0.trailing.equalTo(chevronButton.snp.leading).offset(-2)
+            if showsChevron {
+                $0.trailing.equalTo(chevronButton.snp.leading).offset(-2)
+            } else {
+                $0.trailing.equalToSuperview().offset(-2)
+            }
         }
 
         chevronButton.snp.makeConstraints {
@@ -89,7 +96,9 @@ final class SettingItem: UIView {
             UITapGestureRecognizer(target: target, action: action)
         )
 
-        chevronButton.isUserInteractionEnabled = true
-        chevronButton.addTarget(target, action: action, for: .touchUpInside)
+        if showsChevron {
+            chevronButton.isUserInteractionEnabled = true
+            chevronButton.addTarget(target, action: action, for: .touchUpInside)
+        }
     }
 }
