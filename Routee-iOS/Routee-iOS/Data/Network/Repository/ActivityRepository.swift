@@ -25,6 +25,7 @@ protocol ActivityRepository {
     func changeActivityStatus(activityId: Int64, requestDTO: ChangeActivityStatusRequestDTO) async throws -> ChangeActivityStatusResponseDTO
     func updateArchiveActivityTitle(activityId: Int64, requestDTO: UpdateArchiveActivityTitleRequestDTO) async throws -> UpdateArchiveActivityTitleResponseDTO
     func createCourseList(activityId: Int64, requestDTO: CreateCourseListRequestDTO) async throws -> CourseListModel
+    func updateCourseList(activityId: Int64, requestDTO: UpdateCourseListRequestDTO) async throws -> CourseListModel
 }
 
 struct DefaultActivityRepository: ActivityRepository {
@@ -356,4 +357,18 @@ struct DefaultActivityRepository: ActivityRepository {
         let response = try await service.request(endpoint, decodingType: CreateCourseListResponseDTO.self)
         return response.toModel()
     }
+
+    func updateCourseList(activityId: Int64, requestDTO: UpdateCourseListRequestDTO) async throws -> CourseListModel {
+        let accessToken = keychainService.read(.accessToken)
+        guard !accessToken.isEmpty else { throw RouteeError.forbidden }
+
+        let endpoint = ActivityAPI.updateCourseList(
+            header: .withAuth(accessToken: accessToken),
+            activityId: activityId,
+            requestDTO: requestDTO
+        )
+        let response = try await service.request(endpoint, decodingType: CreateCourseListResponseDTO.self)
+        return response.toModel()
+    }
+
 }
