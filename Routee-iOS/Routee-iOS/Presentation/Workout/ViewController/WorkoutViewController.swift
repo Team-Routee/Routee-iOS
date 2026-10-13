@@ -151,15 +151,22 @@ final class WorkoutViewController: BaseUIViewController {
     private func finishRecordingRoute() {
         guard workoutMode != .finishing else { return }
         workoutMode = .finishing
+        let endedAt = Date()
+        let routePointsSnapshot = viewModel.routePoints
 
-        let backgroundMapTask = Task {
+        let saveRecordingTask = Task {
             guard self.hasValidRoute else { return false }
             guard let mapImage = await workoutView.captureBackgroundMapImage(
-                fitting: viewModel.routePoints.map(\.latLng)
+                fitting: routePointsSnapshot.map(\.latLng)
             ) else { return false }
 
             do {
                 try await viewModel.uploadBackgroundMap(image: mapImage)
+                try await saveFinishedRecording(
+                    title: viewModel.activityTitle ?? "",
+                    routePointsSnapshot: routePointsSnapshot,
+                    endedAt: endedAt
+                )
                 return true
             } catch {
                 RouteeLogger.error(error)
@@ -171,10 +178,10 @@ final class WorkoutViewController: BaseUIViewController {
             guard let self else { return }
 
             Task {
-                let didUploadBackgroundMap = await backgroundMapTask.value
+                let didSaveRecording = await saveRecordingTask.value
                 await MainActor.run {
                     self.pushWorkoutTimeLineViewController(
-                        showFailureModalOnAppear: self.hasValidRoute && !didUploadBackgroundMap
+                        showFailureModalOnAppear: self.hasValidRoute && !didSaveRecording
                     )
                 }
             }
@@ -193,13 +200,7 @@ final class WorkoutViewController: BaseUIViewController {
                 TrackPoint(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude)
             },
             photoRecords: viewModel.photoRecords,
-            finishRecording: { [weak self, routePointsSnapshot] title in
-                guard let self else { throw RouteeError.noData }
-                try await saveFinishedRecording(
-                    title: title,
-                    routePointsSnapshot: routePointsSnapshot
-                )
-            },
+            courseRoutes: viewModel.courseList?.routes ?? [],
             showFailureModalOnAppear: showFailureModalOnAppear
         )
         navigationController?.pushViewController(viewController, animated: true)
@@ -207,8 +208,11 @@ final class WorkoutViewController: BaseUIViewController {
 
     private func saveFinishedRecording(
         title: String,
-        routePointsSnapshot: [WorkoutRoutePoint]
+        routePointsSnapshot: [WorkoutRoutePoint],
+        endedAt: Date
     ) async throws {
+        await pendingTimelineDeletionTask?.value
+
         let uploadTasks = Array(photoUploadTasks.values)
         for uploadTask in uploadTasks {
             await uploadTask.value
@@ -223,7 +227,8 @@ final class WorkoutViewController: BaseUIViewController {
 
         try await viewModel.finishRecording(
             title: title,
-            routePointsSnapshot: routePointsSnapshot
+            routePointsSnapshot: routePointsSnapshot,
+            endedAt: endedAt
         )
     }
     

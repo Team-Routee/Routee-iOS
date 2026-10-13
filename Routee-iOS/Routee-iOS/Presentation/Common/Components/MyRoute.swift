@@ -17,6 +17,12 @@ enum RouteViewMode {
 
 struct RoutePointModel {
     let points: [String]
+    let routeIds: [Int64]
+
+    init(points: [String], routeIds: [Int64] = []) {
+        self.points = points
+        self.routeIds = points.indices.map { routeIds.indices.contains($0) ? routeIds[$0] : 0 }
+    }
 }
 
 final class MyRoute: BaseUIView {
@@ -156,6 +162,14 @@ final class MyRoute: BaseUIView {
 
     var currentPoints: [String] {
         routePoint.points
+    }
+
+    var currentRouteIds: [Int64] {
+        routePoint.routeIds
+    }
+
+    func updateRouteIds(_ routeIds: [Int64]) {
+        routePoint = RoutePointModel(points: routePoint.points, routeIds: routeIds)
     }
 
     func configure(mode: RouteViewMode, routePoint: RoutePointModel) {
@@ -299,7 +313,7 @@ final class MyRoute: BaseUIView {
     private func addRoutePoint() {
         guard routePoint.points.count < maxPointCount else { return }
         
-        routePoint = .init(points: routePoint.points + [""])
+        routePoint = .init(points: routePoint.points + [""], routeIds: routePoint.routeIds + [0])
         updateView()
     }
     
@@ -308,7 +322,9 @@ final class MyRoute: BaseUIView {
         
         var points = routePoint.points
         points.remove(at: index)
-        routePoint = .init(points: points)
+        var routeIds = routePoint.routeIds
+        routeIds.remove(at: index)
+        routePoint = .init(points: points, routeIds: routeIds)
         updateView()
     }
     
@@ -317,6 +333,6 @@ final class MyRoute: BaseUIView {
         
         var points = routePoint.points
         points[index] = point
-        routePoint = .init(points: points)
+        routePoint = .init(points: points, routeIds: routePoint.routeIds)
     }
 }
