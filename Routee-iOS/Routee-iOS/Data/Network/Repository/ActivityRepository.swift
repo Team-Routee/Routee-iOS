@@ -360,7 +360,10 @@ struct DefaultActivityRepository: ActivityRepository {
 
     func updateCourseList(activityId: Int64, requestDTO: UpdateCourseListRequestDTO) async throws -> CourseListModel {
         let accessToken = keychainService.read(.accessToken)
-        guard !accessToken.isEmpty else { throw RouteeError.forbidden }
+        
+        guard !accessToken.isEmpty else {
+            throw RouteeError.forbidden
+        }
 
         let endpoint = ActivityAPI.updateCourseList(
             header: .withAuth(accessToken: accessToken),
@@ -368,6 +371,7 @@ struct DefaultActivityRepository: ActivityRepository {
             requestDTO: requestDTO
         )
         let response = try await service.request(endpoint, decodingType: CreateCourseListResponseDTO.self)
+        
         return response.toModel()
     }
 
