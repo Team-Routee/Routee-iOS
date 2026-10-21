@@ -21,7 +21,8 @@
 	</dict>
 	<key>UIAppFonts</key>
 	<array>
-		<string>Coolvetica-Rg-It.otf</string>
+		<string>Archivo-BoldItalic.ttf</string>
+		<string>Archivo-SemiBoldItalic.ttf</string>
 		<string>Pretendard-Black.otf</string>
 		<string>Pretendard-Bold.otf</string>
 		<string>Pretendard-ExtraBold.otf</string>

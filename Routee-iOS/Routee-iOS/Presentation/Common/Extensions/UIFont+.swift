@@ -43,11 +43,26 @@ extension UIFont {
             }
         }
     }
+    
+    enum ArchivoWeight {
+        case bold
+        case semiBold
 
-    static var display_52: UIFont { coolveticaItalic(size: 52) }
-    static var display_40: UIFont { coolveticaItalic(size: 40) }
-    static var display_30: UIFont { coolveticaItalic(size: 30) }
-    static var display_26: UIFont { coolveticaItalic(size: 26) }
+        fileprivate var fontName: String {
+            switch self {
+            case .bold:
+                "Archivo-BoldItalic"
+            case .semiBold:
+                "Archivo-SemiBoldItalic"
+            }
+        }
+    }
+
+
+    static var display_b_42: UIFont { archivoItalic(.bold, size: 52) }
+    
+    static var display_sb_28: UIFont { archivoItalic(.semiBold, size: 28) }
+    static var display_sb_22: UIFont { archivoItalic(.semiBold, size: 22) }
 
     static var title_sb_24: UIFont { pretendard(.semiBold, size: 24) }
     static var title_sb_20: UIFont { pretendard(.semiBold, size: 20) }
@@ -70,8 +85,8 @@ extension UIFont {
         UIFont(name: weight.fontName, size: size) ?? .systemFont(ofSize: size)
     }
 
-    static func coolveticaItalic(size: CGFloat) -> UIFont {
-        UIFont(name: "Coolvetica-Italic", size: size) ?? .italicSystemFont(ofSize: size)
+    static func archivoItalic(_ weight: ArchivoWeight, size: CGFloat) -> UIFont {
+        UIFont(name: weight.fontName, size: size) ?? .italicSystemFont(ofSize: size)
     }
 }
 // swiftlint:enable identifier_name
