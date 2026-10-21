@@ -149,11 +149,6 @@ extension LoginViewController: ASAuthorizationControllerDelegate {
                 appleUserID: userIdentifier
             )
             
-        case is ASPasswordCredential:
-            let mainVC = SampleViewController()
-            mainVC.modalPresentationStyle = .fullScreen
-            present(mainVC, animated: true)
-            
         default: break
         }
     }
