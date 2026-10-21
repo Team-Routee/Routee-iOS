@@ -93,7 +93,7 @@ final class WorkoutPauseView: BaseUIView {
         }
         
         distanceDataLabel.do {
-            $0.setDisplayText("0.00km", font: .display_52)
+            $0.setDisplayText("0.00km", font: .display_b_42, lineHeightRatio: 1.3)
         }
         
         timeLabel.do {
@@ -101,7 +101,7 @@ final class WorkoutPauseView: BaseUIView {
         }
         
         timeDataLabel.do {
-            $0.setDisplayText("00h 00m", font: .display_52)
+            $0.setDisplayText("00h 00m", font: .display_b_42, lineHeightRatio: 1.3)
         }
         
         altitudeLabel.do {
@@ -109,7 +109,7 @@ final class WorkoutPauseView: BaseUIView {
         }
         
         altitudeDataLabel.do {
-            $0.setDisplayText("0m", font: .display_52)
+            $0.setDisplayText("0m", font: .display_b_42, lineHeightRatio: 1.3)
         }
         
         restartButton.do {
@@ -253,14 +253,14 @@ final class WorkoutPauseView: BaseUIView {
     }
 
     func updateDistance(_ distanceInKilometers: String) {
-        distanceDataLabel.setDisplayText("\(distanceInKilometers)km", font: .display_52)
+        distanceDataLabel.setDisplayText("\(distanceInKilometers)km", font: .display_b_42, lineHeightRatio: 1.3)
     }
 
     func updateTime(_ time: String) {
-        timeDataLabel.setDisplayText(time, font: .display_52)
+        timeDataLabel.setDisplayText(time, font: .display_b_42, lineHeightRatio: 1.3)
     }
 
     func updateAltitude(_ altitudeInMeters: String) {
-        altitudeDataLabel.setDisplayText("\(altitudeInMeters)m", font: .display_52)
+        altitudeDataLabel.setDisplayText("\(altitudeInMeters)m", font: .display_b_42, lineHeightRatio: 1.3)
     }
 }

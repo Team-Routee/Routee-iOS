@@ -54,7 +54,7 @@ final class RecordInfo: BaseUIView {
         
         distanceDataLabel.do {
             $0.textColor = .recapMint
-            $0.setDisplayText("15.50km", font: .display_26)
+            $0.setDisplayText("15.50km", font: .display_sb_22, lineHeightRatio: 1.2)
         }
         
         timeLabel.do {
@@ -65,7 +65,7 @@ final class RecordInfo: BaseUIView {
         
         timeDataLabel.do {
             $0.textColor = .recapMint
-            $0.setDisplayText("3h 20m", font: .display_26)
+            $0.setDisplayText("3h 20m", font: .display_sb_22, lineHeightRatio: 1.2)
         }
         
         altitudeLabel.do {
@@ -76,7 +76,7 @@ final class RecordInfo: BaseUIView {
         
         altitudeDataLabel.do {
             $0.textColor = .recapMint
-            $0.setDisplayText("2132m", font: .display_26)
+            $0.setDisplayText("2132m", font: .display_sb_22, lineHeightRatio: 1.2)
         }
     }
     
@@ -117,15 +117,18 @@ final class RecordInfo: BaseUIView {
         let distanceInKm = Double(distance) / 1000.0
         distanceDataLabel.setDisplayText(
             distance == 0 ? "" : String(format: "%.2fkm", distanceInKm),
-            font: .display_26
+            font: .display_sb_22,
+            lineHeightRatio: 1.2
         )
         timeDataLabel.setDisplayText(
             durationSec == 0 ? "" : "\(durationSec / 3600)h \((durationSec % 3600) / 60)m",
-            font: .display_26
+            font: .display_sb_22,
+            lineHeightRatio: 1.2
         )
         altitudeDataLabel.setDisplayText(
             maxElevation == 0 ? "" : "\(maxElevation)m",
-            font: .display_26
+            font: .display_sb_22,
+            lineHeightRatio: 1.2
         )
     }
     

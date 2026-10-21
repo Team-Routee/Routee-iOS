@@ -58,7 +58,6 @@ extension UIFont {
         }
     }
 
-
     static var display_b_42: UIFont { archivoItalic(.bold, size: 52) }
     
     static var display_sb_28: UIFont { archivoItalic(.semiBold, size: 28) }
