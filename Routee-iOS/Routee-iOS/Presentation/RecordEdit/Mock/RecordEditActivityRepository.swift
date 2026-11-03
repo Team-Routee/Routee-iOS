@@ -221,4 +221,15 @@ struct MockActivityRepository: ActivityRepository {
             }
         )
     }
+
+    func updateCourseList(
+        activityId: Int64,
+        requestDTO: UpdateCourseListRequestDTO
+    ) async throws -> CourseListModel {
+        try await createCourseList(
+            activityId: activityId,
+            requestDTO: CreateCourseListRequestDTO(routes: requestDTO.routes)
+        )
+    }
+
 }
