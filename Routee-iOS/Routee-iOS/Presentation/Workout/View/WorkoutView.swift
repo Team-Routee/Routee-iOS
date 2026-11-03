@@ -163,7 +163,7 @@ final class WorkoutView: BaseUIView {
             $0.outlineWidth = 0
             $0.width = 4
         }
-        
+
         pauseButton.do {
             $0.setImageTitle(
                 title: "정지",
@@ -172,8 +172,10 @@ final class WorkoutView: BaseUIView {
                 foregroundColor: .bgPrimary,
                 imagePadding: 4
             )
-            $0.backgroundColor = .staticWhite
-            $0.layer.cornerRadius = 30
+            $0.backgroundColor = .clear
+            $0.configuration?.background.backgroundColor = .staticWhite
+            $0.configuration?.background.cornerRadius = 30
+            $0.configuration?.cornerStyle = .fixed
             $0.clipsToBounds = true
         }
         

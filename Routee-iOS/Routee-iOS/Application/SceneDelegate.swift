@@ -68,6 +68,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             name: .navigateLoginViewController,
             object: nil
         )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(navigateLoginViewController),
+            name: .signUpCompleted,
+            object: nil
+        )
         
         NotificationCenter.default.addObserver(
             self,
@@ -78,8 +85,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     @objc
-    private func navigateLoginViewController() {
-        let loginViewController = LoginViewController()
+    private func navigateLoginViewController(_ notification: Notification) {
+        let loginViewController = LoginViewController(
+            showSignUpCompletionModal: notification.name == .signUpCompleted
+        )
         let navigationController = UINavigationController(
             rootViewController: loginViewController
         )

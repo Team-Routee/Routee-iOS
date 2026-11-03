@@ -11,6 +11,8 @@ import SnapKit
 import Then
 
 final class RecordEditView: BaseUIView, ToastPresentable {
+
+    private weak var editingTitleField: UITextField?
     
     // MARK: - UI Properties
     
@@ -83,6 +85,25 @@ final class RecordEditView: BaseUIView, ToastPresentable {
             emptyDataImageView,
             emptyDataLabel
         )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardFrameWillChange(_:)),
+            name: UIResponder.keyboardWillChangeFrameNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardFrameWillChange(_:)),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(titleEditingDidBegin(_:)),
+            name: UITextField.textDidBeginEditingNotification,
+            object: nil
+        )
     }
     
     override func setLayout() {
@@ -119,6 +140,78 @@ final class RecordEditView: BaseUIView, ToastPresentable {
         }
     }
     
+    // MARK: - Keyboard
+
+    @objc
+    private func titleEditingDidBegin(_ notification: Notification) {
+        guard let textField = notification.object as? UITextField,
+              textField.isDescendant(of: workoutRecordCollectionView) else { return }
+
+        editingTitleField = textField
+        scrollEditingRecordIntoView(animated: true)
+    }
+
+    @objc
+    private func keyboardFrameWillChange(_ notification: Notification) {
+        guard window != nil || notification.name == UIResponder.keyboardWillHideNotification,
+              let screenFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect
+        else { return }
+
+        let collectionView = workoutRecordCollectionView
+        let keyboardFrame = collectionView.convert(screenFrame, from: nil)
+        let overlap = notification.name == UIResponder.keyboardWillHideNotification
+            ? 0 : collectionView.bounds.intersection(keyboardFrame).height
+        let systemBottomInset = collectionView.adjustedContentInset.bottom - collectionView.contentInset.bottom
+        let extraInset = max(0, overlap - systemBottomInset)
+        let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double ?? 0.25
+        let curve = notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt ?? 7
+
+        UIView.animate(
+            withDuration: duration,
+            delay: 0,
+            options: [UIView.AnimationOptions(rawValue: curve << 16), .beginFromCurrentState]
+        ) {
+            collectionView.contentInset.bottom = 20 + extraInset
+            collectionView.verticalScrollIndicatorInsets.bottom = extraInset
+
+            if overlap > 0 {
+                self.scrollEditingRecordIntoView(animated: false)
+            } else {
+                let maximumOffsetY = max(
+                    -collectionView.adjustedContentInset.top,
+                    collectionView.contentSize.height - collectionView.bounds.height
+                        + collectionView.adjustedContentInset.bottom
+                )
+                if collectionView.contentOffset.y > maximumOffsetY {
+                    collectionView.contentOffset.y = maximumOffsetY
+                }
+            }
+        }
+    }
+
+    private func scrollEditingRecordIntoView(animated: Bool) {
+        guard let textField = editingTitleField,
+              textField.isFirstResponder else { return }
+
+        let collectionView = workoutRecordCollectionView
+        let visibleHeight = collectionView.bounds.height
+            - collectionView.adjustedContentInset.top - collectionView.adjustedContentInset.bottom
+        var targetRect = textField.convert(textField.bounds, to: collectionView)
+        var ancestor = textField.superview
+
+        while let view = ancestor, view !== collectionView {
+            if let cell = view as? WorkoutRecordCell {
+                if cell.bounds.height + 16 <= visibleHeight {
+                    targetRect = cell.convert(cell.bounds, to: collectionView)
+                }
+                break
+            }
+            ancestor = view.superview
+        }
+
+        collectionView.scrollRectToVisible(targetRect.insetBy(dx: 0, dy: -8), animated: animated)
+    }
+
     // MARK: - Public Methods
     
     func updateView(isEmpty: Bool) {

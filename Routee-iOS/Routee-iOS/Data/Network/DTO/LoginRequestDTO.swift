@@ -10,4 +10,5 @@ import Foundation
 struct LoginRequestDTO: Encodable {
     let provider: String
     let idToken: String
+    let authorizationCode: String
 }

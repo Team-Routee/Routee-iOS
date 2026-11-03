@@ -23,6 +23,14 @@ final class WorkoutTimeLineView: BaseUIView {
         myRoute.currentPoints
     }
 
+    var routePointIds: [Int64] {
+        myRoute.currentRouteIds
+    }
+
+    func updateRouteIds(_ routeIds: [Int64]) {
+        myRoute.updateRouteIds(routeIds)
+    }
+
     var activityTitle: String {
         titleTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
     }
@@ -37,6 +45,7 @@ final class WorkoutTimeLineView: BaseUIView {
     private let altitude: String
     private let trackPoints: [TrackPoint]
     private let photoRecords: [WorkoutPhotoRecord]
+    private let courseRoutes: [CourseListModel.RouteData]
     private let timelineImages: [UIImage]
     private let timelineLocations: [String?]
     // MARK: - Initializer
@@ -47,7 +56,8 @@ final class WorkoutTimeLineView: BaseUIView {
         durationInSeconds: Int,
         maxAltitudeInMeters: Double?,
         trackPoints: [TrackPoint],
-        photoRecords: [WorkoutPhotoRecord]
+        photoRecords: [WorkoutPhotoRecord],
+        courseRoutes: [CourseListModel.RouteData]
     ) {
         self.title = title
         self.distance = String(format: "%.2f", distanceInMeters / 1_000)
@@ -59,6 +69,7 @@ final class WorkoutTimeLineView: BaseUIView {
         self.altitude = maxAltitudeInMeters.map { String(Int($0.rounded())) } ?? "0"
         self.trackPoints = trackPoints
         self.photoRecords = photoRecords
+        self.courseRoutes = courseRoutes.sorted { $0.sequence < $1.sequence }
         self.timelineImages = photoRecords.map(\.image)
         self.timelineLocations = photoRecords.map(\.locationTitle)
 
@@ -133,10 +144,13 @@ final class WorkoutTimeLineView: BaseUIView {
         timeLineStackView.isHidden = timelineImages.isEmpty
         timeLineCard.isHidden = timelineImages.isEmpty
 
-        let routeTitles = timelineLocations
-            .compactMap { $0 }
-            .filter { !$0.isEmpty }
-        myRoute.configure(mode: .write, routePoint: RoutePointModel(points: routeTitles))
+        myRoute.configure(
+            mode: .write,
+            routePoint: RoutePointModel(
+                points: courseRoutes.map(\.name),
+                routeIds: courseRoutes.map(\.routeId)
+            )
+        )
 
         timeLineStackView.do {
             $0.axis = .vertical

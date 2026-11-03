@@ -11,7 +11,8 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     private let workoutTimelineView: WorkoutTimeLineView
     private let activityId: Int64?
     private let activityRepository: ActivityRepository
-    private let finishRecording: @MainActor (String) async throws -> Void
+    private var savedActivityTitle: String
+    private var savedRoutes: [RouteData]
     private let showFailureModalOnAppear: Bool
     private let hasRecordedRoute: Bool
     private var isCompletingTimeline = false
@@ -28,13 +29,16 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
         maxAltitudeInMeters: Double?,
         trackPoints: [TrackPoint],
         photoRecords: [WorkoutPhotoRecord],
-        finishRecording: @escaping @MainActor (String) async throws -> Void,
+        courseRoutes: [CourseListModel.RouteData],
         showFailureModalOnAppear: Bool,
         activityRepository: ActivityRepository = DefaultActivityRepository()
     ) {
         self.activityId = activityId
         self.activityRepository = activityRepository
-        self.finishRecording = finishRecording
+        savedActivityTitle = title
+        savedRoutes = courseRoutes.sorted { $0.sequence < $1.sequence }.map {
+            RouteData(routeId: $0.routeId, name: $0.name, sequence: $0.sequence)
+        }
         self.showFailureModalOnAppear = showFailureModalOnAppear
         hasRecordedRoute = trackPoints.count >= 2
         workoutTimelineView = WorkoutTimeLineView(
@@ -43,7 +47,8 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
             durationInSeconds: durationInSeconds,
             maxAltitudeInMeters: maxAltitudeInMeters,
             trackPoints: trackPoints,
-            photoRecords: photoRecords
+            photoRecords: photoRecords,
+            courseRoutes: courseRoutes
         )
         super.init(nibName: nil, bundle: nil)
     }
@@ -104,7 +109,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
 
         Task { @MainActor in
             do {
-                try await saveRecording()
+                try await saveTimelineChanges()
                 _ = navigationController?.popToRootViewController(animated: true)
             } catch {
                 isCompletingTimeline = false
@@ -114,17 +119,12 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
         }
     }
 
-    private func saveRecording() async throws {
-        try await LoadingOverlayManager.shared.perform {
-            try await self.uploadCourseList()
-            try await self.saveWorkoutRecord()
-        }
-    }
-
-    private func saveWorkoutRecord() async throws {
+    private func saveTimelineChanges() async throws {
         workoutTimelineView.endEditing(true)
-        let title = workoutTimelineView.activityTitle
-        try await finishRecording(title)
+        try await LoadingOverlayManager.shared.perform {
+            try await self.updateCourseList()
+            try await self.updateActivityTitle()
+        }
 
         if let activityId {
             AnalyticsTracker.track(
@@ -137,24 +137,53 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
         }
     }
 
-    private func uploadCourseList() async throws {
-        guard let activityId else { return }
+    private func updateActivityTitle() async throws {
+        let title = workoutTimelineView.activityTitle
+        guard title != savedActivityTitle else { return }
+        guard let activityId else { throw RouteeError.noData }
 
-        let titles = await MainActor.run {
-            self.workoutTimelineView.routePointTitles
-                .filter { !$0.isEmpty }
-        }
-
-        guard !titles.isEmpty else { return }
-
-        let routes = titles.enumerated().map { index, title in
-            RouteData(routeId: 0, name: title, sequence: index + 1)
-        }
-
-        _ = try await activityRepository.createCourseList(
+        _ = try await activityRepository.updateArchiveActivityTitle(
             activityId: activityId,
-            requestDTO: CreateCourseListRequestDTO(routes: routes)
+            requestDTO: UpdateArchiveActivityTitleRequestDTO(title: title)
         )
+        savedActivityTitle = title
+    }
+
+    private func currentRoutes() -> [RouteData] {
+        let titles = workoutTimelineView.routePointTitles
+        let routeIds = workoutTimelineView.routePointIds
+        var routes: [RouteData] = []
+        for index in titles.indices {
+            let title = titles[index].trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !title.isEmpty else { continue }
+            routes.append(RouteData(routeId: routeIds[index], name: title, sequence: routes.count + 1))
+        }
+        return routes
+    }
+
+    private func updateCourseList() async throws {
+        let routes = currentRoutes()
+        let hasChanges = routes.count != savedRoutes.count || zip(routes, savedRoutes).contains {
+            $0.routeId != $1.routeId || $0.name != $1.name || $0.sequence != $1.sequence
+        }
+        guard hasChanges else { return }
+        guard let activityId else { throw RouteeError.noData }
+
+        let response = try await activityRepository.updateCourseList(
+            activityId: activityId,
+            requestDTO: UpdateCourseListRequestDTO(routes: routes)
+        )
+        var routeIds = workoutTimelineView.routePointIds
+        var sequence = 0
+        for (index, title) in workoutTimelineView.routePointTitles.enumerated() {
+            guard !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { continue }
+            sequence += 1
+            if let route = response.routes.first(where: { $0.sequence == sequence }) {
+                routeIds[index] = route.routeId
+            }
+        }
+        workoutTimelineView.updateRouteIds(routeIds)
+        savedRoutes = currentRoutes()
     }
 
     // MARK: - Private Method
@@ -229,7 +258,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
 
         Task { @MainActor in
             do {
-                try await saveRecording()
+                try await saveTimelineChanges()
                 navigationController?.pushViewController(
                     EditorViewController(
                         activityId: activityId,

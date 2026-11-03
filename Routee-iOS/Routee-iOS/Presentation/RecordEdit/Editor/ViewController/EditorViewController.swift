@@ -204,8 +204,8 @@ final class EditorViewController: BaseUIViewController {
     }
 
     private func pushCompleteView() {
-        guard !hasCompleted,
-              let navigationController else { return }
+        guard let navigationController,
+              navigationController.topViewController === self else { return }
 
         let editedImage = rootView.makeEditedImage()
         let editCompleteViewController = EditCompleteViewController(

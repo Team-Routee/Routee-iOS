@@ -127,9 +127,14 @@ final class ActionPrimaryModal: UIViewController {
         }
 
         descriptionLabel.do {
-            $0.text = descriptionText
             $0.textColor = .grey_300
-            $0.font = .label_m_14
+            if let descriptionText {
+                $0.setLineHeightText(
+                    descriptionText,
+                    font: .label_m_14,
+                    lineHeightRatio: 1.4
+                )
+            }
             $0.textAlignment = .center
             $0.numberOfLines = 0
             $0.isHidden = !hasDescription

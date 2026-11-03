@@ -20,6 +20,7 @@ final class WorkoutViewModel {
     private(set) var photoRecords: [WorkoutPhotoRecord] = []
 
     private(set) var activityId: Int64?
+    private(set) var courseList: CourseListModel?
     private(set) var activityTitle: String?
     private(set) var mapImageObjectKey: String?
     private(set) var coverImageObjectKey: String?
@@ -207,6 +208,7 @@ final class WorkoutViewModel {
         
         activityId = activity.activityId
         activityTitle = activity.title
+        courseList = nil
         return activity
     }
     
@@ -223,7 +225,8 @@ final class WorkoutViewModel {
     
     func finishRecording(
         title: String,
-        routePointsSnapshot: [WorkoutRoutePoint]
+        routePointsSnapshot: [WorkoutRoutePoint],
+        endedAt: Date
     ) async throws {
         guard let activityId,
               let mapImageObjectKey else {
@@ -231,6 +234,7 @@ final class WorkoutViewModel {
         }
 
         try await retryFailedPhotoUploads()
+        try await createCourseListIfNeeded(activityId: activityId)
         
         let finishModel = WorkoutRecordFinishModel(
             title: title,
@@ -246,12 +250,30 @@ final class WorkoutViewModel {
                     pointIndex: $0.pointIndex
                 )
             },
-            endedAt: Self.timeLineDateFormatter.string(from: Date())
+            endedAt: Self.timeLineDateFormatter.string(from: endedAt)
         )
         
         try await activityRepository.finishActivity(activityId: activityId, requestModel: finishModel)
     }
     
+    private func createCourseListIfNeeded(activityId: Int64) async throws {
+        guard courseList == nil else { return }
+        let titles = photoRecords.compactMap(\.locationTitle)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        let routes = titles.enumerated().map { index, title in
+            RouteData(routeId: 0, name: title, sequence: index + 1)
+        }
+        guard !routes.isEmpty else {
+            courseList = CourseListModel(activityId: activityId, routes: [])
+            return
+        }
+        courseList = try await activityRepository.createCourseList(
+            activityId: activityId,
+            requestDTO: CreateCourseListRequestDTO(routes: routes)
+        )
+    }
+
     func uploadPhoto(at index: Int) async throws {
         guard let activityId,
               photoRecords.indices.contains(index) else {

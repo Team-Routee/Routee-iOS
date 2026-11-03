@@ -38,12 +38,15 @@ final class ContactView: BaseUIView, ToastPresentable {
             $0.font = .title_sb_20
         }
         descriptionLabel.do {
-            $0.text = """
+            $0.textColor = .grey200
+            $0.setLineHeightText(
+                """
                 원하시는 기능 혹은 오류가 발생한다면 언제든지 문의주세요.
                 순차적으로 빠르게 답변드리겠습니다.
-                """
-            $0.textColor = .grey200
-            $0.font = .label_r_12
+                """,
+                font: .label_r_12,
+                lineHeightRatio: 1.4
+            )
             $0.numberOfLines = 2
         }
 

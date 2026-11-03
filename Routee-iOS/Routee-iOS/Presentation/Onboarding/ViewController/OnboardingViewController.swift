@@ -8,17 +8,14 @@
 import UIKit
 
 final class OnboardingViewController: BaseUIViewController {
-    private var identityToken: String?
-    private var appleUserID: String?
+    private let identityToken: String?
     private let agreements: RegisterInfoModel.Agreements
 
     init(
         identityToken: String?,
-        appleUserID: String?,
         agreements: RegisterInfoModel.Agreements
     ) {
         self.identityToken = identityToken
-        self.appleUserID = appleUserID
         self.agreements = agreements
 
         super.init(nibName: nil, bundle: nil)
@@ -52,33 +49,35 @@ final class OnboardingViewController: BaseUIViewController {
 
     @objc
     private func didTapStartButton() {
-        guard let identityToken, let appleUserID else {
-            print("idToken이 없습니다.")
+        guard let identityToken else {
+            RouteeLogger.error(RouteeError.noData)
             return
         }
         let nickname = nicknameSettingView.nickname.trimmingCharacters(in: .whitespacesAndNewlines)
-        
+
         guard nicknameSettingView.isNicknameValid, !nickname.isEmpty else {
             return
         }
-        
+
         Task {
             do {
-                try await viewModel.registerAndLogin(
-                    platform: .APPLE,
-                    identityToken: identityToken,
-                    appleUserID: appleUserID,
-                    nickname: nickname,
-                    agreements: agreements
+                try await viewModel.register(
+                    registerInfo: RegisterInfoModel(
+                        nickname: nickname,
+                        identityToken: identityToken,
+                        provider: .APPLE,
+                        agreements: agreements
+                    )
                 )
 
                 await MainActor.run {
-                    let viewController = TabBarViewController()
-                    viewController.modalPresentationStyle = .fullScreen
-                    present(viewController, animated: true)
+                    NotificationCenter.default.post(
+                        name: .signUpCompleted,
+                        object: nil
+                    )
                 }
             } catch {
-                print("서버 로그인 실패", error)
+                RouteeLogger.error(error)
             }
         }
     }

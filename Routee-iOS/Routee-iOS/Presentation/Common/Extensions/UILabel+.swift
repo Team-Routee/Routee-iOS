@@ -8,7 +8,28 @@
 import UIKit
 
 extension UILabel {
-    func setDisplayText(_ text: String?, font: UIFont) {
+    func setLineHeightText(
+        _ text: String,
+        font: UIFont,
+        lineHeightRatio: CGFloat
+    ) {
+        self.font = font
+
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.minimumLineHeight = font.pointSize * lineHeightRatio
+        paragraphStyle.maximumLineHeight = font.pointSize * lineHeightRatio
+
+        attributedText = NSAttributedString(
+            string: text,
+            attributes: [
+                .font: font,
+                .foregroundColor: textColor as Any,
+                .paragraphStyle: paragraphStyle
+            ]
+        )
+    }
+
+    func setDisplayText(_ text: String?, font: UIFont, lineHeightRatio: CGFloat? = nil) {
         self.font = font
 
         guard let text else {
@@ -16,16 +37,23 @@ extension UILabel {
             return
         }
 
-        let attributedString = NSMutableAttributedString(
-            string: text,
-            attributes: [.font: font]
-        )
+        var attributes: [NSAttributedString.Key: Any] = [.font: font]
+
+        if let lineHeightRatio {
+            let paragraphStyle = NSMutableParagraphStyle()
+            paragraphStyle.minimumLineHeight = font.pointSize * lineHeightRatio
+            paragraphStyle.maximumLineHeight = font.pointSize * lineHeightRatio
+            paragraphStyle.alignment = textAlignment
+            attributes[.paragraphStyle] = paragraphStyle
+        }
+
+        let attributedString = NSMutableAttributedString(string: text, attributes: attributes)
         let letterSpacingLength = max(0, attributedString.length - 1)
 
         if letterSpacingLength > 0 {
             attributedString.addAttribute(
                 .kern,
-                value: font.pointSize * 0.04,
+                value: font.pointSize * -0.04,
                 range: NSRange(location: 0, length: letterSpacingLength)
             )
         }

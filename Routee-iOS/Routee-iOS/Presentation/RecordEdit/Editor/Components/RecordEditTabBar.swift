@@ -148,6 +148,10 @@ final class RecordEditTabBar: BaseUIView {
     func setBrightnessValue(_ value: CGFloat) {
         brightnessSliderView.setValue(value)
     }
+
+    func resetColorSelection() {
+        colorPalette.deselectAll()
+    }
     
     func containsInteractivePoint(_ point: CGPoint) -> Bool {
         if bounds.contains(point) {
