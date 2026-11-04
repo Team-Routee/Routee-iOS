@@ -106,7 +106,7 @@ final class TopNavigationBar: BaseUIView {
     // MARK: - Public Methods
 
     func setBackButtonHidden(_ isHidden: Bool) {
-        backButton.isHidden = !isHidden
+        backButton.isHidden = isHidden
     }
 
     // MARK: - Private Methods

@@ -48,6 +48,7 @@ final class WorkoutTimeLineView: BaseUIView {
     private let courseRoutes: [CourseListModel.RouteData]
     private let timelineImages: [UIImage]
     private let timelineLocations: [String?]
+    
     // MARK: - Initializer
 
     init(
@@ -140,7 +141,6 @@ final class WorkoutTimeLineView: BaseUIView {
     }
     
     override func setStyle() {
-        navigationBar.setBackButtonHidden(false)
         timeLineStackView.isHidden = timelineImages.isEmpty
         timeLineCard.isHidden = timelineImages.isEmpty
 
