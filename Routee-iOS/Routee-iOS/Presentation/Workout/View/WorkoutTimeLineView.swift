@@ -14,6 +14,11 @@ final class WorkoutTimeLineView: BaseUIView {
     
     // MARK: - Properties
 
+    var backButtonAction: (() -> Void)? {
+        get { navigationBar.backButtonAction }
+        set { navigationBar.backButtonAction = newValue }
+    }
+
     var completeButtonAction: (() -> Void)? {
         get { navigationBar.rightButtonAction }
         set { navigationBar.rightButtonAction = newValue }
