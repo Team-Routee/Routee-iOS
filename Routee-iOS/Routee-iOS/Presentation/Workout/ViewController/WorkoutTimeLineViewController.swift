@@ -11,6 +11,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     private let workoutTimelineView: WorkoutTimeLineView
     private let activityId: Int64?
     private let activityRepository: ActivityRepository
+    private let viewModel: WorkoutTimeLineViewModel
     private var savedActivityTitle: String
     private var savedRoutes: [RouteData]
     private let showFailureModalOnAppear: Bool
@@ -35,6 +36,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     ) {
         self.activityId = activityId
         self.activityRepository = activityRepository
+        viewModel = WorkoutTimeLineViewModel(activityRepository: activityRepository)
         savedActivityTitle = title
         savedRoutes = courseRoutes.sorted { $0.sequence < $1.sequence }.map {
             RouteData(routeId: $0.routeId, name: $0.name, sequence: $0.sequence)
@@ -135,7 +137,7 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
         Task {
             do {
                 try await LoadingOverlayManager.shared.perform {
-                    try await self.activityRepository.deleteActivity(activityId: activityId)
+                    try await self.viewModel.deleteActivity(activityId: activityId)
                 }
                 navigationController?.popToRootViewController(animated: true)
             } catch {
