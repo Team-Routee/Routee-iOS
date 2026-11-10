@@ -10,10 +10,7 @@ import UIKit
 final class WorkoutTimeLineViewController: BaseUIViewController {
     private let workoutTimelineView: WorkoutTimeLineView
     private let activityId: Int64?
-    private let activityRepository: ActivityRepository
     private let viewModel: WorkoutTimeLineViewModel
-    private var savedActivityTitle: String
-    private var savedRoutes: [RouteData]
     private let showFailureModalOnAppear: Bool
     private let hasRecordedRoute: Bool
     private var isUpdatingActivity = false
@@ -35,12 +32,11 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
         activityRepository: ActivityRepository = DefaultActivityRepository()
     ) {
         self.activityId = activityId
-        self.activityRepository = activityRepository
-        viewModel = WorkoutTimeLineViewModel(activityRepository: activityRepository)
-        savedActivityTitle = title
-        savedRoutes = courseRoutes.sorted { $0.sequence < $1.sequence }.map {
-            RouteData(routeId: $0.routeId, name: $0.name, sequence: $0.sequence)
-        }
+        viewModel = WorkoutTimeLineViewModel(
+            title: title,
+            courseRoutes: courseRoutes,
+            activityRepository: activityRepository
+        )
         self.showFailureModalOnAppear = showFailureModalOnAppear
         hasRecordedRoute = trackPoints.count >= 2
         workoutTimelineView = WorkoutTimeLineView(
@@ -150,8 +146,17 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
     private func saveTimelineChanges() async throws {
         workoutTimelineView.endEditing(true)
         try await LoadingOverlayManager.shared.perform {
-            try await self.updateCourseList()
-            try await self.updateActivityTitle()
+            if let routeIds = try await self.viewModel.updateCourseList(
+                activityId: self.activityId,
+                titles: self.workoutTimelineView.routePointTitles,
+                routeIds: self.workoutTimelineView.routePointIds
+            ) {
+                self.workoutTimelineView.updateRouteIds(routeIds)
+            }
+            try await self.viewModel.updateActivityTitle(
+                activityId: self.activityId,
+                title: self.workoutTimelineView.activityTitle
+            )
         }
         
         if let activityId {
@@ -163,55 +168,6 @@ final class WorkoutTimeLineViewController: BaseUIViewController {
                 ]
             )
         }
-    }
-    
-    private func updateActivityTitle() async throws {
-        let title = workoutTimelineView.activityTitle
-        guard title != savedActivityTitle else { return }
-        guard let activityId else { throw RouteeError.noData }
-        
-        _ = try await activityRepository.updateArchiveActivityTitle(
-            activityId: activityId,
-            requestDTO: UpdateArchiveActivityTitleRequestDTO(title: title)
-        )
-        savedActivityTitle = title
-    }
-    
-    private func currentRoutes() -> [RouteData] {
-        let titles = workoutTimelineView.routePointTitles
-        let routeIds = workoutTimelineView.routePointIds
-        var routes: [RouteData] = []
-        for index in titles.indices {
-            let title = titles[index].trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !title.isEmpty else { continue }
-            routes.append(RouteData(routeId: routeIds[index], name: title, sequence: routes.count + 1))
-        }
-        return routes
-    }
-    
-    private func updateCourseList() async throws {
-        let routes = currentRoutes()
-        let hasChanges = routes.count != savedRoutes.count || zip(routes, savedRoutes).contains {
-            $0.routeId != $1.routeId || $0.name != $1.name || $0.sequence != $1.sequence
-        }
-        guard hasChanges else { return }
-        guard let activityId else { throw RouteeError.noData }
-        
-        let response = try await activityRepository.updateCourseList(
-            activityId: activityId,
-            requestDTO: UpdateCourseListRequestDTO(routes: routes)
-        )
-        var routeIds = workoutTimelineView.routePointIds
-        var sequence = 0
-        for (index, title) in workoutTimelineView.routePointTitles.enumerated() {
-            guard !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { continue }
-            sequence += 1
-            if let route = response.routes.first(where: { $0.sequence == sequence }) {
-                routeIds[index] = route.routeId
-            }
-        }
-        workoutTimelineView.updateRouteIds(routeIds)
-        savedRoutes = currentRoutes()
     }
     
     // MARK: - Private Method
