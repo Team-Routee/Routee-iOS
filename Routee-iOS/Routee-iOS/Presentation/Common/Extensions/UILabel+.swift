@@ -11,13 +11,15 @@ extension UILabel {
     func setLineHeightText(
         _ text: String,
         font: UIFont,
-        lineHeightRatio: CGFloat
+        lineHeightRatio: CGFloat? = nil
     ) {
         self.font = font
 
+        let ratio = lineHeightRatio ?? font.designLineHeightRatio
+        let lineHeight = ratio.map { font.pointSize * $0 } ?? font.lineHeight
         let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.minimumLineHeight = font.pointSize * lineHeightRatio
-        paragraphStyle.maximumLineHeight = font.pointSize * lineHeightRatio
+        paragraphStyle.minimumLineHeight = lineHeight
+        paragraphStyle.maximumLineHeight = lineHeight
 
         attributedText = NSAttributedString(
             string: text,
@@ -39,7 +41,7 @@ extension UILabel {
 
         var attributes: [NSAttributedString.Key: Any] = [.font: font]
 
-        if let lineHeightRatio {
+        if let lineHeightRatio = lineHeightRatio ?? font.designLineHeightRatio {
             let paragraphStyle = NSMutableParagraphStyle()
             paragraphStyle.minimumLineHeight = font.pointSize * lineHeightRatio
             paragraphStyle.maximumLineHeight = font.pointSize * lineHeightRatio
