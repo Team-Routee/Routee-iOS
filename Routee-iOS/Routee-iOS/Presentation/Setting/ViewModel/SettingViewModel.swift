@@ -20,10 +20,20 @@ final class SettingViewModel {
     }
     
     func withdraw() async throws {
+        let recoveryStore = WorkoutRecoveryStore(accountId: DefaultKeychainService().read(.appleUserID))
         try await memberRepository.withdraw()
+        clearWorkoutRecovery(recoveryStore)
     }
 
     func logout() async throws {
         try await authRepository.logout()
+    }
+
+    private func clearWorkoutRecovery(_ recoveryStore: WorkoutRecoveryStore?) {
+        do {
+            try recoveryStore?.clear()
+        } catch {
+            RouteeLogger.error(error)
+        }
     }
 }
