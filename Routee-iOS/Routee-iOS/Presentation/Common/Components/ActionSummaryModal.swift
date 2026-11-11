@@ -21,7 +21,8 @@ final class ActionSummaryModal: UIViewController {
 
     private let titleText: String
     private let subtitle: String?
-    private let detail: String?
+    private let detail: String
+    private let trailingDetail: String
     private let closeAccessibilityLabel: String
     private let onClose: (() -> Void)?
     private let secondaryAction: Action
@@ -34,7 +35,10 @@ final class ActionSummaryModal: UIViewController {
     private let summaryStackView = UIStackView()
     private let titleLabel = UILabel()
     private let subtitleLabel = UILabel()
+    private let detailStackView = UIStackView()
     private let detailLabel = UILabel()
+    private let detailSeparatorLabel = UILabel()
+    private let trailingDetailLabel = UILabel()
     private let buttonStackView = UIStackView()
     private let secondaryButton = UIButton()
     private let primaryButton = UIButton()
@@ -44,7 +48,8 @@ final class ActionSummaryModal: UIViewController {
     init(
         title: String,
         subtitle: String? = nil,
-        detail: String? = nil,
+        detail: String,
+        trailingDetail: String,
         closeAccessibilityLabel: String = "닫기",
         onClose: (() -> Void)? = nil,
         secondaryAction: Action,
@@ -53,6 +58,7 @@ final class ActionSummaryModal: UIViewController {
         titleText = title
         self.subtitle = subtitle
         self.detail = detail
+        self.trailingDetail = trailingDetail
         self.closeAccessibilityLabel = closeAccessibilityLabel
         self.onClose = onClose
         self.secondaryAction = secondaryAction
@@ -99,35 +105,37 @@ final class ActionSummaryModal: UIViewController {
 
         summaryStackView.do {
             $0.axis = .vertical
-            $0.spacing = 4
+            $0.alignment = .center
+            $0.spacing = 0
         }
 
         titleLabel.do {
-            $0.text = titleText
-            $0.font = .title_sb_18
             $0.textColor = .staticWhite
+            $0.setLineHeightText(titleText, font: .title_sb_18)
             $0.textAlignment = .center
             $0.numberOfLines = 0
             $0.accessibilityTraits.insert(.header)
         }
 
         subtitleLabel.do {
-            $0.text = subtitle
-            $0.isHidden = subtitle == nil
-            $0.font = .label_m_14
             $0.textColor = .grey_300
+            $0.isHidden = subtitle == nil
+            if let subtitle {
+                $0.setLineHeightText(subtitle, font: .label_m_14)
+            }
             $0.textAlignment = .center
             $0.numberOfLines = 0
         }
 
-        detailLabel.do {
-            $0.text = detail
-            $0.isHidden = detail == nil
-            $0.font = .label_sb_16
-            $0.textColor = .staticWhite
-            $0.textAlignment = .center
-            $0.numberOfLines = 0
+        detailStackView.do {
+            $0.axis = .horizontal
+            $0.alignment = .firstBaseline
+            $0.spacing = 8
         }
+
+        configureDetailLabel(detailLabel, text: detail)
+        configureDetailLabel(trailingDetailLabel, text: trailingDetail)
+        configureDetailLabel(detailSeparatorLabel, text: "·", color: .white_60)
 
         buttonStackView.do {
             $0.axis = .horizontal
@@ -142,7 +150,11 @@ final class ActionSummaryModal: UIViewController {
     private func setUI() {
         view.addSubview(cardView)
         cardView.addSubviews(closeButton, summaryStackView, buttonStackView)
-        summaryStackView.addArrangedSubviews(titleLabel, subtitleLabel, detailLabel)
+        summaryStackView.addArrangedSubviews(titleLabel, subtitleLabel, detailStackView)
+        detailStackView.addArrangedSubviews(detailLabel, detailSeparatorLabel, trailingDetailLabel)
+        if subtitle != nil {
+            summaryStackView.setCustomSpacing(8, after: titleLabel)
+        }
         buttonStackView.addArrangedSubviews(secondaryButton, primaryButton)
     }
 
@@ -179,6 +191,14 @@ final class ActionSummaryModal: UIViewController {
     }
 
     // MARK: - Private Methods
+
+    private func configureDetailLabel(_ label: UILabel, text: String, color: UIColor = .staticWhite) {
+        label.textColor = color
+        label.numberOfLines = 1
+        label.setContentHuggingPriority(.required, for: .horizontal)
+        label.setLineHeightText(text, font: .label_sb_18)
+        label.textAlignment = .center
+    }
 
     private func configureButton(_ button: UIButton, title: String, titleColor: UIColor, backgroundColor: UIColor) {
         button.do {

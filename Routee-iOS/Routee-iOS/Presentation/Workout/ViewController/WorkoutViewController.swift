@@ -263,7 +263,8 @@ final class WorkoutViewController: BaseUIViewController {
         let modal = ActionSummaryModal(
             title: "이전 기록을 이어갈까요?",
             subtitle: "\(formatter.string(from: lastRecordedAt)) 까지 기록",
-            detail: "\(distance) · \(hours)h \(minutes)m",
+            detail: distance,
+            trailingDetail: "\(hours)h \(minutes)m",
             closeAccessibilityLabel: "이전 기록 삭제",
             onClose: { [weak self] in self?.viewModel.clearWorkoutRecovery() },
             secondaryAction: .init(title: "종료 후 저장") { [weak self] in
