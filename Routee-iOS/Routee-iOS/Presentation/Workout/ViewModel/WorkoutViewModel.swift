@@ -8,6 +8,10 @@
 import CoreLocation
 import UIKit
 
+enum WorkoutRecoverySaveError: Error {
+    case rejected
+}
+
 @MainActor
 final class WorkoutViewModel {
     var elapsedTimeDidChange: ((TimeInterval) -> Void)?
@@ -18,6 +22,9 @@ final class WorkoutViewModel {
     private(set) var maximumAltitudeInMeters: CLLocationDistance?
     private(set) var routePoints: [WorkoutRoutePoint] = []
     private(set) var photoRecords: [WorkoutPhotoRecord] = []
+    var recoveryLastRecordedAt: Date? {
+        recoveryEndedAt ?? recoveryCheckpointAt
+    }
 
     private(set) var activityId: Int64?
     private(set) var courseList: CourseListModel?
@@ -33,6 +40,10 @@ final class WorkoutViewModel {
     private var elapsedTimeTimer: Timer?
     private var accumulatedElapsedTime: TimeInterval = 0
     private var elapsedTimeSegmentStartedAt: Date?
+    private let recoveryStore: WorkoutRecoveryStore?
+    private var recoveryCheckpointAt: Date?
+    private var recoveryEndedAt: Date?
+    private var activityStartedAt: Date?
     
     init(
         reverseGeocodingRepository: ReverseGeocodingRepository = DefaultReverseGeocodingRepository(),
@@ -40,6 +51,7 @@ final class WorkoutViewModel {
     ) {
         self.reverseGeocodingRepository = reverseGeocodingRepository
         self.activityRepository = activityRepository
+        recoveryStore = WorkoutRecoveryStore(accountId: DefaultKeychainService().read(.appleUserID))
     }
     
     isolated deinit {
@@ -53,6 +65,7 @@ final class WorkoutViewModel {
         routePoints.removeAll()
         photoRecords.removeAll()
         maximumAltitudeDidChange?(nil)
+        checkpointWorkout()
         return totalDistance
     }
     
@@ -63,7 +76,10 @@ final class WorkoutViewModel {
     func startElapsedTimeTracking() {
         elapsedTimeTimer?.invalidate()
         accumulatedElapsedTime = 0
-        elapsedTimeSegmentStartedAt = Date()
+        let startedAt = Date()
+        elapsedTimeSegmentStartedAt = startedAt
+        recoveryCheckpointAt = startedAt
+        recoveryEndedAt = nil
         publishElapsedTime()
         startElapsedTimeTimer()
     }
@@ -71,19 +87,29 @@ final class WorkoutViewModel {
     func pauseElapsedTimeTracking() {
         guard let elapsedTimeSegmentStartedAt else { return }
         
-        accumulatedElapsedTime += Date().timeIntervalSince(elapsedTimeSegmentStartedAt)
+        let pausedAt = Date()
+        accumulatedElapsedTime += max(0, pausedAt.timeIntervalSince(elapsedTimeSegmentStartedAt))
+        if recoveryCheckpointAt != nil {
+            recoveryCheckpointAt = pausedAt
+        }
         self.elapsedTimeSegmentStartedAt = nil
         elapsedTimeTimer?.invalidate()
         elapsedTimeTimer = nil
         publishElapsedTime()
+        checkpointWorkout()
     }
     
     func resumeElapsedTimeTracking() {
         guard elapsedTimeSegmentStartedAt == nil else { return }
         
+        if recoveryEndedAt != nil {
+            mapImageObjectKey = nil
+        }
+        recoveryEndedAt = nil
         elapsedTimeSegmentStartedAt = Date()
         publishElapsedTime()
         startElapsedTimeTimer()
+        checkpointWorkout()
     }
     
     func recordDistance(at location: CLLocation) -> CLLocationDistance? {
@@ -107,6 +133,7 @@ final class WorkoutViewModel {
         )
         routePoints.append(routePoint)
         lastRecordedLocation = location
+        checkpointIfDue()
         return totalDistance
     }
     
@@ -115,6 +142,17 @@ final class WorkoutViewModel {
         var record = photoRecord
         record.locationTitle = title
         photoRecords.append(record)
+        if let recoveryStore, recoveryCheckpointAt != nil {
+            do {
+                guard let data = record.image.jpegData(compressionQuality: 0.8) else {
+                    throw RouteeError.noData
+                }
+                try recoveryStore.savePhoto(data, id: record.recoveryId)
+            } catch {
+                RouteeLogger.error(error)
+            }
+        }
+        checkpointWorkout()
         return photoRecords.count - 1
     }
     
@@ -146,6 +184,7 @@ final class WorkoutViewModel {
         )
         routePoints.append(routePoint)
         lastRecordedLocation = fallbackLocation
+        checkpointWorkout()
         return routePoint
     }
     
@@ -166,6 +205,7 @@ final class WorkoutViewModel {
         let timer = Timer(timeInterval: 1, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in
                 self?.publishElapsedTime()
+                self?.checkpointIfDue()
             }
         }
         elapsedTimeTimer = timer
@@ -177,10 +217,168 @@ final class WorkoutViewModel {
     }
     
     private var currentElapsedTime: TimeInterval {
+        elapsedTime(at: Date())
+    }
+
+    private func elapsedTime(at date: Date) -> TimeInterval {
         let activeSegmentElapsedTime = elapsedTimeSegmentStartedAt.map {
-            Date().timeIntervalSince($0)
+            max(0, date.timeIntervalSince($0))
         } ?? 0
         return accumulatedElapsedTime + activeSegmentElapsedTime
+    }
+
+    // MARK: - Workout Recovery
+
+    func restoreWorkoutIfAvailable() -> Bool {
+        guard let recoveryStore else { return false }
+
+        do {
+            guard let snapshot = try recoveryStore.load() else { return false }
+
+            elapsedTimeTimer?.invalidate()
+            elapsedTimeTimer = nil
+            elapsedTimeSegmentStartedAt = nil
+            accumulatedElapsedTime = snapshot.elapsedTime
+            lastRecordedLocation = nil
+            activityId = snapshot.activityId
+            activityTitle = snapshot.activityTitle
+            totalDistance = snapshot.distance
+            maximumAltitudeInMeters = snapshot.maximumAltitude
+            routePoints = snapshot.routePoints.map {
+                WorkoutRoutePoint(
+                    pointIndex: $0.pointIndex,
+                    coordinate: CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude),
+                    altitude: $0.altitude
+                )
+            }
+            photoRecords = snapshot.photos.compactMap { photo in
+                do {
+                    let data = try recoveryStore.loadPhoto(id: photo.id)
+                    guard let image = UIImage(data: data) else { throw RouteeError.noData }
+                    return WorkoutPhotoRecord(
+                        image: image,
+                        pointIndex: photo.pointIndex,
+                        createdAt: photo.createdAt,
+                        recoveryId: photo.id,
+                        locationTitle: photo.locationTitle,
+                        objectKey: photo.objectKey,
+                        timelineId: photo.timelineId
+                    )
+                } catch {
+                    RouteeLogger.error(error)
+                    return nil
+                }
+            }
+            courseList = snapshot.courseRoutes.map { routes in
+                CourseListModel(
+                    activityId: snapshot.activityId,
+                    routes: routes.map {
+                        CourseListModel.RouteData(routeId: $0.routeId, name: $0.name, sequence: $0.sequence)
+                    }
+                )
+            }
+            mapImageObjectKey = snapshot.mapImageObjectKey
+            coverImageObjectKey = snapshot.coverImageObjectKey
+            recoveryCheckpointAt = snapshot.lastRecordedAt
+            recoveryEndedAt = snapshot.endedAt
+            activityStartedAt = snapshot.startedAt
+
+            publishElapsedTime()
+            maximumAltitudeDidChange?(maximumAltitudeInMeters)
+            return true
+        } catch {
+            RouteeLogger.error(error)
+            return false
+        }
+    }
+
+    func isRecoveredWorkoutCompleted() async throws -> Bool {
+        guard let activityId, let recoveryEndedAt else { return false }
+
+        let calendar = Calendar(identifier: .gregorian)
+        let startMonth = calendar.dateComponents([.year, .month], from: activityStartedAt ?? recoveryEndedAt)
+        let endMonth = calendar.dateComponents([.year, .month], from: recoveryEndedAt)
+        let months = startMonth == endMonth ? [startMonth] : [startMonth, endMonth]
+        for month in months {
+            guard let year = month.year, let month = month.month else { continue }
+            try Task.checkCancellation()
+            let completed = try await activityRepository.getWorkoutList(year: year, month: month)
+            if completed.contains(where: { $0.activityId == activityId }) {
+                return true
+            }
+        }
+        return false
+    }
+
+    func checkpointWorkout(endedAt: Date? = nil) {
+        guard let activityId, let lastRecordedAt = recoveryCheckpointAt else { return }
+
+        if let endedAt {
+            recoveryEndedAt = endedAt
+        }
+        let now = Date()
+        let checkpointAt = elapsedTimeSegmentStartedAt != nil && recoveryEndedAt == nil ? now : lastRecordedAt
+        recoveryCheckpointAt = checkpointAt
+        guard let recoveryStore else { return }
+
+        let snapshot = WorkoutRecoverySnapshot(
+            activityId: activityId,
+            activityTitle: activityTitle,
+            startedAt: activityStartedAt,
+            lastRecordedAt: checkpointAt,
+            endedAt: recoveryEndedAt,
+            elapsedTime: elapsedTime(at: checkpointAt),
+            distance: totalDistance,
+            maximumAltitude: maximumAltitudeInMeters,
+            routePoints: routePoints.map {
+                WorkoutRecoverySnapshot.TrackPoint(
+                    pointIndex: $0.pointIndex,
+                    latitude: $0.coordinate.latitude,
+                    longitude: $0.coordinate.longitude,
+                    altitude: $0.altitude
+                )
+            },
+            photos: photoRecords.map {
+                WorkoutRecoverySnapshot.Photo(
+                    id: $0.recoveryId,
+                    pointIndex: $0.pointIndex,
+                    createdAt: $0.createdAt,
+                    locationTitle: $0.locationTitle,
+                    objectKey: $0.objectKey,
+                    timelineId: $0.timelineId
+                )
+            },
+            courseRoutes: courseList?.routes.map {
+                WorkoutRecoverySnapshot.CourseRoute(routeId: $0.routeId, name: $0.name, sequence: $0.sequence)
+            },
+            mapImageObjectKey: mapImageObjectKey,
+            coverImageObjectKey: coverImageObjectKey
+        )
+
+        do {
+            try recoveryStore.save(snapshot)
+        } catch {
+            RouteeLogger.error(error)
+        }
+    }
+
+    func clearWorkoutRecovery() {
+        recoveryCheckpointAt = nil
+        recoveryEndedAt = nil
+
+        do {
+            try recoveryStore?.clear()
+        } catch {
+            RouteeLogger.error(error)
+        }
+    }
+
+    private func checkpointIfDue() {
+        guard elapsedTimeSegmentStartedAt != nil,
+              let recoveryCheckpointAt,
+              Date().timeIntervalSince(recoveryCheckpointAt) >= 5 else { return }
+
+        checkpointWorkout()
     }
     
     // MARK: - Network
@@ -206,9 +404,13 @@ final class WorkoutViewModel {
             startedAt: startedAt
         )
         
+        clearWorkoutRecovery()
         activityId = activity.activityId
+        activityStartedAt = Self.timeLineDateFormatter.date(from: startedAt)
         activityTitle = activity.title
         courseList = nil
+        mapImageObjectKey = nil
+        coverImageObjectKey = nil
         return activity
     }
     
@@ -226,7 +428,8 @@ final class WorkoutViewModel {
     func finishRecording(
         title: String,
         routePointsSnapshot: [WorkoutRoutePoint],
-        endedAt: Date
+        endedAt: Date,
+        isRecovering: Bool = false
     ) async throws {
         guard let activityId,
               let mapImageObjectKey else {
@@ -234,7 +437,7 @@ final class WorkoutViewModel {
         }
 
         try await retryFailedPhotoUploads()
-        try await createCourseListIfNeeded(activityId: activityId)
+        try await saveCourseListIfNeeded(activityId: activityId)
         
         let finishModel = WorkoutRecordFinishModel(
             title: title,
@@ -253,25 +456,43 @@ final class WorkoutViewModel {
             endedAt: Self.timeLineDateFormatter.string(from: endedAt)
         )
         
-        try await activityRepository.finishActivity(activityId: activityId, requestModel: finishModel)
+        do {
+            try await activityRepository.finishActivity(activityId: activityId, requestModel: finishModel)
+        } catch let error as RouteeError where isRecovering && (error == .clientError || error == .notFound) {
+            throw WorkoutRecoverySaveError.rejected
+        }
     }
     
-    private func createCourseListIfNeeded(activityId: Int64) async throws {
-        guard courseList == nil else { return }
+    private func saveCourseListIfNeeded(activityId: Int64) async throws {
         let titles = photoRecords.compactMap(\.locationTitle)
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
+        let savedRoutes = courseList?.routes.sorted { $0.sequence < $1.sequence } ?? []
+        guard titles != savedRoutes.map(\.name) else { return }
+
         let routes = titles.enumerated().map { index, title in
-            RouteData(routeId: 0, name: title, sequence: index + 1)
+            let routeId = savedRoutes.indices.contains(index) ? savedRoutes[index].routeId : 0
+            return RouteData(routeId: routeId, name: title, sequence: index + 1)
         }
-        guard !routes.isEmpty else {
-            courseList = CourseListModel(activityId: activityId, routes: [])
-            return
+        if savedRoutes.isEmpty {
+            do {
+                courseList = try await activityRepository.createCourseList(
+                    activityId: activityId,
+                    requestDTO: CreateCourseListRequestDTO(routes: routes)
+                )
+            } catch RouteeError.networkError(statusCode: 409, message: _) {
+                courseList = try await activityRepository.updateCourseList(
+                    activityId: activityId,
+                    requestDTO: UpdateCourseListRequestDTO(routes: routes)
+                )
+            }
+        } else {
+            courseList = try await activityRepository.updateCourseList(
+                activityId: activityId,
+                requestDTO: UpdateCourseListRequestDTO(routes: routes)
+            )
         }
-        courseList = try await activityRepository.createCourseList(
-            activityId: activityId,
-            requestDTO: CreateCourseListRequestDTO(routes: routes)
-        )
+        checkpointWorkout()
     }
 
     func uploadPhoto(at index: Int) async throws {
@@ -286,10 +507,15 @@ final class WorkoutViewModel {
         if let uploadedObjectKey = photoRecords[index].objectKey {
             objectKey = uploadedObjectKey
         } else {
-            let image = photoRecords[index].image
-            let imageData = await Task.detached(priority: .userInitiated) {
-                image.jpegData(compressionQuality: 0.8)
-            }.value
+            let record = photoRecords[index]
+            let imageData: Data?
+            if let storedData = try? recoveryStore?.loadPhoto(id: record.recoveryId) {
+                imageData = storedData
+            } else {
+                imageData = await Task.detached(priority: .userInitiated) {
+                    record.image.jpegData(compressionQuality: 0.8)
+                }.value
+            }
 
             guard let imageData else {
                 throw RouteeError.noData
@@ -308,6 +534,7 @@ final class WorkoutViewModel {
             photoRecords[index].objectKey = presigned.objectKey
             coverImageObjectKey = presigned.objectKey
             objectKey = presigned.objectKey
+            checkpointWorkout()
         }
 
         let timelineId = try await createTimeLine(
@@ -316,6 +543,7 @@ final class WorkoutViewModel {
             title: photoRecords[index].locationTitle ?? ""
         )
         photoRecords[index].timelineId = timelineId
+        checkpointWorkout()
     }
 
     private func retryFailedPhotoUploads() async throws {
@@ -351,6 +579,7 @@ final class WorkoutViewModel {
         if coverImageObjectKey == deletedPhoto.objectKey {
             coverImageObjectKey = photoRecords.reversed().compactMap(\.objectKey).first
         }
+        checkpointWorkout()
     }
 
     func updateTimelineTitle(at index: Int, title: String) async throws {
@@ -360,6 +589,7 @@ final class WorkoutViewModel {
         }
 
         photoRecords[index].locationTitle = title
+        checkpointWorkout()
 
         guard let timelineId = photoRecords[index].timelineId else { return }
 
@@ -369,6 +599,7 @@ final class WorkoutViewModel {
             requestDTO: UpdateTimelineTitleRequestDTO(title: title)
         )
         photoRecords[index].locationTitle = response.title
+        checkpointWorkout()
     }
 
     func uploadBackgroundMap(image: UIImage) async throws {
@@ -395,6 +626,7 @@ final class WorkoutViewModel {
         )
         
         mapImageObjectKey = presigned.objectKey
+        checkpointWorkout()
     }
     
     private func createTimeLine(
