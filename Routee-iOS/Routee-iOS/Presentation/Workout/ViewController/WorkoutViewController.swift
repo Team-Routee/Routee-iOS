@@ -41,6 +41,8 @@ final class WorkoutViewController: BaseUIViewController {
     }
     let viewModel = WorkoutViewModel()
     private let locationManager = CLLocationManager()
+    private var didOfferWorkoutRecovery = false
+    private var recoveryCheckTask: Task<Void, Never>?
     private var initialLocation = false
     private var lastReverseGeocodingLocation: CLLocation?
     private let hapticManager = HapticManager()
@@ -56,6 +58,12 @@ final class WorkoutViewController: BaseUIViewController {
         bindViewModel()
         setLocationManager()
         updateUI(for: workoutMode)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(checkpointWorkoutOnBackground),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil
+        )
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -68,6 +76,24 @@ final class WorkoutViewController: BaseUIViewController {
         }
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        offerWorkoutRecoveryIfNeeded()
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+
+        if presentedViewController == nil {
+            if recoveryCheckTask != nil {
+                recoveryCheckTask?.cancel()
+                recoveryCheckTask = nil
+                workoutView.recordButton.isEnabled = workoutMode == .ready
+            }
+            didOfferWorkoutRecovery = false
+        }
+    }
+
     override func loadView() {
         view = workoutView
     }
@@ -133,7 +159,7 @@ final class WorkoutViewController: BaseUIViewController {
         guard workoutMode == .recording,
               let totalDistance = viewModel.recordDistance(at: location) else { return }
         
-        workoutView.updateRoutePath(viewModel.routePoints.map(\.latLng))
+        updateRecordedRoutePath()
         workoutView.updateDistance(totalDistance)
     }
     
@@ -152,21 +178,18 @@ final class WorkoutViewController: BaseUIViewController {
         guard workoutMode != .finishing else { return }
         workoutMode = .finishing
         let endedAt = Date()
+        viewModel.checkpointWorkout(endedAt: endedAt)
         let routePointsSnapshot = viewModel.routePoints
 
         let saveRecordingTask = Task {
-            guard self.hasValidRoute else { return false }
-            guard let mapImage = await workoutView.captureBackgroundMapImage(
-                fitting: routePointsSnapshot.map(\.latLng)
-            ) else { return false }
+            guard hasValidRoute else {
+                viewModel.clearWorkoutRecovery()
+                return false
+            }
 
             do {
-                try await viewModel.uploadBackgroundMap(image: mapImage)
-                try await saveFinishedRecording(
-                    title: viewModel.activityTitle ?? "",
-                    routePointsSnapshot: routePointsSnapshot,
-                    endedAt: endedAt
-                )
+                try await saveRecording(routePoints: routePointsSnapshot, endedAt: endedAt)
+                viewModel.clearWorkoutRecovery()
                 return true
             } catch {
                 RouteeLogger.error(error)
@@ -186,6 +209,157 @@ final class WorkoutViewController: BaseUIViewController {
                 }
             }
         }
+    }
+
+    // MARK: - Workout Recovery
+
+    @objc
+    private func checkpointWorkoutOnBackground() {
+        guard workoutMode == .recording || workoutMode == .paused else { return }
+        viewModel.checkpointWorkout()
+    }
+
+    private func offerWorkoutRecoveryIfNeeded() {
+        guard workoutMode == .ready,
+              !didOfferWorkoutRecovery,
+              presentedViewController == nil,
+              viewModel.restoreWorkoutIfAvailable(),
+              let lastRecordedAt = viewModel.recoveryLastRecordedAt else { return }
+
+        didOfferWorkoutRecovery = true
+        workoutView.recordButton.isEnabled = false
+        recoveryCheckTask = Task { [weak self] in
+            guard let self else { return }
+
+            var isCompleted = false
+            do {
+                isCompleted = try await viewModel.isRecoveredWorkoutCompleted()
+            } catch {
+                RouteeLogger.error(error)
+            }
+            guard !Task.isCancelled else { return }
+
+            recoveryCheckTask = nil
+            workoutView.recordButton.isEnabled = true
+            if isCompleted {
+                viewModel.clearWorkoutRecovery()
+            } else {
+                presentWorkoutRecoveryModal(lastRecordedAt: lastRecordedAt)
+            }
+        }
+    }
+
+    private func presentWorkoutRecoveryModal(lastRecordedAt: Date) {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.dateFormat = "MM/dd a h:mm"
+
+        let distance = String(format: "%.2fkm", viewModel.totalDistance / 1_000)
+        let elapsedTime = viewModel.elapsedTimeInSeconds
+        let hours = elapsedTime / 3_600
+        let minutes = elapsedTime % 3_600 / 60
+
+        let modal = ActionSummaryModal(
+            title: "이전 기록을 이어갈까요?",
+            subtitle: "\(formatter.string(from: lastRecordedAt)) 까지 기록",
+            detail: "\(distance) · \(hours)h \(minutes)m",
+            closeAccessibilityLabel: "이전 기록 삭제",
+            onClose: { [weak self] in self?.viewModel.clearWorkoutRecovery() },
+            secondaryAction: .init(title: "종료 후 저장") { [weak self] in
+                self?.finishRecoveredWorkout(endedAt: lastRecordedAt)
+            },
+            primaryAction: .init(title: "이어서 기록") { [weak self] in
+                self?.resumeRecoveredWorkout()
+            }
+        )
+        present(modal, animated: true)
+    }
+
+    private func resumeRecoveredWorkout() {
+        workoutMode = .countdown
+        workoutView.updateDistance(viewModel.totalDistance)
+        workoutView.updateElapsedTime(TimeInterval(viewModel.elapsedTimeInSeconds))
+        workoutView.updateMaximumAltitude(viewModel.maximumAltitudeInMeters)
+        updateRecordedRoutePath()
+        reloadPhotoMarkers()
+
+        workoutView.playCountdownAnimation { [weak self] in
+            guard let self, workoutMode == .countdown else { return }
+
+            viewModel.resumeElapsedTimeTracking()
+            workoutMode = .recording
+            changeActivityStatus(to: "ACTIVITY_IN_PROGRESS")
+            if let currentLocation = locationManager.location {
+                appendRouteLocationIfNeeded(currentLocation)
+            }
+        }
+    }
+
+    private func finishRecoveredWorkout(endedAt: Date) {
+        guard hasValidRoute, viewModel.elapsedTimeInSeconds >= 1 else {
+            let modal = ActionPrimaryModal(
+                title: "기록 등록 실패",
+                description: "운동 경로를 확인할 수 없어 기록이 등록되지 않았어요. 위치 정보를 확인한 후 다시 시도해주세요.",
+                actionCount: .single,
+                leftButtonTitle: "확인",
+                leftButtonAction: { [weak self] in self?.viewModel.clearWorkoutRecovery() }
+            )
+            present(modal, animated: true)
+            return
+        }
+
+        workoutMode = .finishing
+        viewModel.checkpointWorkout(endedAt: endedAt)
+
+        Task {
+            let message: String
+            do {
+                try await LoadingOverlayManager.shared.perform {
+                    try await self.saveRecording(
+                        routePoints: self.viewModel.routePoints,
+                        endedAt: endedAt,
+                        isRecovering: true
+                    )
+                }
+                viewModel.clearWorkoutRecovery()
+                message = "기록을 저장했어요."
+            } catch {
+                if error is WorkoutRecoverySaveError {
+                    viewModel.clearWorkoutRecovery()
+                }
+                RouteeLogger.error(error)
+                message = "기록을 저장하는 중에 문제가 생겼어요."
+            }
+
+            workoutMode = .ready
+            requestCurrentLocationAuthorization()
+            moveCameraToCurrentLocation()
+            workoutView.showToast(title: message)
+        }
+    }
+
+    private func updateRecordedRoutePath() {
+        workoutView.updateRoutePath(viewModel.routePoints.map(\.latLng))
+    }
+
+    private func saveRecording(
+        routePoints: [WorkoutRoutePoint],
+        endedAt: Date,
+        isRecovering: Bool = false
+    ) async throws {
+        if viewModel.mapImageObjectKey == nil {
+            guard let image = await workoutView.captureBackgroundMapImage(fitting: routePoints.map(\.latLng)) else {
+                throw RouteeError.noData
+            }
+            try await viewModel.uploadBackgroundMap(image: image)
+        }
+        try await saveFinishedRecording(
+            title: viewModel.activityTitle ?? "",
+            routePointsSnapshot: routePoints,
+            endedAt: endedAt,
+            isRecovering: isRecovering
+        )
     }
 
     private func pushWorkoutTimeLineViewController(showFailureModalOnAppear: Bool) {
@@ -209,7 +383,8 @@ final class WorkoutViewController: BaseUIViewController {
     private func saveFinishedRecording(
         title: String,
         routePointsSnapshot: [WorkoutRoutePoint],
-        endedAt: Date
+        endedAt: Date,
+        isRecovering: Bool
     ) async throws {
         await pendingTimelineDeletionTask?.value
 
@@ -228,7 +403,8 @@ final class WorkoutViewController: BaseUIViewController {
         try await viewModel.finishRecording(
             title: title,
             routePointsSnapshot: routePointsSnapshot,
-            endedAt: endedAt
+            endedAt: endedAt,
+            isRecovering: isRecovering
         )
     }
     
@@ -606,10 +782,11 @@ final class WorkoutViewController: BaseUIViewController {
                         guard let self else { return }
                         guard workoutMode == .countdown else { return }
 
+                        viewModel.startElapsedTimeTracking()
                         workoutMode = .recording
                         workoutView.updateDistance(viewModel.startDistanceTracking())
                         workoutView.updatePhotoCount(0)
-                        workoutView.updateRoutePath(viewModel.routePoints.map(\.latLng))
+                        updateRecordedRoutePath()
 
                         AnalyticsTracker.track(
                             .workoutStarted,
@@ -642,7 +819,7 @@ extension WorkoutViewController {
 
     private func updateElapsedTimeTracking(from oldMode: WorkoutMode, to newMode: WorkoutMode) {
         switch (oldMode, newMode) {
-        case (.ready, .recording), (.countdown, .recording):
+        case (.ready, .recording):
             viewModel.startElapsedTimeTracking()
         case (.paused, .recording):
             viewModel.resumeElapsedTimeTracking()

@@ -13,7 +13,7 @@ import NMapsMap
 import SnapKit
 import Then
 
-final class WorkoutView: BaseUIView {
+final class WorkoutView: BaseUIView, ToastPresentable {
     
     // MARK: - Properties
     
@@ -342,6 +342,10 @@ final class WorkoutView: BaseUIView {
     
     // MARK: - Public Methods
     
+    var toastBottomAnchor: ConstraintItem {
+        recordButton.snp.top
+    }
+
     func updateRoutePath(_ locations: [NMGLatLng]) {
         guard locations.count >= 2 else {
             pathOverlay.mapView = nil
