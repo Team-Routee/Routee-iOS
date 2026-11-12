@@ -13,6 +13,8 @@ enum ConfigKey: String {
     case naverMapClientID = "NAVER_MAP_CLIENT_ID"
     case naverMapClientSecret = "NAVER_MAP_CLIENT_SECRET"
     case mixpanelToken = "MIXPANEL_TOKEN"
+    case firebaseConfigFileName = "FIREBASE_CONFIG_FILE_NAME"
+    case remoteConfigMinimumFetchInterval = "FIREBASE_REMOTE_CONFIG_MINIMUM_FETCH_INTERVAL"
 }
 
 struct ConfigManager {
@@ -30,4 +32,11 @@ struct ConfigManager {
     static var naverMapClientID: String { toString(for: .naverMapClientID) }
     static var naverMapClientSecret: String { toString(for: .naverMapClientSecret) }
     static var mixpanelToken: String { toString(for: .mixpanelToken) }
+    static var firebaseConfigFileName: String { toString(for: .firebaseConfigFileName) }
+
+    static var remoteConfigMinimumFetchInterval: TimeInterval? {
+        guard let interval = TimeInterval(toString(for: .remoteConfigMinimumFetchInterval)),
+              interval.isFinite, interval >= 0 else { return nil }
+        return interval
+    }
 }

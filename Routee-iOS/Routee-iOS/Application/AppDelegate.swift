@@ -13,14 +13,9 @@ import Mixpanel
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        configureFirebase()
+
         let token = ConfigManager.mixpanelToken
-        
-        if Bundle.main.bundleIdentifier == "com.Routee-iOS.dev",
-           let path = Bundle.main.path(forResource: "GoogleService-Info-Dev", ofType: "plist"),
-           let options = FirebaseOptions(contentsOfFile: path) {
-            FirebaseApp.configure(options: options)
-        }
-        
         guard !token.isEmpty else {
             RouteeLogger.error(RouteeError.configError)
             return true
@@ -34,6 +29,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
     
+    private func configureFirebase() {
+        let configurationName = ConfigManager.firebaseConfigFileName
+        guard !configurationName.isEmpty,
+              let bundleIdentifier = Bundle.main.bundleIdentifier,
+              let path = Bundle.main.path(forResource: configurationName, ofType: "plist"),
+              let options = FirebaseOptions(contentsOfFile: path),
+              options.bundleID == bundleIdentifier else {
+            RouteeLogger.error(RouteeError.configError)
+            return
+        }
+
+        FirebaseApp.configure(options: options)
+    }
+
     // MARK: UISceneSession Lifecycle
     
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {

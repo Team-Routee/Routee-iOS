@@ -20,7 +20,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private static let skippedRecommendationKey = "skippedRecommendedAppVersion"
     private static let appStoreURL = URL(string: "https://apps.apple.com/kr/app/루티-routee-운동기록-사진-편집-아카이브/id6791870747")
     private let keychainService = DefaultKeychainService()
-    private var maintenanceFetch: Task<Void, Never>?
+    private var maintenanceFetch: (task: Task<Void, Never>, bypassesCache: Bool)?
     private var maintenanceWait: Task<Void, Never>?
     private var observesNotifications = false
     
@@ -29,12 +29,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         self.window = window
 
-#if DEVELOPMENT
         if FirebaseApp.app() != nil {
             let remoteConfig = RemoteConfig.remoteConfig()
-            let settings = RemoteConfigSettings()
-            settings.minimumFetchInterval = 0
-            remoteConfig.configSettings = settings
+            if let minimumFetchInterval = ConfigManager.remoteConfigMinimumFetchInterval {
+                let settings = RemoteConfigSettings()
+                settings.minimumFetchInterval = minimumFetchInterval
+                remoteConfig.configSettings = settings
+            }
             remoteConfig.setDefaults([
                 Self.maintenanceKey: NSNumber(value: false),
                 Self.minimumSupportedVersionKey: "" as NSString,
@@ -49,13 +50,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             window.makeKeyAndVisible()
             return
         }
-#endif
 
         showInitialScreen(in: window)
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
-        maintenanceFetch?.cancel()
+        maintenanceFetch?.task.cancel()
         maintenanceFetch = nil
         maintenanceWait?.cancel()
         maintenanceWait = nil
@@ -83,17 +83,35 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // to restore the scene back to its current state.
     }
     
-    private func checkMaintenance(using remoteConfig: RemoteConfig, maximumWait: Duration) {
+    private func checkMaintenance(
+        using remoteConfig: RemoteConfig,
+        maximumWait: Duration,
+        bypassesCache: Bool = false
+    ) {
         guard maintenanceWait == nil,
               let loadingViewController = window?.rootViewController as? StartupLoadingViewController else { return }
 
         let modal = loadingViewController.presentedViewController as? ActionPrimaryModal
         modal?.setActionsEnabled(false)
 
-        if maintenanceFetch == nil {
-            maintenanceFetch = Task { [weak self] in
+        if maintenanceFetch == nil || (bypassesCache && maintenanceFetch?.bypassesCache == false) {
+            let previousFetch = maintenanceFetch?.task
+            previousFetch?.cancel()
+
+            let task = Task { [weak self] in
+                // Firebase may reuse the previous result if two requests overlap.
+                await previousFetch?.value
+                guard !Task.isCancelled else { return }
+
                 do {
-                    _ = try await remoteConfig.fetchAndActivate()
+                    if bypassesCache {
+                        let status = try await remoteConfig.fetch(withExpirationDuration: 0)
+                        if status == .success, !Task.isCancelled {
+                            _ = try await remoteConfig.activate()
+                        }
+                    } else {
+                        _ = try await remoteConfig.fetchAndActivate()
+                    }
                 } catch {
                     RouteeLogger.debug("Remote Config fetch failed (code \((error as NSError).code))")
                 }
@@ -102,6 +120,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 maintenanceFetch = nil
                 finishMaintenanceCheck(using: remoteConfig)
             }
+            maintenanceFetch = (task, bypassesCache)
         }
 
         // Bound the UI wait even if Firebase Installations is still preparing a token.
@@ -133,7 +152,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             }
 
             let retry: () -> Void = { [weak self] in
-                self?.checkMaintenance(using: remoteConfig, maximumWait: .seconds(3))
+                self?.checkMaintenance(using: remoteConfig, maximumWait: .seconds(3), bypassesCache: true)
             }
             
             let maintenanceModal = ActionPrimaryModal(
