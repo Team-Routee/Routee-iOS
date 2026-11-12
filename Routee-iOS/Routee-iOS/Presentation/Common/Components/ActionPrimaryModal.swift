@@ -25,6 +25,7 @@ final class ActionPrimaryModal: UIViewController {
     private let leftButtonTitle: String
     private let rightButtonTitle: String
     private let dismissOnAction: Bool
+    private let dismissOnBackgroundTap: Bool
     private let leftButtonAction: (() -> Void)?
     private let rightButtonAction: (() -> Void)?
     private var hasDescription: Bool {
@@ -52,6 +53,7 @@ final class ActionPrimaryModal: UIViewController {
         leftButtonTitle: String = "",
         rightButtonTitle: String = "",
         dismissOnAction: Bool = true,
+        dismissOnBackgroundTap: Bool = true,
         leftButtonAction: (() -> Void)? = nil,
         rightButtonAction: (() -> Void)? = nil
     ) {
@@ -61,6 +63,7 @@ final class ActionPrimaryModal: UIViewController {
         self.leftButtonTitle = leftButtonTitle
         self.rightButtonTitle = rightButtonTitle
         self.dismissOnAction = dismissOnAction
+        self.dismissOnBackgroundTap = dismissOnBackgroundTap
         self.leftButtonAction = leftButtonAction
         self.rightButtonAction = rightButtonAction
 
@@ -83,6 +86,13 @@ final class ActionPrimaryModal: UIViewController {
         setUI()
         setLayout()
         setAddTarget()
+    }
+
+    // MARK: - Public Methods
+
+    func setActionsEnabled(_ isEnabled: Bool) {
+        leftButton.isEnabled = isEnabled
+        rightButton.isEnabled = isEnabled
     }
 
     // MARK: - UI Setting
@@ -200,7 +210,9 @@ final class ActionPrimaryModal: UIViewController {
     }
 
     private func setAddTarget() {
-        dimBackgroundView.addTarget(self, action: #selector(didTapDimBackground), for: .touchUpInside)
+        if dismissOnBackgroundTap {
+            dimBackgroundView.addTarget(self, action: #selector(didTapDimBackground), for: .touchUpInside)
+        }
         leftButton.addTarget(self, action: #selector(didTapLeftButton), for: .touchUpInside)
         rightButton.addTarget(self, action: #selector(didTapRightButton), for: .touchUpInside)
     }
