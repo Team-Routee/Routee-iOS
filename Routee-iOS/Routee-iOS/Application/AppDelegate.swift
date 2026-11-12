@@ -31,11 +31,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             trackAutomaticEvents: false
         )
         
-#if DEVELOPMENT
-        let mixpanel = Mixpanel.mainInstance()
-        mixpanel.loggingEnabled = true
-#endif
-        
         return true
     }
     

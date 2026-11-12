@@ -35,7 +35,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
             let loadingViewController = StartupLoadingViewController()
             loadingViewController.onFirstAppearance = { [weak self] in
-                self?.checkMaintenance(using: remoteConfig)
+                self?.checkMaintenance(using: remoteConfig, maximumWait: .seconds(1))
             }
             window.rootViewController = loadingViewController
             window.makeKeyAndVisible()
@@ -75,7 +75,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // to restore the scene back to its current state.
     }
     
-    private func checkMaintenance(using remoteConfig: RemoteConfig) {
+    private func checkMaintenance(using remoteConfig: RemoteConfig, maximumWait: Duration) {
         guard maintenanceWait == nil,
               let loadingViewController = window?.rootViewController as? StartupLoadingViewController else { return }
 
@@ -99,7 +99,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Bound the UI wait even if Firebase Installations is still preparing a token.
         maintenanceWait = Task { [weak self] in
             do {
-                try await Task.sleep(for: .seconds(3))
+                try await Task.sleep(for: maximumWait)
             } catch {
                 return
             }
@@ -125,7 +125,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             }
 
             let retry: () -> Void = { [weak self] in
-                self?.checkMaintenance(using: remoteConfig)
+                self?.checkMaintenance(using: remoteConfig, maximumWait: .seconds(3))
             }
             let maintenanceModal = ActionPrimaryModal(
                 title: "서비스 점검 중이에요",
