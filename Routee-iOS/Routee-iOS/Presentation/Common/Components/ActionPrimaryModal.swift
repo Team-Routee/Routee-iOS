@@ -24,6 +24,7 @@ final class ActionPrimaryModal: UIViewController {
     private let actionCount: ActionCount
     private let leftButtonTitle: String
     private let rightButtonTitle: String
+    private let primaryButtonTitleColor: UIColor?
     private let dismissOnAction: Bool
     private let dismissOnBackgroundTap: Bool
     private let leftButtonAction: (() -> Void)?
@@ -52,6 +53,7 @@ final class ActionPrimaryModal: UIViewController {
         actionCount: ActionCount = .double,
         leftButtonTitle: String = "",
         rightButtonTitle: String = "",
+        primaryButtonTitleColor: UIColor? = nil,
         dismissOnAction: Bool = true,
         dismissOnBackgroundTap: Bool = true,
         leftButtonAction: (() -> Void)? = nil,
@@ -62,6 +64,7 @@ final class ActionPrimaryModal: UIViewController {
         self.actionCount = actionCount
         self.leftButtonTitle = leftButtonTitle
         self.rightButtonTitle = rightButtonTitle
+        self.primaryButtonTitleColor = primaryButtonTitleColor
         self.dismissOnAction = dismissOnAction
         self.dismissOnBackgroundTap = dismissOnBackgroundTap
         self.leftButtonAction = leftButtonAction
@@ -152,15 +155,16 @@ final class ActionPrimaryModal: UIViewController {
             $0.distribution = .fillEqually
         }
 
+        let singleButtonTitleColor = actionCount == .single ? primaryButtonTitleColor : nil
         configureButton(
             leftButton,
             title: leftButtonTitle,
-            titleColor: .white_60
+            titleColor: singleButtonTitleColor ?? .white_60
         )
         configureButton(
             rightButton,
             title: rightButtonTitle,
-            titleColor: .status_error
+            titleColor: primaryButtonTitleColor ?? .status_error
         )
     }
 
