@@ -20,14 +20,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private static let skippedRecommendationKey = "skippedRecommendedAppVersion"
     private static let appStoreURL = URL(string: "https://apps.apple.com/kr/app/루티-routee-운동기록-사진-편집-아카이브/id6791870747")
     private let keychainService = DefaultKeychainService()
-    private var maintenanceFetch: (task: Task<Void, Never>, bypassesCache: Bool)?
-    private var maintenanceWait: Task<Void, Never>?
+    private var remoteConfigFetch: Task<Void, Never>?
+    private var maintenanceRetryWait: Task<Void, Never>?
+    private var remoteConfigModalWindow: UIWindow?
+    private var maintenanceModal: ActionPrimaryModal?
     private var observesNotifications = false
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
         self.window = window
+        showInitialScreen(in: window)
 
         if FirebaseApp.app() != nil {
             let remoteConfig = RemoteConfig.remoteConfig()
@@ -42,23 +45,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 Self.recommendedVersionKey: "" as NSString
             ])
 
-            let loadingViewController = StartupLoadingViewController()
-            loadingViewController.onFirstAppearance = { [weak self] in
-                self?.checkMaintenance(using: remoteConfig, maximumWait: .seconds(1))
-            }
-            window.rootViewController = loadingViewController
-            window.makeKeyAndVisible()
-            return
+            checkRemoteConfig(using: remoteConfig)
         }
-
-        showInitialScreen(in: window)
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
-        maintenanceFetch?.task.cancel()
-        maintenanceFetch = nil
-        maintenanceWait?.cancel()
-        maintenanceWait = nil
+        remoteConfigFetch?.cancel()
+        remoteConfigFetch = nil
+        maintenanceRetryWait?.cancel()
+        maintenanceRetryWait = nil
+        dismissRemoteConfigModal()
         window = nil
     }
 
@@ -83,79 +79,65 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // to restore the scene back to its current state.
     }
     
-    private func checkMaintenance(
-        using remoteConfig: RemoteConfig,
-        maximumWait: Duration,
-        bypassesCache: Bool = false
-    ) {
-        guard maintenanceWait == nil,
-              let loadingViewController = window?.rootViewController as? StartupLoadingViewController else { return }
+    private func checkRemoteConfig(using remoteConfig: RemoteConfig, bypassesCache: Bool = false) {
+        guard window != nil, maintenanceRetryWait == nil else { return }
 
-        let modal = loadingViewController.presentedViewController as? ActionPrimaryModal
-        modal?.setActionsEnabled(false)
-
-        if maintenanceFetch == nil || (bypassesCache && maintenanceFetch?.bypassesCache == false) {
-            let previousFetch = maintenanceFetch?.task
-            previousFetch?.cancel()
-
-            let task = Task { [weak self] in
-                // Firebase may reuse the previous result if two requests overlap.
-                await previousFetch?.value
-                guard !Task.isCancelled else { return }
-
+        if bypassesCache {
+            maintenanceModal?.setActionsEnabled(false)
+            // Allow another tap after three seconds while the same request continues.
+            maintenanceRetryWait = Task { [weak self] in
                 do {
-                    if bypassesCache {
-                        let status = try await remoteConfig.fetch(withExpirationDuration: 0)
-                        if status == .success, !Task.isCancelled {
-                            _ = try await remoteConfig.activate()
-                        }
-                    } else {
-                        _ = try await remoteConfig.fetchAndActivate()
-                    }
+                    try await Task.sleep(for: .seconds(3))
                 } catch {
-                    RouteeLogger.debug("Remote Config fetch failed (code \((error as NSError).code))")
+                    return
                 }
 
                 guard !Task.isCancelled, let self else { return }
-                maintenanceFetch = nil
-                finishMaintenanceCheck(using: remoteConfig)
+                maintenanceRetryWait = nil
+                maintenanceModal?.setActionsEnabled(true)
             }
-            maintenanceFetch = (task, bypassesCache)
         }
 
-        // Bound the UI wait even if Firebase Installations is still preparing a token.
-        maintenanceWait = Task { [weak self] in
+        // Share an in-flight retry instead of starting overlapping Firebase requests.
+        guard remoteConfigFetch == nil else { return }
+        remoteConfigFetch = Task { [weak self] in
+            guard !Task.isCancelled else { return }
+
             do {
-                try await Task.sleep(for: maximumWait)
+                if bypassesCache {
+                    let status = try await remoteConfig.fetch(withExpirationDuration: 0)
+                    if status == .success, !Task.isCancelled {
+                        _ = try await remoteConfig.activate()
+                    }
+                } else {
+                    _ = try await remoteConfig.fetchAndActivate()
+                }
             } catch {
-                return
+                RouteeLogger.debug("Remote Config fetch failed (code \((error as NSError).code))")
             }
 
-            self?.finishMaintenanceCheck(using: remoteConfig)
+            guard !Task.isCancelled, let self else { return }
+            remoteConfigFetch = nil
+            maintenanceRetryWait?.cancel()
+            maintenanceRetryWait = nil
+            applyRemoteConfig(using: remoteConfig)
         }
     }
 
-    private func finishMaintenanceCheck(using remoteConfig: RemoteConfig) {
-        guard let maintenanceWait else { return }
-        maintenanceWait.cancel()
-        self.maintenanceWait = nil
+    private func applyRemoteConfig(using remoteConfig: RemoteConfig) {
+        guard window != nil else { return }
 
-        guard let window,
-              let loadingViewController = window.rootViewController as? StartupLoadingViewController else { return }
-
-        let modal = loadingViewController.presentedViewController as? ActionPrimaryModal
         if remoteConfig[Self.maintenanceKey].boolValue {
-            loadingViewController.stopLoading()
-            if let modal {
-                modal.setActionsEnabled(true)
+            if let maintenanceModal {
+                maintenanceModal.setActionsEnabled(true)
                 return
             }
 
             let retry: () -> Void = { [weak self] in
-                self?.checkMaintenance(using: remoteConfig, maximumWait: .seconds(3), bypassesCache: true)
+                self?.checkRemoteConfig(using: remoteConfig, bypassesCache: true)
             }
-            
-            let maintenanceModal = ActionPrimaryModal(
+
+            let modal = ActionPrimaryModal(
                 title: "서비스 점검 중이에요",
                 description: "더 나은 루티를 위해 점검하고 있어요.\n잠시 후 다시 이용해주세요.",
                 actionCount: .single,
@@ -164,21 +146,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 dismissOnBackgroundTap: false,
                 leftButtonAction: retry
             )
-            
-            loadingViewController.present(maintenanceModal, animated: true)
-        } else if let modal {
-            modal.dismiss(animated: false) { [weak self] in
-                guard let self, self.window === window else { return }
-                continueAfterMaintenance(using: remoteConfig, in: window)
-            }
+
+            showRemoteConfigModal(modal)
+            maintenanceModal = modal
         } else {
-            continueAfterMaintenance(using: remoteConfig, in: window)
+            dismissRemoteConfigModal()
+            showUpdateModalIfNeeded(using: remoteConfig)
         }
     }
 
-    private func continueAfterMaintenance(using remoteConfig: RemoteConfig, in window: UIWindow) {
-        guard let loadingViewController = window.rootViewController as? StartupLoadingViewController else { return }
-
+    private func showUpdateModalIfNeeded(using remoteConfig: RemoteConfig) {
         let requirement = AppUpdateRequirement(
             currentVersion: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String,
             minimumSupportedVersion: remoteConfig[Self.minimumSupportedVersionKey].stringValue,
@@ -188,14 +165,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         switch requirement {
         case .none:
-            showInitialScreen(in: window)
+            return
         case .required:
-            loadingViewController.stopLoading()
-
             let update: () -> Void = {
                 Self.openAppStore()
             }
-            
+
             let modal = ActionPrimaryModal(
                 title: "업데이트가 필요해요",
                 description: "더 안정적인 루티를 위해\n최신 버전으로 업데이트해주세요.",
@@ -206,39 +181,56 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 dismissOnBackgroundTap: false,
                 leftButtonAction: update
             )
-            
-            loadingViewController.present(modal, animated: true)
-        case .recommended(let version):
-            loadingViewController.stopLoading()
 
-            let proceed: () -> Void = { [weak self, weak window] in
-                guard let self, let window, self.window === window else { return }
-                showInitialScreen(in: window)
-            }
-            
-            let later: () -> Void = {
+            showRemoteConfigModal(modal)
+        case .recommended(let version):
+            let later: () -> Void = { [weak self] in
                 UserDefaults.standard.set(version, forKey: Self.skippedRecommendationKey)
-                proceed()
+                self?.dismissRemoteConfigModal()
             }
-            
-            let update: () -> Void = {
+
+            let update: () -> Void = { [weak self] in
+                self?.dismissRemoteConfigModal()
                 Self.openAppStore()
-                proceed()
             }
-            
+
             let modal = ActionPrimaryModal(
                 title: "새로운 버전이 나왔어요",
                 description: "업데이트하고 더 편해진\n루티를 만나보세요.",
                 leftButtonTitle: "나중에",
                 rightButtonTitle: "업데이트",
                 primaryButtonTitleColor: .white,
+                dismissOnAction: false,
                 dismissOnBackgroundTap: false,
                 leftButtonAction: later,
                 rightButtonAction: update
             )
-            
-            loadingViewController.present(modal, animated: true)
+
+            showRemoteConfigModal(modal)
         }
+    }
+
+    private func showRemoteConfigModal(_ modal: ActionPrimaryModal) {
+        guard let windowScene = window?.windowScene else { return }
+        window?.endEditing(true)
+
+        // Keep the modal above root changes caused by login or token expiration.
+        let modalWindow = UIWindow(windowScene: windowScene)
+        modalWindow.backgroundColor = .clear
+        modalWindow.isOpaque = false
+        modalWindow.windowLevel = UIWindow.Level(rawValue: UIWindow.Level.normal.rawValue + 1)
+        modalWindow.rootViewController = modal
+        modal.view.accessibilityViewIsModal = true
+        remoteConfigModalWindow = modalWindow
+        // Keep the app window key so existing screen and loading-overlay logic still works.
+        modalWindow.isHidden = false
+    }
+
+    private func dismissRemoteConfigModal() {
+        remoteConfigModalWindow?.isHidden = true
+        remoteConfigModalWindow?.rootViewController = nil
+        remoteConfigModalWindow = nil
+        maintenanceModal = nil
     }
 
     private static func openAppStore() {
@@ -289,7 +281,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     @objc
     private func navigateLoginViewController(_ notification: Notification) {
-        guard let window, !(window.rootViewController is StartupLoadingViewController) else { return }
+        guard let window else { return }
 
         let loginViewController = LoginViewController(
             showSignUpCompletionModal: notification.name == .signUpCompleted
@@ -392,37 +384,5 @@ private struct AppVersion: Comparable {
 
     static func < (lhs: Self, rhs: Self) -> Bool {
         lhs.components.lexicographicallyPrecedes(rhs.components)
-    }
-}
-
-private final class StartupLoadingViewController: UIViewController {
-
-    var onFirstAppearance: (() -> Void)?
-    private let activityIndicator = UIActivityIndicatorView(style: .medium)
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        view.backgroundColor = .grey_900
-        activityIndicator.color = .white
-        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(activityIndicator)
-        NSLayoutConstraint.activate([
-            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-        ])
-        activityIndicator.startAnimating()
-    }
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-
-        let onFirstAppearance = onFirstAppearance
-        self.onFirstAppearance = nil
-        onFirstAppearance?()
-    }
-
-    func stopLoading() {
-        activityIndicator.stopAnimating()
     }
 }
