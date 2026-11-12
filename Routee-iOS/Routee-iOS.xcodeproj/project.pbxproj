@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		3B84571530010C70003912FD /* CropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = 3B84571430010C70003912FD /* CropViewController */; };
 		3B84571730010C70003912FD /* TOCropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = 3B84571630010C70003912FD /* TOCropViewController */; };
+		4F21A8A630A5971100286BB1 /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 4F21A8A530A5971100286BB1 /* FirebaseRemoteConfig */; };
 		4F324C3C2FEE587000B7B9F9 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 4F324C3B2FEE587000B7B9F9 /* NMapsMap */; };
 		4F324C412FEE6F1000B7B9F9 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4F324C402FEE6F1000B7B9F9 /* SnapKit */; };
 		4F324C442FEF454C00B7B9F9 /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = 4F324C432FEF454C00B7B9F9 /* Then */; };
@@ -58,6 +59,7 @@
 				4F51D6353047C1B000E304D8 /* Mixpanel in Frameworks */,
 				3B84571730010C70003912FD /* TOCropViewController in Frameworks */,
 				4F324C412FEE6F1000B7B9F9 /* SnapKit in Frameworks */,
+				4F21A8A630A5971100286BB1 /* FirebaseRemoteConfig in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -111,6 +113,7 @@
 				3B84571630010C70003912FD /* TOCropViewController */,
 				4F51A2703004194600530799 /* Kingfisher */,
 				4F51D6343047C1B000E304D8 /* Mixpanel */,
+				4F21A8A530A5971100286BB1 /* FirebaseRemoteConfig */,
 			);
 			productName = "Routee-iOS";
 			productReference = 4F324B982FE931BB00B7B9F9 /* Routee-iOS.app */;
@@ -149,6 +152,7 @@
 				3B84571330010C70003912FD /* XCRemoteSwiftPackageReference "TOCropViewController" */,
 				4F51A26F3004194600530799 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				4F51D6333047C1B000E304D8 /* XCRemoteSwiftPackageReference "mixpanel-swift" */,
+				4F21A8A430A5971100286BB1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4F324B992FE931BB00B7B9F9 /* Products */;
@@ -677,6 +681,14 @@
 				minimumVersion = 3.1.2;
 			};
 		};
+		4F21A8A430A5971100286BB1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 13.1.1;
+			};
+		};
 		4F324C3A2FEE587000B7B9F9 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/navermaps/SPM-NMapsMap";
@@ -745,6 +757,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3B84571330010C70003912FD /* XCRemoteSwiftPackageReference "TOCropViewController" */;
 			productName = TOCropViewController;
+		};
+		4F21A8A530A5971100286BB1 /* FirebaseRemoteConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4F21A8A430A5971100286BB1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseRemoteConfig;
 		};
 		4F324C3B2FEE587000B7B9F9 /* NMapsMap */ = {
 			isa = XCSwiftPackageProductDependency;
