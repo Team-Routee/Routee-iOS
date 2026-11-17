@@ -159,3 +159,16 @@ test('validates schema and refuses inactive requests or a different app cache', 
   await assert.rejects(collectDownloads(ENV, undefined, { fetchImpl: inactive.fetchImpl, now: NOW }), { code: 'REPORT_REQUEST' });
   await assert.rejects(collectDownloads(ENV, { appId: '9999', days: {} }, { now: NOW }), { code: 'CACHE_APP_MISMATCH' });
 });
+
+test('lifetime history survives retention and accepts corrections to an old date', async () => {
+  const previous = { appId: '1234', startDate: '2026-01-01', days: {
+    '2026-01-01': { count: 11, processingDate: '2026-01-03' },
+    '2026-02-01': { count: 22, processingDate: '2026-02-03' },
+  } };
+  const { fetchImpl } = fixture([{ id: 'correction', processingDate: '2026-11-18', segments: [row('2026-01-01', 8)] }]);
+  const result = await collectDownloads(ENV, previous, { fetchImpl, now: NOW });
+  assert.equal(result.startDate, '2026-01-01');
+  assert.equal(result.days['2026-01-01'].count, 8);
+  assert.equal(result.days['2026-02-01'].count, 22);
+  assert.equal(previous.days['2026-01-01'].count, 11);
+});

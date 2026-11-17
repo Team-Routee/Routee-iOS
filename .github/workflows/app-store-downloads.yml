@@ -47,6 +47,9 @@ jobs:
 
   report:
     name: Collect and deliver
+    permissions:
+      contents: read
+      actions: read
     needs: test
     if: >-
       github.event_name != 'pull_request' &&
@@ -65,7 +68,32 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
-      - name: Collect Apple report and optionally post to Discord
+      - name: Find latest encrypted history
+        id: history
+        working-directory: automation/app-store-discord
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/restore-history.mjs
+      - name: Restore encrypted history
+        if: steps.history.outputs.run_id != ''
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          artifact-ids: ${{ steps.history.outputs.artifact_id }}
+          run-id: ${{ steps.history.outputs.run_id }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/routee-history-input
+          merge-multiple: true
+      - name: Prepare encrypted input and output
+        env:
+          HISTORY_RUN_ID: ${{ steps.history.outputs.run_id }}
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/routee-history-input" "$RUNNER_TEMP/routee-history-output"
+          if [[ -z "$HISTORY_RUN_ID" ]]; then
+            cp automation/app-store-discord/history-seed.enc.json "$RUNNER_TEMP/routee-history-input/history.enc.json"
+          fi
+          test -s "$RUNNER_TEMP/routee-history-input/history.enc.json"
+      - name: Collect Apple report and encrypt complete history
         working-directory: automation/app-store-discord
         env:
           ASC_APP_ID: '6791870747'
@@ -73,13 +101,30 @@ jobs:
           ASC_ISSUER_ID: ${{ secrets.ROUTEE_ASC_ISSUER_ID }}
           ASC_PRIVATE_KEY: ${{ secrets.ROUTEE_ASC_PRIVATE_KEY }}
           ASC_REPORT_REQUEST_ID: ${{ vars.ROUTEE_ASC_REPORT_REQUEST_ID }}
-          DISCORD_WEBHOOK_URL: ${{ secrets.ROUTEE_DISCORD_WEBHOOK_URL }}
+          HISTORY_KEY: ${{ secrets.ROUTEE_DOWNLOAD_HISTORY_KEY }}
           REPORT_PERIOD: ${{ inputs.period || 'last_week' }}
-          REPORT_SEND: ${{ github.event_name == 'schedule' || inputs.send_to_discord }}
         shell: bash
         run: |
-          args=(--period "$REPORT_PERIOD")
-          if [[ "$REPORT_SEND" == 'true' ]]; then
-            args+=(--send)
-          fi
-          node scripts/run-report.mjs "${args[@]}"
+          node scripts/run-report.mjs --period "$REPORT_PERIOD" \
+            --history-in "$RUNNER_TEMP/routee-history-input/history.enc.json" \
+            --history-out "$RUNNER_TEMP/routee-history-output/history.enc.json"
+      - name: Preserve encrypted history before sending
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: routee-download-history
+          path: ${{ runner.temp }}/routee-history-output/history.enc.json
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 0
+      - name: Send the saved report to Discord
+        if: github.event_name == 'schedule' || inputs.send_to_discord
+        working-directory: automation/app-store-discord
+        env:
+          ASC_APP_ID: '6791870747'
+          HISTORY_KEY: ${{ secrets.ROUTEE_DOWNLOAD_HISTORY_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.ROUTEE_DISCORD_WEBHOOK_URL }}
+          REPORT_PERIOD: ${{ inputs.period || 'last_week' }}
+        shell: bash
+        run: |
+          node scripts/run-report.mjs --period "$REPORT_PERIOD" --send --deliver-only \
+            --history-in "$RUNNER_TEMP/routee-history-output/history.enc.json"
