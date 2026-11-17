@@ -67,7 +67,8 @@ export async function runReport(env, {
       fail('REPLAY_BLOCKED', '중복 전송을 막기 위해 재실행에서는 전송하지 않습니다. Discord 채널을 확인한 뒤 새 Run workflow로 실행해 주세요.');
     }
   }
-  const collectionEnv = { ...env, ASC_MAX_INSTANCES_PER_SYNC: env.ASC_MAX_INSTANCES_PER_SYNC ?? '20' };
+  const appId = String(env.ASC_APP_ID ?? '').trim();
+  const collectionEnv = { ...env, ASC_APP_ID: appId, ASC_MAX_INSTANCES_PER_SYNC: env.ASC_MAX_INSTANCES_PER_SYNC ?? '20' };
   let snapshot = { days: {} };
   let finished = false;
   for (let round = 0; round < maxRounds; round++) {
@@ -78,7 +79,7 @@ export async function runReport(env, {
     } catch (error) {
       throw collectionError(error);
     }
-    validateSnapshot(next, env.ASC_APP_ID);
+    validateSnapshot(next, appId);
     snapshot = next;
     if (snapshot.pendingInstances === 0) {
       finished = true;

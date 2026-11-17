@@ -52,6 +52,17 @@ test('public summary never contains metrics, raw data, message text or webhook',
   assert.match(result.summary, /2026-11-09 ~ 2026-11-15/);
 });
 
+test('normalizes app ID whitespace for collection and snapshot validation without changing the input', async () => {
+  const paddedEnv = { ...env, ASC_APP_ID: ' \t123\n' };
+  const result = await runReport(paddedEnv, { now, collect: async config => {
+    assert.equal(config.ASC_APP_ID, '123');
+    return snapshot();
+  } });
+  assert.equal(result.status, 'preview');
+  assert.equal(result.snapshot.appId, '123');
+  assert.equal(paddedEnv.ASC_APP_ID, ' \t123\n');
+});
+
 test('dry-run validates all requested periods without sending', async () => {
   for (const [period, expected] of [['last_week', 119], ['last_7_days', 119], ['last_30_days', 510]]) {
     const result = await runReport(env, { now, period, collect: async () => snapshot(), deliver: async () => assert.fail('Must not send') });

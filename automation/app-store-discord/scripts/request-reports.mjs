@@ -10,11 +10,12 @@ if (!process.argv.includes('--apply')) {
     if (env.ASC_PRIVATE_KEY_PATH && !env.ASC_PRIVATE_KEY) {
       env.ASC_PRIVATE_KEY = await readFile(env.ASC_PRIVATE_KEY_PATH, 'utf8');
     }
-    if (!/^\d+$/.test(env.ASC_APP_ID ?? '')) throw new Error('configuration');
+    const appId = String(env.ASC_APP_ID ?? '').trim();
+    if (!/^\d+$/.test(appId)) throw new Error('configuration');
     const token = await createAppleJWT(env);
     const origin = 'https://api.appstoreconnect.apple.com';
     const headers = { Authorization: `Bearer ${token}`, 'content-type': 'application/json' };
-    let next = `${origin}/v1/apps/${env.ASC_APP_ID}/analyticsReportRequests?filter%5BaccessType%5D=ONGOING&limit=200`;
+    let next = `${origin}/v1/apps/${appId}/analyticsReportRequests?filter%5BaccessType%5D=ONGOING&limit=200`;
     const requests = [];
     const visited = new Set();
     while (next) {
@@ -35,7 +36,7 @@ if (!process.argv.includes('--apply')) {
       const response = await fetch(`${origin}/v1/analyticsReportRequests`, {
         method: 'POST', headers, redirect: 'error', signal: AbortSignal.timeout(10_000),
         body: JSON.stringify({ data: { type: 'analyticsReportRequests', attributes: { accessType: 'ONGOING' },
-          relationships: { app: { data: { type: 'apps', id: env.ASC_APP_ID } } } } }),
+          relationships: { app: { data: { type: 'apps', id: appId } } } } }),
       });
       if (!response.ok) throw new Error('creation');
       const result = await response.json();
