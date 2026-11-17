@@ -1,5 +1,6 @@
 import { collectDownloads } from './apple.mjs';
-import { formatReport, PERIODS, summarize } from './reports.mjs';
+import { formatReport, PERIODS, summarize, summarizeLifetime } from './reports.mjs';
+import { validateHistory } from './history.mjs';
 import { sendWebhook } from './webhook.mjs';
 
 export class ReportRunError extends Error {
@@ -50,9 +51,10 @@ function publicSummary(report, status) {
     '- 실제 다운로드 수와 리포트 본문은 GitHub 로그·요약에 기록하지 않습니다.', ''].join('\n');
 }
 
-/** Stateless per-run collection. Only the returned content is sent to the private Discord channel. */
+/** Refresh saved daily history; only the returned content is sent to the private Discord channel. */
 export async function runReport(env, {
   period = 'last_week', send = false, now = new Date(), maxRounds = 6,
+  initialSnapshot, deliverOnly = false, persist,
   collect = collectDownloads, deliver = sendWebhook,
 } = {}) {
   if (!PERIODS.has(period)) fail('INVALID_PERIOD', '조회 기간은 last_week, last_7_days, last_30_days 중 하나여야 합니다.');
@@ -70,8 +72,14 @@ export async function runReport(env, {
   const appId = String(env.ASC_APP_ID ?? '').trim();
   const collectionEnv = { ...env, ASC_APP_ID: appId, ASC_MAX_INSTANCES_PER_SYNC: env.ASC_MAX_INSTANCES_PER_SYNC ?? '20' };
   let snapshot = { days: {} };
-  let finished = false;
-  for (let round = 0; round < maxRounds; round++) {
+  if (initialSnapshot) {
+    try { snapshot = validateHistory(initialSnapshot, appId); }
+    catch { fail('INVALID_HISTORY', '저장된 누적 이력을 확인할 수 없어 전송하지 않았습니다.'); }
+  }
+  if (deliverOnly && !initialSnapshot) fail('HISTORY_REQUIRED', '전송할 검증된 누적 이력이 필요합니다.');
+  // Instance IDs are intentionally reset between runs so that recent corrections are read again.
+  let finished = deliverOnly;
+  for (let round = 0; !deliverOnly && round < maxRounds; round++) {
     const previousIds = new Set(snapshot.processedInstanceIds ?? []);
     let next;
     try {
@@ -93,13 +101,19 @@ export async function runReport(env, {
 
   let report;
   let content;
+  let complete;
   try {
     report = summarize(snapshot, period, now);
+    complete = report.complete && summarizeLifetime(snapshot, now).complete;
     content = formatReport(snapshot, period, now);
   } catch {
     fail('REPORT_FORMAT_FAILED', '수집 자료를 리포트로 변환하지 못해 전송하지 않았습니다.');
   }
-  let status = report.complete ? 'preview' : 'preview_partial';
+  if (persist) {
+    try { await persist(snapshot); }
+    catch { fail('HISTORY_SAVE_FAILED', '누적 이력을 안전하게 보관하지 못해 전송하지 않았습니다.'); }
+  }
+  let status = complete ? 'preview' : 'preview_partial';
   if (send) {
     try {
       await deliver(env.DISCORD_WEBHOOK_URL, content);
@@ -110,7 +124,7 @@ export async function runReport(env, {
           : '디스코드 전송 결과를 확인할 수 없습니다. 재전송하기 전에 채널을 확인해 주세요.',
         knownFailure ? 'not_sent' : 'unknown');
     }
-    status = report.complete ? 'sent' : 'sent_partial';
+    status = complete ? 'sent' : 'sent_partial';
   }
   return { snapshot, content, status, summary: publicSummary(report, status) };
 }

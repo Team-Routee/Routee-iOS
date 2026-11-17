@@ -184,7 +184,11 @@ export async function collectDownloads(env, previous = { days: {} }, { fetchImpl
   if (!Number.isFinite(now.getTime())) fail('CONFIGURATION', 'Invalid current time.');
   if (previous.appId && previous.appId !== appId) fail('CACHE_APP_MISMATCH', 'The saved report belongs to a different app.');
   const today = now.toISOString().slice(0, 10);
-  const oldestDate = shiftDate(today, -89);
+  if (previous.startDate != null && (!isDate(previous.startDate) || previous.startDate > today)) {
+    fail('CACHE_SCHEMA', 'The saved history start date is invalid.');
+  }
+  // Lifetime history must survive Apple's 35-day instance retention, including old corrections.
+  const oldestDate = previous.startDate ?? shiftDate(today, -89);
   const earliestProcessingDate = shiftDate(today, -34);
   const days = {};
   if (!previous.days || typeof previous.days !== 'object' || Array.isArray(previous.days)) fail('CACHE_SCHEMA', 'The saved download data is invalid.');
@@ -312,7 +316,8 @@ export async function collectDownloads(env, previous = { days: {} }, { fetchImpl
     completedInstances += 1;
   }
   return {
-    appId, days, syncedAt: now.toISOString(), requestId, reportId,
+    appId, ...(previous.startDate ? { startDate: previous.startDate } : {}),
+    days, syncedAt: now.toISOString(), requestId, reportId,
     processedInstanceIds: [...processed],
     pendingInstances: recent.filter((instance) => !processed.has(instance.id)).length,
   };

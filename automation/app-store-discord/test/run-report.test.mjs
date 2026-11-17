@@ -15,7 +15,7 @@ function snapshot({ start = '2026-10-13', end = '2026-11-16', count = 17 } = {})
   for (let day = start; day <= end; day = addDays(day, 1)) {
     days[day] = { count, processingDate: addDays(day, 2) };
   }
-  return { appId: env.ASC_APP_ID, days, syncedAt: now.toISOString(), processedInstanceIds: ['all'], pendingInstances: 0 };
+  return { appId: env.ASC_APP_ID, startDate: start, days, syncedAt: now.toISOString(), processedInstanceIds: ['all'], pendingInstances: 0 };
 }
 
 test('collects 35 days across multiple batches with the same reference time and sends once', async () => {
@@ -166,4 +166,46 @@ test('a summary file failure preserves a successful send status without leaking 
   assert.ok(messages.some(message => message === '루티 리포트 실행 완료: sent'));
   assert.ok(messages.some(message => message.includes('요약 파일을 저장하지 못했습니다')));
   assert.ok(messages.every(message => !message.includes(directory) && !message.includes('987654') && !message.includes('REPORT_RUN_FAILED')));
+});
+
+test('restored history resets cursors and persistence happens before delivery', async () => {
+  const events = [];
+  const initial = snapshot();
+  const result = await runReport(env, { now, initialSnapshot: initial, send: true,
+    collect: async (_, previous) => {
+      events.push('collect');
+      assert.equal(previous.processedInstanceIds, undefined);
+      assert.equal(previous.startDate, initial.startDate);
+      assert.deepEqual(previous.days, initial.days);
+      return snapshot();
+    }, persist: async data => { events.push('persist'); assert.equal(data.startDate, initial.startDate); },
+    deliver: async () => events.push('deliver'),
+  });
+  assert.deepEqual(events, ['collect', 'persist', 'deliver']);
+  assert.equal(result.status, 'sent');
+  await assert.rejects(runReport(env, { now, initialSnapshot: initial, send: true,
+    collect: async () => snapshot(), persist: async () => { throw new Error('private history'); },
+    deliver: async () => assert.fail('Must not send before saving'),
+  }), { code: 'HISTORY_SAVE_FAILED' });
+});
+
+test('delivery-only uses verified saved history without collecting again', async () => {
+  let calls = 0;
+  const result = await runReport(env, { now, initialSnapshot: snapshot(), deliverOnly: true, send: true,
+    collect: async () => assert.fail('Must not collect'),
+    deliver: async (_, content) => { calls++; assert.match(content, /전체 최초 다운로드/); },
+  });
+  assert.equal(calls, 1);
+  assert.equal(result.status, 'sent');
+  await assert.rejects(runReport(env, { now, deliverOnly: true }), { code: 'HISTORY_REQUIRED' });
+  await assert.rejects(runReport(env, { now, initialSnapshot: { ...snapshot(), appId: '99' }, deliverOnly: true }), { code: 'INVALID_HISTORY' });
+});
+
+test('a complete weekly period with a lifetime gap is a partial report', async () => {
+  const data = snapshot();
+  delete data.days['2026-10-20'];
+  const result = await runReport(env, { now, collect: async () => data });
+  assert.equal(result.status, 'preview_partial');
+  assert.match(result.content, /이후 집계 확인 대기/);
+  assert.match(result.content, /119건/);
 });
