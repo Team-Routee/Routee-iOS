@@ -250,6 +250,7 @@ final class WorkoutViewController: BaseUIViewController {
     }
 
     private func presentWorkoutRecoveryModal(lastRecordedAt: Date) {
+        let activityId = viewModel.activityId
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.calendar = Calendar(identifier: .gregorian)
@@ -274,7 +275,9 @@ final class WorkoutViewController: BaseUIViewController {
                 self?.resumeRecoveredWorkout()
             }
         )
-        present(modal, animated: true)
+        present(modal, animated: true) {
+            Self.trackRecoveredWorkoutEvent(.workoutRecoveryShown, activityId: activityId)
+        }
     }
 
     private func resumeRecoveredWorkout() {
@@ -298,13 +301,18 @@ final class WorkoutViewController: BaseUIViewController {
     }
 
     private func finishRecoveredWorkout(endedAt: Date) {
+        let activityId = viewModel.activityId
         guard hasValidRoute, viewModel.elapsedTimeInSeconds >= 1 else {
+            Self.trackRecoveredWorkoutEvent(.workoutCompleteFailed, activityId: activityId)
+            let confirmAction: () -> Void = { [weak self] in
+                self?.viewModel.clearWorkoutRecovery()
+            }
             let modal = ActionPrimaryModal(
                 title: "기록 등록 실패",
                 description: "운동 경로를 확인할 수 없어 기록이 등록되지 않았어요. 위치 정보를 확인한 후 다시 시도해주세요.",
                 actionCount: .single,
                 leftButtonTitle: "확인",
-                leftButtonAction: { [weak self] in self?.viewModel.clearWorkoutRecovery() }
+                leftButtonAction: confirmAction
             )
             present(modal, animated: true)
             return
@@ -323,9 +331,11 @@ final class WorkoutViewController: BaseUIViewController {
                         isRecovering: true
                     )
                 }
+                Self.trackRecoveredWorkoutEvent(.workoutCompleted, activityId: activityId)
                 viewModel.clearWorkoutRecovery()
                 message = "기록을 저장했어요."
             } catch {
+                Self.trackRecoveredWorkoutEvent(.workoutCompleteFailed, activityId: activityId)
                 if error is WorkoutRecoverySaveError {
                     viewModel.clearWorkoutRecovery()
                 }
@@ -338,6 +348,18 @@ final class WorkoutViewController: BaseUIViewController {
             moveCameraToCurrentLocation()
             workoutView.showToast(title: message)
         }
+    }
+
+    private static func trackRecoveredWorkoutEvent(_ event: AnalyticsEvent, activityId: Int64?) {
+        guard let activityId else { return }
+
+        AnalyticsTracker.track(
+            event,
+            properties: [
+                "activity_id": String(activityId),
+                "activity_type": "HIKING"
+            ]
+        )
     }
 
     private func updateRecordedRoutePath() {

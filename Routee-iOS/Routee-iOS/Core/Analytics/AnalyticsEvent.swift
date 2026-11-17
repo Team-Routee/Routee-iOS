@@ -15,6 +15,7 @@ enum AnalyticsEvent: String {
     case workoutRecordingEnded = "workout_recording_ended"
     case workoutCompleted = "workout_completed"
     case workoutCompleteFailed = "workout_complete_failed"
+    case workoutRecoveryShown = "workout_recovery_shown"
 
     case recapEditorOpened = "recap_editor_opened"
     case recapEdited = "recap_edited"
