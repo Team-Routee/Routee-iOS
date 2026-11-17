@@ -24,7 +24,9 @@ final class ActionPrimaryModal: UIViewController {
     private let actionCount: ActionCount
     private let leftButtonTitle: String
     private let rightButtonTitle: String
+    private let primaryButtonTitleColor: UIColor?
     private let dismissOnAction: Bool
+    private let dismissOnBackgroundTap: Bool
     private let leftButtonAction: (() -> Void)?
     private let rightButtonAction: (() -> Void)?
     private var hasDescription: Bool {
@@ -51,7 +53,9 @@ final class ActionPrimaryModal: UIViewController {
         actionCount: ActionCount = .double,
         leftButtonTitle: String = "",
         rightButtonTitle: String = "",
+        primaryButtonTitleColor: UIColor? = nil,
         dismissOnAction: Bool = true,
+        dismissOnBackgroundTap: Bool = true,
         leftButtonAction: (() -> Void)? = nil,
         rightButtonAction: (() -> Void)? = nil
     ) {
@@ -60,7 +64,9 @@ final class ActionPrimaryModal: UIViewController {
         self.actionCount = actionCount
         self.leftButtonTitle = leftButtonTitle
         self.rightButtonTitle = rightButtonTitle
+        self.primaryButtonTitleColor = primaryButtonTitleColor
         self.dismissOnAction = dismissOnAction
+        self.dismissOnBackgroundTap = dismissOnBackgroundTap
         self.leftButtonAction = leftButtonAction
         self.rightButtonAction = rightButtonAction
 
@@ -83,6 +89,13 @@ final class ActionPrimaryModal: UIViewController {
         setUI()
         setLayout()
         setAddTarget()
+    }
+
+    // MARK: - Public Methods
+
+    func setActionsEnabled(_ isEnabled: Bool) {
+        leftButton.isEnabled = isEnabled
+        rightButton.isEnabled = isEnabled
     }
 
     // MARK: - UI Setting
@@ -129,11 +142,7 @@ final class ActionPrimaryModal: UIViewController {
         descriptionLabel.do {
             $0.textColor = .grey_300
             if let descriptionText {
-                $0.setLineHeightText(
-                    descriptionText,
-                    font: .label_m_14,
-                    lineHeightRatio: 1.4
-                )
+                $0.setLineHeightText(descriptionText, font: .label_m_14)
             }
             $0.textAlignment = .center
             $0.numberOfLines = 0
@@ -146,15 +155,16 @@ final class ActionPrimaryModal: UIViewController {
             $0.distribution = .fillEqually
         }
 
+        let singleButtonTitleColor = actionCount == .single ? primaryButtonTitleColor : nil
         configureButton(
             leftButton,
             title: leftButtonTitle,
-            titleColor: .white_60
+            titleColor: singleButtonTitleColor ?? .white_60
         )
         configureButton(
             rightButton,
             title: rightButtonTitle,
-            titleColor: .status_error
+            titleColor: primaryButtonTitleColor ?? .status_error
         )
     }
 
@@ -204,7 +214,9 @@ final class ActionPrimaryModal: UIViewController {
     }
 
     private func setAddTarget() {
-        dimBackgroundView.addTarget(self, action: #selector(didTapDimBackground), for: .touchUpInside)
+        if dismissOnBackgroundTap {
+            dimBackgroundView.addTarget(self, action: #selector(didTapDimBackground), for: .touchUpInside)
+        }
         leftButton.addTarget(self, action: #selector(didTapLeftButton), for: .touchUpInside)
         rightButton.addTarget(self, action: #selector(didTapRightButton), for: .touchUpInside)
     }

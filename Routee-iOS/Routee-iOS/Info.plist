@@ -6,6 +6,10 @@
 	<string>$(BASE_URL)</string>
 	<key>MIXPANEL_TOKEN</key>
 	<string>$(MIXPANEL_TOKEN)</string>
+	<key>FIREBASE_CONFIG_FILE_NAME</key>
+	<string>$(FIREBASE_CONFIG_FILE_NAME)</string>
+	<key>FIREBASE_REMOTE_CONFIG_MINIMUM_FETCH_INTERVAL</key>
+	<string>$(FIREBASE_REMOTE_CONFIG_MINIMUM_FETCH_INTERVAL)</string>
 	<key>NAVER_MAP_BASE_URL</key>
 	<string>$(NAVER_MAP_BASE_URL)</string>
 	<key>NAVER_MAP_CLIENT_ID</key>

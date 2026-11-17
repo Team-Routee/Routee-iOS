@@ -150,9 +150,10 @@ final class Profile: BaseUIView {
     // MARK: - Private Methods
 
     private func configureProfileImage(with imageUrl: String?) {
-        guard let imageUrl,
-              let url = URL(string: imageUrl) else { return }
+        let url = imageUrl.flatMap { URL(string: $0) }
+        let defaultImage = UIImage(resource: .profileImgDefault)
 
-        profileImageView.kf.setImage(with: url)
+        profileImageView.kf.cancelDownloadTask()
+        profileImageView.kf.setImage(with: url, placeholder: defaultImage)
     }
 }

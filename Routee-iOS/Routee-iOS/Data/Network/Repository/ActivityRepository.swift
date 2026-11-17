@@ -21,6 +21,7 @@ protocol ActivityRepository {
     func deleteTimeline(activityId: Int64, timelineId: Int64) async throws
     func updateTimelineTitle(activityId: Int64, timelineId: Int64, requestDTO: UpdateTimelineTitleRequestDTO) async throws -> UpdateTimelineTitleResponseDTO
     func backgroundMapPresignedURL(activityId: Int64, requestDTO: BackgroundMapPresignedURLRequestDTO) async throws -> ImagePresignedURLModel
+    func deleteActivity(activityId: Int64) async throws
     func finishActivity(activityId: Int64, requestModel: WorkoutRecordFinishModel) async throws
     func changeActivityStatus(activityId: Int64, requestDTO: ChangeActivityStatusRequestDTO) async throws -> ChangeActivityStatusResponseDTO
     func updateArchiveActivityTitle(activityId: Int64, requestDTO: UpdateArchiveActivityTitleRequestDTO) async throws -> UpdateArchiveActivityTitleResponseDTO
@@ -289,6 +290,21 @@ struct DefaultActivityRepository: ActivityRepository {
         return response.toImagePresignedURLModel()
     }
     
+    func deleteActivity(activityId: Int64) async throws {
+        let accessToken = keychainService.read(.accessToken)
+
+        guard !accessToken.isEmpty else {
+            throw RouteeError.forbidden
+        }
+
+        let endpoint = ActivityAPI.deleteActivity(
+            header: .withAuth(accessToken: accessToken),
+            activityId: activityId
+        )
+
+        try await service.requestEmpty(endpoint)
+    }
+
     func finishActivity(activityId: Int64, requestModel: WorkoutRecordFinishModel) async throws {
         let accessToken = keychainService.read(.accessToken)
         

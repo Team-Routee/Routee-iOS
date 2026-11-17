@@ -80,6 +80,10 @@ extension UIFont {
     static var label_m_12: UIFont { pretendard(.medium, size: 12) }
     static var label_r_12: UIFont { pretendard(.regular, size: 12) }
 
+    var designLineHeightRatio: CGFloat? {
+        fontName.hasPrefix("Pretendard-") ? 1.4 : nil
+    }
+
     static func pretendard(_ weight: PretendardWeight, size: CGFloat) -> UIFont {
         UIFont(name: weight.fontName, size: size) ?? .systemFont(ofSize: size)
     }

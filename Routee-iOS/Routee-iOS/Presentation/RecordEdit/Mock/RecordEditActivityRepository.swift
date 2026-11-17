@@ -184,6 +184,8 @@ struct MockActivityRepository: ActivityRepository {
         )
     }
 
+    func deleteActivity(activityId: Int64) async throws { }
+
     func finishActivity(activityId: Int64, requestModel: WorkoutRecordFinishModel) async throws { }
 
     func changeActivityStatus(

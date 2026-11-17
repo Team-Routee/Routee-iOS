@@ -116,7 +116,7 @@ final class RecordInfo: BaseUIView {
     func configure(distance: Int, durationSec: Int, maxElevation: Int) {
         let distanceInKm = Double(distance) / 1000.0
         distanceDataLabel.setDisplayText(
-            distance == 0 ? "" : String(format: "%.2fkm", distanceInKm),
+            distance == 0 ? "0km" : String(format: "%.2fkm", distanceInKm),
             font: .display_sb_22,
             lineHeightRatio: 1.2
         )
