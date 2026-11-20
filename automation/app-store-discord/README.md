@@ -15,7 +15,7 @@ GitHub Actions가 App Store Connect의 **기간별 최초 다운로드 수와 �
 
 ## 집계 기준
 
-`App Store Downloads Standard` 보고서에서 `Download Type = First-time Download`인 행의 `Counts`를 합산한다. Apple 계정 기준 처음 받기/구입을 누른 횟수이며 재다운로드·업데이트·회원가입 수와 구분한다.
+`App Downloads Standard` 보고서에서 `Download Type = First-time Download`인 행의 `Counts`를 합산한다. Apple 계정 기준 처음 받기/구입을 누른 횟수이며 재다운로드·업데이트·회원가입 수와 구분한다.
 
 - 모든 세그먼트를 수집한 다음 집계한다.
 - 동일한 데이터 날짜가 여러 보고서에 있으면 최신 `processingDate` 값으로 교체한다. 과거 값과 더하지 않는다.
