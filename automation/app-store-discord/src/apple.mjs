@@ -261,8 +261,8 @@ export async function collectDownloads(env, previous = { days: {} }, { fetchImpl
   if (active.length !== 1) fail('REPORT_REQUEST', 'A single active ONGOING report request is required. Complete the App Store Connect report setup.');
   const requestId = active[0].id;
   const reports = await list(`/v1/analyticsReportRequests/${resourceId(requestId)}/reports?limit=200`);
-  const standard = reports.filter((item) => item.attributes.name === 'App Store Downloads Standard');
-  if (standard.length !== 1) fail('REPORT_NOT_READY', 'The App Store Downloads Standard report is not available yet. Initial generation can take 24–48 hours.');
+  const standard = reports.filter((item) => item.attributes.name === 'App Downloads Standard');
+  if (standard.length !== 1) fail('REPORT_NOT_READY', 'The App Downloads Standard report is not available yet. Initial generation can take 24–48 hours.');
   const reportId = standard[0].id;
   const instances = await list(`/v1/analyticsReports/${resourceId(reportId)}/instances?filter%5Bgranularity%5D=DAILY&limit=200`);
   const recent = instances.filter((instance) => {

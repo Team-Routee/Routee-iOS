@@ -30,7 +30,7 @@ function fixture(instances, override) {
       return page([metadata('request', { accessType: 'ONGOING', stoppedDueToInactivity: false })]);
     }
     if (url.pathname === '/v1/analyticsReportRequests/request/reports') {
-      return page([metadata('detailed', { name: 'App Store Downloads Detailed' }), metadata('report', { name: 'App Store Downloads Standard' })]);
+      return page([metadata('detailed', { name: 'App Downloads Detailed' }), metadata('report', { name: 'App Downloads Standard' })]);
     }
     if (url.pathname === '/v1/analyticsReports/report/instances') {
       return page(instances.map((item) => metadata(item.id, { granularity: 'DAILY', processingDate: item.processingDate })));
@@ -171,4 +171,26 @@ test('lifetime history survives retention and accepts corrections to an old date
   assert.equal(result.days['2026-01-01'].count, 8);
   assert.equal(result.days['2026-02-01'].count, 22);
   assert.equal(previous.days['2026-01-01'].count, 11);
+});
+
+
+test('selects the real App Downloads Standard report instead of Detailed', async () => {
+  const { fetchImpl, calls } = fixture([
+    { id: 'daily', processingDate: '2026-11-18', segments: [row('2026-11-16', 7)] },
+  ]);
+  const result = await collectDownloads(ENV, undefined, { fetchImpl, now: NOW });
+  assert.equal(result.reportId, 'report');
+  assert.equal(result.days['2026-11-16'].count, 7);
+  assert.ok(calls.some(call => call.url.pathname === '/v1/analyticsReports/report/instances'));
+  assert.ok(calls.every(call => !call.url.pathname.includes('/analyticsReports/detailed/')));
+});
+
+test('a Detailed-only report list still reports Standard as unavailable', async () => {
+  const { fetchImpl, calls } = fixture([], url => {
+    if (url.pathname.endsWith('/request/reports')) {
+      return page([metadata('detailed', { name: 'App Downloads Detailed' })]);
+    }
+  });
+  await assert.rejects(collectDownloads(ENV, undefined, { fetchImpl, now: NOW }), { code: 'REPORT_NOT_READY' });
+  assert.ok(calls.every(call => !call.url.pathname.includes('/instances')));
 });
